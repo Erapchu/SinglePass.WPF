@@ -10,6 +10,6 @@
     Height="450" Width="800"
     Closed="Window_Closed">
     <Grid>
-        <TextBox Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}"/>
+        
     </Grid>
 </Window>

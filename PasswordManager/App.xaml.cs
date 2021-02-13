@@ -1,4 +1,6 @@
 ﻿using Autofac;
+using NLog;
+using PasswordManager.Helpers;
 using PasswordManager.ViewModels;
 using PasswordManager.Views;
 using System;
@@ -42,6 +44,7 @@ namespace PasswordManager
             var container = new ContainerBuilder();
             container.RegisterType<MainWindow>();
             container.RegisterType<MainWindowViewModel>();
+            container.Register(LoggerResolver.GetLogger).SingleInstance();
 
             _container = container.Build();
         }

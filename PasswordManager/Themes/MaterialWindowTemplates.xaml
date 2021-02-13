@@ -114,6 +114,7 @@
                                     <MultiBinding Converter="{StaticResource CaptionVisibilityConverter}">
                                         <Binding Path="(componentModel:DesignerProperties.IsInDesignMode)" RelativeSource="{RelativeSource TemplatedParent}"/>
                                         <Binding Path="WindowStyle" RelativeSource="{RelativeSource TemplatedParent}" />
+                                        <Binding Path="CaptionVisibility" RelativeSource="{RelativeSource TemplatedParent}"/>
                                     </MultiBinding>
                                 </materialDesign:ColorZone.Visibility>
                                 <Grid>
@@ -235,6 +236,18 @@
                                         SnapsToDevicePixels="True"
                                         Stretch="Uniform"
                                         Width="10"/>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                        <Trigger Property="CaptionVisibility" Value="Collapsed">
+                            <Setter Property="WindowChrome.WindowChrome">
+                                <Setter.Value>
+                                    <WindowChrome 
+                                        CaptionHeight="0"
+                                        ResizeBorderThickness="7"
+                                        UseAeroCaptionButtons="False"
+                                        GlassFrameThickness="0 0 0 1"
+                                        CornerRadius="0"/>
                                 </Setter.Value>
                             </Setter>
                         </Trigger>

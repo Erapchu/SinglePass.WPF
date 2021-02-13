@@ -14,10 +14,18 @@ namespace PasswordManager.Controls
         private const string MaximizeRestoreButtonName = "MaximizeRestoreButton";
         private const string CloseButtonName = "CloseButton";
 
-
         private Button _minimizeButton;
         private Button _maximizeRestoreButton;
         private Button _closeButton;
+
+        public static readonly DependencyProperty CaptionVisibilityProperty = DependencyProperty.Register(
+                "CaptionVisibility", typeof(Visibility), typeof(MaterialWindow), new FrameworkPropertyMetadata(Visibility.Visible));
+
+        public Visibility CaptionVisibility
+        {
+            get => (Visibility)GetValue(CaptionVisibilityProperty);
+            set => SetValue(CaptionVisibilityProperty, value);
+        }
 
         static MaterialWindow()
         {

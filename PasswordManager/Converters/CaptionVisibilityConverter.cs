@@ -15,16 +15,19 @@ namespace PasswordManager.Converters
         {
             try
             {
-                if (values != null && values.Length == 2)
+                if (values != null && values.Length == 3)
                 {
                     var designMode = (bool)values[0];
                     var windowStyle = (WindowStyle)values[1];
+                    var customVisibility = (Visibility)values[2];
 
                     if (designMode)
                         return Visibility.Collapsed;
 
                     if (windowStyle == WindowStyle.None)
                         return Visibility.Collapsed;
+
+                    return customVisibility;
                 }
             }
             catch

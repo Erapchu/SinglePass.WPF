@@ -11,6 +11,9 @@
     <converters:WindowCaptionButtonVisibilityConverter x:Key="WindowCaptionButtonVisibilityConverter" />
     <converters:WindowCaptionButtonEnabledConverter x:Key="WindowCaptionButtonEnabledConverter" />
 
+    <SolidColorBrush x:Key="RedTransparentBrush" Color="#DEE50000"/>
+    <SolidColorBrush x:Key="RedTransparentDarkBrush" Color="#EE900000"/>
+
     <Style x:Key="CaptionButton" TargetType="{x:Type ButtonBase}" BasedOn="{x:Null}">
         <Setter Property="Width" Value="46"/>
         <Setter Property="Height" Value="32" />
@@ -58,6 +61,19 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <Style x:Key="CloseCaptionButton" TargetType="{x:Type ButtonBase}" BasedOn="{StaticResource CaptionButton}">
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource RedTransparentBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource RedTransparentBrush}"/>
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="{StaticResource RedTransparentDarkBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource RedTransparentDarkBrush}"/>
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <Style TargetType="{x:Type controls:MaterialWindow}">
@@ -176,7 +192,7 @@
                                         </Button>
                                         <Button 
                                             x:Name="CloseButton"
-                                            Style="{StaticResource CaptionButton}">
+                                            Style="{StaticResource CloseCaptionButton}">
                                             <Button.Visibility>
                                                 <MultiBinding Converter="{StaticResource WindowCaptionButtonVisibilityConverter}">
                                                     <Binding Path="CloseButtonName" Source="{StaticResource WindowCaptionButtonVisibilityConverter}" Mode="OneTime" />

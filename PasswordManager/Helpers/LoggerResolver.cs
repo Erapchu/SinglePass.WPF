@@ -44,7 +44,6 @@ namespace PasswordManager.Helpers
             config.LoggingRules.Add(new LoggingRule(loggerName, LogLevel.Trace, fileTargetWrapper));
             LogManager.Configuration = config;
             var logger = LogManager.GetLogger(loggerName);
-            logger.Info("Log session started!");
             return logger;
         }
     }

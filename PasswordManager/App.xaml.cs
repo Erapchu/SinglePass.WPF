@@ -19,6 +19,7 @@ namespace PasswordManager
     public partial class App : Application
     {
         private IContainer _container;
+        private ILogger _logger;
 
         public App()
         {
@@ -34,6 +35,8 @@ namespace PasswordManager
         {
             InitializeComponent();
             ConfigureServices();
+            _logger = _container.Resolve<ILogger>();
+            _logger.Info("Log session started!");
 
             var mainWindow = _container.Resolve<MainWindow>();
             mainWindow.Show();

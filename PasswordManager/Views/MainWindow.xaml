@@ -6,11 +6,17 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="clr-namespace:PasswordManager.Controls"
     xmlns:local="clr-namespace:PasswordManager.Views"
+    xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:vm="clr-namespace:PasswordManager.ViewModels"
     mc:Ignorable="d"
+    d:DataContext="{x:Static vm:LoginWindowViewModel.DesignTimeInstance}"
     Title="MainWindow"
     Height="450" Width="800"
     Closed="Window_Closed">
-    <Grid>
-        
-    </Grid>
+    <md:DialogHost
+        Identifier="MainWindowDialogHost">
+        <Grid>
+            
+        </Grid>
+    </md:DialogHost>
 </controls:MaterialWindow>

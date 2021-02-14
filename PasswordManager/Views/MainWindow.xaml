@@ -9,14 +9,77 @@
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:vm="clr-namespace:PasswordManager.ViewModels"
     mc:Ignorable="d"
-    d:DataContext="{x:Static vm:LoginWindowViewModel.DesignTimeInstance}"
+    d:DataContext="{x:Static vm:MainWindowViewModel.DesignTimeInstance}"
     Title="MainWindow"
     Height="450" Width="800"
     Closed="Window_Closed">
+    <Window.Resources>
+        <DataTemplate 
+            x:Key="FolderListBoxItem" 
+            DataType="{x:Type vm:FolderItemViewModel}">
+            <Grid
+                Width="60"
+                Height="70">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <md:PackIcon
+                    Grid.Row="0"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Kind="{Binding IconKind}"
+                    Width="24"
+                    Height="24">
+                </md:PackIcon>
+                <TextBlock 
+                    Grid.Row="1"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Text="{Binding Name}"
+                    Margin="4 4 4 0"
+                    MaxWidth="70"
+                    TextWrapping="Wrap"/>
+            </Grid>
+        </DataTemplate>
+        <Style
+            x:Key="LeftToolbarMaterialButton"
+            TargetType="{x:Type ButtonBase}"
+            BasedOn="{StaticResource MaterialDesignFlatButton}">
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Width" Value="70"/>
+            <Setter Property="Height" Value="60"/>
+            <Setter Property="md:ButtonAssist.CornerRadius" Value="0"/>
+        </Style>
+    </Window.Resources>
     <md:DialogHost
         Identifier="MainWindowDialogHost">
         <Grid>
-            
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+                <ListBox
+                    VerticalAlignment="Center"
+                    SelectedItem="{Binding SelectedFolder, UpdateSourceTrigger=PropertyChanged}"
+                    ItemsSource="{Binding Folders}"
+                    ItemTemplate="{StaticResource FolderListBoxItem}"
+                    Style="{StaticResource MaterialDesignListBox}"
+                    ItemContainerStyle="{StaticResource MaterialDesignToolToggleListBoxItem}"
+                    ScrollViewer.CanContentScroll="False"
+                    md:ShadowAssist.ShadowDepth="Depth0"
+                    md:ListBoxAssist.IsToggle="False">
+                    <ListBox.Resources>
+                        <Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource MaterialDesignScrollBarMinimal}"/>
+                    </ListBox.Resources>
+                </ListBox>
+                <Button 
+                    Style="{StaticResource LeftToolbarMaterialButton}"
+                    Content="{md:PackIcon Kind=Tune,Size=24}"/>
+            </StackPanel>
         </Grid>
     </md:DialogHost>
 </controls:MaterialWindow>

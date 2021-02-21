@@ -24,11 +24,17 @@ namespace PasswordManager
         public App()
         {
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+            Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
+        }
+
+        private void Current_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            _logger.Error(e.Exception);
         }
 
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            
+            _logger.Error(e.ExceptionObject as Exception);
         }
 
         private void Application_Startup(object sender, StartupEventArgs e)

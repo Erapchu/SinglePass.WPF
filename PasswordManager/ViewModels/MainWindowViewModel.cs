@@ -34,16 +34,20 @@ namespace PasswordManager.ViewModels
         }
         #endregion
 
+        public FolderItemViewModel SettingsFolder { get; }
+
         public MainWindowViewModel()
         {
             foreach (var folder in LoadFolders())
                 Folders.Add(folder);
+
+            SettingsFolder = new FolderItemViewModel(new Folder() { Name = "Settings", Icon = MaterialDesignThemes.Wpf.PackIconKind.Tune });
         }
 
         private IEnumerable<FolderItemViewModel> LoadFolders()
         {
             // TODO: load folders from settings for user
-            return new List<FolderItemViewModel> { new FolderItemViewModel(new Folder()) };
+            return new List<FolderItemViewModel> { new FolderItemViewModel(new Folder() { Name = "Test" }) };
         }
     }
 }

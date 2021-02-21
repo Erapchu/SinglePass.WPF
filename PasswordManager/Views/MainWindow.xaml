@@ -19,27 +19,22 @@
             DataType="{x:Type vm:FolderItemViewModel}">
             <Grid
                 Width="60"
-                Height="70">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+                Height="60">
                 <md:PackIcon
-                    Grid.Row="0"
-                    VerticalAlignment="Center"
+                    VerticalAlignment="Top"
                     HorizontalAlignment="Center"
                     Kind="{Binding IconKind}"
                     Width="24"
-                    Height="24">
+                    Height="24"
+                    Margin="0 8 0 0">
                 </md:PackIcon>
-                <TextBlock 
-                    Grid.Row="1"
+                <TextBlock
+                    VerticalAlignment="Bottom"
                     HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
                     Text="{Binding Name}"
-                    Margin="4 4 4 0"
+                    Margin="0 4"
                     MaxWidth="70"
-                    TextWrapping="Wrap"/>
+                    TextWrapping="Wrap" />
             </Grid>
         </DataTemplate>
         <Style
@@ -48,9 +43,20 @@
             BasedOn="{StaticResource MaterialDesignFlatButton}">
             <Setter Property="Margin" Value="0"/>
             <Setter Property="Padding" Value="0"/>
-            <Setter Property="Width" Value="70"/>
+            <Setter Property="Width" Value="60"/>
             <Setter Property="Height" Value="60"/>
+            <Setter Property="FontWeight" Value="Regular"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
             <Setter Property="md:ButtonAssist.CornerRadius" Value="0"/>
+            <Setter Property="Opacity" Value="0.63"/>
+        </Style>
+        <Style
+            x:Key="FolderListBoxItemsStyle"
+            TargetType="{x:Type ListBoxItem}"
+            BasedOn="{StaticResource MaterialDesignToolToggleListBoxItem}">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
         </Style>
     </Window.Resources>
     <md:DialogHost
@@ -68,7 +74,7 @@
                     ItemsSource="{Binding Folders}"
                     ItemTemplate="{StaticResource FolderListBoxItem}"
                     Style="{StaticResource MaterialDesignListBox}"
-                    ItemContainerStyle="{StaticResource MaterialDesignToolToggleListBoxItem}"
+                    ItemContainerStyle="{StaticResource FolderListBoxItemsStyle}"
                     ScrollViewer.CanContentScroll="False"
                     md:ShadowAssist.ShadowDepth="Depth0"
                     md:ListBoxAssist.IsToggle="False">
@@ -76,9 +82,10 @@
                         <Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource MaterialDesignScrollBarMinimal}"/>
                     </ListBox.Resources>
                 </ListBox>
-                <Button 
+                <Button
                     Style="{StaticResource LeftToolbarMaterialButton}"
-                    Content="{md:PackIcon Kind=Tune,Size=24}"/>
+                    ContentTemplate="{StaticResource FolderListBoxItem}"
+                    Content="{Binding SettingsFolder}" />
             </StackPanel>
         </Grid>
     </md:DialogHost>

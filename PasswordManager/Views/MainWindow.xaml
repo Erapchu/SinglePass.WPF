@@ -52,12 +52,26 @@
             <Setter Property="Opacity" Value="0.63"/>
         </Style>
         <Style
-            x:Key="FolderListBoxItemsStyle"
+            x:Key="FolderListBoxItemStyle"
             TargetType="{x:Type ListBoxItem}"
             BasedOn="{StaticResource MaterialDesignToolToggleListBoxItem}">
             <Setter Property="Padding" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
         </Style>
+        <Style
+            x:Key="CredentialsListBoxItemStyle"
+            TargetType="{x:Type ListBoxItem}"
+            BasedOn="{StaticResource MaterialDesignListBoxItem}">
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <DataTemplate
+            x:Key="CredentialListBoxItem"
+            DataType="{x:Type vm:CredentialViewModel}">
+            <Grid>
+                <TextBlock 
+                    Text="{Binding Name}"/>
+            </Grid>
+        </DataTemplate>
     </Window.Resources>
     <md:DialogHost
         Identifier="MainWindowDialogHost">
@@ -69,12 +83,11 @@
             </Grid.ColumnDefinitions>
             <StackPanel>
                 <ListBox
-                    VerticalAlignment="Center"
                     SelectedItem="{Binding SelectedFolder, UpdateSourceTrigger=PropertyChanged}"
                     ItemsSource="{Binding Folders}"
                     ItemTemplate="{StaticResource FolderListBoxItem}"
                     Style="{StaticResource MaterialDesignListBox}"
-                    ItemContainerStyle="{StaticResource FolderListBoxItemsStyle}"
+                    ItemContainerStyle="{StaticResource FolderListBoxItemStyle}"
                     ScrollViewer.CanContentScroll="False"
                     md:ShadowAssist.ShadowDepth="Depth0"
                     md:ListBoxAssist.IsToggle="False">
@@ -87,6 +100,14 @@
                     ContentTemplate="{StaticResource FolderListBoxItem}"
                     Content="{Binding SettingsFolder}" />
             </StackPanel>
+            <Grid
+                Grid.Column="1">
+                <ListBox
+                    SelectedItem="{Binding SelectedCredential, UpdateSourceTrigger=PropertyChanged}"
+                    ItemsSource="{Binding Credentials}"
+                    ItemTemplate="{StaticResource CredentialListBoxItem}"
+                    ItemContainerStyle="{StaticResource CredentialsListBoxItemStyle}"/>
+            </Grid>
         </Grid>
     </md:DialogHost>
 </controls:MaterialWindow>

@@ -17,6 +17,7 @@ namespace PasswordManager.ViewModels
         #endregion
 
         public ObservableCollection<FolderItemViewModel> Folders { get; private set; } = new ObservableCollection<FolderItemViewModel>();
+        public ObservableCollection<CredentialViewModel> Credentials { get; private set; } = new ObservableCollection<CredentialViewModel>();
 
         #region SelectedFolder
         private FolderItemViewModel _selectedFolder;
@@ -34,6 +35,22 @@ namespace PasswordManager.ViewModels
         }
         #endregion
 
+        #region SelectedCredential
+        private CredentialViewModel _selectedCredential;
+        public CredentialViewModel SelectedCredential
+        {
+            get => _selectedCredential;
+            set
+            {
+                if (_selectedCredential == value)
+                    return;
+
+                _selectedCredential = value;
+                RaisePropertyChanged();
+            }
+        }
+        #endregion
+
         public FolderItemViewModel SettingsFolder { get; }
 
         public MainWindowViewModel()
@@ -41,13 +58,24 @@ namespace PasswordManager.ViewModels
             foreach (var folder in LoadFolders())
                 Folders.Add(folder);
 
+            foreach (var cred in LoadCredentials())
+                Credentials.Add(cred);
+
+            // TODO: Leave as is for now
             SettingsFolder = new FolderItemViewModel(new Folder() { Name = "Settings", Icon = MaterialDesignThemes.Wpf.PackIconKind.Tune });
+
         }
 
         private IEnumerable<FolderItemViewModel> LoadFolders()
         {
             // TODO: load folders from settings for user
             return new List<FolderItemViewModel> { new FolderItemViewModel(new Folder() { Name = "Test" }) };
+        }
+
+        private IEnumerable<CredentialViewModel> LoadCredentials()
+        {
+            // TODO: load credentials from encrypted file
+            return new List<CredentialViewModel> { new CredentialViewModel(new Credential() { Name = "Credential" }) };
         }
     }
 }

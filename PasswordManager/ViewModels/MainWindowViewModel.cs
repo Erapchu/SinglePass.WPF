@@ -62,7 +62,7 @@ namespace PasswordManager.ViewModels
                 Credentials.Add(cred);
 
             // TODO: Leave as is for now
-            SettingsFolder = new FolderItemViewModel(new Folder() { Name = "Settings", Icon = MaterialDesignThemes.Wpf.PackIconKind.Tune });
+            SettingsFolder = new FolderItemViewModel(new Folder() { Name = "Edit", Icon = MaterialDesignThemes.Wpf.PackIconKind.Tune });
 
         }
 

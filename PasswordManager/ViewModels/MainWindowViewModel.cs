@@ -63,7 +63,7 @@ namespace PasswordManager.ViewModels
 
             // TODO: Leave as is for now
             SettingsFolder = new FolderItemViewModel(new Folder() { Name = "Edit", Icon = MaterialDesignThemes.Wpf.PackIconKind.Tune });
-
+            SelectedFolder = Folders.FirstOrDefault();
         }
 
         private IEnumerable<FolderItemViewModel> LoadFolders()

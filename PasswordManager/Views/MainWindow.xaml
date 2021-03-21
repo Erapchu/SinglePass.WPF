@@ -11,10 +11,10 @@
     mc:Ignorable="d"
     d:DataContext="{x:Static vm:MainWindowViewModel.DesignTimeInstance}"
     Title="Password manager"
-    Height="400" 
-    Width="600"
-    MinWidth="300"
-    MinHeight="200"
+    Height="500" 
+    Width="800"
+    MinWidth="400"
+    MinHeight="300"
     Closed="Window_Closed">
     <Window.Resources>
         <DataTemplate 
@@ -208,7 +208,8 @@
                         <TextBlock
                             Style="{StaticResource MaterialDesignHeadline5TextBlock}"
                             Text="{Binding SelectedCredential.Name, FallbackValue='Please, select any credential'}"
-                            Margin="8 8 0 0" />
+                            Margin="8 8 0 0"
+                            TextTrimming="CharacterEllipsis"/>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition

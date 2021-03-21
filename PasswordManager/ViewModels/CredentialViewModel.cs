@@ -13,6 +13,9 @@ namespace PasswordManager.ViewModels
         public Credential Model { get; }
 
         public string Name => Model.Name;
+        public string Login => Model.Login;
+        public string Password => Model.Password;
+        public string Other => Model.Other;
 
         public CredentialViewModel(Credential credential)
         {

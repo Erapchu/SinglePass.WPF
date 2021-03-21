@@ -170,6 +170,7 @@
                         Style="{StaticResource MaterialDesignListBox}"
                         ItemContainerStyle="{StaticResource FolderListBoxItemStyle}"
                         ScrollViewer.CanContentScroll="False"
+                        SelectionMode="Single"
                         md:ShadowAssist.ShadowDepth="Depth0"
                         md:ListBoxAssist.IsToggle="False">
                         <ListBox.Resources>
@@ -229,17 +230,19 @@
                                 IsReadOnly="True"
                                 Grid.Column="1"
                                 md:HintAssist.Hint="Login"
-                                Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                VerticalAlignment="Center"
+                                Text="{Binding SelectedCredential.Login, Mode=OneWay}"
+                                Style="{StaticResource MaterialDesignTextBox}"
                                 Margin="8 0 0 0" />
                             <Button
                                 Grid.Column="2"
-                                Margin="8 0 8 0"
-                                Padding="6"
+                                Margin="8 0"
                                 ToolTip="Copy login"
                                 Style="{StaticResource MaterialDesignFlatButton}"
                                 Content="{md:PackIcon Kind=ClipboardOutline}"/>
                         </Grid>
-                        <Grid>
+                        <Grid
+                            Margin="0 4 0 0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition
                                     Width="auto" />
@@ -260,17 +263,20 @@
                                 IsReadOnly="True"
                                 Grid.Column="1"
                                 md:HintAssist.Hint="Password"
-                                Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                VerticalAlignment="Center"
+                                Text="{Binding SelectedCredential.Password, Mode=OneWay}"
+                                Style="{StaticResource MaterialDesignTextBox}"
                                 Margin="8 0 0 0" />
                             <Button
                                 Grid.Column="2"
-                                Margin="8 0 8 0"
-                                Padding="6"
+                                Margin="8 0"
                                 ToolTip="Copy password"
                                 Style="{StaticResource MaterialDesignFlatButton}"
                                 Content="{md:PackIcon Kind=ClipboardOutline}" />
                         </Grid>
-                        <Grid>
+                        <Grid
+                            MinHeight="32"
+                            Margin="0 4 0 0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition
                                     Width="auto" />
@@ -287,9 +293,12 @@
                             <TextBox
                                 x:Name="OtherTextBox"
                                 IsReadOnly="True"
+                                AcceptsReturn="True"
                                 Grid.Column="1"
                                 md:HintAssist.Hint="Other"
-                                Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                VerticalAlignment="Center"
+                                Text="{Binding SelectedCredential.Other, Mode=OneWay}"
+                                Style="{StaticResource MaterialDesignTextBox}"
                                 Margin="8 0 8 0" />
                         </Grid>
                     </StackPanel>

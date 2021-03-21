@@ -75,7 +75,7 @@ namespace PasswordManager.ViewModels
         private IEnumerable<CredentialViewModel> LoadCredentials()
         {
             // TODO: load credentials from encrypted file
-            return new List<CredentialViewModel> { new CredentialViewModel(new Credential() { Name = "Credential" }) };
+            return new List<CredentialViewModel> { new CredentialViewModel(new Credential() { Name = "Credential", Login="hello", Password="secret", Other="info" }) };
         }
     }
 }

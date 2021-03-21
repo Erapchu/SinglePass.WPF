@@ -154,13 +154,13 @@
                     <ColumnDefinition
                         Width="auto" />
                     <ColumnDefinition
-                        Width="auto"
-                        MinWidth="110"
-                        MaxWidth="500" />
+                        Width="*"
+                        MinWidth="160"/>
                     <ColumnDefinition
                         Width="auto" />
                     <ColumnDefinition
-                        Width="*" />
+                        Width="*"
+                        MinWidth="160"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel>
                     <ListBox

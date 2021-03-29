@@ -27,7 +27,8 @@ namespace PasswordManager.Views
         public MainWindow(ILifetimeScope scope)
         {
             InitializeComponent();
-            _scope = scope;
+
+            _scope = scope.BeginLifetimeScope();
             DataContext = scope.Resolve<MainWindowViewModel>();
         }
 

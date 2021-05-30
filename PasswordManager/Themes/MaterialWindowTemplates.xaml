@@ -13,8 +13,10 @@
 
     <SolidColorBrush x:Key="RedTransparentBrush" Color="#DEE50000"/>
     <SolidColorBrush x:Key="RedTransparentDarkBrush" Color="#EE900000"/>
+    <SolidColorBrush x:Key="GreyTransparentBrush" Color="#33000000"/>
+    <SolidColorBrush x:Key="GreyTransparentPressedBrush" Color="#55000000"/>
 
-    <Style x:Key="CaptionButton" TargetType="{x:Type ButtonBase}" BasedOn="{x:Null}">
+    <Style x:Key="CaptionButtonStyle" TargetType="{x:Type ButtonBase}" BasedOn="{x:Null}">
         <Setter Property="Width" Value="46"/>
         <Setter Property="Height" Value="32" />
         <Setter Property="Padding" Value="16 4" />
@@ -47,12 +49,12 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="true">
-                            <Setter Property="Background" Value="{DynamicResource PrimaryHueLightBrush}" />
-                            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryHueLightBrush}"/>
+                            <Setter Property="Background" Value="{StaticResource GreyTransparentBrush}" />
+                            <Setter Property="BorderBrush" Value="{StaticResource GreyTransparentBrush}"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter Property="Background" Value="{DynamicResource PrimaryHueDarkBrush}" />
-                            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryHueDarkBrush}"/>
+                            <Setter Property="Background" Value="{StaticResource GreyTransparentPressedBrush}" />
+                            <Setter Property="BorderBrush" Value="{StaticResource GreyTransparentPressedBrush}"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="false">
                             <Setter Property="Opacity" Value="0.23"/>
@@ -63,7 +65,7 @@
         </Setter>
     </Style>
 
-    <Style x:Key="CloseCaptionButton" TargetType="{x:Type ButtonBase}" BasedOn="{StaticResource CaptionButton}">
+    <Style x:Key="CloseCaptionButtonStyle" TargetType="{x:Type ButtonBase}" BasedOn="{StaticResource CaptionButtonStyle}">
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="{StaticResource RedTransparentBrush}" />
@@ -147,7 +149,7 @@
                                         VerticalAlignment="Top">
                                         <Button 
                                             x:Name="MinimizeButton"
-                                            Style="{StaticResource CaptionButton}">
+                                            Style="{StaticResource CaptionButtonStyle}">
                                             <Button.Visibility>
                                                 <MultiBinding Converter="{StaticResource WindowCaptionButtonVisibilityConverter}">
                                                     <Binding Path="MinimizeButtonName" Source="{StaticResource WindowCaptionButtonVisibilityConverter}" Mode="OneTime" />
@@ -170,7 +172,7 @@
                                         </Button>
                                         <Button 
                                             x:Name="MaximizeRestoreButton"
-                                            Style="{StaticResource CaptionButton}">
+                                            Style="{StaticResource CaptionButtonStyle}">
                                             <Button.Visibility>
                                                 <MultiBinding Converter="{StaticResource WindowCaptionButtonVisibilityConverter}">
                                                     <Binding Path="MaximizeRestoreButtonName" Source="{StaticResource WindowCaptionButtonVisibilityConverter}" Mode="OneTime" />
@@ -193,7 +195,7 @@
                                         </Button>
                                         <Button 
                                             x:Name="CloseButton"
-                                            Style="{StaticResource CloseCaptionButton}">
+                                            Style="{StaticResource CloseCaptionButtonStyle}">
                                             <Button.Visibility>
                                                 <MultiBinding Converter="{StaticResource WindowCaptionButtonVisibilityConverter}">
                                                     <Binding Path="CloseButtonName" Source="{StaticResource WindowCaptionButtonVisibilityConverter}" Mode="OneTime" />

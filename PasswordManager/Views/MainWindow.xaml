@@ -150,8 +150,9 @@
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
                         <TextBox 
-                            Margin="6 0 6 6"
-                            Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                            Margin="8"
+                            Style="{StaticResource MaterialDesignTextBox}"
+                            BorderThickness="0"
                             md:TextFieldAssist.HasClearButton="True"
                             md:HintAssist.Hint="Search"/>
                         <ListBox

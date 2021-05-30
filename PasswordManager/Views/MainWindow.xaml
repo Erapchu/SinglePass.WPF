@@ -19,8 +19,7 @@
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary
-                    Source="pack://application:,,,/PasswordManager;component/Themes/SeparatorTemplates.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/PasswordManager;component/Themes/SeparatorTemplates.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <DataTemplate
                 x:Key="FolderListBoxItem"
@@ -49,60 +48,33 @@
                 x:Key="LeftToolbarMaterialButton"
                 TargetType="{x:Type ButtonBase}"
                 BasedOn="{StaticResource MaterialDesignFlatButton}">
-                <Setter
-                    Property="Margin"
-                    Value="0" />
-                <Setter
-                    Property="Padding"
-                    Value="0" />
-                <Setter
-                    Property="Width"
-                    Value="60" />
-                <Setter
-                    Property="Height"
-                    Value="60" />
-                <Setter
-                    Property="FontWeight"
-                    Value="Regular" />
-                <Setter
-                    Property="FontSize"
-                    Value="12" />
-                <Setter
-                    Property="Foreground"
-                    Value="{DynamicResource MaterialDesignBody}" />
-                <Setter
-                    Property="md:ButtonAssist.CornerRadius"
-                    Value="0" />
-                <Setter
-                    Property="Opacity"
-                    Value="0.63" />
+                <Setter Property="Margin" Value="0" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Width" Value="60" />
+                <Setter Property="Height" Value="60" />
+                <Setter Property="FontWeight" Value="Regular" />
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
+                <Setter Property="md:ButtonAssist.CornerRadius" Value="0" />
+                <Setter Property="Opacity" Value="0.63" />
             </Style>
             <Style
                 x:Key="FolderListBoxItemStyle"
                 TargetType="{x:Type ListBoxItem}"
                 BasedOn="{StaticResource MaterialDesignToolToggleListBoxItem}">
-                <Setter
-                    Property="Padding"
-                    Value="0" />
-                <Setter
-                    Property="Cursor"
-                    Value="Hand" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Cursor" Value="Hand" />
             </Style>
             <Style
                 x:Key="CredentialsListBoxItemStyle"
                 TargetType="{x:Type ListBoxItem}"
                 BasedOn="{StaticResource MaterialDesignListBoxItem}">
-                <Setter
-                    Property="Cursor"
-                    Value="Hand" />
-                <Setter
-                    Property="ContextMenu">
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="ContextMenu">
                     <Setter.Value>
                         <ContextMenu>
-                            <MenuItem
-                                Header="Edit" />
-                            <MenuItem
-                                Header="Remove" />
+                            <MenuItem Header="Edit" />
+                            <MenuItem Header="Remove" />
                         </ContextMenu>
                     </Setter.Value>
                 </Setter>
@@ -118,39 +90,25 @@
             </DataTemplate>
         </ResourceDictionary>
     </Window.Resources>
-    <md:DialogHost
-        Identifier="MainWindowDialogHost">
+    <md:DialogHost Identifier="MainWindowDialogHost">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition
-                    Height="auto"/>
-                <RowDefinition
-                    Height="*" />
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Grid
-                Grid.Row="1">
+            <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition
-                        Width="auto" />
-                    <ColumnDefinition
-                        Width="auto" />
-                    <ColumnDefinition
-                        Width="*"
-                        MinWidth="160"/>
-                    <ColumnDefinition
-                        Width="auto" />
-                    <ColumnDefinition
-                        Width="*"
-                        MinWidth="160"/>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="*" MinWidth="160"/>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="*" MinWidth="160"/>
                 </Grid.ColumnDefinitions>
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition
-                            Height="auto" />
-                        <RowDefinition
-                            Height="*" />
-                        <RowDefinition
-                            Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="auto" />
                     </Grid.RowDefinitions>
                     <StackPanel>
                         <ListBox
@@ -185,14 +143,11 @@
                 <Separator 
                     Grid.Column="1"
                     Style="{StaticResource MaterialDesignVerticalSeparator}"/>
-                <Grid
-                    Grid.Column="2">
+                <Grid Grid.Column="2">
                     <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition
-                                Height="auto" />
-                            <RowDefinition
-                                Height="*" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
                         <TextBox 
                             Margin="6 0 6 6"
@@ -217,8 +172,7 @@
                     Grid.Column="3"
                     ResizeBehavior="PreviousAndNext"
                     Width="5" />
-                <Grid
-                    Grid.Column="4">
+                <Grid Grid.Column="4">
                     <StackPanel>
                         <TextBlock
                             Style="{StaticResource MaterialDesignHeadline5TextBlock}"
@@ -227,12 +181,9 @@
                             TextTrimming="CharacterEllipsis"/>
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition
-                                    Width="auto" />
-                                <ColumnDefinition
-                                    Width="*" />
-                                <ColumnDefinition
-                                    Width="auto" />
+                                <ColumnDefinition Width="auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="auto" />
                             </Grid.ColumnDefinitions>
                             <md:PackIcon
                                 Kind="Account"
@@ -257,15 +208,11 @@
                                 Style="{StaticResource MaterialDesignFlatButton}"
                                 Content="{md:PackIcon Kind=ClipboardOutline}"/>
                         </Grid>
-                        <Grid
-                            Margin="0 4 0 0">
+                        <Grid Margin="0 4 0 0">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition
-                                    Width="auto" />
-                                <ColumnDefinition
-                                    Width="*" />
-                                <ColumnDefinition
-                                    Width="auto" />
+                                <ColumnDefinition Width="auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="auto" />
                             </Grid.ColumnDefinitions>
                             <md:PackIcon
                                 Kind="Key"
@@ -294,10 +241,8 @@
                             MinHeight="32"
                             Margin="0 4 0 0">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition
-                                    Width="auto" />
-                                <ColumnDefinition
-                                    Width="*" />
+                                <ColumnDefinition Width="auto" />
+                                <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <md:PackIcon
                                 Kind="InformationOutline"

@@ -37,7 +37,7 @@ namespace PasswordManager.Converters
                     }
                     else if (buttonName == MaximizeRestoreButtonName)
                     {
-                        return resizeMode != ResizeMode.NoResize && resizeMode != ResizeMode.CanMinimize;
+                        return resizeMode is not ResizeMode.NoResize and not ResizeMode.CanMinimize;
                     }
                 }
             }

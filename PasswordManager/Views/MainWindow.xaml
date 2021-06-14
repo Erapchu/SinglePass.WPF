@@ -92,179 +92,134 @@
     </Window.Resources>
     <md:DialogHost Identifier="MainWindowDialogHost">
         <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto" />
-                    <ColumnDefinition Width="auto" />
-                    <ColumnDefinition Width="*" MinWidth="160"/>
-                    <ColumnDefinition Width="auto" />
-                    <ColumnDefinition Width="*" MinWidth="160"/>
-                </Grid.ColumnDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MinWidth="160"/>
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="*" MinWidth="160"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />
                         <RowDefinition Height="*" />
-                        <RowDefinition Height="auto" />
                     </Grid.RowDefinitions>
-                    <StackPanel>
-                        <ListBox
-                            SelectedItem="{Binding SelectedFolder, UpdateSourceTrigger=PropertyChanged}"
-                            ItemsSource="{Binding Folders}"
-                            ItemTemplate="{StaticResource FolderListBoxItem}"
-                            Style="{StaticResource MaterialDesignListBox}"
-                            ItemContainerStyle="{StaticResource FolderListBoxItemStyle}"
-                            ScrollViewer.CanContentScroll="False"
-                            SelectionMode="Single"
-                            md:ShadowAssist.ShadowDepth="Depth0"
-                            md:ListBoxAssist.IsToggle="False">
-                            <ListBox.Resources>
-                                <Style
-                                    TargetType="{x:Type ScrollBar}"
-                                    BasedOn="{StaticResource MaterialDesignScrollBarMinimal}" />
-                            </ListBox.Resources>
-                        </ListBox>
-                        <Button
-                            Style="{StaticResource LeftToolbarMaterialButton}"
-                            ContentTemplate="{StaticResource FolderListBoxItem}"
-                            Content="{Binding SettingsFolder}" />
-                    </StackPanel>
-                    <Button
-                        Grid.Row="2"
-                        Width="40"
-                        Height="40"
-                        Content="{md:PackIcon Kind=Settings}"
-                        Style="{StaticResource MaterialDesignIconButton}"
-                        Margin="8" />
+                    <TextBox 
+                        Margin="8"
+                        Style="{StaticResource MaterialDesignTextBox}"
+                        BorderThickness="0"
+                        md:TextFieldAssist.HasClearButton="True"
+                        md:HintAssist.Hint="Search"/>
+                    <ListBox
+                        Grid.Row="1"
+                        SelectedItem="{Binding SelectedCredential, UpdateSourceTrigger=PropertyChanged}"
+                        ItemsSource="{Binding Credentials}"
+                        ItemTemplate="{StaticResource CredentialListBoxItem}"
+                        ItemContainerStyle="{StaticResource CredentialsListBoxItemStyle}" />
                 </Grid>
-                <Separator 
-                    Grid.Column="1"
-                    Style="{StaticResource MaterialDesignVerticalSeparator}"/>
-                <Grid Grid.Column="2">
+                <Button 
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Margin="0 0 12 12"
+                    Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"
+                    Content="{md:PackIcon Kind=Plus,Size=24}"/>
+            </Grid>
+            <GridSplitter
+                Grid.Column="1"
+                ResizeBehavior="PreviousAndNext"
+                Width="4" />
+            <Grid Grid.Column="2">
+                <StackPanel>
+                    <TextBlock
+                        Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                        Text="{Binding SelectedCredential.Name, FallbackValue='Please, select any credential'}"
+                        Margin="8 8 0 0"
+                        TextTrimming="CharacterEllipsis"/>
                     <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-                        <TextBox 
-                            Margin="8"
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
+                        <md:PackIcon
+                            Kind="Account"
+                            Width="16"
+                            Height="16"
+                            Margin="8 0 0 0"
+                            Foreground="{Binding BorderBrush, ElementName=LoginTextBox}"
+                            VerticalAlignment="Center" />
+                        <TextBox
+                            x:Name="LoginTextBox"
+                            IsReadOnly="True"
+                            Grid.Column="1"
+                            md:HintAssist.Hint="Login"
+                            VerticalAlignment="Center"
+                            Text="{Binding SelectedCredential.Login, Mode=OneWay}"
                             Style="{StaticResource MaterialDesignTextBox}"
-                            BorderThickness="0"
-                            md:TextFieldAssist.HasClearButton="True"
-                            md:HintAssist.Hint="Search"/>
-                        <ListBox
-                            Grid.Row="1"
-                            SelectedItem="{Binding SelectedCredential, UpdateSourceTrigger=PropertyChanged}"
-                            ItemsSource="{Binding Credentials}"
-                            ItemTemplate="{StaticResource CredentialListBoxItem}"
-                            ItemContainerStyle="{StaticResource CredentialsListBoxItemStyle}" />
+                            Margin="8 0 0 0" />
+                        <Button
+                            Grid.Column="2"
+                            Margin="4 0"
+                            Padding="6 4"
+                            ToolTip="Copy login"
+                            Style="{StaticResource MaterialDesignFlatButton}"
+                            Content="{md:PackIcon Kind=ClipboardOutline,Size=18}"/>
                     </Grid>
-                    <Button 
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Bottom"
-                        Margin="0 0 12 12"
-                        Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"
-                        Content="{md:PackIcon Kind=Plus,Size=24}"/>
-                </Grid>
-                <GridSplitter
-                    Grid.Column="3"
-                    ResizeBehavior="PreviousAndNext"
-                    Width="5" />
-                <Grid Grid.Column="4">
-                    <StackPanel>
-                        <TextBlock
-                            Style="{StaticResource MaterialDesignHeadline5TextBlock}"
-                            Text="{Binding SelectedCredential.Name, FallbackValue='Please, select any credential'}"
-                            Margin="8 8 0 0"
-                            TextTrimming="CharacterEllipsis"/>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="auto" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="auto" />
-                            </Grid.ColumnDefinitions>
-                            <md:PackIcon
-                                Kind="Account"
-                                Width="16"
-                                Height="16"
-                                Margin="8 0 0 0"
-                                Foreground="{Binding BorderBrush, ElementName=LoginTextBox}"
-                                VerticalAlignment="Center" />
-                            <TextBox
-                                x:Name="LoginTextBox"
-                                IsReadOnly="True"
-                                Grid.Column="1"
-                                md:HintAssist.Hint="Login"
-                                VerticalAlignment="Center"
-                                Text="{Binding SelectedCredential.Login, Mode=OneWay}"
-                                Style="{StaticResource MaterialDesignTextBox}"
-                                Margin="8 0 0 0" />
-                            <Button
-                                Grid.Column="2"
-                                Margin="8 0"
-                                ToolTip="Copy login"
-                                Style="{StaticResource MaterialDesignFlatButton}"
-                                Content="{md:PackIcon Kind=ClipboardOutline}"/>
-                        </Grid>
-                        <Grid Margin="0 4 0 0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="auto" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="auto" />
-                            </Grid.ColumnDefinitions>
-                            <md:PackIcon
-                                Kind="Key"
-                                Width="16"
-                                Height="16"
-                                Margin="8 0 0 0"
-                                Foreground="{Binding BorderBrush, ElementName=PasswordTextBox}"
-                                VerticalAlignment="Center" />
-                            <TextBox
-                                x:Name="PasswordTextBox"
-                                IsReadOnly="True"
-                                Grid.Column="1"
-                                md:HintAssist.Hint="Password"
-                                VerticalAlignment="Center"
-                                Text="{Binding SelectedCredential.Password, Mode=OneWay}"
-                                Style="{StaticResource MaterialDesignTextBox}"
-                                Margin="8 0 0 0" />
-                            <Button
-                                Grid.Column="2"
-                                Margin="8 0"
-                                ToolTip="Copy password"
-                                Style="{StaticResource MaterialDesignFlatButton}"
-                                Content="{md:PackIcon Kind=ClipboardOutline}" />
-                        </Grid>
-                        <Grid
-                            MinHeight="32"
-                            Margin="0 4 0 0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <md:PackIcon
-                                Kind="InformationOutline"
-                                Width="16"
-                                Height="16"
-                                Margin="8 0 0 0"
-                                Foreground="{Binding BorderBrush, ElementName=OtherTextBox}"
-                                VerticalAlignment="Center" />
-                            <TextBox
-                                x:Name="OtherTextBox"
-                                IsReadOnly="True"
-                                AcceptsReturn="True"
-                                Grid.Column="1"
-                                md:HintAssist.Hint="Other"
-                                VerticalAlignment="Center"
-                                Text="{Binding SelectedCredential.Other, Mode=OneWay}"
-                                Style="{StaticResource MaterialDesignTextBox}"
-                                Margin="8 0 8 0" />
-                        </Grid>
-                    </StackPanel>
-                </Grid>
+                    <Grid Margin="0 4 0 0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
+                        <md:PackIcon
+                            Kind="Key"
+                            Width="16"
+                            Height="16"
+                            Margin="8 0 0 0"
+                            Foreground="{Binding BorderBrush, ElementName=PasswordTextBox}"
+                            VerticalAlignment="Center" />
+                        <TextBox
+                            x:Name="PasswordTextBox"
+                            IsReadOnly="True"
+                            Grid.Column="1"
+                            md:HintAssist.Hint="Password"
+                            VerticalAlignment="Center"
+                            Text="{Binding SelectedCredential.Password, Mode=OneWay}"
+                            Style="{StaticResource MaterialDesignTextBox}"
+                            Margin="8 0 0 0" />
+                        <Button
+                            Grid.Column="2"
+                            Margin="4 0"
+                            Padding="6 4"
+                            ToolTip="Copy password"
+                            Style="{StaticResource MaterialDesignFlatButton}"
+                            Content="{md:PackIcon Kind=ClipboardOutline,Size=18}" />
+                    </Grid>
+                    <Grid
+                        MinHeight="32"
+                        Margin="0 4 0 0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <md:PackIcon
+                            Kind="InformationOutline"
+                            Width="16"
+                            Height="16"
+                            Margin="8 0 0 0"
+                            Foreground="{Binding BorderBrush, ElementName=OtherTextBox}"
+                            VerticalAlignment="Center" />
+                        <TextBox
+                            x:Name="OtherTextBox"
+                            IsReadOnly="True"
+                            AcceptsReturn="True"
+                            Grid.Column="1"
+                            md:HintAssist.Hint="Other"
+                            VerticalAlignment="Center"
+                            Text="{Binding SelectedCredential.Other, Mode=OneWay}"
+                            Style="{StaticResource MaterialDesignTextBox}"
+                            Margin="8 0 8 0" />
+                    </Grid>
+                </StackPanel>
             </Grid>
         </Grid>
     </md:DialogHost>

@@ -25,7 +25,7 @@
         <Setter Property="WindowChrome.IsHitTestVisibleInChrome" Value="True"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{DynamicResource PrimaryHueMidForegroundBrush}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryHueMidBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
@@ -110,8 +110,7 @@
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
                             <!--Caption panel with window buttons, title and icon-->
-                            <materialDesign:ColorZone 
-                                Mode="PrimaryMid">
+                            <materialDesign:ColorZone Mode="Standard">
                                 <materialDesign:ColorZone.Visibility>
                                     <MultiBinding Converter="{StaticResource CaptionVisibilityConverter}">
                                         <Binding Path="(componentModel:DesignerProperties.IsInDesignMode)" RelativeSource="{RelativeSource TemplatedParent}"/>
@@ -164,8 +163,8 @@
                                                 </MultiBinding>
                                             </Button.IsEnabled>
                                             <Path
-                                                Data="M0,0L10,0 10,1 10,1 1,1 0,1z" 
-                                                Fill="{DynamicResource PrimaryHueMidForegroundBrush}"
+                                                Data="M0,0L10,0 10,1 10,1 1,1 0,1z"
+                                                Fill="{DynamicResource MaterialDesignBody}"
                                                 SnapsToDevicePixels="True"
                                                 Stretch="Uniform"
                                                 Width="10"/>
@@ -188,7 +187,7 @@
                                             </Button.IsEnabled>
                                             <Path 
                                                 Data="M1,1L1,11 11,11 11,1z M0,0L12,0 12,12 0,12z"
-                                                Fill="{DynamicResource PrimaryHueMidForegroundBrush}"
+                                                Fill="{DynamicResource MaterialDesignBody}"
                                                 SnapsToDevicePixels="True"
                                                 Stretch="Uniform"
                                                 Width="10"/>
@@ -211,7 +210,7 @@
                                             </Button.IsEnabled>
                                             <Path 
                                                 Data="F1M8.583,8L13,12.424 12.424,13 8,8.583 3.576,13 3,12.424 7.417,8 3,3.576 3.576,3 8,7.417 12.424,3 13,3.576z" 
-                                                Fill="{DynamicResource PrimaryHueMidForegroundBrush}"
+                                                Fill="{DynamicResource MaterialDesignBody}"
                                                 SnapsToDevicePixels="True"
                                                 Stretch="Uniform"
                                                 Width="10"/>
@@ -234,7 +233,7 @@
                                 <Setter.Value>
                                     <Path 
                                         Data="M1,4.56L1,14.56 11,14.56 11,4.56z M4,1L4,3.56 12,3.56 12,11 14,11 14,1z M3,0L15,0 15,12 12,12 12,15.56 0,15.56 0,3.56 3,3.56z" 
-                                        Fill="{DynamicResource PrimaryHueMidForegroundBrush}"
+                                        Fill="{DynamicResource MaterialDesignBody}"
                                         SnapsToDevicePixels="True"
                                         Stretch="Uniform"
                                         Width="10"/>

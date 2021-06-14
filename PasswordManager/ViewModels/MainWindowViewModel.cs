@@ -16,24 +16,7 @@ namespace PasswordManager.ViewModels
         public static MainWindowViewModel DesignTimeInstance => _lazy.Value;
         #endregion
 
-        public ObservableCollection<FolderItemViewModel> Folders { get; private set; } = new ObservableCollection<FolderItemViewModel>();
         public ObservableCollection<CredentialViewModel> Credentials { get; private set; } = new ObservableCollection<CredentialViewModel>();
-
-        #region SelectedFolder
-        private FolderItemViewModel _selectedFolder;
-        public FolderItemViewModel SelectedFolder
-        {
-            get => _selectedFolder;
-            set
-            {
-                if (_selectedFolder == value)
-                    return;
-
-                _selectedFolder = value;
-                RaisePropertyChanged();
-            }
-        }
-        #endregion
 
         #region SelectedCredential
         private CredentialViewModel _selectedCredential;
@@ -51,25 +34,10 @@ namespace PasswordManager.ViewModels
         }
         #endregion
 
-        public FolderItemViewModel SettingsFolder { get; }
-
         public MainWindowViewModel()
         {
-            foreach (var folder in LoadFolders())
-                Folders.Add(folder);
-
             foreach (var cred in LoadCredentials())
                 Credentials.Add(cred);
-
-            // TODO: Leave as is for now
-            SettingsFolder = new FolderItemViewModel(new Folder() { Name = "Edit", Icon = MaterialDesignThemes.Wpf.PackIconKind.Tune });
-            SelectedFolder = Folders.FirstOrDefault();
-        }
-
-        private IEnumerable<FolderItemViewModel> LoadFolders()
-        {
-            // TODO: load folders from settings for user
-            return new List<FolderItemViewModel> { new FolderItemViewModel(new Folder() { Name = "Test" }) };
         }
 
         private IEnumerable<CredentialViewModel> LoadCredentials()

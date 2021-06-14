@@ -36,17 +36,9 @@
                 <Setter Property="Opacity" Value="0.63" />
             </Style>
             <Style
-                x:Key="FolderListBoxItemStyle"
-                TargetType="{x:Type ListBoxItem}"
-                BasedOn="{StaticResource MaterialDesignToolToggleListBoxItem}">
-                <Setter Property="Padding" Value="0" />
-                <Setter Property="Cursor" Value="Hand" />
-            </Style>
-            <Style
                 x:Key="CredentialsListBoxItemStyle"
                 TargetType="{x:Type ListBoxItem}"
                 BasedOn="{StaticResource MaterialDesignListBoxItem}">
-                <Setter Property="Cursor" Value="Hand" />
                 <Setter Property="ContextMenu">
                     <Setter.Value>
                         <ContextMenu>
@@ -108,8 +100,8 @@
                 <StackPanel>
                     <TextBlock
                         Style="{StaticResource MaterialDesignHeadline5TextBlock}"
-                        Text="{Binding SelectedCredential.Name, FallbackValue='Please, select any credential'}"
-                        Margin="8 8 0 0"
+                        Text="{Binding SelectedCredential.Name}"
+                        Margin="8 8 0 16"
                         TextTrimming="CharacterEllipsis"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -130,6 +122,7 @@
                             Grid.Column="1"
                             md:HintAssist.Hint="Login"
                             VerticalAlignment="Center"
+                            BorderThickness="0"
                             Text="{Binding SelectedCredential.Login, Mode=OneWay}"
                             Style="{StaticResource MaterialDesignTextBox}"
                             Margin="8 0 0 0" />
@@ -139,7 +132,7 @@
                             Padding="6 4"
                             ToolTip="Copy login"
                             Style="{StaticResource MaterialDesignFlatButton}"
-                            Content="{md:PackIcon Kind=ClipboardOutline,Size=18}"/>
+                            Content="{md:PackIcon Kind=ContentCopy,Size=18}"/>
                     </Grid>
                     <Grid Margin="0 4 0 0">
                         <Grid.ColumnDefinitions>
@@ -159,6 +152,7 @@
                             IsReadOnly="True"
                             Grid.Column="1"
                             md:HintAssist.Hint="Password"
+                            BorderThickness="0"
                             VerticalAlignment="Center"
                             Text="{Binding SelectedCredential.Password, Mode=OneWay}"
                             Style="{StaticResource MaterialDesignTextBox}"
@@ -169,7 +163,7 @@
                             Padding="6 4"
                             ToolTip="Copy password"
                             Style="{StaticResource MaterialDesignFlatButton}"
-                            Content="{md:PackIcon Kind=ClipboardOutline,Size=18}" />
+                            Content="{md:PackIcon Kind=ContentCopy,Size=18}" />
                     </Grid>
                     <Grid
                         MinHeight="32"
@@ -190,6 +184,7 @@
                             IsReadOnly="True"
                             AcceptsReturn="True"
                             Grid.Column="1"
+                            BorderThickness="0"
                             md:HintAssist.Hint="Other"
                             VerticalAlignment="Center"
                             Text="{Binding SelectedCredential.Other, Mode=OneWay}"

@@ -139,6 +139,8 @@
                                         Margin="7 0 0 0"
                                         TextTrimming="CharacterEllipsis"
                                         Text="{TemplateBinding Title}"/>
+                                    <!--Additional controls-->
+                                    
                                     <!--Window button commands-->
                                     <StackPanel
                                         Grid.Column="2"

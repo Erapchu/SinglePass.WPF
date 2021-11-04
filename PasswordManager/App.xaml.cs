@@ -29,12 +29,12 @@ namespace PasswordManager
 
         private void Current_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
-            _logger.Error(e.Exception);
+            _logger?.Error(e.Exception);
         }
 
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            _logger.Error(e.ExceptionObject as Exception);
+            _logger?.Error(e.ExceptionObject as Exception);
         }
 
         private void Application_Startup(object sender, StartupEventArgs e)

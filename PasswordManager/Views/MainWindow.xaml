@@ -107,7 +107,6 @@
                         Orientation="Horizontal">
                         <Button
                             Margin="0 0 6 0"
-                            Cursor="Arrow"
                             Padding="8 4"
                             Style="{StaticResource MaterialDesignFlatButton}"
                             Content="{md:PackIcon Kind=Plus,Size=24}"/>
@@ -168,7 +167,6 @@
                             <Button
                                 Grid.Column="2"
                                 Margin="4 0"
-                                Cursor="Arrow"
                                 Padding="6 4"
                                 ToolTip="Copy login"
                                 Style="{StaticResource MaterialDesignFlatButton}"
@@ -200,7 +198,6 @@
                             <Button
                                 Grid.Column="2"
                                 Margin="4 0"
-                                Cursor="Arrow"
                                 Padding="6 4"
                                 ToolTip="Copy password"
                                 Style="{StaticResource MaterialDesignFlatButton}"

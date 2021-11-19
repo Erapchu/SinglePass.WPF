@@ -1,13 +1,9 @@
 ﻿using Autofac;
 using NLog;
-using PasswordManager.Helpers;
+using PasswordManager.Services;
 using PasswordManager.ViewModels;
 using PasswordManager.Views;
 using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -41,8 +37,11 @@ namespace PasswordManager
         {
             InitializeComponent();
             ConfigureServices();
-            _logger = _container.Resolve<ILogger>();
-            _logger.Info("Log session started!");
+            _ = Task.Run(() =>
+            {
+                _logger = _container.Resolve<ILogger>();
+                _logger.Info("Log session started!");
+            });
 
             var mainWindow = _container.Resolve<MainWindow>();
             mainWindow.Show();

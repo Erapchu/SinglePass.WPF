@@ -13,9 +13,9 @@ namespace PasswordManager.Helpers
         public const string NameOfPasswordsFile = "PassMan.dat";
         public const string NameOfLoggerFile = "PasswordManager.log";
 
-        public static string LocalAppDataDirectoryPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), AppName);
-        public static string RoamingAppDataDirectoryPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppName);
-        public static string PathToPasswordsFile => Path.Combine(RoamingAppDataDirectoryPath, NameOfPasswordsFile);
-        public static string PathToLoggerFile => Path.Combine(LocalAppDataDirectoryPath, NameOfLoggerFile);
+        public static string LocalAppDataDirectoryPath { get; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), AppName);
+        public static string RoamingAppDataDirectoryPath { get; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppName);
+        public static string PathToPasswordsFile { get; } = Path.Combine(RoamingAppDataDirectoryPath, NameOfPasswordsFile);
+        public static string PathToLoggerFile { get; } = Path.Combine(LocalAppDataDirectoryPath, NameOfLoggerFile);
     }
 }

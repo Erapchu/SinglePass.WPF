@@ -2,6 +2,7 @@
 using NLog;
 using NLog.Config;
 using NLog.Targets.Wrappers;
+using PasswordManager.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PasswordManager.Helpers
+namespace PasswordManager.Services
 {
     public static class LoggerResolver
     {
@@ -40,8 +41,8 @@ namespace PasswordManager.Helpers
             };
             var fileTargetWrapper = new AsyncTargetWrapper(fileTarget);
             config.AddTarget(fileTargetName, fileTargetWrapper);
-
             config.LoggingRules.Add(new LoggingRule(loggerName, LogLevel.Trace, fileTargetWrapper));
+
             LogManager.Configuration = config;
             var logger = LogManager.GetLogger(loggerName);
             return logger;

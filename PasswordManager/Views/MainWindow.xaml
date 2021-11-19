@@ -97,19 +97,18 @@
                     </Grid.ColumnDefinitions>
                     <TextBox
                         x:Name="SearchTextBox"
-                        Margin="8"
+                        Margin="8 8 0 8"
                         VerticalAlignment="Center"
-                        Style="{StaticResource MaterialDesignTextBox}"
+                        Style="{StaticResource MaterialDesignFilledTextBox}"
+                        md:HintAssist.IsFloating="False"
                         BorderThickness="0"
                         md:TextFieldAssist.HasClearButton="True"
                         md:HintAssist.Hint="Search"/>
                     <StackPanel
-                        Margin="4 0 0 0"
+                        Margin="4 0"
                         Grid.Column="1"
                         Orientation="Horizontal">
                         <Button
-                            Margin="0 0 6 0"
-                            Padding="8 4"
                             Style="{StaticResource MaterialDesignFlatButton}"
                             Content="{md:PackIcon Kind=Plus,Size=24}"/>
                     </StackPanel>
@@ -164,7 +163,10 @@
                                 VerticalAlignment="Center"
                                 BorderThickness="0"
                                 Text="{Binding SelectedCredential.Login, Mode=OneWay}"
-                                Style="{StaticResource MaterialDesignTextBox}"
+                                Style="{StaticResource MaterialDesignFilledTextBox}"
+                                md:HintAssist.IsFloating="False"
+                                md:TextFieldAssist.DecorationVisibility="Collapsed"
+                                md:TextFieldAssist.RippleOnFocusEnabled="False"
                                 Margin="8 0 0 0" />
                             <Button
                                 Grid.Column="2"
@@ -195,7 +197,10 @@
                                 BorderThickness="0"
                                 VerticalAlignment="Center"
                                 Text="{Binding SelectedCredential.Password, Mode=OneWay}"
-                                Style="{StaticResource MaterialDesignTextBox}"
+                                Style="{StaticResource MaterialDesignFilledTextBox}"
+                                md:HintAssist.IsFloating="False"
+                                md:TextFieldAssist.DecorationVisibility="Collapsed"
+                                md:TextFieldAssist.RippleOnFocusEnabled="False"
                                 Margin="8 0 0 0" />
                             <Button
                                 Grid.Column="2"
@@ -228,7 +233,10 @@
                                 md:HintAssist.Hint="Other"
                                 VerticalAlignment="Center"
                                 Text="{Binding SelectedCredential.Other, Mode=OneWay}"
-                                Style="{StaticResource MaterialDesignTextBox}"
+                                Style="{StaticResource MaterialDesignFilledTextBox}"
+                                md:HintAssist.IsFloating="False"
+                                md:TextFieldAssist.DecorationVisibility="Collapsed"
+                                md:TextFieldAssist.RippleOnFocusEnabled="False"
                                 Margin="8 0 8 0" />
                         </Grid>
                     </StackPanel>

@@ -3,12 +3,8 @@ using NLog;
 using NLog.Config;
 using NLog.Targets.Wrappers;
 using PasswordManager.Helpers;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace PasswordManager.Services
 {

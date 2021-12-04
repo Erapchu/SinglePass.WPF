@@ -38,6 +38,17 @@
                     </Setter.Value>
                 </Setter>
             </Style>
+            <Style
+                x:Key="CredFilledTextBoxStyle"
+                TargetType="{x:Type TextBox}"
+                BasedOn="{StaticResource MaterialDesignFilledTextBox}">
+                <Setter Property="IsReadOnly" Value="True"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="md:HintAssist.IsFloating" Value="False"/>
+                <Setter Property="md:TextFieldAssist.DecorationVisibility" Value="Collapsed"/>
+                <Setter Property="md:TextFieldAssist.RippleOnFocusEnabled" Value="False"/>
+                <Setter Property="md:TextFieldAssist.TextFieldCornerRadius" Value="4"/>
+            </Style>
             <DataTemplate
                 x:Key="CredentialListBoxItem"
                 DataType="{x:Type vm:CredentialViewModel}">
@@ -77,6 +88,7 @@
                     md:HintAssist.IsFloating="False"
                     BorderThickness="0"
                     md:TextFieldAssist.HasClearButton="True"
+                    md:TextFieldAssist.TextFieldCornerRadius="4"
                     md:HintAssist.Hint="Search"/>
                 <StackPanel
                     Margin="4 0"
@@ -89,8 +101,7 @@
             </Grid>
             <Grid
                 Grid.Column="0"
-                Grid.Row="1"
-                Margin="6 0">
+                Grid.Row="1">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />
@@ -131,16 +142,11 @@
                             VerticalAlignment="Center" />
                         <TextBox
                             x:Name="LoginTextBox"
-                            IsReadOnly="True"
                             Grid.Column="1"
                             md:HintAssist.Hint="Login"
                             VerticalAlignment="Center"
-                            BorderThickness="0"
                             Text="{Binding SelectedCredential.Login, Mode=OneWay}"
-                            Style="{StaticResource MaterialDesignFilledTextBox}"
-                            md:HintAssist.IsFloating="False"
-                            md:TextFieldAssist.DecorationVisibility="Collapsed"
-                            md:TextFieldAssist.RippleOnFocusEnabled="False"
+                            Style="{StaticResource CredFilledTextBoxStyle}"
                             Margin="8 0 0 0" />
                         <Button
                             Grid.Column="2"
@@ -165,16 +171,11 @@
                             VerticalAlignment="Center" />
                         <TextBox
                             x:Name="PasswordTextBox"
-                            IsReadOnly="True"
                             Grid.Column="1"
                             md:HintAssist.Hint="Password"
-                            BorderThickness="0"
                             VerticalAlignment="Center"
                             Text="{Binding SelectedCredential.Password, Mode=OneWay}"
-                            Style="{StaticResource MaterialDesignFilledTextBox}"
-                            md:HintAssist.IsFloating="False"
-                            md:TextFieldAssist.DecorationVisibility="Collapsed"
-                            md:TextFieldAssist.RippleOnFocusEnabled="False"
+                            Style="{StaticResource CredFilledTextBoxStyle}"
                             Margin="8 0 0 0" />
                         <Button
                             Grid.Column="2"
@@ -200,17 +201,12 @@
                             VerticalAlignment="Center" />
                         <TextBox
                             x:Name="OtherTextBox"
-                            IsReadOnly="True"
                             AcceptsReturn="True"
                             Grid.Column="1"
-                            BorderThickness="0"
                             md:HintAssist.Hint="Other"
                             VerticalAlignment="Center"
                             Text="{Binding SelectedCredential.Other, Mode=OneWay}"
-                            Style="{StaticResource MaterialDesignFilledTextBox}"
-                            md:HintAssist.IsFloating="False"
-                            md:TextFieldAssist.DecorationVisibility="Collapsed"
-                            md:TextFieldAssist.RippleOnFocusEnabled="False"
+                            Style="{StaticResource CredFilledTextBoxStyle}"
                             Margin="8 0 8 0" />
                     </Grid>
                 </StackPanel>

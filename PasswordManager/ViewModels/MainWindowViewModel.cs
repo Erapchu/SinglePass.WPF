@@ -1,49 +1,60 @@
-﻿using PasswordManager.Helpers;
-using PasswordManager.Models;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
+using Microsoft.Toolkit.Mvvm.Input;
+using PasswordManager.Helpers;
+using PasswordManager.Services;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace PasswordManager.ViewModels
 {
-    public class MainWindowViewModel : ViewModelBase
+    public class MainWindowViewModel : ObservableRecipient
     {
         #region Design time instance
-        private static readonly Lazy<MainWindowViewModel> _lazy = new Lazy<MainWindowViewModel>(() => new MainWindowViewModel());
+        private static readonly Lazy<MainWindowViewModel> _lazy = new(() => new MainWindowViewModel(null));
         public static MainWindowViewModel DesignTimeInstance => _lazy.Value;
         #endregion
 
-        public ObservableCollection<CredentialViewModel> Credentials { get; private set; } = new ObservableCollection<CredentialViewModel>();
+        private readonly SettingsService _settingsService;
 
-        #region SelectedCredential
+        public ObservableCollection<CredentialViewModel> Credentials { get; } = new ObservableCollection<CredentialViewModel>();
+
         private CredentialViewModel _selectedCredential;
         public CredentialViewModel SelectedCredential
         {
             get => _selectedCredential;
-            set
-            {
-                if (_selectedCredential == value)
-                    return;
+            set => SetProperty(ref _selectedCredential, value);
+        }
 
-                _selectedCredential = value;
-                RaisePropertyChanged();
+        private bool _loading;
+        public bool Loading
+        {
+            get => _loading;
+            set => SetProperty(ref _loading, value);
+        }
+
+        public MainWindowViewModel(SettingsService settingsService)
+        {
+            if (MvvmHelper.IsInDesignMode)
+                return;
+
+            _settingsService = settingsService;
+        }
+
+        private async Task LoadingAsync()
+        {
+            try
+            {
+                Loading = true;
+                var credentials = await _settingsService.LoadCredentialsFromFileAsync();
+            }
+            finally
+            {
+                Loading = false;
             }
         }
-        #endregion
 
-        public MainWindowViewModel()
-        {
-            foreach (var cred in LoadCredentials())
-                Credentials.Add(cred);
-        }
-
-        private IEnumerable<CredentialViewModel> LoadCredentials()
-        {
-            // TODO: load credentials from encrypted file
-            return new List<CredentialViewModel> { new CredentialViewModel(new Credential() { Name = "Credential", Login="hello", Password="secret", Other="info" }) };
-        }
+        private RelayCommand _loadingCommand;
+        public RelayCommand LoadingCommand => _loadingCommand ??= new RelayCommand(async () => await LoadingAsync());
     }
 }

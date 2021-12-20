@@ -1,13 +1,9 @@
-﻿using PasswordManager.Helpers;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PasswordManager.ViewModels
 {
-    public class LoginWindowViewModel : ViewModelBase
+    public class LoginWindowViewModel : ObservableRecipient
     {
         #region Design time instance
         private static readonly Lazy<LoginWindowViewModel> _lazy = new Lazy<LoginWindowViewModel>(() => new LoginWindowViewModel());

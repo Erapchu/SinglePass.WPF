@@ -8,6 +8,7 @@
     xmlns:local="clr-namespace:PasswordManager.Views"
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:vm="clr-namespace:PasswordManager.ViewModels"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     mc:Ignorable="d"
     d:DataContext="{x:Static vm:MainWindowViewModel.DesignTimeInstance}"
     Title="Password manager"
@@ -24,6 +25,11 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding LoadingCommand}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <md:DialogHost Identifier="MainWindowDialogHost">
         <TabControl Style="{StaticResource MaterialDesignNavigatilRailTabControl}">
             <TabItem>

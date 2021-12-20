@@ -52,6 +52,7 @@ namespace PasswordManager
             var container = new ContainerBuilder();
             container.RegisterType<MainWindow>();
             container.RegisterType<MainWindowViewModel>();
+            container.RegisterType<SettingsService>();
             container.Register(LoggerResolver.GetLogger).SingleInstance();
 
             _container = container.Build();

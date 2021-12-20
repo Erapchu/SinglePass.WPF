@@ -4,6 +4,7 @@ using PasswordManager.Helpers;
 using PasswordManager.Services;
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PasswordManager.ViewModels
@@ -17,7 +18,7 @@ namespace PasswordManager.ViewModels
 
         private readonly SettingsService _settingsService;
 
-        public ObservableCollection<CredentialViewModel> Credentials { get; } = new ObservableCollection<CredentialViewModel>();
+        public ObservableCollection<CredentialViewModel> Credentials { get; private set; }
 
         private CredentialViewModel _selectedCredential;
         public CredentialViewModel SelectedCredential
@@ -47,6 +48,7 @@ namespace PasswordManager.ViewModels
             {
                 Loading = true;
                 var credentials = await _settingsService.LoadCredentialsFromFileAsync();
+                Credentials = new ObservableCollection<CredentialViewModel>(credentials.Select(c => new CredentialViewModel(c)));
             }
             finally
             {

@@ -31,40 +31,53 @@
         </i:EventTrigger>
     </i:Interaction.Triggers>
     <md:DialogHost Identifier="MainWindowDialogHost">
-        <TabControl Style="{StaticResource MaterialDesignNavigatilRailTabControl}">
-            <TabItem>
-                <TabItem.Header>
-                    <StackPanel
-                        Height="auto"
-                        Width="auto">
-                        <md:PackIcon
-                            Kind="Home"
-                            Width="24"
-                            Height="24"
-                            HorizontalAlignment="Center" />
-                        <TextBlock
-                            Text="Main"
-                            HorizontalAlignment="Center" />
-                    </StackPanel>
-                </TabItem.Header>
-                <local:MainContent/>
-            </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    <StackPanel
-                        Height="auto"
-                        Width="auto">
-                        <md:PackIcon
-                            Kind="Settings"
-                            Width="24"
-                            Height="24"
-                            HorizontalAlignment="Center" />
-                        <TextBlock
-                            Text="Settings"
-                            HorizontalAlignment="Center" />
-                    </StackPanel>
-                </TabItem.Header>
-            </TabItem>
-        </TabControl>
+        <Grid>
+            <TabControl Style="{StaticResource MaterialDesignNavigatilRailTabControl}">
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel
+                                Height="auto"
+                                Width="auto">
+                            <md:PackIcon
+                                    Kind="Home"
+                                    Width="24"
+                                    Height="24"
+                                    HorizontalAlignment="Center" />
+                            <TextBlock
+                                    Text="Main"
+                                    HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </TabItem.Header>
+                    <local:MainContent/>
+                </TabItem>
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel
+                                Height="auto"
+                                Width="auto">
+                            <md:PackIcon
+                                    Kind="Settings"
+                                    Width="24"
+                                    Height="24"
+                                    HorizontalAlignment="Center" />
+                            <TextBlock
+                                    Text="Settings"
+                                    HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </TabItem.Header>
+                </TabItem>
+            </TabControl>
+            <md:Card
+                HorizontalAlignment="Left"
+                VerticalAlignment="Bottom"
+                Margin="16 0 0 16"
+                UniformCornerRadius="18"
+                Visibility="{Binding Loading, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <ProgressBar
+                    Margin="8"
+                    IsIndeterminate="True"
+                    Style="{StaticResource MaterialDesignCircularProgressBar}"/>
+            </md:Card>
+        </Grid>
     </md:DialogHost>
 </controls:MaterialWindow>

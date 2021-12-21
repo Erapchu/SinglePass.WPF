@@ -16,6 +16,8 @@
                 x:Key="CredentialsListBoxItemStyle"
                 TargetType="{x:Type ListBoxItem}"
                 BasedOn="{StaticResource MaterialDesignListBoxItem}">
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                <Setter Property="Padding" Value="0"/>
                 <Setter Property="ContextMenu">
                     <Setter.Value>
                         <ContextMenu>
@@ -53,9 +55,11 @@
                 x:Key="CredentialListBoxItem"
                 DataType="{x:Type vm:CredentialViewModel}">
                 <Grid>
-                    <TextBlock
-                        Text="{Binding Name}"
-                        TextTrimming="CharacterEllipsis" />
+                    <Expander Header="{Binding Name}">
+                        <Grid>
+                            <TextBlock Text="Hello"/>
+                        </Grid>
+                    </Expander>
                 </Grid>
             </DataTemplate>
         </ResourceDictionary>
@@ -110,7 +114,8 @@
                         SelectedItem="{Binding SelectedCredential, UpdateSourceTrigger=PropertyChanged}"
                         ItemsSource="{Binding Credentials}"
                         ItemTemplate="{StaticResource CredentialListBoxItem}"
-                        ItemContainerStyle="{StaticResource CredentialsListBoxItemStyle}" />
+                        ItemContainerStyle="{StaticResource CredentialsListBoxItemStyle}"
+                        md:ListBoxItemAssist.ShowSelection="false"/>
                 </Grid>
             </Grid>
             <GridSplitter

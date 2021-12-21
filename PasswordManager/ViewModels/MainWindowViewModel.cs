@@ -49,6 +49,7 @@ namespace PasswordManager.ViewModels
                 Loading = true;
                 var credentials = await _settingsService.LoadCredentialsFromFileAsync();
                 Credentials = new ObservableCollection<CredentialViewModel>(credentials.Select(c => new CredentialViewModel(c)));
+                OnPropertyChanged(nameof(Credentials));
             }
             finally
             {

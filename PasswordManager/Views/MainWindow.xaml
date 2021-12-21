@@ -16,8 +16,7 @@
     Width="800"
     MinWidth="400"
     MinHeight="300"
-    Closed="Window_Closed"
-    FocusManager.FocusedElement="{Binding ElementName=SearchTextBox}">
+    Closed="Window_Closed">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

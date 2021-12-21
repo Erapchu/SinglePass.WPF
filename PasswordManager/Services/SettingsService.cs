@@ -44,10 +44,7 @@ namespace PasswordManager.Services
                             return credentials;
                         }
 
-                        var passPathBytes = Encoding.UTF8.GetBytes(Constants.PathToPasswordsFile);
-                        var hashData = System.Security.Cryptography.SHA256.HashData(passPathBytes);
-                        var hashedPath = Encoding.UTF8.GetString(hashData);
-
+                        var hashedPath = GetHashForPath(pathToPasswordsFile);
                         using var waitHandleLocker = EventWaitHandleLocker.MakeWithEventHandle(true, EventResetMode.AutoReset, hashedPath);
                         using var fileStream = File.Open(Constants.PathToPasswordsFile, FileMode.Open, FileAccess.Read, FileShare.Read);
                         using var streamReader = new StreamReader(fileStream);
@@ -88,9 +85,10 @@ namespace PasswordManager.Services
 
             await Task.Run(() =>
             {
-                var passwordsPath = Constants.PathToPasswordsFile;
-                using var waitHandleLocker = EventWaitHandleLocker.MakeWithEventHandle(true, EventResetMode.AutoReset, passwordsPath);
-                using var fileStream = File.Open(passwordsPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                var pathToPasswordsFile = Constants.PathToPasswordsFile;
+                var hashedPath = GetHashForPath(pathToPasswordsFile);
+                using var waitHandleLocker = EventWaitHandleLocker.MakeWithEventHandle(true, EventResetMode.AutoReset, hashedPath);
+                using var fileStream = File.Open(pathToPasswordsFile, FileMode.Open, FileAccess.Write, FileShare.Write);
                 using var streamWriter = new StreamWriter(fileStream);
                 using var jsonWriter = new JsonTextWriter(streamWriter);
                 var serializer = JsonSerializer.Create(DefaultSerializerSettings);
@@ -104,6 +102,14 @@ namespace PasswordManager.Services
                     _logger.Warn("Failed to serialize credentials settings to file due to exception: {0}", jsex);
                 }
             });
+        }
+
+        private static string GetHashForPath(string path)
+        {
+            var passPathBytes = Encoding.UTF8.GetBytes(path);
+            var hashData = System.Security.Cryptography.SHA256.HashData(passPathBytes);
+            var hashedPath = Encoding.UTF8.GetString(hashData);
+            return hashedPath;
         }
     }
 }

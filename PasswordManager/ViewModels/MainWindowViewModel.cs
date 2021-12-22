@@ -1,5 +1,6 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
+using PasswordManager.Collections;
 using PasswordManager.Helpers;
 using PasswordManager.Services;
 using System;
@@ -18,7 +19,7 @@ namespace PasswordManager.ViewModels
 
         private readonly SettingsService _settingsService;
 
-        public ObservableCollection<CredentialViewModel> Credentials { get; private set; }
+        public ObservableCollectionDelayed<CredentialViewModel> Credentials { get; } = new ObservableCollectionDelayed<CredentialViewModel>();
 
         private CredentialViewModel _selectedCredential;
         public CredentialViewModel SelectedCredential
@@ -48,8 +49,11 @@ namespace PasswordManager.ViewModels
             {
                 Loading = true;
                 var credentials = await _settingsService.LoadCredentialsFromFileAsync();
-                Credentials = new ObservableCollection<CredentialViewModel>(credentials.Select(c => new CredentialViewModel(c)));
-                OnPropertyChanged(nameof(Credentials));
+                using var delayed = Credentials.DelayNotifications();
+                foreach (var cred in credentials)
+                {
+                    delayed.Add(new CredentialViewModel(cred));
+                }
             }
             finally
             {

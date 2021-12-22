@@ -28,7 +28,7 @@ namespace PasswordManager.Services
             _logger = logger;
         }
 
-        public async Task<List<Credential>> LoadCredentialsFromFileAsync()
+        public async Task<List<Credential>> LoadCredentialsAsync()
         {
             if (_credentialsList is null)
             {
@@ -78,7 +78,7 @@ namespace PasswordManager.Services
             return _credentialsList;
         }
 
-        public async Task SaveCredentialsToFileAsync()
+        public async Task SaveCredentialsAsync()
         {
             if (_credentialsList is null)
                 return;

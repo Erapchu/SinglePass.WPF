@@ -4,8 +4,6 @@ using PasswordManager.Collections;
 using PasswordManager.Helpers;
 using PasswordManager.Services;
 using System;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace PasswordManager.ViewModels
@@ -48,7 +46,7 @@ namespace PasswordManager.ViewModels
             try
             {
                 Loading = true;
-                var credentials = await _settingsService.LoadCredentialsFromFileAsync();
+                var credentials = await _settingsService.LoadCredentialsAsync();
                 using var delayed = Credentials.DelayNotifications();
                 foreach (var cred in credentials)
                 {

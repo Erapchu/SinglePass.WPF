@@ -1,22 +1,23 @@
-﻿<controls:MaterialWindow 
+﻿<controls:MaterialWindow
     x:Class="PasswordManager.Views.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="clr-namespace:PasswordManager.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:helpers="clr-namespace:PasswordManager.Helpers"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:PasswordManager.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:vm="clr-namespace:PasswordManager.ViewModels"
-    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-    mc:Ignorable="d"
-    d:DataContext="{x:Static vm:MainWindowViewModel.DesignTimeInstance}"
     Title="Password manager"
-    Height="500" 
     Width="800"
+    Height="500"
     MinWidth="400"
     MinHeight="300"
-    Closed="Window_Closed">
+    d:DataContext="{x:Static vm:MainWindowViewModel.DesignTimeInstance}"
+    Closed="Window_Closed"
+    mc:Ignorable="d">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -26,56 +27,51 @@
     </Window.Resources>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Loaded">
-            <i:InvokeCommandAction Command="{Binding LoadingCommand}"/>
+            <i:InvokeCommandAction Command="{Binding LoadingCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
-    <md:DialogHost Identifier="MainWindowDialogHost">
+    <md:DialogHost
+        CloseOnClickAway="True"
+        Identifier="{x:Static helpers:MvvmHelper.MainWindowDialogName}"
+        Style="{StaticResource MaterialDesignEmbeddedDialogHost}">
         <Grid>
             <TabControl Style="{StaticResource MaterialDesignNavigatilRailTabControl}">
                 <TabItem>
                     <TabItem.Header>
-                        <StackPanel
-                                Height="auto"
-                                Width="auto">
+                        <StackPanel Width="auto" Height="auto">
                             <md:PackIcon
-                                    Kind="Home"
-                                    Width="24"
-                                    Height="24"
-                                    HorizontalAlignment="Center" />
-                            <TextBlock
-                                    Text="Main"
-                                    HorizontalAlignment="Center" />
+                                Width="24"
+                                Height="24"
+                                HorizontalAlignment="Center"
+                                Kind="Home" />
+                            <TextBlock HorizontalAlignment="Center" Text="Main" />
                         </StackPanel>
                     </TabItem.Header>
-                    <local:MainContent/>
+                    <local:MainContent />
                 </TabItem>
                 <TabItem>
                     <TabItem.Header>
-                        <StackPanel
-                                Height="auto"
-                                Width="auto">
+                        <StackPanel Width="auto" Height="auto">
                             <md:PackIcon
-                                    Kind="Settings"
-                                    Width="24"
-                                    Height="24"
-                                    HorizontalAlignment="Center" />
-                            <TextBlock
-                                    Text="Settings"
-                                    HorizontalAlignment="Center" />
+                                Width="24"
+                                Height="24"
+                                HorizontalAlignment="Center"
+                                Kind="Settings" />
+                            <TextBlock HorizontalAlignment="Center" Text="Settings" />
                         </StackPanel>
                     </TabItem.Header>
                 </TabItem>
             </TabControl>
             <md:Card
+                Margin="16 0 0 16"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Bottom"
-                Margin="16 0 0 16"
                 UniformCornerRadius="18"
                 Visibility="{Binding Loading, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <ProgressBar
                     Margin="8"
                     IsIndeterminate="True"
-                    Style="{StaticResource MaterialDesignCircularProgressBar}"/>
+                    Style="{StaticResource MaterialDesignCircularProgressBar}" />
             </md:Card>
         </Grid>
     </md:DialogHost>

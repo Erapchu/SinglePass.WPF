@@ -1,8 +1,10 @@
-﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using MaterialDesignThemes.Wpf;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 using PasswordManager.Collections;
 using PasswordManager.Helpers;
 using PasswordManager.Services;
+using PasswordManager.Views;
 using System;
 using System.Threading.Tasks;
 
@@ -59,7 +61,15 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        private RelayCommand _loadingCommand;
-        public RelayCommand LoadingCommand => _loadingCommand ??= new RelayCommand(async () => await LoadingAsync());
+        private async Task AddCredentialAsync()
+        {
+            await DialogHost.Show(new NewCredentialsDialog(), MvvmHelper.MainWindowDialogName);
+        }
+
+        private AsyncRelayCommand _loadingCommand;
+        public AsyncRelayCommand LoadingCommand => _loadingCommand ??= new AsyncRelayCommand(LoadingAsync);
+
+        private AsyncRelayCommand _addCredentialCommand;
+        public AsyncRelayCommand AddCredentialCommand => _addCredentialCommand ??= new AsyncRelayCommand(AddCredentialAsync);
     }
 }

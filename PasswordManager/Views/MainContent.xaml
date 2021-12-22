@@ -76,8 +76,6 @@
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" MinWidth="240"/>
-                <ColumnDefinition Width="auto" />
-                <ColumnDefinition Width="*" MinWidth="240"/>
             </Grid.ColumnDefinitions>
             <Grid Grid.Row="0">
                 <Grid.ColumnDefinitions>
@@ -100,7 +98,8 @@
                     Orientation="Horizontal">
                     <Button
                         Style="{StaticResource MaterialDesignFlatButton}"
-                        Content="{md:PackIcon Kind=Plus,Size=24}"/>
+                        Content="{md:PackIcon Kind=Plus,Size=24}"
+                        Command="{Binding AddCredentialCommand}"/>
                 </StackPanel>
             </Grid>
             <Grid
@@ -117,104 +116,6 @@
                         ItemContainerStyle="{StaticResource CredentialsListBoxItemStyle}"
                         md:ListBoxItemAssist.ShowSelection="false"/>
                 </Grid>
-            </Grid>
-            <GridSplitter
-                Grid.RowSpan="2"
-                Grid.Column="1"
-                ResizeBehavior="PreviousAndNext"
-                Width="4" />
-            <Grid
-                Grid.Column="2"
-                Grid.RowSpan="2">
-                <StackPanel>
-                    <TextBlock
-                        Style="{StaticResource MaterialDesignHeadline5TextBlock}"
-                        Text="{Binding SelectedCredential.Name, FallbackValue='No one credential is selected'}"
-                        Margin="8 8 0 16"
-                        TextTrimming="CharacterEllipsis"/>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="auto" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="auto" />
-                        </Grid.ColumnDefinitions>
-                        <md:PackIcon
-                            Kind="Account"
-                            Width="16"
-                            Height="16"
-                            Margin="8 0 0 0"
-                            Foreground="{Binding BorderBrush, ElementName=LoginTextBox}"
-                            VerticalAlignment="Center" />
-                        <TextBox
-                            x:Name="LoginTextBox"
-                            Grid.Column="1"
-                            md:HintAssist.Hint="Login"
-                            VerticalAlignment="Center"
-                            Text="{Binding SelectedCredential.Login, Mode=OneWay}"
-                            Style="{StaticResource CredFilledTextBoxStyle}"
-                            Margin="8 0 0 0" />
-                        <Button
-                            Grid.Column="2"
-                            Margin="4 0"
-                            Padding="6 4"
-                            ToolTip="Copy login"
-                            Style="{StaticResource MaterialDesignFlatButton}"
-                            Content="{md:PackIcon Kind=ContentCopy,Size=18}"/>
-                    </Grid>
-                    <Grid Margin="0 4 0 0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="auto" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="auto" />
-                        </Grid.ColumnDefinitions>
-                        <md:PackIcon
-                            Kind="Key"
-                            Width="16"
-                            Height="16"
-                            Margin="8 0 0 0"
-                            Foreground="{Binding BorderBrush, ElementName=PasswordTextBox}"
-                            VerticalAlignment="Center" />
-                        <TextBox
-                            x:Name="PasswordTextBox"
-                            Grid.Column="1"
-                            md:HintAssist.Hint="Password"
-                            VerticalAlignment="Center"
-                            Text="{Binding SelectedCredential.Password, Mode=OneWay}"
-                            Style="{StaticResource CredFilledTextBoxStyle}"
-                            Margin="8 0 0 0" />
-                        <Button
-                            Grid.Column="2"
-                            Margin="4 0"
-                            Padding="6 4"
-                            ToolTip="Copy password"
-                            Style="{StaticResource MaterialDesignFlatButton}"
-                            Content="{md:PackIcon Kind=ContentCopy,Size=18}" />
-                    </Grid>
-                    <Grid
-                        MinHeight="32"
-                        Margin="0 4 0 0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="auto" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <md:PackIcon
-                            Kind="InformationOutline"
-                            Width="16"
-                            Height="16"
-                            Margin="8 0 0 0"
-                            Foreground="{Binding BorderBrush, ElementName=OtherTextBox}"
-                            VerticalAlignment="Center" />
-                        <TextBox
-                            x:Name="OtherTextBox"
-                            AcceptsReturn="True"
-                            Grid.Column="1"
-                            md:HintAssist.Hint="Other"
-                            VerticalAlignment="Center"
-                            Text="{Binding SelectedCredential.Other, Mode=OneWay}"
-                            Style="{StaticResource CredFilledTextBoxStyle}"
-                            Margin="8 0 8 0" />
-                    </Grid>
-                </StackPanel>
             </Grid>
         </Grid>
     </Grid>

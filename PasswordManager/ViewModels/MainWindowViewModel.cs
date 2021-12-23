@@ -6,6 +6,7 @@ using PasswordManager.Helpers;
 using PasswordManager.Services;
 using PasswordManager.Views;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace PasswordManager.ViewModels
@@ -25,6 +26,14 @@ namespace PasswordManager.ViewModels
         #endregion
 
         private readonly SettingsService _settingsService;
+
+        public List<PassFieldViewModel> DefaultFields { get; } = new List<PassFieldViewModel>()
+        {
+            new PassFieldViewModel(new Models.PassField() { Name = "Name", IconKind = PackIconKind.Information }),
+            new PassFieldViewModel(new Models.PassField() { Name = "Login", IconKind = PackIconKind.Account }),
+            new PassFieldViewModel(new Models.PassField() { Name = "Password", IconKind = PackIconKind.Key }),
+            new PassFieldViewModel(new Models.PassField() { Name = "Other", IconKind = PackIconKind.InformationOutline }),
+        };
 
         public ObservableCollectionDelayed<CredentialViewModel> Credentials { get; } = new ObservableCollectionDelayed<CredentialViewModel>();
 
@@ -70,7 +79,7 @@ namespace PasswordManager.ViewModels
 
         private async Task AddCredentialAsync()
         {
-            await DialogHost.Show(new NewCredentialsDialog(), MvvmHelper.MainWindowDialogName);
+            var result = await DialogHost.Show(new NewCredentialsDialog(), MvvmHelper.MainWindowDialogName);
         }
 
         private AsyncRelayCommand _loadingCommand;

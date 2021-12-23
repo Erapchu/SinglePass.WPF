@@ -22,6 +22,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/PasswordManager;component/Themes/SeparatorTemplates.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/PasswordManager;component/Themes/DialogHostTemplates.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
@@ -33,7 +34,7 @@
     <md:DialogHost
         CloseOnClickAway="True"
         Identifier="{x:Static helpers:MvvmHelper.MainWindowDialogName}"
-        Style="{StaticResource MaterialDesignEmbeddedDialogHost}">
+        Style="{StaticResource MaterialDesignEmbeddedFastDialogHost}">
         <Grid>
             <TabControl Style="{StaticResource MaterialDesignNavigatilRailTabControl}">
                 <TabItem>

@@ -11,8 +11,8 @@
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:vm="clr-namespace:PasswordManager.ViewModels"
     Title="Password manager"
-    Width="800"
-    Height="500"
+    Width="500"
+    Height="600"
     MinWidth="400"
     MinHeight="300"
     d:DataContext="{x:Static vm:MainWindowViewModel.DesignTimeInstance}"
@@ -43,8 +43,11 @@
                                 Width="24"
                                 Height="24"
                                 HorizontalAlignment="Center"
-                                Kind="Home" />
-                            <TextBlock HorizontalAlignment="Center" Text="Main" />
+                                Kind="Password" />
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                FontSize="12"
+                                Text="Passwords" />
                         </StackPanel>
                     </TabItem.Header>
                     <local:MainContent />
@@ -57,22 +60,14 @@
                                 Height="24"
                                 HorizontalAlignment="Center"
                                 Kind="Settings" />
-                            <TextBlock HorizontalAlignment="Center" Text="Settings" />
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                FontSize="12"
+                                Text="Settings" />
                         </StackPanel>
                     </TabItem.Header>
                 </TabItem>
             </TabControl>
-            <md:Card
-                Margin="16 0 0 16"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Bottom"
-                UniformCornerRadius="18"
-                Visibility="{Binding Loading, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <ProgressBar
-                    Margin="8"
-                    IsIndeterminate="True"
-                    Style="{StaticResource MaterialDesignCircularProgressBar}" />
-            </md:Card>
         </Grid>
     </md:DialogHost>
 </controls:MaterialWindow>

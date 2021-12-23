@@ -5,7 +5,7 @@
     xmlns:local="clr-namespace:PasswordManager"
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     Startup="Application_Startup"
-    ShutdownMode="OnExplicitShutdown">
+    ShutdownMode="OnLastWindowClose">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

@@ -13,8 +13,15 @@ namespace PasswordManager.ViewModels
     public class MainWindowViewModel : ObservableRecipient
     {
         #region Design time instance
-        private static readonly Lazy<MainWindowViewModel> _lazy = new(() => new MainWindowViewModel(null));
+        private static readonly Lazy<MainWindowViewModel> _lazy = new(GetDesignTimeVM);
         public static MainWindowViewModel DesignTimeInstance => _lazy.Value;
+
+        private static MainWindowViewModel GetDesignTimeVM()
+        {
+            var vm = new MainWindowViewModel(null);
+            vm.Loading = true;
+            return vm;
+        }
         #endregion
 
         private readonly SettingsService _settingsService;

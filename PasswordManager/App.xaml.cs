@@ -51,9 +51,13 @@ namespace PasswordManager
         private void ConfigureServices()
         {
             var container = new ContainerBuilder();
-            container.RegisterType<MainWindow>();
-            container.RegisterType<MainWindowViewModel>();
-            container.RegisterType<SettingsService>();
+            container.RegisterType<MainWindow>().InstancePerLifetimeScope();
+            container.RegisterType<MainWindowViewModel>().InstancePerLifetimeScope();
+            container.RegisterType<SettingsService>().InstancePerLifetimeScope();
+            container.RegisterType<PasswordsViewModel>().InstancePerLifetimeScope();
+
+            container.RegisterType<NewCredentialsViewModel>().InstancePerDependency();
+
             container.Register(LoggerResolver.GetLogger).SingleInstance();
 
             _container = container.Build();

@@ -51,7 +51,7 @@
                                 Text="Passwords" />
                         </StackPanel>
                     </TabItem.Header>
-                    <local:MainContent />
+                    <local:MainContent DataContext="{Binding PasswordsViewModel, Mode=OneTime}"/>
                 </TabItem>
                 <TabItem>
                     <TabItem.Header>

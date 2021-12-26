@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:vm="clr-namespace:PasswordManager.ViewModels"
-    d:DataContext="{x:Static vm:MainWindowViewModel.DesignTimeInstance}"
+    d:DataContext="{x:Static vm:PasswordsViewModel.DesignTimeInstance}"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">

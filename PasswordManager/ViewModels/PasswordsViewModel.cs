@@ -4,9 +4,11 @@ using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 using PasswordManager.Collections;
 using PasswordManager.Helpers;
+using PasswordManager.Models;
 using PasswordManager.Services;
 using PasswordManager.Views;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PasswordManager.ViewModels
@@ -71,11 +73,17 @@ namespace PasswordManager.ViewModels
 
         private async Task AddCredentialAsync()
         {
+            var credential = new Credential();
+            var newCredentialVM = new CredentialViewModel(credential);
             var newCredDialog = new NewCredentialsDialog
             {
-                DataContext = _lifetimeScope.Resolve<NewCredentialsViewModel>()
+                DataContext = newCredentialVM
             };
             var result = await DialogHost.Show(newCredDialog, MvvmHelper.MainWindowDialogName);
+            if (result is bool boolResult && boolResult)
+            {
+                Credentials.Add(newCredentialVM);
+            }
         }
 
         private AsyncRelayCommand _addCredentialCommand;

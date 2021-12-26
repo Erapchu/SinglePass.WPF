@@ -1,27 +1,45 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
-using PasswordManager.Helpers;
 using PasswordManager.Models;
 using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PasswordManager.ViewModels
 {
     public class CredentialViewModel : ObservableRecipient
     {
+        #region Design time instance
+        private static readonly Lazy<CredentialViewModel> _lazy = new(GetDesignTimeVM);
+        public static CredentialViewModel DesignTimeInstance => _lazy.Value;
+
+        private static CredentialViewModel GetDesignTimeVM()
+        {
+            var fields = Credential.DefaultFields;
+            var model = new Credential()
+            {
+                Fields = fields
+            };
+            var vm = new CredentialViewModel(model);
+            return vm;
+        }
+        #endregion
+
         public Credential Model { get; }
 
-        public string Name => Model.Name;
-        public string Login => Model.Login;
-        public string Password => Model.Password;
-        public string Other => Model.Other;
-        public Uri SiteUri => Model.SiteUri;
+        public ObservableCollection<PassFieldViewModel> Fields { get; }
+
+        public string Name => Model.Fields["Name"].Value;
+
+        public string Login => Model.Fields["Login"].Value;
+
+        public string Password => Model.Fields["Password"].Value;
+
+        public string Other => Model.Fields["Other"].Value;
 
         public CredentialViewModel(Credential credential)
         {
-            Model = credential;
+            Model = credential ?? throw new ArgumentNullException(nameof(credential));
+            Fields = new ObservableCollection<PassFieldViewModel>(credential.Fields.Select(f => new PassFieldViewModel(f.Key, f.Value)));
         }
     }
 }

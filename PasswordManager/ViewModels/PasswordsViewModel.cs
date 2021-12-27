@@ -8,7 +8,6 @@ using PasswordManager.Models;
 using PasswordManager.Services;
 using PasswordManager.Views;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace PasswordManager.ViewModels
@@ -73,8 +72,7 @@ namespace PasswordManager.ViewModels
 
         private async Task AddCredentialAsync()
         {
-            var credential = new Credential();
-            var newCredentialVM = new CredentialViewModel(credential);
+            var newCredentialVM = new CredentialViewModel(new Credential());
             var newCredDialog = new NewCredentialsDialog
             {
                 DataContext = newCredentialVM

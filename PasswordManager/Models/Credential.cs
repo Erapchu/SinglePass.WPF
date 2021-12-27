@@ -6,21 +6,21 @@ namespace PasswordManager.Models
 {
     public class Credential
     {
-        public static Dictionary<string, PassField> DefaultFields => new()
+        public static List<PassField> DefaultFields => new()
         {
-            { "Name", new PassField() { IconKind = PackIconKind.Information } },
-            { "Login", new PassField() { IconKind = PackIconKind.Account } },
-            { "Password", new PassField() { IconKind = PackIconKind.Key } },
-            { "Other", new PassField() { IconKind = PackIconKind.InformationOutline } },
+            { new PassField() { Name = "Name", IconKind = PackIconKind.Information } },
+            { new PassField() { Name = "Login", IconKind = PackIconKind.Account } },
+            { new PassField() { Name = "Password", IconKind = PackIconKind.Key } },
+            { new PassField() { Name = "Other", IconKind = PackIconKind.InformationOutline } },
         };
 
         public Guid Id { get; set; }
-        public Dictionary<string, PassField> Fields { get; set; }
+        public List<PassField> Fields { get; set; }
 
         public Credential(bool useDefaultFields = true)
         {
             Id = Guid.NewGuid();
-            Fields = useDefaultFields ? DefaultFields : new Dictionary<string, PassField>();
+            Fields = useDefaultFields ? DefaultFields : new List<PassField>();
         }
     }
 }

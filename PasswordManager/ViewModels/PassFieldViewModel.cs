@@ -9,16 +9,15 @@ namespace PasswordManager.ViewModels
     {
         public PassField Model { get; }
 
-        private string _name;
         public string Name
         {
-            get => _name;
+            get => Model.Name;
             set
             {
-                if (_name == value)
+                if (Model.Name == value)
                     return;
 
-                _name = value;
+                Model.Name = value;
                 OnPropertyChanged();
             }
         }
@@ -49,9 +48,8 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        public PassFieldViewModel(string name, PassField field)
+        public PassFieldViewModel(PassField field)
         {
-            _name = name;
             Model = field ?? throw new ArgumentNullException(nameof(field));
         }
     }

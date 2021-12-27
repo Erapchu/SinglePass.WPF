@@ -38,5 +38,12 @@ namespace PasswordManager.ViewModels
             Model = credential ?? throw new ArgumentNullException(nameof(credential));
             Fields = new ObservableCollection<PassFieldViewModel>(credential.Fields.Select(f => new PassFieldViewModel(f)));
         }
+
+        internal CredentialViewModel Clone()
+        {
+            var cloneModel = Model.Clone();
+            var cloneVM = new CredentialViewModel(cloneModel);
+            return cloneVM;
+        }
     }
 }

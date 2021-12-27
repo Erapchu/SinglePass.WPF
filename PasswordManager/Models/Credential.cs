@@ -22,5 +22,17 @@ namespace PasswordManager.Models
             Id = Guid.NewGuid();
             Fields = useDefaultFields ? DefaultFields : new List<PassField>();
         }
+
+        internal Credential Clone()
+        {
+            var clone = new Credential(false);
+            clone.Id = Id;
+            foreach (var field in Fields)
+            {
+                var fieldClone = field.Clone();
+                clone.Fields.Add(fieldClone);
+            }
+            return clone;
+        }
     }
 }

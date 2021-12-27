@@ -84,7 +84,26 @@ namespace PasswordManager.ViewModels
             }
         }
 
+        private async Task EditCredentialAsync(CredentialViewModel cred)
+        {
+            var cloneVM = cred.Clone();
+            var newCredDialog = new NewCredentialsDialog
+            {
+                DataContext = cloneVM
+            };
+            var result = await DialogHost.Show(newCredDialog, MvvmHelper.MainWindowDialogName);
+            if (result is bool boolResult && boolResult)
+            {
+                var currentIndex = Credentials.IndexOf(cred);
+                Credentials.Remove(cred);
+                Credentials.Insert(currentIndex, cloneVM);
+            }
+        }
+
         private AsyncRelayCommand _addCredentialCommand;
         public AsyncRelayCommand AddCredentialCommand => _addCredentialCommand ??= new AsyncRelayCommand(AddCredentialAsync);
+
+        private AsyncRelayCommand<CredentialViewModel> _editCredentialCommand;
+        public AsyncRelayCommand<CredentialViewModel> EditCredentialCommand => _editCredentialCommand ??= new AsyncRelayCommand<CredentialViewModel>(EditCredentialAsync);
     }
 }

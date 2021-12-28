@@ -8,6 +8,7 @@ using PasswordManager.Helpers;
 using PasswordManager.Models;
 using PasswordManager.Services;
 using PasswordManager.Views;
+using PasswordManager.Views.MessageBox;
 using System;
 using System.Threading.Tasks;
 
@@ -107,10 +108,27 @@ namespace PasswordManager.ViewModels
             }
         }
 
+        private async Task DeleteCredentialAsync(CredentialViewModel cred)
+        {
+            var result = await MaterialMessageBox.ShowAsync(
+                "Delete credential?",
+                $"Name: {cred.NameFieldVM.Value}",
+                MaterialMessageBoxButtons.YesNo,
+                MvvmHelper.MainWindowDialogName,
+                PackIconKind.Delete);
+            if (result == MaterialDialogResult.Yes)
+            {
+                Credentials.Remove(cred);
+            }
+        }
+
         private AsyncRelayCommand _addCredentialCommand;
         public AsyncRelayCommand AddCredentialCommand => _addCredentialCommand ??= new AsyncRelayCommand(AddCredentialAsync);
 
         private AsyncRelayCommand<CredentialViewModel> _editCredentialCommand;
         public AsyncRelayCommand<CredentialViewModel> EditCredentialCommand => _editCredentialCommand ??= new AsyncRelayCommand<CredentialViewModel>(EditCredentialAsync);
+
+        private AsyncRelayCommand<CredentialViewModel> _deleteCredentialCommand;
+        public AsyncRelayCommand<CredentialViewModel> DeleteCredentialCommand => _deleteCredentialCommand ??= new AsyncRelayCommand<CredentialViewModel>(DeleteCredentialAsync);
     }
 }

@@ -32,6 +32,20 @@ namespace PasswordManager.ViewModels
         public PassFieldViewModel OtherFieldVM { get; }
         public ObservableCollection<PassFieldViewModel> AdditionalFields { get; }
 
+        private bool _isExpanded;
+        public bool IsExpanded
+        {
+            get => _isExpanded;
+            set
+            {
+                if (_isExpanded == value)
+                    return;
+
+                _isExpanded = value;
+                OnPropertyChanged();
+            }
+        }
+
         public CredentialViewModel(Credential credential)
         {
             Model = credential ?? throw new ArgumentNullException(nameof(credential));

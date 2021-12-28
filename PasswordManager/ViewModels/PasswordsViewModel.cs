@@ -28,7 +28,6 @@ namespace PasswordManager.ViewModels
         #endregion
 
         private readonly SettingsService _settingsService;
-        private readonly ILifetimeScope _lifetimeScope;
         private readonly ILogger _logger;
 
         private bool _loading;
@@ -49,10 +48,9 @@ namespace PasswordManager.ViewModels
 
         private PasswordsViewModel() { }
 
-        public PasswordsViewModel(ILifetimeScope lifetimeScope, SettingsService settingsService, ILogger logger)
+        public PasswordsViewModel(SettingsService settingsService, ILogger logger)
         {
             _settingsService = settingsService;
-            _lifetimeScope = lifetimeScope;
             _logger = logger;
         }
 

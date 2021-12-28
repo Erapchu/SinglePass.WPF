@@ -1,36 +1,35 @@
-﻿using MaterialDesignThemes.Wpf;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace PasswordManager.Models
 {
     public class Credential
     {
-        public static List<PassField> DefaultFields => new()
-        {
-            { new PassField() { Name = "Name", IconKind = PackIconKind.Information } },
-            { new PassField() { Name = "Login", IconKind = PackIconKind.Account } },
-            { new PassField() { Name = "Password", IconKind = PackIconKind.Key } },
-            { new PassField() { Name = "Other", IconKind = PackIconKind.InformationOutline } },
-        };
-
         public Guid Id { get; set; }
-        public List<PassField> Fields { get; set; }
+        public PassField NameField { get; set; }
+        public PassField LoginField { get; set; }
+        public PassField PasswordField { get; set; }
+        public PassField OtherField { get; set; }
+        public List<PassField> AdditionalFields { get; set; }
 
-        public Credential(bool useDefaultFields = true)
+        public Credential()
         {
             Id = Guid.NewGuid();
-            Fields = useDefaultFields ? DefaultFields : new List<PassField>();
+            NameField = new PassField() { Name = "Name" };
+            LoginField = new PassField() { Name = "Login" };
+            PasswordField = new PassField() { Name = "Password" };
+            OtherField = new PassField() { Name = "Other" };
+            AdditionalFields = new List<PassField>();
         }
 
         internal Credential Clone()
         {
-            var clone = new Credential(false);
+            var clone = new Credential();
             clone.Id = Id;
-            foreach (var field in Fields)
+            foreach (var field in AdditionalFields)
             {
                 var fieldClone = field.Clone();
-                clone.Fields.Add(fieldClone);
+                clone.AdditionalFields.Add(fieldClone);
             }
             return clone;
         }

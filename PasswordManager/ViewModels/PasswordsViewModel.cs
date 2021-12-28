@@ -2,6 +2,7 @@
 using MaterialDesignThemes.Wpf;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
+using NLog;
 using PasswordManager.Collections;
 using PasswordManager.Helpers;
 using PasswordManager.Models;
@@ -27,6 +28,7 @@ namespace PasswordManager.ViewModels
 
         private readonly SettingsService _settingsService;
         private readonly ILifetimeScope _lifetimeScope;
+        private readonly ILogger _logger;
 
         private bool _loading;
         public bool Loading
@@ -46,10 +48,11 @@ namespace PasswordManager.ViewModels
 
         private PasswordsViewModel() { }
 
-        public PasswordsViewModel(ILifetimeScope lifetimeScope, SettingsService settingsService)
+        public PasswordsViewModel(ILifetimeScope lifetimeScope, SettingsService settingsService, ILogger logger)
         {
             _settingsService = settingsService;
             _lifetimeScope = lifetimeScope;
+            _logger = logger;
         }
 
         public async Task LoadCredentialsAsync()
@@ -63,6 +66,10 @@ namespace PasswordManager.ViewModels
                 {
                     delayed.Add(new CredentialViewModel(cred));
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex);
             }
             finally
             {

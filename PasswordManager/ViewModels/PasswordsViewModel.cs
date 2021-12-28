@@ -79,26 +79,26 @@ namespace PasswordManager.ViewModels
 
         private async Task AddCredentialAsync()
         {
-            var newCredentialVM = new CredentialViewModel(new Credential());
-            var newCredDialog = new NewCredentialsDialog
+            var credentialVM = new CredentialViewModel(new Credential());
+            var credDialog = new CredentialsDialog
             {
-                DataContext = newCredentialVM
+                DataContext = credentialVM
             };
-            var result = await DialogHost.Show(newCredDialog, MvvmHelper.MainWindowDialogName);
+            var result = await DialogHost.Show(credDialog, MvvmHelper.MainWindowDialogName);
             if (result is bool boolResult && boolResult)
             {
-                Credentials.Add(newCredentialVM);
+                Credentials.Add(credentialVM);
             }
         }
 
         private async Task EditCredentialAsync(CredentialViewModel cred)
         {
             var cloneVM = cred.Clone();
-            var newCredDialog = new NewCredentialsDialog
+            var credDialog = new CredentialsDialog
             {
                 DataContext = cloneVM
             };
-            var result = await DialogHost.Show(newCredDialog, MvvmHelper.MainWindowDialogName);
+            var result = await DialogHost.Show(credDialog, MvvmHelper.MainWindowDialogName);
             if (result is bool boolResult && boolResult)
             {
                 var currentIndex = Credentials.IndexOf(cred);

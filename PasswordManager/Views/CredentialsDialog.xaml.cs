@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace PasswordManager.Views
 {
     /// <summary>
-    /// Interaction logic for NewCredentialsDialog.xaml
+    /// Interaction logic for CredentialsDialog.xaml
     /// </summary>
-    public partial class NewCredentialsDialog : UserControl
+    public partial class CredentialsDialog : UserControl
     {
-        public NewCredentialsDialog()
+        public CredentialsDialog()
         {
             InitializeComponent();
         }

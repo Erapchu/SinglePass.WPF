@@ -1,10 +1,11 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using PasswordManager.Models;
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace PasswordManager.ViewModels
 {
-    public class PassFieldViewModel : ObservableRecipient
+    public class PassFieldViewModel : ObservableValidator
     {
         public PassField Model { get; }
 
@@ -21,6 +22,7 @@ namespace PasswordManager.ViewModels
             }
         }
 
+        [Required(ErrorMessage = "Value shouldn't be empty.")]
         public string Value
         {
             get => Model.Value;
@@ -29,6 +31,7 @@ namespace PasswordManager.ViewModels
                 if (Model.Value == value)
                     return;
 
+                ValidateProperty(value);
                 Model.Value = value;
                 OnPropertyChanged();
             }
@@ -37,6 +40,11 @@ namespace PasswordManager.ViewModels
         public PassFieldViewModel(PassField field)
         {
             Model = field ?? throw new ArgumentNullException(nameof(field));
+        }
+
+        public void ForceValidate()
+        {
+            ValidateProperty(Value, nameof(Value));
         }
     }
 }

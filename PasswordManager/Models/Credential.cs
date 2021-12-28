@@ -15,7 +15,7 @@ namespace PasswordManager.Models
         public Credential()
         {
             Id = Guid.NewGuid();
-            NameField = new PassField() { Name = "Name" };
+            NameField = new PassField() { Name = "Name*" };
             LoginField = new PassField() { Name = "Login" };
             PasswordField = new PassField() { Name = "Password" };
             OtherField = new PassField() { Name = "Other" };

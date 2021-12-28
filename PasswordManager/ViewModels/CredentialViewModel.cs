@@ -1,9 +1,13 @@
-﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using MaterialDesignThemes.Wpf;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
+using Microsoft.Toolkit.Mvvm.Input;
+using PasswordManager.Helpers;
 using PasswordManager.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace PasswordManager.ViewModels
 {
@@ -62,5 +66,17 @@ namespace PasswordManager.ViewModels
             var cloneVM = new CredentialViewModel(cloneModel);
             return cloneVM;
         }
+
+        private void OkExecute(bool value)
+        {
+            NameFieldVM.ForceValidate();
+            if (NameFieldVM.HasErrors)
+                return;
+
+            DialogHost.Close(MvvmHelper.MainWindowDialogName, value);
+        }
+
+        private RelayCommand<bool> _okCommand;
+        public RelayCommand<bool> OkCommand => _okCommand ??= new RelayCommand<bool>(OkExecute);
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using PasswordManager.ViewModels;
+using System.Windows.Controls;
 
 namespace PasswordManager.Views
 {
@@ -10,6 +11,14 @@ namespace PasswordManager.Views
         public PasswordsControl()
         {
             InitializeComponent();
+        }
+
+        private void ListBox_CleanUpVirtualizedItem(object sender, CleanUpVirtualizedItemEventArgs e)
+        {
+            if (e.Value is CredentialViewModel credVM && credVM.IsExpanded)
+            {
+                e.Cancel = true;
+            }
         }
     }
 }

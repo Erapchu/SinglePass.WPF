@@ -1,12 +1,9 @@
-﻿using MaterialDesignThemes.Wpf;
-
-namespace PasswordManager.Models
+﻿namespace PasswordManager.Models
 {
     public class PassField
     {
         public string Name { get; set; }
         public string Value { get; set; }
-        public PackIconKind IconKind { get; set; }
 
         public PassField Clone()
         {
@@ -14,7 +11,6 @@ namespace PasswordManager.Models
             {
                 Name = Name,
                 Value = Value,
-                IconKind = IconKind
             };
             return clone;
         }

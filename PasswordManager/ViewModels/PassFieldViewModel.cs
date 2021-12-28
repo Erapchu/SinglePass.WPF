@@ -1,5 +1,4 @@
-﻿using MaterialDesignThemes.Wpf;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using PasswordManager.Models;
 using System;
 
@@ -31,19 +30,6 @@ namespace PasswordManager.ViewModels
                     return;
 
                 Model.Value = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public PackIconKind IconKind
-        {
-            get => Model.IconKind;
-            set
-            {
-                if (Model.IconKind == value)
-                    return;
-
-                Model.IconKind = value;
                 OnPropertyChanged();
             }
         }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using PasswordManager.Models;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
@@ -14,10 +15,10 @@ namespace PasswordManager.ViewModels
 
         private static CredentialViewModel GetDesignTimeVM()
         {
-            var fields = Credential.DefaultFields;
+            var additionalFields = new List<PassField>() { new PassField() { Name = "Design additional field", Value = "Test value" } };
             var model = new Credential()
             {
-                Fields = fields
+                AdditionalFields = additionalFields
             };
             var vm = new CredentialViewModel(model);
             return vm;
@@ -25,18 +26,34 @@ namespace PasswordManager.ViewModels
         #endregion
 
         public Credential Model { get; }
+        public PassFieldViewModel NameFieldVM { get; }
+        public PassFieldViewModel LoginFieldVM { get; }
+        public PassFieldViewModel PasswordFieldVM { get; }
+        public PassFieldViewModel OtherFieldVM { get; }
+        public ObservableCollection<PassFieldViewModel> AdditionalFields { get; }
 
-        public ObservableCollection<PassFieldViewModel> Fields { get; }
+        private bool _isExpanded;
+        public bool IsExpanded
+        {
+            get => _isExpanded;
+            set
+            {
+                if (_isExpanded == value)
+                    return;
 
-        public string Name => Model.Fields.FirstOrDefault(f => f.Name.Equals("Name")).Value;
-        public string Login => Model.Fields.FirstOrDefault(f => f.Name.Equals("Login")).Value;
-        public string Password => Model.Fields.FirstOrDefault(f => f.Name.Equals("Password")).Value;
-        public string Other => Model.Fields.FirstOrDefault(f => f.Name.Equals("Other")).Value;
+                _isExpanded = value;
+                OnPropertyChanged();
+            }
+        }
 
         public CredentialViewModel(Credential credential)
         {
             Model = credential ?? throw new ArgumentNullException(nameof(credential));
-            Fields = new ObservableCollection<PassFieldViewModel>(credential.Fields.Select(f => new PassFieldViewModel(f)));
+            NameFieldVM = new PassFieldViewModel(credential.NameField);
+            LoginFieldVM = new PassFieldViewModel(credential.LoginField);
+            PasswordFieldVM = new PassFieldViewModel(credential.PasswordField);
+            OtherFieldVM = new PassFieldViewModel(credential.OtherField);
+            AdditionalFields = new ObservableCollection<PassFieldViewModel>(credential.AdditionalFields.Select(f => new PassFieldViewModel(f)));
         }
 
         internal CredentialViewModel Clone()

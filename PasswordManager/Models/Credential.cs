@@ -26,6 +26,11 @@ namespace PasswordManager.Models
         {
             var clone = new Credential();
             clone.Id = Id;
+            clone.NameField = NameField.Clone();
+            clone.LoginField = LoginField.Clone();
+            clone.PasswordField = PasswordField.Clone();
+            clone.OtherField = OtherField.Clone();
+
             foreach (var field in AdditionalFields)
             {
                 var fieldClone = field.Clone();

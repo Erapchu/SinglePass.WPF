@@ -37,7 +37,7 @@ namespace PasswordManager.Services
                     var credentials = new List<Credential>();
                     try
                     {
-                        var pathToPasswordsFile = Constants.PathToPasswordsFile;
+                        var pathToPasswordsFile = Constants.PasswordsFilePath;
                         if (!File.Exists(pathToPasswordsFile))
                         {
                             // File is not exists yet
@@ -46,7 +46,7 @@ namespace PasswordManager.Services
 
                         var hashedPath = GetHashForPath(pathToPasswordsFile);
                         using var waitHandleLocker = EventWaitHandleLocker.MakeWithEventHandle(true, EventResetMode.AutoReset, hashedPath);
-                        using var fileStream = File.Open(Constants.PathToPasswordsFile, FileMode.Open, FileAccess.Read, FileShare.Read);
+                        using var fileStream = File.Open(Constants.PasswordsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                         using var streamReader = new StreamReader(fileStream);
                         using var jsonReader = new JsonTextReader(streamReader);
                         var serializer = JsonSerializer.Create(DefaultSerializerSettings);
@@ -85,7 +85,7 @@ namespace PasswordManager.Services
 
             await Task.Run(() =>
             {
-                var pathToPasswordsFile = Constants.PathToPasswordsFile;
+                var pathToPasswordsFile = Constants.PasswordsFilePath;
                 var hashedPath = GetHashForPath(pathToPasswordsFile);
                 using var waitHandleLocker = EventWaitHandleLocker.MakeWithEventHandle(true, EventResetMode.AutoReset, hashedPath);
                 using var fileStream = File.Open(pathToPasswordsFile, FileMode.Open, FileAccess.Write, FileShare.Write);

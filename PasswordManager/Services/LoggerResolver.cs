@@ -17,14 +17,14 @@ namespace PasswordManager.Services
             var config = LogManager.Configuration ?? new LoggingConfiguration();
             var loggerName = Constants.AppName;
             var fileTargetName = $"{loggerName} File Log Target";
-            var logsDirectoryPath = Constants.PathToLoggerFile;
+            var logsDirectoryPath = Constants.LoggerFilePath;
 
             var fileTarget = new NLog.Targets.FileTarget()
             {
                 ArchiveAboveSize = 30 * 1024 * 1024,
                 ArchiveDateFormat = "yyyyMMdd",
                 ArchiveEvery = NLog.Targets.FileArchivePeriod.Month,
-                ArchiveFileName = Path.Combine(logsDirectoryPath, "Archive", logsDirectoryPath),
+                ArchiveFileName = Path.Combine(Constants.LoggerDirectoryPath, "Archive", Constants.LoggerFileName),
                 ArchiveNumbering = NLog.Targets.ArchiveNumberingMode.DateAndSequence,
                 AutoFlush = true,
                 ConcurrentWrites = true,

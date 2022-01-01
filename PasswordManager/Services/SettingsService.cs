@@ -28,7 +28,7 @@ namespace PasswordManager.Services
             _logger = logger;
         }
 
-        public async Task<List<Credential>> LoadCredentialsAsync()
+        public async Task<List<Credential>> GetCredentialsAsync()
         {
             if (_credentialsList is null)
             {
@@ -46,7 +46,7 @@ namespace PasswordManager.Services
 
                         var hashedPath = GetHashForPath(pathToPasswordsFile);
                         using var waitHandleLocker = EventWaitHandleLocker.MakeWithEventHandle(true, EventResetMode.AutoReset, hashedPath);
-                        using var fileStream = File.Open(Constants.PasswordsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                        using var fileStream = File.Open(pathToPasswordsFile, FileMode.Open, FileAccess.Read, FileShare.Read);
                         using var streamReader = new StreamReader(fileStream);
                         using var jsonReader = new JsonTextReader(streamReader);
                         var serializer = JsonSerializer.Create(DefaultSerializerSettings);
@@ -88,7 +88,7 @@ namespace PasswordManager.Services
                 var pathToPasswordsFile = Constants.PasswordsFilePath;
                 var hashedPath = GetHashForPath(pathToPasswordsFile);
                 using var waitHandleLocker = EventWaitHandleLocker.MakeWithEventHandle(true, EventResetMode.AutoReset, hashedPath);
-                using var fileStream = File.Open(pathToPasswordsFile, FileMode.Open, FileAccess.Write, FileShare.Write);
+                using var fileStream = File.Open(pathToPasswordsFile, FileMode.Open, FileAccess.Write, FileShare.Read);
                 using var streamWriter = new StreamWriter(fileStream);
                 using var jsonWriter = new JsonTextWriter(streamWriter);
                 var serializer = JsonSerializer.Create(DefaultSerializerSettings);

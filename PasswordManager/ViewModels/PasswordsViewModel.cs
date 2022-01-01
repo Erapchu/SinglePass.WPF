@@ -59,7 +59,7 @@ namespace PasswordManager.ViewModels
             try
             {
                 Loading = true;
-                var credentials = await _settingsService.LoadCredentialsAsync();
+                var credentials = await _settingsService.GetCredentialsAsync();
                 using var delayed = Credentials.DelayNotifications();
                 foreach (var cred in credentials)
                 {

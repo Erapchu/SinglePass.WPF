@@ -38,14 +38,15 @@ namespace PasswordManager.Services
                     try
                     {
                         var pathToPasswordsFile = Constants.PasswordsFilePath;
+                        var hashedPath = GetHashForPath(pathToPasswordsFile);
+                        using var waitHandleLocker = EventWaitHandleLocker.MakeWithEventHandle(true, EventResetMode.AutoReset, hashedPath);
+
                         if (!File.Exists(pathToPasswordsFile))
                         {
                             // File is not exists yet
                             return credentials;
                         }
 
-                        var hashedPath = GetHashForPath(pathToPasswordsFile);
-                        using var waitHandleLocker = EventWaitHandleLocker.MakeWithEventHandle(true, EventResetMode.AutoReset, hashedPath);
                         using var fileStream = File.Open(pathToPasswordsFile, FileMode.Open, FileAccess.Read, FileShare.Read);
                         using var streamReader = new StreamReader(fileStream);
                         using var jsonReader = new JsonTextReader(streamReader);

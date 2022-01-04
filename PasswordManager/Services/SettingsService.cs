@@ -34,6 +34,7 @@ namespace PasswordManager.Services
             {
                 _credentialsList = await Task.Run(() =>
                 {
+                    _logger.Info("Credentials list is null, trying to load them...");
                     var credentials = new List<Credential>();
                     try
                     {
@@ -44,6 +45,7 @@ namespace PasswordManager.Services
                         if (!File.Exists(pathToPasswordsFile))
                         {
                             // File is not exists yet
+                            _logger.Info("File is not exists.");
                             return credentials;
                         }
 

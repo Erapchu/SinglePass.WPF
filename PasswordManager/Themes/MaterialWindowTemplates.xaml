@@ -246,7 +246,7 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="WindowState" Value="Maximized">
-                            <Setter TargetName="MainWindowBorder" Property="BorderThickness" Value="8" />
+                            <Setter TargetName="MainWindowBorder" Property="BorderThickness" Value="7" />
                             <Setter TargetName="MaximizeRestoreButton" Property="Content">
                                 <Setter.Value>
                                     <Path

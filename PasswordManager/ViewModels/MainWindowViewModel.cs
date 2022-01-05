@@ -1,5 +1,6 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
+using PasswordManager.Services;
 using System;
 using System.Threading.Tasks;
 
@@ -18,13 +19,16 @@ namespace PasswordManager.ViewModels
         }
         #endregion
 
+        private readonly SettingsService _settingsService;
+
         public PasswordsViewModel PasswordsViewModel { get; }
 
         private MainWindowViewModel() { }
 
-        public MainWindowViewModel(PasswordsViewModel passwordsViewModel)
+        public MainWindowViewModel(PasswordsViewModel passwordsViewModel, SettingsService settingsService)
         {
             PasswordsViewModel = passwordsViewModel;
+            _settingsService = settingsService;
         }
 
         private async Task LoadingAsync()

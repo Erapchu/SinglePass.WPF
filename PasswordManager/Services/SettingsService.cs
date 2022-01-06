@@ -199,7 +199,7 @@ namespace PasswordManager.Services
                 try
                 {
                     // Access to file
-                    using var fileStream = File.Open(pathToPasswordsFile, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
+                    using var fileStream = File.Open(pathToPasswordsFile, FileMode.Create, FileAccess.Write, FileShare.Read);
 
                     // Just to ensure
                     fileStream.Seek(0, SeekOrigin.Begin);

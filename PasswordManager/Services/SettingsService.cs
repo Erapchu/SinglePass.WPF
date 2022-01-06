@@ -21,13 +21,24 @@ namespace PasswordManager.Services
         });
         public JsonSerializerSettings DefaultSerializerSettings => _lazyDefaultSerializerSettings.Value;
 
+        private readonly object _credentialsLock = new object();
+
         private readonly ILogger _logger;
         private List<Credential> _credentials;
 
         private readonly string _key = "agddhethbqerthnmklutrasdcxzfgttr";
         private readonly string _iv = "rudhsaqyjsfhrwqs";
 
-        public List<Credential> Credentials => _credentials.ToList();
+        public List<Credential> Credentials
+        {
+            get
+            {
+                lock (_credentialsLock)
+                {
+                    return _credentials.ToList();
+                }
+            }
+        }
 
         public SettingsService(ILogger logger)
         {
@@ -104,7 +115,10 @@ namespace PasswordManager.Services
 
         public async Task AddCredential(Credential credential)
         {
-            _credentials.Add(credential);
+            lock (_credentialsLock)
+            {
+                _credentials.Add(credential);
+            }
 
             await SaveCredentialsAsync();
         }
@@ -136,7 +150,9 @@ namespace PasswordManager.Services
                     var keyBytes = Encoding.UTF8.GetBytes(_key);
                     var ivBytes = Encoding.UTF8.GetBytes(_iv);
 
-                    var jsonText = JsonConvert.SerializeObject(_credentials, DefaultSerializerSettings);
+                    // Get copy and serialize
+                    var credentials = Credentials;
+                    var jsonText = JsonConvert.SerializeObject(credentials, DefaultSerializerSettings);
                     var encryptedBytes = AesCryptographyHelper.EncryptStringToBytes(jsonText, keyBytes, ivBytes);
 
                     await fileStream.WriteAsync(encryptedBytes);

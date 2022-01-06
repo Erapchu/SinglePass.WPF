@@ -102,10 +102,10 @@ namespace PasswordManager.ViewModels
             var result = await DialogHost.Show(credDialog, MvvmHelper.MainWindowDialogName);
             if (result is bool boolResult && boolResult)
             {
+                await _settingsService.EditCredential(cloneVM.Model);
                 var currentIndex = Credentials.IndexOf(cred);
                 Credentials.Remove(cred);
                 Credentials.Insert(currentIndex, cloneVM);
-
             }
         }
 
@@ -119,6 +119,7 @@ namespace PasswordManager.ViewModels
                 PackIconKind.Delete);
             if (result == MaterialDialogResult.Yes)
             {
+                await _settingsService.DeleteCredential(cred.Model);
                 Credentials.Remove(cred);
             }
         }

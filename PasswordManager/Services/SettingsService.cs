@@ -51,7 +51,7 @@ namespace PasswordManager.Services
         {
             _credentials = await Task.Run(async () =>
             {
-                _logger.Info("Credentials list is empty, trying to load from file...");
+                _logger.Info("Loading credentials from file...");
                 var credentials = new List<Credential>();
                 try
                 {
@@ -115,9 +115,66 @@ namespace PasswordManager.Services
 
         public async Task AddCredential(Credential credential)
         {
+            if (credential is null)
+            {
+                throw new ArgumentNullException(nameof(credential));
+            }
+
             lock (_credentialsLock)
             {
+                var index = _credentials.IndexOf(credential);
+                if (index >= 0)
+                {
+                    // Shouldn't be
+                    _logger.Warn("Duplicate credential found.");
+                    return;
+                }
+
                 _credentials.Add(credential);
+            }
+
+            await SaveCredentialsAsync();
+        }
+
+        public async Task EditCredential(Credential credential)
+        {
+            if (credential is null)
+            {
+                throw new ArgumentNullException(nameof(credential));
+            }
+
+            lock (_credentialsLock)
+            {
+                var index = _credentials.IndexOf(credential);
+                if (index < 0)
+                {
+                    _logger.Warn("Prevented attempt to edit non-existed credential.");
+                    return;
+                }
+
+                _credentials[index] = credential;
+            }
+
+            await SaveCredentialsAsync();
+        }
+
+        public async Task DeleteCredential(Credential credential)
+        {
+            if (credential is null)
+            {
+                throw new ArgumentNullException(nameof(credential));
+            }
+
+            lock (_credentialsLock)
+            {
+                var index = _credentials.IndexOf(credential);
+                if (index < 0)
+                {
+                    _logger.Warn("Prevented attempt to delete non-existed credential.");
+                    return;
+                }
+
+                _credentials.RemoveAt(index);
             }
 
             await SaveCredentialsAsync();

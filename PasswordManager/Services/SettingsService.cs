@@ -6,6 +6,7 @@ using PasswordManager.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,88 +22,132 @@ namespace PasswordManager.Services
         public JsonSerializerSettings DefaultSerializerSettings => _lazyDefaultSerializerSettings.Value;
 
         private readonly ILogger _logger;
-        private List<Credential> _credentialsList;
+        private List<Credential> _credentials;
+
+        private readonly string _key = "agddhethbqerthnmklutrasdcxzfgttr";
+        private readonly string _iv = "rudhsaqyjsfhrwqs";
+
+        public List<Credential> Credentials => _credentials.ToList();
 
         public SettingsService(ILogger logger)
         {
             _logger = logger;
+
+            _credentials = new List<Credential>();
         }
 
-        public async Task<List<Credential>> GetCredentialsAsync()
+        public async Task LoadCredentialsAsync()
         {
-            if (_credentialsList is null)
+            _credentials = await Task.Run(async () =>
             {
-                _credentialsList = await Task.Run(() =>
+                _logger.Info("Credentials list is empty, trying to load from file...");
+                var credentials = new List<Credential>();
+                try
                 {
-                    _logger.Info("Credentials list is null, trying to load them...");
-                    var credentials = new List<Credential>();
+                    // Lock access to file for multithreading environment
+                    var pathToPasswordsFile = Constants.PasswordsFilePath;
+                    var hashedPath = GetHashForPath(pathToPasswordsFile);
+                    using var waitHandleLocker = EventWaitHandleLocker.MakeWithEventHandle(true, EventResetMode.AutoReset, hashedPath);
+
+                    if (!File.Exists(pathToPasswordsFile))
+                    {
+                        // File is not exists yet
+                        _logger.Info("File is not exists.");
+                        return credentials;
+                    }
+
+                    // Access to file
+                    var bufferSize = 4096;
+                    using var fileStream = new FileStream(pathToPasswordsFile, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, true);
+                    // Just to ensure
+                    fileStream.Seek(0, SeekOrigin.Begin);
+                    var buffer = new byte[bufferSize];
+                    var encryptedBytes = Array.Empty<byte>();
+                    using (var ms = new MemoryStream())
+                    {
+                        int bytesRead = 0;
+                        while ((bytesRead = await fileStream.ReadAsync(buffer)) > 0)
+                        {
+                            await ms.WriteAsync(buffer.AsMemory(0, bytesRead));
+                        }
+                        encryptedBytes = ms.ToArray();
+                    }
+
+                    var keyBytes = Encoding.UTF8.GetBytes(_key);
+                    var ivBytes = Encoding.UTF8.GetBytes(_iv);
+
+                    var jsonText = AesCryptographyHelper.DecryptStringFromBytes(encryptedBytes, keyBytes, ivBytes);
+
                     try
                     {
-                        var pathToPasswordsFile = Constants.PasswordsFilePath;
-                        var hashedPath = GetHashForPath(pathToPasswordsFile);
-                        using var waitHandleLocker = EventWaitHandleLocker.MakeWithEventHandle(true, EventResetMode.AutoReset, hashedPath);
-
-                        if (!File.Exists(pathToPasswordsFile))
-                        {
-                            // File is not exists yet
-                            _logger.Info("File is not exists.");
-                            return credentials;
-                        }
-
-                        using var fileStream = File.Open(pathToPasswordsFile, FileMode.Open, FileAccess.Read, FileShare.Read);
-                        using var streamReader = new StreamReader(fileStream);
-                        using var jsonReader = new JsonTextReader(streamReader);
-                        var serializer = JsonSerializer.Create(DefaultSerializerSettings);
-
-                        try
-                        {
-                            credentials = serializer.Deserialize<List<Credential>>(jsonReader);
-                        }
-                        catch (JsonException jsex)
-                        {
-                            _logger.Warn("Failed to deserialize credentials settings file content due to exception: {0}", jsex);
-
-                            if (credentials is null)
-                            {
-                                credentials = new();
-                                _logger.Info("Using default settings");
-                            }
-                        }
+                        credentials = JsonConvert.DeserializeObject<List<Credential>>(jsonText, DefaultSerializerSettings);
                     }
-                    catch (Exception ex)
+                    catch (JsonException jsex)
                     {
-                        _logger.Error(ex);
+                        _logger.Warn("Failed to deserialize credentials settings file content due to exception: {0}", jsex);
+
+                        if (credentials is null)
+                        {
+                            _logger.Info("Using empty credentials list");
+                            credentials = new();
+                        }
                     }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex);
+                }
 
-                    return credentials;
-                });
-            }
+                return credentials;
+            });
+        }
 
-            return _credentialsList;
+        public async Task AddCredential(Credential credential)
+        {
+            _credentials.Add(credential);
+
+            await SaveCredentialsAsync();
         }
 
         public async Task SaveCredentialsAsync()
         {
-            if (_credentialsList is null)
-                return;
-
-            await Task.Run(() =>
+            await Task.Run(async () =>
             {
+                // Lock access to file for multithreading environment
                 var pathToPasswordsFile = Constants.PasswordsFilePath;
                 var hashedPath = GetHashForPath(pathToPasswordsFile);
+
+                var appdataDir = new DirectoryInfo(Constants.RoamingAppDataDirectoryPath);
+                if (!appdataDir.Exists)
+                {
+                    appdataDir.Create();
+                }
+
                 using var waitHandleLocker = EventWaitHandleLocker.MakeWithEventHandle(true, EventResetMode.AutoReset, hashedPath);
-                using var fileStream = File.Open(pathToPasswordsFile, FileMode.Open, FileAccess.Write, FileShare.Read);
-                using var streamWriter = new StreamWriter(fileStream);
-                using var jsonWriter = new JsonTextWriter(streamWriter);
-                var serializer = JsonSerializer.Create(DefaultSerializerSettings);
 
                 try
                 {
-                    serializer.Serialize(jsonWriter, _credentialsList);
+                    // Access to file
+                    using var fileStream = File.Open(pathToPasswordsFile, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
+
+                    // Just to ensure
+                    fileStream.Seek(0, SeekOrigin.Begin);
+
+                    var keyBytes = Encoding.UTF8.GetBytes(_key);
+                    var ivBytes = Encoding.UTF8.GetBytes(_iv);
+
+                    var jsonText = JsonConvert.SerializeObject(_credentials, DefaultSerializerSettings);
+                    var encryptedBytes = AesCryptographyHelper.EncryptStringToBytes(jsonText, keyBytes, ivBytes);
+
+                    await fileStream.WriteAsync(encryptedBytes);
                 }
                 catch (JsonException jsex)
                 {
                     _logger.Warn("Failed to serialize credentials settings to file due to exception: {0}", jsex);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex);
                 }
             });
         }

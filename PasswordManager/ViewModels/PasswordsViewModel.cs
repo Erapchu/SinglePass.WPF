@@ -59,7 +59,8 @@ namespace PasswordManager.ViewModels
             try
             {
                 Loading = true;
-                var credentials = await _settingsService.GetCredentialsAsync();
+                await _settingsService.LoadCredentialsAsync();
+                var credentials = _settingsService.Credentials;
                 using var delayed = Credentials.DelayNotifications();
                 foreach (var cred in credentials)
                 {
@@ -78,7 +79,8 @@ namespace PasswordManager.ViewModels
 
         private async Task AddCredentialAsync()
         {
-            var credentialVM = new CredentialViewModel(new Credential());
+            var cred = new Credential();
+            var credentialVM = new CredentialViewModel(cred);
             var credDialog = new CredentialsDialog
             {
                 DataContext = credentialVM
@@ -87,6 +89,7 @@ namespace PasswordManager.ViewModels
             if (result is bool boolResult && boolResult)
             {
                 Credentials.Add(credentialVM);
+                await _settingsService.AddCredential(cred);
             }
         }
 

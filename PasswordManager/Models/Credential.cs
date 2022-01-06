@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace PasswordManager.Models
 {
+    [DebuggerDisplay("{NameField.Value}")]
     public class Credential
     {
         public Guid Id { get; set; }

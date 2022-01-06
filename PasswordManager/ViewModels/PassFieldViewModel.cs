@@ -31,7 +31,6 @@ namespace PasswordManager.ViewModels
                 if (Model.Value == value)
                     return;
 
-                ValidateProperty(value);
                 Model.Value = value;
                 OnPropertyChanged();
             }
@@ -42,7 +41,7 @@ namespace PasswordManager.ViewModels
             Model = field ?? throw new ArgumentNullException(nameof(field));
         }
 
-        public void ForceValidate()
+        public void ValidateValue()
         {
             ValidateProperty(Value, nameof(Value));
         }

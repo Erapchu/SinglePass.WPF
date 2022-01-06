@@ -38,5 +38,16 @@ namespace PasswordManager.Models
             }
             return clone;
         }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Credential credential &&
+                   Id.Equals(credential.Id);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Id);
+        }
     }
 }

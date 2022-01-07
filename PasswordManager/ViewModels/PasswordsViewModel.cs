@@ -92,9 +92,9 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        private async Task EditCredentialAsync(CredentialViewModel cred)
+        private async Task EditCredentialAsync(CredentialViewModel credVM)
         {
-            var cloneVM = cred.Clone();
+            var cloneVM = credVM.Clone();
             var credDialog = new CredentialsDialog
             {
                 DataContext = cloneVM
@@ -103,24 +103,24 @@ namespace PasswordManager.ViewModels
             if (result is bool boolResult && boolResult)
             {
                 await _settingsService.EditCredential(cloneVM.Model);
-                var currentIndex = Credentials.IndexOf(cred);
-                Credentials.Remove(cred);
+                var currentIndex = Credentials.IndexOf(credVM);
+                Credentials.Remove(credVM);
                 Credentials.Insert(currentIndex, cloneVM);
             }
         }
 
-        private async Task DeleteCredentialAsync(CredentialViewModel cred)
+        private async Task DeleteCredentialAsync(CredentialViewModel credVM)
         {
             var result = await MaterialMessageBox.ShowAsync(
                 "Delete credential?",
-                $"Name: {cred.NameFieldVM.Value}",
+                $"Name: {credVM.NameFieldVM.Value}",
                 MaterialMessageBoxButtons.YesNo,
                 MvvmHelper.MainWindowDialogName,
                 PackIconKind.Delete);
             if (result == MaterialDialogResult.Yes)
             {
-                await _settingsService.DeleteCredential(cred.Model);
-                Credentials.Remove(cred);
+                await _settingsService.DeleteCredential(credVM.Model);
+                Credentials.Remove(credVM);
             }
         }
 

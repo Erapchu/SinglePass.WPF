@@ -6,6 +6,11 @@ namespace PasswordManager.Helpers
 {
     public static class AesCryptographyHelper
     {
+        /// <summary>
+        /// Length of IV vector for encryption/decryption.
+        /// </summary>
+        public const int IVLength = 16;
+
         public static byte[] EncryptStringToBytes(string plainText, byte[] key, byte[] IV)
         {
             // Check arguments.

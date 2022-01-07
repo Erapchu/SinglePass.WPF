@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,7 +28,6 @@ namespace PasswordManager.Services
         private List<Credential> _credentials;
 
         private readonly string _key = "agddhethbqerthnmklutrasdcxzfgttr";
-        private readonly string _iv = "rudhsaqyjsfhrwqs";
 
         public List<Credential> Credentials
         {
@@ -49,7 +49,7 @@ namespace PasswordManager.Services
 
         public async Task LoadCredentialsAsync()
         {
-            _credentials = await Task.Run(async () =>
+            _credentials = await Task.Run(() =>
             {
                 _logger.Info("Loading credentials from file...");
                 var credentials = new List<Credential>();
@@ -72,20 +72,15 @@ namespace PasswordManager.Services
                     using var fileStream = new FileStream(pathToPasswordsFile, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, true);
                     // Just to ensure
                     fileStream.Seek(0, SeekOrigin.Begin);
-                    var buffer = new byte[bufferSize];
-                    var encryptedBytes = Array.Empty<byte>();
-                    using (var ms = new MemoryStream())
-                    {
-                        int bytesRead = 0;
-                        while ((bytesRead = await fileStream.ReadAsync(buffer)) > 0)
-                        {
-                            await ms.WriteAsync(buffer.AsMemory(0, bytesRead));
-                        }
-                        encryptedBytes = ms.ToArray();
-                    }
+
+                    using var br = new BinaryReader(fileStream);
+                    var ivLength = AesCryptographyHelper.IVLength;
+                    var ivBytes = new byte[ivLength];
+                    br.Read(ivBytes);
+                    var encryptedBytes = new byte[fileStream.Length - ivLength];
+                    br.Read(encryptedBytes);
 
                     var keyBytes = Encoding.UTF8.GetBytes(_key);
-                    var ivBytes = Encoding.UTF8.GetBytes(_iv);
 
                     var jsonText = AesCryptographyHelper.DecryptStringFromBytes(encryptedBytes, keyBytes, ivBytes);
 
@@ -182,7 +177,7 @@ namespace PasswordManager.Services
 
         public async Task SaveCredentialsAsync()
         {
-            await Task.Run(async () =>
+            await Task.Run(() =>
             {
                 // Lock access to file for multithreading environment
                 var pathToPasswordsFile = Constants.PasswordsFilePath;
@@ -205,14 +200,19 @@ namespace PasswordManager.Services
                     fileStream.Seek(0, SeekOrigin.Begin);
 
                     var keyBytes = Encoding.UTF8.GetBytes(_key);
-                    var ivBytes = Encoding.UTF8.GetBytes(_iv);
+
+                    // Generate new IV for each new saving
+                    using var aesObj = Aes.Create();
+                    var ivBytes = aesObj.IV;
 
                     // Get copy and serialize
                     var credentials = Credentials;
                     var jsonText = JsonConvert.SerializeObject(credentials, DefaultSerializerSettings);
                     var encryptedBytes = AesCryptographyHelper.EncryptStringToBytes(jsonText, keyBytes, ivBytes);
 
-                    await fileStream.WriteAsync(encryptedBytes);
+                    using var bw = new BinaryWriter(fileStream);
+                    bw.Write(ivBytes);
+                    bw.Write(encryptedBytes);
                 }
                 catch (JsonException jsex)
                 {

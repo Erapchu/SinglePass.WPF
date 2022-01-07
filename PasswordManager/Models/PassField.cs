@@ -1,5 +1,8 @@
-﻿namespace PasswordManager.Models
+﻿using System.Diagnostics;
+
+namespace PasswordManager.Models
 {
+    [DebuggerDisplay("{Name} - {Value}")]
     public class PassField
     {
         public string Name { get; set; }

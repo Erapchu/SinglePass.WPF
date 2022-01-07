@@ -60,5 +60,10 @@ namespace PasswordManager
 
             _container = container.Build();
         }
+
+        private void Application_Exit(object sender, ExitEventArgs e)
+        {
+            // Save last window settings
+        }
     }
 }

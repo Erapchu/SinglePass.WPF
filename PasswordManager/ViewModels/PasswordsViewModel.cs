@@ -59,7 +59,8 @@ namespace PasswordManager.ViewModels
             try
             {
                 Loading = true;
-                var credentials = await _settingsService.LoadCredentialsAsync();
+                await _settingsService.LoadCredentialsAsync();
+                var credentials = _settingsService.Credentials;
                 using var delayed = Credentials.DelayNotifications();
                 foreach (var cred in credentials)
                 {
@@ -86,13 +87,14 @@ namespace PasswordManager.ViewModels
             var result = await DialogHost.Show(credDialog, MvvmHelper.MainWindowDialogName);
             if (result is bool boolResult && boolResult)
             {
+                await _settingsService.AddCredential(credentialVM.Model);
                 Credentials.Add(credentialVM);
             }
         }
 
-        private async Task EditCredentialAsync(CredentialViewModel cred)
+        private async Task EditCredentialAsync(CredentialViewModel credVM)
         {
-            var cloneVM = cred.Clone();
+            var cloneVM = credVM.Clone();
             var credDialog = new CredentialsDialog
             {
                 DataContext = cloneVM
@@ -100,23 +102,25 @@ namespace PasswordManager.ViewModels
             var result = await DialogHost.Show(credDialog, MvvmHelper.MainWindowDialogName);
             if (result is bool boolResult && boolResult)
             {
-                var currentIndex = Credentials.IndexOf(cred);
-                Credentials.Remove(cred);
+                await _settingsService.EditCredential(cloneVM.Model);
+                var currentIndex = Credentials.IndexOf(credVM);
+                Credentials.Remove(credVM);
                 Credentials.Insert(currentIndex, cloneVM);
             }
         }
 
-        private async Task DeleteCredentialAsync(CredentialViewModel cred)
+        private async Task DeleteCredentialAsync(CredentialViewModel credVM)
         {
             var result = await MaterialMessageBox.ShowAsync(
                 "Delete credential?",
-                $"Name: {cred.NameFieldVM.Value}",
+                $"Name: {credVM.NameFieldVM.Value}",
                 MaterialMessageBoxButtons.YesNo,
                 MvvmHelper.MainWindowDialogName,
                 PackIconKind.Delete);
             if (result == MaterialDialogResult.Yes)
             {
-                Credentials.Remove(cred);
+                await _settingsService.DeleteCredential(credVM.Model);
+                Credentials.Remove(credVM);
             }
         }
 

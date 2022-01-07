@@ -69,7 +69,7 @@ namespace PasswordManager.ViewModels
 
         private void OkExecute(bool value)
         {
-            NameFieldVM.ForceValidate();
+            NameFieldVM.ValidateValue();
             if (NameFieldVM.HasErrors)
                 return;
 

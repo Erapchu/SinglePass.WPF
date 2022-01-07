@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace PasswordManager.Models
 {
+    [DebuggerDisplay("{NameField.Value}")]
     public class Credential
     {
         public Guid Id { get; set; }
@@ -37,6 +39,17 @@ namespace PasswordManager.Models
                 clone.AdditionalFields.Add(fieldClone);
             }
             return clone;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Credential credential &&
+                   Id.Equals(credential.Id);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Id);
         }
     }
 }

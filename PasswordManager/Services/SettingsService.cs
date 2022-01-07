@@ -68,8 +68,7 @@ namespace PasswordManager.Services
                     }
 
                     // Access to file
-                    var bufferSize = 4096;
-                    using var fileStream = new FileStream(pathToPasswordsFile, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, true);
+                    using var fileStream = new FileStream(pathToPasswordsFile, FileMode.Open, FileAccess.Read, FileShare.Read);
                     // Just to ensure
                     fileStream.Seek(0, SeekOrigin.Begin);
 

@@ -67,6 +67,7 @@
                                 Text="Settings" />
                         </StackPanel>
                     </TabItem.Header>
+                    <local:SettingsControl DataContext="{Binding SettingsViewModel, Mode=OneTime}"/>
                 </TabItem>
             </TabControl>
         </Grid>

@@ -10,10 +10,11 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <materialDesign:BundledTheme
+                <materialDesign:BundledTheme />
+                <!--<materialDesign:BundledTheme
                     BaseTheme="Light"
                     PrimaryColor="Blue"
-                    SecondaryColor="Yellow" />
+                    SecondaryColor="Yellow" />-->
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

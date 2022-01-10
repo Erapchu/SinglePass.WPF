@@ -22,12 +22,17 @@ namespace PasswordManager.ViewModels
         private readonly SettingsService _settingsService;
 
         public PasswordsViewModel PasswordsViewModel { get; }
+        public SettingsViewModel SettingsViewModel { get; }
 
         private MainWindowViewModel() { }
 
-        public MainWindowViewModel(PasswordsViewModel passwordsViewModel, SettingsService settingsService)
+        public MainWindowViewModel(
+            PasswordsViewModel passwordsViewModel,
+            SettingsService settingsService,
+            SettingsViewModel settingsViewModel)
         {
             PasswordsViewModel = passwordsViewModel;
+            SettingsViewModel = settingsViewModel;
             _settingsService = settingsService;
         }
 

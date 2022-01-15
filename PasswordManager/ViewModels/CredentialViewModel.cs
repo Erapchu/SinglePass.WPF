@@ -42,12 +42,16 @@ namespace PasswordManager.ViewModels
             get => _isExpanded;
             set
             {
-                if (_isExpanded == value)
-                    return;
-
-                _isExpanded = value;
-                OnPropertyChanged();
+                SetProperty(ref _isExpanded, value);
+                SetProperty(ref _passwordVisible, false, nameof(PasswordVisible));
             }
+        }
+
+        private bool _passwordVisible;
+        public bool PasswordVisible
+        {
+            get => _passwordVisible;
+            set => SetProperty(ref _passwordVisible, value);
         }
 
         public CredentialViewModel(Credential credential)

@@ -88,9 +88,10 @@ namespace PasswordManager.ViewModels
         private async Task AddCredentialAsync()
         {
             var credentialVM = new CredentialViewModel(new Credential());
+            var credDialogVm = new CredentialsDialogViewModel(credentialVM);
             var credDialog = new CredentialsDialog
             {
-                DataContext = credentialVM
+                DataContext = credDialogVm
             };
             var result = await DialogHost.Show(credDialog, MvvmHelper.MainWindowDialogName);
             if (result is bool boolResult && boolResult)
@@ -103,9 +104,10 @@ namespace PasswordManager.ViewModels
         private async Task EditCredentialAsync(CredentialViewModel credVM)
         {
             var cloneVM = credVM.Clone();
+            var credDialogVm = new CredentialsDialogViewModel(cloneVM);
             var credDialog = new CredentialsDialog
             {
-                DataContext = cloneVM
+                DataContext = credDialogVm
             };
             var result = await DialogHost.Show(credDialog, MvvmHelper.MainWindowDialogName);
             if (result is bool boolResult && boolResult)

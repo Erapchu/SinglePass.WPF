@@ -134,6 +134,11 @@ namespace PasswordManager.ViewModels
             }
         }
 
+        private void CopyToClipboard(string data)
+        {
+            System.Windows.Clipboard.SetText(data);
+        }
+
         private AsyncRelayCommand _addCredentialCommand;
         public AsyncRelayCommand AddCredentialCommand => _addCredentialCommand ??= new AsyncRelayCommand(AddCredentialAsync);
 
@@ -142,5 +147,8 @@ namespace PasswordManager.ViewModels
 
         private AsyncRelayCommand<CredentialViewModel> _deleteCredentialCommand;
         public AsyncRelayCommand<CredentialViewModel> DeleteCredentialCommand => _deleteCredentialCommand ??= new AsyncRelayCommand<CredentialViewModel>(DeleteCredentialAsync);
+
+        private RelayCommand<string> _copyToClipboardCommand;
+        public RelayCommand<string> CopyToClipboardCommand => _copyToClipboardCommand ??= new RelayCommand<string>(CopyToClipboard);
     }
 }

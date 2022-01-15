@@ -23,6 +23,14 @@ namespace PasswordManager.ViewModels
         private static PasswordsViewModel GetDesignTimeVM()
         {
             var vm = new PasswordsViewModel();
+            var cred = new Credential();
+            cred.NameField.Value = "Test";
+            cred.LoginField.Value = "TestLogin";
+            cred.PasswordField.Value = "TestPass";
+            cred.OtherField.Value = "TestOther";
+            var credVm = new CredentialViewModel(cred);
+            credVm.IsExpanded = true;
+            vm.Credentials.Add(credVm);
             return vm;
         }
         #endregion

@@ -136,7 +136,17 @@ namespace PasswordManager.ViewModels
 
         private void CopyToClipboard(string data)
         {
-            System.Windows.Clipboard.SetText(data);
+            if (string.IsNullOrWhiteSpace(data))
+                return;
+
+            try
+            {
+                System.Windows.Clipboard.SetText(data);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex);
+            }
         }
 
         private AsyncRelayCommand _addCredentialCommand;

@@ -23,6 +23,14 @@ namespace PasswordManager.ViewModels
         private static PasswordsViewModel GetDesignTimeVM()
         {
             var vm = new PasswordsViewModel();
+            var cred = new Credential();
+            cred.NameField.Value = "Test";
+            cred.LoginField.Value = "TestLogin";
+            cred.PasswordField.Value = "TestPass";
+            cred.OtherField.Value = "TestOther";
+            var credVm = new CredentialViewModel(cred);
+            credVm.IsExpanded = true;
+            vm.Credentials.Add(credVm);
             return vm;
         }
         #endregion
@@ -80,9 +88,10 @@ namespace PasswordManager.ViewModels
         private async Task AddCredentialAsync()
         {
             var credentialVM = new CredentialViewModel(new Credential());
+            var credDialogVm = new CredentialsDialogViewModel(credentialVM);
             var credDialog = new CredentialsDialog
             {
-                DataContext = credentialVM
+                DataContext = credDialogVm
             };
             var result = await DialogHost.Show(credDialog, MvvmHelper.MainWindowDialogName);
             if (result is bool boolResult && boolResult)
@@ -95,9 +104,10 @@ namespace PasswordManager.ViewModels
         private async Task EditCredentialAsync(CredentialViewModel credVM)
         {
             var cloneVM = credVM.Clone();
+            var credDialogVm = new CredentialsDialogViewModel(cloneVM);
             var credDialog = new CredentialsDialog
             {
-                DataContext = cloneVM
+                DataContext = credDialogVm
             };
             var result = await DialogHost.Show(credDialog, MvvmHelper.MainWindowDialogName);
             if (result is bool boolResult && boolResult)
@@ -124,6 +134,21 @@ namespace PasswordManager.ViewModels
             }
         }
 
+        private void CopyToClipboard(string data)
+        {
+            if (string.IsNullOrWhiteSpace(data))
+                return;
+
+            try
+            {
+                System.Windows.Clipboard.SetText(data);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex);
+            }
+        }
+
         private AsyncRelayCommand _addCredentialCommand;
         public AsyncRelayCommand AddCredentialCommand => _addCredentialCommand ??= new AsyncRelayCommand(AddCredentialAsync);
 
@@ -132,5 +157,8 @@ namespace PasswordManager.ViewModels
 
         private AsyncRelayCommand<CredentialViewModel> _deleteCredentialCommand;
         public AsyncRelayCommand<CredentialViewModel> DeleteCredentialCommand => _deleteCredentialCommand ??= new AsyncRelayCommand<CredentialViewModel>(DeleteCredentialAsync);
+
+        private RelayCommand<string> _copyToClipboardCommand;
+        public RelayCommand<string> CopyToClipboardCommand => _copyToClipboardCommand ??= new RelayCommand<string>(CopyToClipboard);
     }
 }

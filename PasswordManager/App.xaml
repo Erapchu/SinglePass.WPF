@@ -3,17 +3,18 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="clr-namespace:PasswordManager"
-    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
     Exit="Application_Exit"
     ShutdownMode="OnLastWindowClose"
     Startup="Application_Startup">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <materialDesign:BundledTheme
+                <md:BundledTheme />
+                <!--<md:BundledTheme
                     BaseTheme="Light"
                     PrimaryColor="Blue"
-                    SecondaryColor="Yellow" />
+                    SecondaryColor="Yellow" />-->
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

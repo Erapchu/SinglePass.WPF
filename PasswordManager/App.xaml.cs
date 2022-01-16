@@ -55,7 +55,9 @@ namespace PasswordManager
             container.RegisterType<MainWindowViewModel>().InstancePerLifetimeScope();
             container.RegisterType<SettingsService>().InstancePerLifetimeScope();
             container.RegisterType<PasswordsViewModel>().InstancePerLifetimeScope();
-
+            container.RegisterType<SettingsViewModel>().InstancePerLifetimeScope();
+            
+            container.RegisterType<ThemeService>().SingleInstance();
             container.Register(LoggerResolver.GetLogger).SingleInstance();
 
             _container = container.Build();

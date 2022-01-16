@@ -42,12 +42,16 @@ namespace PasswordManager.ViewModels
             get => _isExpanded;
             set
             {
-                if (_isExpanded == value)
-                    return;
-
-                _isExpanded = value;
-                OnPropertyChanged();
+                SetProperty(ref _isExpanded, value);
+                SetProperty(ref _passwordVisible, false, nameof(PasswordVisible));
             }
+        }
+
+        private bool _passwordVisible;
+        public bool PasswordVisible
+        {
+            get => _passwordVisible;
+            set => SetProperty(ref _passwordVisible, value);
         }
 
         public CredentialViewModel(Credential credential)
@@ -63,20 +67,12 @@ namespace PasswordManager.ViewModels
         internal CredentialViewModel Clone()
         {
             var cloneModel = Model.Clone();
-            var cloneVM = new CredentialViewModel(cloneModel);
+            var cloneVM = new CredentialViewModel(cloneModel)
+            {
+                _isExpanded = _isExpanded,
+                _passwordVisible = _passwordVisible,
+            };
             return cloneVM;
         }
-
-        private void OkExecute(bool value)
-        {
-            NameFieldVM.ValidateValue();
-            if (NameFieldVM.HasErrors)
-                return;
-
-            DialogHost.Close(MvvmHelper.MainWindowDialogName, value);
-        }
-
-        private RelayCommand<bool> _okCommand;
-        public RelayCommand<bool> OkCommand => _okCommand ??= new RelayCommand<bool>(OkExecute);
     }
 }

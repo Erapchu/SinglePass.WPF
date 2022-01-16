@@ -1,0 +1,55 @@
+﻿using MaterialDesignThemes.Wpf;
+using System.Linq;
+
+namespace PasswordManager.Services
+{
+    public class ThemeService
+    {
+        private readonly SettingsService _settingsService;
+        private readonly BundledTheme _bundledThemeDictionary;
+
+        public bool IsDarkMode
+        {
+            get => GetTheme().GetBaseTheme() == BaseTheme.Dark;
+            set
+            {
+                ITheme theme = GetTheme();
+
+                var currentBaseTheme = theme.GetBaseTheme();
+                if (currentBaseTheme == BaseTheme.Dark && value
+                    || currentBaseTheme == BaseTheme.Light && !value)
+                    return;
+
+                IBaseTheme newBaseTheme = value ? Theme.Dark : Theme.Light;
+                theme.SetBaseTheme(newBaseTheme);
+                _bundledThemeDictionary.SetTheme(theme);
+            }
+        }
+
+        public ITheme GetTheme() => _bundledThemeDictionary.GetTheme();
+
+        public ThemeService(SettingsService settingsService)
+        {
+            _settingsService = settingsService;
+
+            var app = System.Windows.Application.Current;
+            if (app is null)
+                return;
+
+            var appMergedDictionaries = app.Resources.MergedDictionaries;
+
+            var bundledThemeDictionary = (BundledTheme)appMergedDictionaries.FirstOrDefault(rd => rd is BundledTheme);
+            if (bundledThemeDictionary is null)
+            {
+                bundledThemeDictionary = new BundledTheme();
+                appMergedDictionaries.Add(bundledThemeDictionary);
+            }
+
+            bundledThemeDictionary.BaseTheme = BaseTheme.Light;
+            bundledThemeDictionary.PrimaryColor = MaterialDesignColors.PrimaryColor.Blue;
+            bundledThemeDictionary.SecondaryColor = MaterialDesignColors.SecondaryColor.Yellow;
+
+            _bundledThemeDictionary = bundledThemeDictionary;
+        }
+    }
+}

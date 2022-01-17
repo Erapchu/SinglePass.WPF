@@ -11,9 +11,9 @@
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:vm="clr-namespace:PasswordManager.ViewModels"
     Title="Password manager"
-    Width="500"
-    Height="600"
-    MinWidth="400"
+    Width="700"
+    Height="500"
+    MinWidth="500"
     MinHeight="300"
     d:DataContext="{x:Static vm:MainWindowViewModel.DesignTimeInstance}"
     Closed="Window_Closed"
@@ -22,8 +22,36 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/PasswordManager;component/Themes/SeparatorTemplates.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/PasswordManager;component/Themes/DialogHostTemplates.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/PasswordManager;component/Themes/DialogHostTemplates.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <DataTemplate x:Key="NavigationItemDataTemplate">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <md:PackIcon
+                        Grid.Column="0"
+                        Width="24"
+                        Height="24"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Kind="{Binding IconKind}" />
+                    <TextBlock
+                        Grid.Column="1"
+                        Margin="16 0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Text="{Binding Name}"
+                        TextWrapping="Wrap" />
+                </Grid>
+            </DataTemplate>
+            <Style
+                x:Key="NavigationItemStyle"
+                BasedOn="{StaticResource MaterialDesignNavigationPrimaryListBoxItem}"
+                TargetType="{x:Type ListBoxItem}">
+                <Setter Property="Cursor" Value="Hand" />
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
     <i:Interaction.Triggers>
@@ -36,40 +64,35 @@
         Identifier="{x:Static helpers:MvvmHelper.MainWindowDialogName}"
         Style="{StaticResource MaterialDesignEmbeddedFastDialogHost}">
         <Grid>
-            <TabControl Style="{StaticResource MaterialDesignNavigatilRailTabControl}">
-                <TabItem>
-                    <TabItem.Header>
-                        <StackPanel Width="auto" Height="auto">
-                            <md:PackIcon
-                                Width="24"
-                                Height="24"
-                                HorizontalAlignment="Center"
-                                Kind="Password" />
-                            <TextBlock
-                                HorizontalAlignment="Center"
-                                FontSize="12"
-                                Text="Passwords" />
-                        </StackPanel>
-                    </TabItem.Header>
-                    <local:PasswordsControl DataContext="{Binding PasswordsViewModel, Mode=OneTime}"/>
-                </TabItem>
-                <TabItem>
-                    <TabItem.Header>
-                        <StackPanel Width="auto" Height="auto">
-                            <md:PackIcon
-                                Width="24"
-                                Height="24"
-                                HorizontalAlignment="Center"
-                                Kind="Settings" />
-                            <TextBlock
-                                HorizontalAlignment="Center"
-                                FontSize="12"
-                                Text="Settings" />
-                        </StackPanel>
-                    </TabItem.Header>
-                    <local:SettingsControl DataContext="{Binding SettingsViewModel, Mode=OneTime}"/>
-                </TabItem>
-            </TabControl>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
+                <ListBox
+                    Width="260"
+                    HorizontalContentAlignment="Stretch"
+                    ItemContainerStyle="{StaticResource NavigationItemStyle}"
+                    ItemTemplate="{StaticResource NavigationItemDataTemplate}"
+                    ItemsSource="{Binding NavigationItems}"
+                    SelectedItem="{Binding SelectedNavigationItem, UpdateSourceTrigger=PropertyChanged}"
+                    Style="{StaticResource MaterialDesignNavigationPrimaryListBox}">
+                    <ListBox.Resources>
+                        <Style BasedOn="{StaticResource MaterialDesignScrollBarMinimal}" TargetType="{x:Type ScrollBar}" />
+                    </ListBox.Resources>
+                </ListBox>
+                <Rectangle
+                    Grid.Column="1"
+                    Width="1"
+                    Fill="{DynamicResource MaterialDesignDivider}" />
+            </Grid>
+            <Grid Grid.Column="1">
+                <ContentControl Content="{Binding Content, UpdateSourceTrigger=PropertyChanged}" DataContext="{Binding SelectedNavigationItem}" />
+            </Grid>
         </Grid>
     </md:DialogHost>
 </controls:MaterialWindow>

@@ -111,19 +111,15 @@
                         BorderBrush="{DynamicResource PrimaryHueMidBrush}"
                         BorderThickness="1">
                         <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="*" />
-                            </Grid.RowDefinitions>
                             <!--  Caption panel with window buttons, title and icon  -->
-                            <materialDesign:ColorZone Mode="Standard">
-                                <materialDesign:ColorZone.Visibility>
+                            <Grid Panel.ZIndex="1" VerticalAlignment="Top">
+                                <Grid.Visibility>
                                     <MultiBinding Converter="{StaticResource CaptionVisibilityConverter}">
                                         <Binding Path="(componentModel:DesignerProperties.IsInDesignMode)" RelativeSource="{RelativeSource TemplatedParent}" />
                                         <Binding Path="WindowStyle" RelativeSource="{RelativeSource TemplatedParent}" />
                                         <Binding Path="CaptionVisibility" RelativeSource="{RelativeSource TemplatedParent}" />
                                     </MultiBinding>
-                                </materialDesign:ColorZone.Visibility>
+                                </Grid.Visibility>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="auto" />
@@ -238,7 +234,7 @@
                                         </Button>
                                     </StackPanel>
                                 </Grid>
-                            </materialDesign:ColorZone>
+                            </Grid>
                             <AdornerDecorator Grid.Row="1">
                                 <ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" />
                             </AdornerDecorator>

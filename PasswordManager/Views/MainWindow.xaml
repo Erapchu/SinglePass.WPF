@@ -75,7 +75,7 @@
                 ItemContainerStyle="{StaticResource NavigationItemStyle}"
                 ItemTemplate="{StaticResource NavigationItemDataTemplate}"
                 ItemsSource="{Binding NavigationItems}"
-                SelectedItem="{Binding SelectedNavigationItem, UpdateSourceTrigger=PropertyChanged}"
+                SelectedIndex="{Binding SelectedNavigationItemIndex, UpdateSourceTrigger=PropertyChanged}"
                 Style="{StaticResource MaterialDesignNavigationPrimaryListBox}">
                 <ListBox.Resources>
                     <Style BasedOn="{StaticResource MaterialDesignScrollBarMinimal}" TargetType="{x:Type ScrollBar}" />
@@ -100,13 +100,28 @@
                     Grid.Column="1"
                     Height="1"
                     Fill="{DynamicResource MaterialDesignDivider}" />
-                <md:Card
-                    Grid.Row="1"
-                    Grid.Column="1"
-                    md:ShadowAssist.ShadowDepth="Depth0"
-                    UniformCornerRadius="0">
-                    <ContentControl Content="{Binding Content, UpdateSourceTrigger=PropertyChanged}" DataContext="{Binding SelectedNavigationItem}" />
-                </md:Card>
+                <AdornerDecorator Grid.Row="1" Grid.Column="1">
+                    <md:Transitioner SelectedIndex="{Binding SelectedNavigationItemIndex}">
+                        <md:TransitionerSlide>
+                            <md:TransitionerSlide.OpeningEffects>
+                                <md:TransitionEffect Kind="None" />
+                            </md:TransitionerSlide.OpeningEffects>
+                            <md:TransitionerSlide.ForwardWipe>
+                                <md:FadeWipe Duration="0:0:0.2" />
+                            </md:TransitionerSlide.ForwardWipe>
+                            <local:PasswordsControl DataContext="{Binding PasswordsViewModel}" />
+                        </md:TransitionerSlide>
+                        <md:TransitionerSlide>
+                            <md:TransitionerSlide.OpeningEffects>
+                                <md:TransitionEffect Kind="None" />
+                            </md:TransitionerSlide.OpeningEffects>
+                            <md:TransitionerSlide.BackwardWipe>
+                                <md:FadeWipe Duration="0:0:0.2" />
+                            </md:TransitionerSlide.BackwardWipe>
+                            <local:SettingsControl DataContext="{Binding SettingsViewModel}" />
+                        </md:TransitionerSlide>
+                    </md:Transitioner>
+                </AdornerDecorator>
             </Grid>
         </Grid>
     </md:DialogHost>

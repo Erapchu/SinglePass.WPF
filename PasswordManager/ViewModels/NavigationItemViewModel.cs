@@ -1,39 +1,20 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
-using NLog;
 using System;
-using System.Windows.Controls;
 
 namespace PasswordManager.ViewModels
 {
     public class NavigationItemViewModel : ObservableRecipient
     {
-        private readonly ILogger _logger;
-        private readonly Lazy<Control> _lazyContent;
-
         /// <summary>
         /// Name of settings item.
         /// </summary>
         public string Name { get; }
 
         /// <summary>
-        /// Visible content.
+        /// Item index.
         /// </summary>
-        public Control Content
-        {
-            get
-            {
-                try
-                {
-                    return _lazyContent.Value;
-                }
-                catch (Exception ex)
-                {
-                    _logger.Error(ex);
-                    return null;
-                }
-            }
-        }
+        public int ItemIndex { get; }
 
         /// <summary>
         /// Icon kind.
@@ -49,13 +30,11 @@ namespace PasswordManager.ViewModels
         public NavigationItemViewModel(
             string name,
             PackIconKind packIconKind,
-            Func<Control> createContent,
-            ILogger logger)
+            int itemIndex)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
-            _lazyContent = new Lazy<Control>(createContent);
             IconKind = packIconKind;
-            _logger = logger;
+            ItemIndex = itemIndex;
         }
     }
 }

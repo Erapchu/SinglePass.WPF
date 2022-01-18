@@ -27,26 +27,19 @@ namespace PasswordManager.ViewModels
         private readonly SettingsService _settingsService;
         private readonly ILogger _logger;
 
+        public static int PasswordsNavigationItemIndex { get; }
+        public static int SettingsNavigationItemIndex { get; } = 1;
+
         public PasswordsViewModel PasswordsViewModel { get; }
         public SettingsViewModel SettingsViewModel { get; }
+
         public ObservableCollectionDelayed<NavigationItemViewModel> NavigationItems { get; }
 
-        private NavigationItemViewModel _selectedNavigationItem;
-        public NavigationItemViewModel SelectedNavigationItem
+        private int _selectedNavigationItemIndex;
+        public int SelectedNavigationItemIndex
         {
-            get => _selectedNavigationItem;
-            set
-            {
-                if (_selectedNavigationItem == value)
-                    return;
-
-                // Prevent unselected items
-                if (value is null)
-                    return;
-
-                _selectedNavigationItem = value;
-                OnPropertyChanged();
-            }
+            get => _selectedNavigationItemIndex;
+            set => SetProperty(ref _selectedNavigationItemIndex, value);
         }
 
         private MainWindowViewModel() { }
@@ -63,7 +56,6 @@ namespace PasswordManager.ViewModels
             _logger = logger;
 
             NavigationItems = new ObservableCollectionDelayed<NavigationItemViewModel>(GenerateSettingsItem());
-            SelectedNavigationItem = NavigationItems.First();
         }
 
         private List<NavigationItemViewModel> GenerateSettingsItem()
@@ -73,13 +65,11 @@ namespace PasswordManager.ViewModels
                 new NavigationItemViewModel(
                     "Credentials",
                     MaterialDesignThemes.Wpf.PackIconKind.Password,
-                    () => new PasswordsControl() { DataContext = PasswordsViewModel },
-                    _logger),
+                    PasswordsNavigationItemIndex),
                 new NavigationItemViewModel(
                     "Settings",
                     MaterialDesignThemes.Wpf.PackIconKind.Settings,
-                    () => new SettingsControl() { DataContext = SettingsViewModel },
-                    _logger),
+                    SettingsNavigationItemIndex),
             };
         }
 

@@ -27,9 +27,6 @@ namespace PasswordManager.ViewModels
         private readonly SettingsService _settingsService;
         private readonly ILogger _logger;
 
-        public static int PasswordsNavigationItemIndex { get; }
-        public static int SettingsNavigationItemIndex { get; } = 1;
-
         public PasswordsViewModel PasswordsViewModel { get; }
         public SettingsViewModel SettingsViewModel { get; }
 
@@ -55,22 +52,11 @@ namespace PasswordManager.ViewModels
             _settingsService = settingsService;
             _logger = logger;
 
-            NavigationItems = new ObservableCollectionDelayed<NavigationItemViewModel>(GenerateSettingsItem());
-        }
-
-        private List<NavigationItemViewModel> GenerateSettingsItem()
-        {
-            return new List<NavigationItemViewModel>()
+            NavigationItems = new ObservableCollectionDelayed<NavigationItemViewModel>(new List<NavigationItemViewModel>()
             {
-                new NavigationItemViewModel(
-                    "Credentials",
-                    MaterialDesignThemes.Wpf.PackIconKind.Password,
-                    PasswordsNavigationItemIndex),
-                new NavigationItemViewModel(
-                    "Settings",
-                    MaterialDesignThemes.Wpf.PackIconKind.Settings,
-                    SettingsNavigationItemIndex),
-            };
+                PasswordsViewModel,
+                SettingsViewModel
+            });
         }
 
         private async Task LoadingAsync()

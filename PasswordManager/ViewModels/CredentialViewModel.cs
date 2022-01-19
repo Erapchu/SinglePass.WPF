@@ -1,13 +1,9 @@
-﻿using MaterialDesignThemes.Wpf;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.Input;
-using PasswordManager.Helpers;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using PasswordManager.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace PasswordManager.ViewModels
 {
@@ -36,17 +32,6 @@ namespace PasswordManager.ViewModels
         public PassFieldViewModel OtherFieldVM { get; }
         public ObservableCollection<PassFieldViewModel> AdditionalFields { get; }
 
-        private bool _isExpanded;
-        public bool IsExpanded
-        {
-            get => _isExpanded;
-            set
-            {
-                SetProperty(ref _isExpanded, value);
-                SetProperty(ref _passwordVisible, false, nameof(PasswordVisible));
-            }
-        }
-
         private bool _passwordVisible;
         public bool PasswordVisible
         {
@@ -69,7 +54,6 @@ namespace PasswordManager.ViewModels
             var cloneModel = Model.Clone();
             var cloneVM = new CredentialViewModel(cloneModel)
             {
-                _isExpanded = _isExpanded,
                 _passwordVisible = _passwordVisible,
             };
             return cloneVM;

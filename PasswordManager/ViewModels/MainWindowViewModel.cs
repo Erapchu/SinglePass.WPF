@@ -3,10 +3,8 @@ using Microsoft.Toolkit.Mvvm.Input;
 using NLog;
 using PasswordManager.Collections;
 using PasswordManager.Services;
-using PasswordManager.Views;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace PasswordManager.ViewModels

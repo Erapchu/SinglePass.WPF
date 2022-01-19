@@ -34,6 +34,12 @@ namespace PasswordManager.Controls
             typeof(Flyout),
             new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnIsOpenPropertyChanged));
 
+        public static readonly DependencyProperty ShadowVisibilityProperty = DependencyProperty.Register(
+            nameof(ShadowVisibility),
+            typeof(Visibility),
+            typeof(Flyout),
+            new FrameworkPropertyMetadata(Visibility.Visible, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+
         public static readonly RoutedEvent IsOpenChangedEvent = EventManager.RegisterRoutedEvent(
             nameof(IsOpenChanged),
             RoutingStrategy.Bubble,
@@ -84,6 +90,12 @@ namespace PasswordManager.Controls
         {
             get => (bool)GetValue(AnimateOnPositionChangeProperty);
             set => SetValue(AnimateOnPositionChangeProperty, value);
+        }
+
+        public Visibility ShadowVisibility
+        {
+            get => (Visibility)GetValue(ShadowVisibilityProperty);
+            set => SetValue(ShadowVisibilityProperty, value);
         }
 
         public event RoutedEventHandler IsOpenChanged

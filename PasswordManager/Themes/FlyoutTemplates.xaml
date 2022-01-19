@@ -15,7 +15,7 @@
                 <TranslateTransform />
             </Border.RenderTransform>
             <Grid>
-                <AdornerDecorator x:Name="PART_ShadowBorder">
+                <AdornerDecorator x:Name="PART_ShadowBorder" Visibility="{TemplateBinding ShadowVisibility}">
                     <controls:FastShadow
                         BlurRadius="30"
                         Direction="270"

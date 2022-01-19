@@ -65,53 +65,61 @@
         Identifier="{x:Static helpers:MvvmHelper.MainWindowDialogName}"
         Style="{StaticResource MaterialDesignEmbeddedFastDialogHost}">
         <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="auto" />
-                <ColumnDefinition Width="auto" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <ListBox
-                Grid.Column="0"
-                Width="250"
-                Margin="0 32 0 0"
-                HorizontalContentAlignment="Stretch"
-                md:RippleAssist.IsDisabled="True"
-                ItemTemplate="{StaticResource NavigationItemDataTemplate}"
-                ItemsSource="{Binding NavigationItems}"
-                SelectedIndex="{Binding SelectedNavigationItemIndex, UpdateSourceTrigger=PropertyChanged}"
-                Style="{StaticResource MaterialDesignNavigationPrimaryListBox}">
-                <ListBox.Resources>
-                    <Style BasedOn="{StaticResource MaterialDesignScrollBarMinimal}" TargetType="{x:Type ScrollBar}" />
-                </ListBox.Resources>
-            </ListBox>
-            <Rectangle
-                Grid.Column="1"
-                Width="1"
-                Fill="{DynamicResource MaterialDesignDivider}" />
-            <md:Card Grid.Column="2" md:ShadowAssist.ShadowDepth="Depth0">
-                <AdornerDecorator Grid.Column="4" Margin="0 32 0 0">
-                    <md:Transitioner SelectedIndex="{Binding SelectedNavigationItemIndex}">
-                        <md:TransitionerSlide>
-                            <md:TransitionerSlide.OpeningEffects>
-                                <md:TransitionEffect Kind="None" />
-                            </md:TransitionerSlide.OpeningEffects>
-                            <md:TransitionerSlide.ForwardWipe>
-                                <md:FadeWipe Duration="0:0:0.2" />
-                            </md:TransitionerSlide.ForwardWipe>
-                            <local:PasswordsControl DataContext="{Binding PasswordsViewModel}" />
-                        </md:TransitionerSlide>
-                        <md:TransitionerSlide>
-                            <md:TransitionerSlide.OpeningEffects>
-                                <md:TransitionEffect Kind="None" />
-                            </md:TransitionerSlide.OpeningEffects>
-                            <md:TransitionerSlide.BackwardWipe>
-                                <md:FadeWipe Duration="0:0:0.2" />
-                            </md:TransitionerSlide.BackwardWipe>
-                            <local:SettingsControl DataContext="{Binding SettingsViewModel}" />
-                        </md:TransitionerSlide>
-                    </md:Transitioner>
-                </AdornerDecorator>
-            </md:Card>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <ListBox
+                    Grid.Column="0"
+                    Width="250"
+                    Margin="0 32 0 0"
+                    HorizontalContentAlignment="Stretch"
+                    md:RippleAssist.IsDisabled="True"
+                    ItemTemplate="{StaticResource NavigationItemDataTemplate}"
+                    ItemsSource="{Binding NavigationItems}"
+                    SelectedIndex="{Binding SelectedNavigationItemIndex, UpdateSourceTrigger=PropertyChanged}"
+                    Style="{StaticResource MaterialDesignNavigationPrimaryListBox}">
+                    <ListBox.Resources>
+                        <Style BasedOn="{StaticResource MaterialDesignScrollBarMinimal}" TargetType="{x:Type ScrollBar}" />
+                    </ListBox.Resources>
+                </ListBox>
+                <Rectangle
+                    Grid.Column="1"
+                    Width="1"
+                    Fill="{DynamicResource MaterialDesignDivider}" />
+                <md:Card Grid.Column="2" md:ShadowAssist.ShadowDepth="Depth0">
+                    <AdornerDecorator Grid.Column="4" Margin="0 32 0 0">
+                        <md:Transitioner SelectedIndex="{Binding SelectedNavigationItemIndex}">
+                            <md:TransitionerSlide>
+                                <md:TransitionerSlide.OpeningEffects>
+                                    <md:TransitionEffect Kind="None" />
+                                </md:TransitionerSlide.OpeningEffects>
+                                <md:TransitionerSlide.ForwardWipe>
+                                    <md:FadeWipe Duration="0:0:0.2" />
+                                </md:TransitionerSlide.ForwardWipe>
+                                <local:PasswordsControl DataContext="{Binding PasswordsViewModel}" />
+                            </md:TransitionerSlide>
+                            <md:TransitionerSlide>
+                                <md:TransitionerSlide.OpeningEffects>
+                                    <md:TransitionEffect Kind="None" />
+                                </md:TransitionerSlide.OpeningEffects>
+                                <md:TransitionerSlide.BackwardWipe>
+                                    <md:FadeWipe Duration="0:0:0.2" />
+                                </md:TransitionerSlide.BackwardWipe>
+                                <local:SettingsControl DataContext="{Binding SettingsViewModel}" />
+                            </md:TransitionerSlide>
+                        </md:Transitioner>
+                    </AdornerDecorator>
+                </md:Card>
+            </Grid>
+            <controls:Flyout
+                IsOpen="{Binding IsOpenFlyout}"
+                ShadowVisibility="Visible"
+                Position="Right">
+                <local:CredentialsDialog />
+            </controls:Flyout>
         </Grid>
     </md:DialogHost>
 </controls:MaterialWindow>

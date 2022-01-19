@@ -37,6 +37,13 @@ namespace PasswordManager.ViewModels
             set => SetProperty(ref _selectedNavigationItemIndex, value);
         }
 
+        private bool _isOpenFlyout;
+        public bool IsOpenFlyout
+        {
+            get => _isOpenFlyout;
+            set => SetProperty(ref _isOpenFlyout, value);
+        }
+
         private MainWindowViewModel() { }
 
         public MainWindowViewModel(
@@ -50,11 +57,18 @@ namespace PasswordManager.ViewModels
             _settingsService = settingsService;
             _logger = logger;
 
+            PasswordsViewModel.OpenFlyoutRequested += PasswordsViewModel_OpenFlyoutRequested;
+
             NavigationItems = new ObservableCollectionDelayed<NavigationItemViewModel>(new List<NavigationItemViewModel>()
             {
                 PasswordsViewModel,
                 SettingsViewModel
             });
+        }
+
+        private void PasswordsViewModel_OpenFlyoutRequested(bool isOpen)
+        {
+            IsOpenFlyout = isOpen;
         }
 
         private async Task LoadingAsync()

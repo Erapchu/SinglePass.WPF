@@ -35,13 +35,19 @@ namespace PasswordManager.ViewModels
         private readonly SettingsService _settingsService;
         private readonly ILogger _logger;
 
+        public event Action<bool> OpenFlyoutRequested;
+
         public ObservableCollectionDelayed<CredentialViewModel> Credentials { get; } = new ObservableCollectionDelayed<CredentialViewModel>();
 
         private CredentialViewModel _selectedCredential;
         public CredentialViewModel SelectedCredential
         {
             get => _selectedCredential;
-            set => SetProperty(ref _selectedCredential, value);
+            set
+            {
+                SetProperty(ref _selectedCredential, value);
+                OpenFlyoutRequested?.Invoke(value != null);
+            }
         }
 
         private PasswordsViewModel() { }

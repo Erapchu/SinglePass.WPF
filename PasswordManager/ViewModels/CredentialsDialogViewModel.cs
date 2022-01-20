@@ -25,16 +25,19 @@ namespace PasswordManager.ViewModels
                 AdditionalFields = additionalFields
             };
             var credVm = new CredentialViewModel(model);
-            var vm = new CredentialsDialogViewModel(credVm);
+            var vm = new CredentialsDialogViewModel(credVm, "Lorem ipsum dolor sit amet");
             return vm;
         }
         #endregion
 
         public CredentialViewModel CredentialViewModel { get; }
 
-        public CredentialsDialogViewModel(CredentialViewModel credentialViewModel)
+        public string CaptionText { get; }
+
+        public CredentialsDialogViewModel(CredentialViewModel credentialViewModel, string captionText)
         {
             CredentialViewModel = credentialViewModel ?? throw new ArgumentNullException(nameof(credentialViewModel));
+            CaptionText = captionText;
         }
 
         private void OkExecute(bool value)

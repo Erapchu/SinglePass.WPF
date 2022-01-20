@@ -12,13 +12,5 @@ namespace PasswordManager.Views
         {
             InitializeComponent();
         }
-
-        private void ListBox_CleanUpVirtualizedItem(object sender, CleanUpVirtualizedItemEventArgs e)
-        {
-            if (e.Value is CredentialViewModel credVM && credVM.IsExpanded)
-            {
-                e.Cancel = true;
-            }
-        }
     }
 }

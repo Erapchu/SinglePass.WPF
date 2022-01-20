@@ -45,9 +45,10 @@ namespace PasswordManager.Services
                 appMergedDictionaries.Add(bundledThemeDictionary);
             }
 
+            bundledThemeDictionary.ColorAdjustment = new ColorAdjustment();
             bundledThemeDictionary.BaseTheme = BaseTheme.Light;
-            bundledThemeDictionary.PrimaryColor = MaterialDesignColors.PrimaryColor.Blue;
-            bundledThemeDictionary.SecondaryColor = MaterialDesignColors.SecondaryColor.Yellow;
+            bundledThemeDictionary.PrimaryColor = MaterialDesignColors.PrimaryColor.DeepPurple;
+            bundledThemeDictionary.SecondaryColor = MaterialDesignColors.SecondaryColor.Lime;
 
             _bundledThemeDictionary = bundledThemeDictionary;
         }

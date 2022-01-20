@@ -1,10 +1,10 @@
-﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using MaterialDesignThemes.Wpf;
 using PasswordManager.Services;
 using System;
 
 namespace PasswordManager.ViewModels
 {
-    public class SettingsViewModel : ObservableObject
+    public class SettingsViewModel : NavigationItemViewModel
     {
         #region Design time instance
         private static readonly Lazy<SettingsViewModel> _lazy = new(GetDesignTimeVM);
@@ -35,6 +35,10 @@ namespace PasswordManager.ViewModels
         public SettingsViewModel(ThemeService themeService)
         {
             _themeService = themeService;
+
+            Name = "Settings";
+            ItemIndex = SettingsNavigationItemIndex;
+            IconKind = PackIconKind.Settings;
         }
     }
 }

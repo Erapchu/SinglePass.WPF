@@ -1,40 +1,36 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
-using System;
 
 namespace PasswordManager.ViewModels
 {
     public class NavigationItemViewModel : ObservableRecipient
     {
+        public static int PasswordsNavigationItemIndex { get; }
+        public static int SettingsNavigationItemIndex { get; } = 1;
+
         /// <summary>
         /// Name of settings item.
         /// </summary>
-        public string Name { get; }
+        public string Name { get; protected set; }
 
         /// <summary>
         /// Item index.
         /// </summary>
-        public int ItemIndex { get; }
+        public int ItemIndex { get; protected set; }
 
         /// <summary>
         /// Icon kind.
         /// </summary>
-        public PackIconKind IconKind { get; }
+        public PackIconKind IconKind { get; protected set; }
 
+        private bool _loading;
         /// <summary>
-        /// Constructs settings item view model with specified name, content and icon.
+        /// Indicates loading of some content.
         /// </summary>
-        /// <param name="name">Name of settings item.</param>
-        /// <param name="createContent">Function to create content.</param>
-        /// <param name="packIconKind">Icon kind on the left side.</param>
-        public NavigationItemViewModel(
-            string name,
-            PackIconKind packIconKind,
-            int itemIndex)
+        public bool Loading
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            IconKind = packIconKind;
-            ItemIndex = itemIndex;
+            get => _loading;
+            set => SetProperty(ref _loading, value);
         }
     }
 }

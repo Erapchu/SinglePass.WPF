@@ -1,6 +1,4 @@
-﻿using Autofac;
-using MaterialDesignThemes.Wpf;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using MaterialDesignThemes.Wpf;
 using Microsoft.Toolkit.Mvvm.Input;
 using NLog;
 using PasswordManager.Collections;
@@ -14,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace PasswordManager.ViewModels
 {
-    public class PasswordsViewModel : ObservableRecipient
+    public class PasswordsViewModel : NavigationItemViewModel
     {
         #region Design time instance
         private static readonly Lazy<PasswordsViewModel> _lazy = new(GetDesignTimeVM);
@@ -29,7 +27,6 @@ namespace PasswordManager.ViewModels
             cred.PasswordField.Value = "TestPass";
             cred.OtherField.Value = "TestOther";
             var credVm = new CredentialViewModel(cred);
-            credVm.IsExpanded = true;
             vm.Credentials.Add(credVm);
             return vm;
         }
@@ -38,12 +35,7 @@ namespace PasswordManager.ViewModels
         private readonly SettingsService _settingsService;
         private readonly ILogger _logger;
 
-        private bool _loading;
-        public bool Loading
-        {
-            get => _loading;
-            set => SetProperty(ref _loading, value);
-        }
+        public event Action<bool> OpenFlyoutRequested;
 
         public ObservableCollectionDelayed<CredentialViewModel> Credentials { get; } = new ObservableCollectionDelayed<CredentialViewModel>();
 
@@ -51,7 +43,11 @@ namespace PasswordManager.ViewModels
         public CredentialViewModel SelectedCredential
         {
             get => _selectedCredential;
-            set => SetProperty(ref _selectedCredential, value);
+            set
+            {
+                SetProperty(ref _selectedCredential, value);
+                OpenFlyoutRequested?.Invoke(value != null);
+            }
         }
 
         private PasswordsViewModel() { }
@@ -60,6 +56,10 @@ namespace PasswordManager.ViewModels
         {
             _settingsService = settingsService;
             _logger = logger;
+
+            Name = "Credentials";
+            ItemIndex = PasswordsNavigationItemIndex;
+            IconKind = PackIconKind.Password;
         }
 
         public async Task LoadCredentialsAsync()

@@ -3,10 +3,8 @@ using Microsoft.Toolkit.Mvvm.Input;
 using NLog;
 using PasswordManager.Collections;
 using PasswordManager.Services;
-using PasswordManager.Views;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace PasswordManager.ViewModels
@@ -27,9 +25,6 @@ namespace PasswordManager.ViewModels
         private readonly SettingsService _settingsService;
         private readonly ILogger _logger;
 
-        public static int PasswordsNavigationItemIndex { get; }
-        public static int SettingsNavigationItemIndex { get; } = 1;
-
         public PasswordsViewModel PasswordsViewModel { get; }
         public SettingsViewModel SettingsViewModel { get; }
 
@@ -40,6 +35,13 @@ namespace PasswordManager.ViewModels
         {
             get => _selectedNavigationItemIndex;
             set => SetProperty(ref _selectedNavigationItemIndex, value);
+        }
+
+        private bool _isOpenFlyout;
+        public bool IsOpenFlyout
+        {
+            get => _isOpenFlyout;
+            set => SetProperty(ref _isOpenFlyout, value);
         }
 
         private MainWindowViewModel() { }
@@ -55,22 +57,18 @@ namespace PasswordManager.ViewModels
             _settingsService = settingsService;
             _logger = logger;
 
-            NavigationItems = new ObservableCollectionDelayed<NavigationItemViewModel>(GenerateSettingsItem());
+            PasswordsViewModel.OpenFlyoutRequested += PasswordsViewModel_OpenFlyoutRequested;
+
+            NavigationItems = new ObservableCollectionDelayed<NavigationItemViewModel>(new List<NavigationItemViewModel>()
+            {
+                PasswordsViewModel,
+                SettingsViewModel
+            });
         }
 
-        private List<NavigationItemViewModel> GenerateSettingsItem()
+        private void PasswordsViewModel_OpenFlyoutRequested(bool isOpen)
         {
-            return new List<NavigationItemViewModel>()
-            {
-                new NavigationItemViewModel(
-                    "Credentials",
-                    MaterialDesignThemes.Wpf.PackIconKind.Password,
-                    PasswordsNavigationItemIndex),
-                new NavigationItemViewModel(
-                    "Settings",
-                    MaterialDesignThemes.Wpf.PackIconKind.Settings,
-                    SettingsNavigationItemIndex),
-            };
+            IsOpenFlyout = isOpen;
         }
 
         private async Task LoadingAsync()

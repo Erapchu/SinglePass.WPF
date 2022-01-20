@@ -115,10 +115,24 @@
                 </md:Card>
             </Grid>
             <controls:Flyout
+                Background="{DynamicResource MaterialDesignPaper}"
                 IsOpen="{Binding IsOpenFlyout}"
-                ShadowVisibility="Visible"
-                Position="Right">
-                <local:CredentialsDialog />
+                Position="Right"
+                ShadowVisibility="Collapsed">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Rectangle
+                        Grid.Column="0"
+                        Width="1"
+                        Fill="{DynamicResource MaterialDesignDivider}" />
+                    <local:CredentialsDialog
+                        Grid.Column="1"
+                        Margin="0 32 0 0"
+                        DataContext="{Binding ActiveCredentialDialogViewModel}" />
+                </Grid>
             </controls:Flyout>
         </Grid>
     </md:DialogHost>

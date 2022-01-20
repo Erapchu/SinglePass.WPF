@@ -27,6 +27,7 @@ namespace PasswordManager.ViewModels
 
         public PasswordsViewModel PasswordsViewModel { get; }
         public SettingsViewModel SettingsViewModel { get; }
+        public CredentialsDialogViewModel ActiveCredentialDialogViewModel { get; }
 
         public ObservableCollectionDelayed<NavigationItemViewModel> NavigationItems { get; }
 
@@ -44,20 +45,24 @@ namespace PasswordManager.ViewModels
             set => SetProperty(ref _isOpenFlyout, value);
         }
 
+
         private MainWindowViewModel() { }
 
         public MainWindowViewModel(
             PasswordsViewModel passwordsViewModel,
             SettingsService settingsService,
             SettingsViewModel settingsViewModel,
+            CredentialsDialogViewModel credentialsDialogViewModel,
             ILogger logger)
         {
             PasswordsViewModel = passwordsViewModel;
             SettingsViewModel = settingsViewModel;
+            ActiveCredentialDialogViewModel = credentialsDialogViewModel;
             _settingsService = settingsService;
             _logger = logger;
 
-            PasswordsViewModel.OpenFlyoutRequested += PasswordsViewModel_OpenFlyoutRequested;
+            PasswordsViewModel.FlyoutRequested += ViewModel_FlyoutRequested;
+            ActiveCredentialDialogViewModel.FlyoutRequested += ViewModel_FlyoutRequested;
 
             NavigationItems = new ObservableCollectionDelayed<NavigationItemViewModel>(new List<NavigationItemViewModel>()
             {
@@ -66,8 +71,14 @@ namespace PasswordManager.ViewModels
             });
         }
 
-        private void PasswordsViewModel_OpenFlyoutRequested(bool isOpen)
+        private void ViewModel_FlyoutRequested(CredentialViewModel credDialogViewModel, CredentialsDialogMode mode, bool isOpen)
         {
+            if (credDialogViewModel is not null)
+            {
+                ActiveCredentialDialogViewModel.CredentialViewModel = credDialogViewModel;
+                ActiveCredentialDialogViewModel.Mode = mode;
+            }
+
             IsOpenFlyout = isOpen;
         }
 

@@ -5,9 +5,6 @@ using PasswordManager.Helpers;
 using PasswordManager.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PasswordManager.ViewModels
 {
@@ -25,19 +22,56 @@ namespace PasswordManager.ViewModels
                 AdditionalFields = additionalFields
             };
             var credVm = new CredentialViewModel(model);
-            var vm = new CredentialsDialogViewModel(credVm, "Lorem ipsum dolor sit amet");
+            var vm = new CredentialsDialogViewModel();
+            vm._credentialViewModel = credVm;
+            vm.Mode = CredentialsDialogMode.View;
             return vm;
         }
         #endregion
 
-        public CredentialViewModel CredentialViewModel { get; }
+        public event Action<CredentialViewModel, CredentialsDialogMode, bool> FlyoutRequested;
 
-        public string CaptionText { get; }
-
-        public CredentialsDialogViewModel(CredentialViewModel credentialViewModel, string captionText)
+        private CredentialViewModel _credentialViewModel;
+        public CredentialViewModel CredentialViewModel
         {
-            CredentialViewModel = credentialViewModel ?? throw new ArgumentNullException(nameof(credentialViewModel));
-            CaptionText = captionText;
+            get => _credentialViewModel;
+            set => SetProperty(ref _credentialViewModel, value);
+        }
+
+        private string _captionText;
+        public string CaptionText
+        {
+            get => _captionText;
+            private set => SetProperty(ref _captionText, value);
+        }
+
+        private CredentialsDialogMode _mode;
+        public CredentialsDialogMode Mode
+        {
+            get => _mode;
+            set
+            {
+                SetProperty(ref _mode, value);
+                switch (_mode)
+                {
+                    case CredentialsDialogMode.Edit:
+                        CaptionText = "Edit";
+                        break;
+                    case CredentialsDialogMode.New:
+                        CaptionText = "New";
+                        break;
+                    case CredentialsDialogMode.View:
+                        CaptionText = "Details";
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        public CredentialsDialogViewModel()
+        {
+            
         }
 
         private void OkExecute(bool value)
@@ -46,10 +80,25 @@ namespace PasswordManager.ViewModels
             if (CredentialViewModel.NameFieldVM.HasErrors)
                 return;
 
-            DialogHost.Close(MvvmHelper.MainWindowDialogName, value);
+            FlyoutRequested?.Invoke(CredentialViewModel, CredentialsDialogMode.View, false);
+        }
+
+        private void CloseExecute()
+        {
+            FlyoutRequested?.Invoke(null, CredentialsDialogMode.View, false);
         }
 
         private RelayCommand<bool> _okCommand;
         public RelayCommand<bool> OkCommand => _okCommand ??= new RelayCommand<bool>(OkExecute);
+
+        private RelayCommand _closeCommand;
+        public RelayCommand CloseCommand => _closeCommand ??= new RelayCommand(CloseExecute);
+    }
+
+    public enum CredentialsDialogMode
+    {
+        Edit,
+        New,
+        View,
     }
 }

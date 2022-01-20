@@ -35,7 +35,7 @@ namespace PasswordManager.ViewModels
         private readonly SettingsService _settingsService;
         private readonly ILogger _logger;
 
-        public event Action<bool> OpenFlyoutRequested;
+        public event Action<CredentialViewModel, CredentialsDialogMode, bool> FlyoutRequested;
 
         public ObservableCollectionDelayed<CredentialViewModel> Credentials { get; } = new ObservableCollectionDelayed<CredentialViewModel>();
 
@@ -46,7 +46,7 @@ namespace PasswordManager.ViewModels
             set
             {
                 SetProperty(ref _selectedCredential, value);
-                OpenFlyoutRequested?.Invoke(value != null);
+                FlyoutRequested?.Invoke(value, CredentialsDialogMode.View, true);
             }
         }
 
@@ -85,38 +85,16 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        private async Task AddCredentialAsync()
+        private void AddCredential()
         {
             var credentialVM = new CredentialViewModel(new Credential());
-            var credDialogVm = new CredentialsDialogViewModel(credentialVM, "Add credential");
-            var credDialog = new CredentialsDialog
-            {
-                DataContext = credDialogVm
-            };
-            var result = await DialogHost.Show(credDialog, MvvmHelper.MainWindowDialogName);
-            if (result is bool boolResult && boolResult)
-            {
-                await _settingsService.AddCredential(credentialVM.Model);
-                Credentials.Add(credentialVM);
-            }
+            FlyoutRequested?.Invoke(credentialVM, CredentialsDialogMode.New, true);
         }
 
-        private async Task EditCredentialAsync(CredentialViewModel credVM)
+        private void EditCredential(CredentialViewModel credVM)
         {
             var cloneVM = credVM.Clone();
-            var credDialogVm = new CredentialsDialogViewModel(cloneVM, $"Edit credential \"{cloneVM.NameFieldVM.Value}\"");
-            var credDialog = new CredentialsDialog
-            {
-                DataContext = credDialogVm
-            };
-            var result = await DialogHost.Show(credDialog, MvvmHelper.MainWindowDialogName);
-            if (result is bool boolResult && boolResult)
-            {
-                await _settingsService.EditCredential(cloneVM.Model);
-                var currentIndex = Credentials.IndexOf(credVM);
-                Credentials.Remove(credVM);
-                Credentials.Insert(currentIndex, cloneVM);
-            }
+            FlyoutRequested?.Invoke(cloneVM, CredentialsDialogMode.Edit, true);
         }
 
         private async Task DeleteCredentialAsync(CredentialViewModel credVM)
@@ -149,11 +127,11 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        private AsyncRelayCommand _addCredentialCommand;
-        public AsyncRelayCommand AddCredentialCommand => _addCredentialCommand ??= new AsyncRelayCommand(AddCredentialAsync);
+        private RelayCommand _addCredentialCommand;
+        public RelayCommand AddCredentialCommand => _addCredentialCommand ??= new RelayCommand(AddCredential);
 
-        private AsyncRelayCommand<CredentialViewModel> _editCredentialCommand;
-        public AsyncRelayCommand<CredentialViewModel> EditCredentialCommand => _editCredentialCommand ??= new AsyncRelayCommand<CredentialViewModel>(EditCredentialAsync);
+        private RelayCommand<CredentialViewModel> _editCredentialCommand;
+        public RelayCommand<CredentialViewModel> EditCredentialCommand => _editCredentialCommand ??= new RelayCommand<CredentialViewModel>(EditCredential);
 
         private AsyncRelayCommand<CredentialViewModel> _deleteCredentialCommand;
         public AsyncRelayCommand<CredentialViewModel> DeleteCredentialCommand => _deleteCredentialCommand ??= new AsyncRelayCommand<CredentialViewModel>(DeleteCredentialAsync);

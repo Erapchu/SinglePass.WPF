@@ -17,6 +17,7 @@
     MinHeight="300"
     d:DataContext="{x:Static vm:MainWindowViewModel.DesignTimeInstance}"
     Closed="Window_Closed"
+    SizeChanged="MaterialWindow_SizeChanged"
     mc:Ignorable="d">
     <Window.Resources>
         <ResourceDictionary>
@@ -65,6 +66,10 @@
         Identifier="{x:Static helpers:MvvmHelper.MainWindowDialogName}"
         Style="{StaticResource MaterialDesignEmbeddedFastDialogHost}">
         <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto" />
@@ -115,10 +120,13 @@
                 </md:Card>
             </Grid>
             <controls:Flyout
+                x:Name="Flyout"
                 Background="{DynamicResource MaterialDesignPaper}"
                 IsOpen="{Binding IsOpenFlyout}"
                 Position="Right"
-                ShadowVisibility="Collapsed">
+                ShadowVisibility="Collapsed"
+                AreAnimationsEnabled="true"
+                Grid.Column="0">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto" />

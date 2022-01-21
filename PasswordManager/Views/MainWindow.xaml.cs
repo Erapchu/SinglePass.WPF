@@ -23,6 +23,7 @@ namespace PasswordManager.Views
     public partial class MainWindow : MaterialWindow
     {
         private ILifetimeScope _scope;
+        private bool _flyoutCover = true;
 
         public MainWindow(ILifetimeScope scope)
         {
@@ -36,6 +37,31 @@ namespace PasswordManager.Views
         {
             await _scope.DisposeAsync();
             _scope = null;
+        }
+
+        private void MaterialWindow_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (e.WidthChanged)
+            {
+                if (e.NewSize.Width > 860)
+                {
+                    if (_flyoutCover)
+                    {
+                        _flyoutCover = false;
+                        Flyout.AreAnimationsEnabled = false;
+                        Grid.SetColumn(Flyout, 1);
+                    }
+                }
+                else
+                {
+                    if (!_flyoutCover)
+                    {
+                        _flyoutCover = true;
+                        Flyout.AreAnimationsEnabled = true;
+                        Grid.SetColumn(Flyout, 0);
+                    }
+                }
+            }
         }
     }
 }

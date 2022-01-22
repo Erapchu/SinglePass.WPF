@@ -1,6 +1,7 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
+using PasswordManager.Enums;
 using PasswordManager.Helpers;
 using PasswordManager.Models;
 using System;
@@ -28,6 +29,10 @@ namespace PasswordManager.ViewModels
             return vm;
         }
         #endregion
+
+        public event Action<CredentialViewModel> Accept;
+        public event Action<CredentialViewModel> Delete;
+        public event Action Cancel;
 
         private CredentialViewModel _credentialViewModel;
         public CredentialViewModel CredentialViewModel
@@ -78,11 +83,24 @@ namespace PasswordManager.ViewModels
             if (CredentialViewModel.NameFieldVM.HasErrors)
                 return;
 
+            Accept?.Invoke(CredentialViewModel);
         }
 
         private void CancelExecute()
         {
+            Mode = CredentialsDialogMode.View;
+            Cancel?.Invoke();
+        }
 
+        private void EditExecute()
+        {
+            CredentialViewModel = CredentialViewModel.Clone();
+            Mode = CredentialsDialogMode.Edit;
+        }
+
+        private void DeleteExecute()
+        {
+            Delete?.Invoke(CredentialViewModel);
         }
 
         private RelayCommand<bool> _okCommand;
@@ -90,12 +108,11 @@ namespace PasswordManager.ViewModels
 
         private RelayCommand _cancelCommand;
         public RelayCommand CancelCommand => _cancelCommand ??= new RelayCommand(CancelExecute);
-    }
 
-    public enum CredentialsDialogMode
-    {
-        Edit,
-        New,
-        View,
+        private RelayCommand _editCommand;
+        public RelayCommand EditCommand => _editCommand ??= new RelayCommand(EditExecute);
+
+        private RelayCommand _deleteCommand;
+        public RelayCommand DeleteCommand => _deleteCommand ??= new RelayCommand(DeleteExecute);
     }
 }

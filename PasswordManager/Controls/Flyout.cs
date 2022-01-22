@@ -8,6 +8,8 @@ using System.Windows.Threading;
 
 namespace PasswordManager.Controls
 {
+    [TemplatePart(Name = "PART_Root", Type = typeof(FrameworkElement))]
+    [TemplatePart(Name = "PART_Content", Type = typeof(FrameworkElement))]
     public class Flyout : ContentControl
     {
         public static readonly DependencyProperty AnimateOnPositionChangeProperty = DependencyProperty.Register(
@@ -264,14 +266,17 @@ namespace PasswordManager.Controls
 
         private void ApplyAnimation(Position position, bool animateOpacity, bool resetShowFrame = true)
         {
-            if (_flyoutRoot is null
-                || _hideFrame is null
-                || _showFrame is null
-                || _hideFrameY is null
-                || _showFrameY is null)
+            if (_flyoutRoot is null || _hideFrame is null || _showFrame is null || _hideFrameY is null || _showFrameY is null)
                 return;
 
-            _showFrame.Value = 0;
+            if (Position == Position.Left || Position == Position.Right)
+            {
+                _showFrame.Value = 0;
+            }
+            else if (Position == Position.Top || Position == Position.Bottom)
+            {
+                _showFrameY.Value = 0;
+            }
 
             if (!animateOpacity)
             {

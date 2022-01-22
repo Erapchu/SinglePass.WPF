@@ -29,8 +29,6 @@ namespace PasswordManager.ViewModels
         }
         #endregion
 
-        public event Action<CredentialViewModel, CredentialsDialogMode, bool> FlyoutRequested;
-
         private CredentialViewModel _credentialViewModel;
         public CredentialViewModel CredentialViewModel
         {
@@ -80,12 +78,11 @@ namespace PasswordManager.ViewModels
             if (CredentialViewModel.NameFieldVM.HasErrors)
                 return;
 
-            FlyoutRequested?.Invoke(CredentialViewModel, CredentialsDialogMode.View, false);
         }
 
         private void CloseExecute()
         {
-            FlyoutRequested?.Invoke(null, CredentialsDialogMode.View, false);
+
         }
 
         private RelayCommand<bool> _okCommand;

@@ -5,10 +5,12 @@ using PasswordManager.Collections;
 using PasswordManager.Helpers;
 using PasswordManager.Models;
 using PasswordManager.Services;
-using PasswordManager.Views;
 using PasswordManager.Views.MessageBox;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Data;
 
 namespace PasswordManager.ViewModels
 {
@@ -27,17 +29,17 @@ namespace PasswordManager.ViewModels
             cred.PasswordField.Value = "TestPass";
             cred.OtherField.Value = "TestOther";
             var credVm = new CredentialViewModel(cred);
-            vm.Credentials.Add(credVm);
+            vm.DisplayedCredentials.Add(credVm);
             return vm;
         }
         #endregion
 
         private readonly SettingsService _settingsService;
         private readonly ILogger _logger;
+        private readonly List<CredentialViewModel> _credentials = new();
 
-        public event Action<CredentialViewModel, CredentialsDialogMode, bool> FlyoutRequested;
-
-        public ObservableCollectionDelayed<CredentialViewModel> Credentials { get; } = new ObservableCollectionDelayed<CredentialViewModel>();
+        public ObservableCollectionDelayed<CredentialViewModel> DisplayedCredentials { get; private set; } = new();
+        public CredentialsDialogViewModel ActiveCredentialDialogViewModel { get; }
 
         private CredentialViewModel _selectedCredential;
         public CredentialViewModel SelectedCredential
@@ -46,13 +48,35 @@ namespace PasswordManager.ViewModels
             set
             {
                 SetProperty(ref _selectedCredential, value);
-                FlyoutRequested?.Invoke(value, CredentialsDialogMode.View, true);
+                ActiveCredentialDialogViewModel.Mode = CredentialsDialogMode.View;
+                ActiveCredentialDialogViewModel.CredentialViewModel = value;
             }
+        }
+
+        private string _searchText;
+        public string SearchText
+        {
+            get => _searchText;
+            set
+            {
+                SetProperty(ref _searchText, value);
+                _ = FilterCredentialsAsync(_searchText);
+            }
+        }
+
+        private bool _searchTextFocused;
+        public bool SearchTextFocused
+        {
+            get => _searchTextFocused;
+            set => SetProperty(ref _searchTextFocused, value);
         }
 
         private PasswordsViewModel() { }
 
-        public PasswordsViewModel(SettingsService settingsService, ILogger logger)
+        public PasswordsViewModel(
+            SettingsService settingsService,
+            ILogger logger,
+            CredentialsDialogViewModel credentialsDialogViewModel)
         {
             _settingsService = settingsService;
             _logger = logger;
@@ -60,6 +84,7 @@ namespace PasswordManager.ViewModels
             Name = "Credentials";
             ItemIndex = PasswordsNavigationItemIndex;
             IconKind = PackIconKind.Password;
+            ActiveCredentialDialogViewModel = credentialsDialogViewModel;
         }
 
         public async Task LoadCredentialsAsync()
@@ -69,11 +94,56 @@ namespace PasswordManager.ViewModels
                 Loading = true;
                 await _settingsService.LoadCredentialsAsync();
                 var credentials = _settingsService.Credentials;
-                using var delayed = Credentials.DelayNotifications();
+                using var delayed = DisplayedCredentials.DelayNotifications();
                 foreach (var cred in credentials)
                 {
-                    delayed.Add(new CredentialViewModel(cred));
+                    var credVM = new CredentialViewModel(cred);
+                    _credentials.Add(credVM);
+                    delayed.Add(credVM);
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex);
+            }
+            finally
+            {
+                Loading = false;
+            }
+        }
+
+        public async Task FilterCredentialsAsync(string filterText)
+        {
+            try
+            {
+                Loading = true;
+                List<CredentialViewModel> filteredCredentials = null;
+
+                if (string.IsNullOrEmpty(filterText))
+                {
+                    filteredCredentials = _credentials;
+                }
+                else
+                {
+                    filteredCredentials = await Task.Run(() =>
+                    {
+                        var fCreds = new List<CredentialViewModel>();
+                        foreach (var cred in _credentials)
+                        {
+                            if (cred.NameFieldVM.Value.IndexOf(filterText, StringComparison.OrdinalIgnoreCase) != -1)
+                            {
+                                fCreds.Add(cred);
+                            }
+                        }
+                        return fCreds;
+                    });
+                }
+
+                DisplayedCredentials = new ObservableCollectionDelayed<CredentialViewModel>(filteredCredentials);
+                OnPropertyChanged(nameof(DisplayedCredentials));
+
+                // Selected credential always first according to search request
+                SelectedCredential = DisplayedCredentials.FirstOrDefault();
             }
             catch (Exception ex)
             {
@@ -88,13 +158,13 @@ namespace PasswordManager.ViewModels
         private void AddCredential()
         {
             var credentialVM = new CredentialViewModel(new Credential());
-            FlyoutRequested?.Invoke(credentialVM, CredentialsDialogMode.New, true);
+
         }
 
         private void EditCredential(CredentialViewModel credVM)
         {
             var cloneVM = credVM.Clone();
-            FlyoutRequested?.Invoke(cloneVM, CredentialsDialogMode.Edit, true);
+
         }
 
         private async Task DeleteCredentialAsync(CredentialViewModel credVM)
@@ -108,7 +178,8 @@ namespace PasswordManager.ViewModels
             if (result == MaterialDialogResult.Yes)
             {
                 await _settingsService.DeleteCredential(credVM.Model);
-                Credentials.Remove(credVM);
+                _credentials.Remove(credVM);
+                DisplayedCredentials.Remove(credVM);
             }
         }
 

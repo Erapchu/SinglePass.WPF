@@ -71,39 +71,25 @@
                     <ColumnDefinition Width="auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <StackPanel>
-                    <TextBox
-                        x:Name="SearchTextBox"
-                        Grid.Column="1"
-                        Margin="8 40 8 0"
-                        VerticalAlignment="Center"
-                        md:HintAssist.Hint="Search"
-                        md:HintAssist.IsFloating="False"
-                        md:TextFieldAssist.HasClearButton="True"
-                        md:TextFieldAssist.TextFieldCornerRadius="4"
-                        Style="{StaticResource MaterialDesignFilledTextBox}" />
-                    <ListBox
-                        Grid.Column="0"
-                        Width="250"
-                        Margin="0 8 0 0"
-                        HorizontalContentAlignment="Stretch"
-                        md:RippleAssist.IsDisabled="True"
-                        ItemTemplate="{StaticResource NavigationItemDataTemplate}"
-                        ItemsSource="{Binding NavigationItems}"
-                        SelectedIndex="{Binding SelectedNavigationItemIndex, UpdateSourceTrigger=PropertyChanged}"
-                        Style="{StaticResource MaterialDesignNavigationPrimaryListBox}">
-                        <ListBox.Resources>
-                            <Style BasedOn="{StaticResource MaterialDesignScrollBarMinimal}" TargetType="{x:Type ScrollBar}" />
-                        </ListBox.Resources>
-                    </ListBox>
-                </StackPanel>
-
+                <ListBox
+                    Grid.Column="0"
+                    Width="250"
+                    Margin="0 36 0 0"
+                    HorizontalContentAlignment="Stretch"
+                    ItemTemplate="{StaticResource NavigationItemDataTemplate}"
+                    ItemsSource="{Binding NavigationItems}"
+                    SelectedIndex="{Binding SelectedNavigationItemIndex, UpdateSourceTrigger=PropertyChanged}"
+                    Style="{StaticResource MaterialDesignNavigationPrimaryListBox}">
+                    <ListBox.Resources>
+                        <Style BasedOn="{StaticResource MaterialDesignScrollBarMinimal}" TargetType="{x:Type ScrollBar}" />
+                    </ListBox.Resources>
+                </ListBox>
                 <Rectangle
                     Grid.Column="1"
                     Width="1"
                     Fill="{DynamicResource MaterialDesignDivider}" />
                 <md:Card Grid.Column="2" md:ShadowAssist.ShadowDepth="Depth0">
-                    <AdornerDecorator Grid.Column="4" Margin="0 32 0 0">
+                    <AdornerDecorator Grid.Column="4">
                         <md:Transitioner SelectedIndex="{Binding SelectedNavigationItemIndex}">
                             <md:TransitionerSlide>
                                 <md:TransitionerSlide.OpeningEffects>
@@ -127,25 +113,6 @@
                     </AdornerDecorator>
                 </md:Card>
             </Grid>
-            <controls:Flyout
-                Background="{DynamicResource MaterialDesignPaper}"
-                IsOpen="{Binding IsOpenFlyout}"
-                Position="Right">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="auto" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Rectangle
-                        Grid.Column="0"
-                        Width="1"
-                        Fill="{DynamicResource MaterialDesignDivider}" />
-                    <local:CredentialsDialog
-                        Grid.Column="1"
-                        Margin="0 32 0 0"
-                        DataContext="{Binding ActiveCredentialDialogViewModel}" />
-                </Grid>
-            </controls:Flyout>
         </Grid>
     </md:DialogHost>
 </controls:MaterialWindow>

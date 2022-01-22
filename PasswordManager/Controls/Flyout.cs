@@ -346,7 +346,7 @@ namespace PasswordManager.Controls
         private void Hide()
         {
             // hide the flyout, we should get better performance and prevent showing the flyout on any resizing events
-            Visibility = Visibility.Collapsed; // Collapse to stop reserve space
+            Visibility = Visibility.Hidden;
         }
 
         private void TryFocusElement()

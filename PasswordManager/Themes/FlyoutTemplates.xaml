@@ -170,7 +170,7 @@
         <Setter Property="KeyboardNavigation.ControlTabNavigation" Value="Cycle" />
         <Setter Property="KeyboardNavigation.DirectionalNavigation" Value="Cycle" />
         <Setter Property="KeyboardNavigation.TabNavigation" Value="Cycle" />
-        <Setter Property="Visibility" Value="Collapsed" />
+        <Setter Property="Visibility" Value="Hidden" />
         <Setter Property="Template" Value="{StaticResource FlyoutTemplate}" />
     </Style>
 </ResourceDictionary>

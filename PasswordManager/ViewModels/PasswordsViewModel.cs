@@ -61,7 +61,7 @@ namespace PasswordManager.ViewModels
             set
             {
                 SetProperty(ref _searchText, value);
-                _ = FilterCredentialsAsync(_searchText);
+                _ = FilterCredentialsAsync();
             }
         }
 
@@ -118,7 +118,7 @@ namespace PasswordManager.ViewModels
             {
                 await _settingsService.AddCredential(credVM.Model);
                 _credentials.Add(credVM);
-                await FilterCredentialsAsync(null);
+                await FilterCredentialsAsync();
             }
             else if (ActiveCredentialDialogViewModel.Mode == CredentialsDialogMode.Edit)
             {
@@ -127,7 +127,7 @@ namespace PasswordManager.ViewModels
                 var staleIndex = _credentials.IndexOf(staleCredVM);
                 _credentials.Remove(staleCredVM);
                 _credentials.Insert(staleIndex, credVM);
-                await FilterCredentialsAsync(null);
+                await FilterCredentialsAsync();
             }
 
             SelectedCredential = credVM;
@@ -158,12 +158,13 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        public async Task FilterCredentialsAsync(string filterText)
+        public async Task FilterCredentialsAsync()
         {
             try
             {
                 Loading = true;
                 List<CredentialViewModel> filteredCredentials = null;
+                var filterText = SearchText;
 
                 if (string.IsNullOrEmpty(filterText))
                 {

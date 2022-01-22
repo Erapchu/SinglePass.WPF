@@ -80,7 +80,7 @@ namespace PasswordManager.ViewModels
 
         }
 
-        private void CloseExecute()
+        private void CancelExecute()
         {
 
         }
@@ -88,8 +88,8 @@ namespace PasswordManager.ViewModels
         private RelayCommand<bool> _okCommand;
         public RelayCommand<bool> OkCommand => _okCommand ??= new RelayCommand<bool>(OkExecute);
 
-        private RelayCommand _closeCommand;
-        public RelayCommand CloseCommand => _closeCommand ??= new RelayCommand(CloseExecute);
+        private RelayCommand _cancelCommand;
+        public RelayCommand CancelCommand => _cancelCommand ??= new RelayCommand(CancelExecute);
     }
 
     public enum CredentialsDialogMode

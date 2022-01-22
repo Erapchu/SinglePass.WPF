@@ -71,20 +71,33 @@
                     <ColumnDefinition Width="auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <ListBox
-                    Grid.Column="0"
-                    Width="250"
-                    Margin="0 32 0 0"
-                    HorizontalContentAlignment="Stretch"
-                    md:RippleAssist.IsDisabled="True"
-                    ItemTemplate="{StaticResource NavigationItemDataTemplate}"
-                    ItemsSource="{Binding NavigationItems}"
-                    SelectedIndex="{Binding SelectedNavigationItemIndex, UpdateSourceTrigger=PropertyChanged}"
-                    Style="{StaticResource MaterialDesignNavigationPrimaryListBox}">
-                    <ListBox.Resources>
-                        <Style BasedOn="{StaticResource MaterialDesignScrollBarMinimal}" TargetType="{x:Type ScrollBar}" />
-                    </ListBox.Resources>
-                </ListBox>
+                <StackPanel>
+                    <TextBox
+                        x:Name="SearchTextBox"
+                        Grid.Column="1"
+                        Margin="8 32 8 0"
+                        VerticalAlignment="Center"
+                        md:HintAssist.Hint="Search"
+                        md:HintAssist.IsFloating="False"
+                        md:TextFieldAssist.HasClearButton="True"
+                        md:TextFieldAssist.TextFieldCornerRadius="4"
+                        Style="{StaticResource MaterialDesignFilledTextBox}" />
+                    <ListBox
+                        Grid.Column="0"
+                        Width="250"
+                        Margin="0 8 0 0"
+                        HorizontalContentAlignment="Stretch"
+                        md:RippleAssist.IsDisabled="True"
+                        ItemTemplate="{StaticResource NavigationItemDataTemplate}"
+                        ItemsSource="{Binding NavigationItems}"
+                        SelectedIndex="{Binding SelectedNavigationItemIndex, UpdateSourceTrigger=PropertyChanged}"
+                        Style="{StaticResource MaterialDesignNavigationPrimaryListBox}">
+                        <ListBox.Resources>
+                            <Style BasedOn="{StaticResource MaterialDesignScrollBarMinimal}" TargetType="{x:Type ScrollBar}" />
+                        </ListBox.Resources>
+                    </ListBox>
+                </StackPanel>
+
                 <Rectangle
                     Grid.Column="1"
                     Width="1"
@@ -117,8 +130,7 @@
             <controls:Flyout
                 Background="{DynamicResource MaterialDesignPaper}"
                 IsOpen="{Binding IsOpenFlyout}"
-                Position="Right"
-                ShadowVisibility="Collapsed">
+                Position="Right">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto" />

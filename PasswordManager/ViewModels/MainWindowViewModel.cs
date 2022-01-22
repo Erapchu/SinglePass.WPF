@@ -35,7 +35,11 @@ namespace PasswordManager.ViewModels
         public int SelectedNavigationItemIndex
         {
             get => _selectedNavigationItemIndex;
-            set => SetProperty(ref _selectedNavigationItemIndex, value);
+            set
+            {
+                SetProperty(ref _selectedNavigationItemIndex, value);
+                IsOpenFlyout = false; // Close flyout on change navigation item
+            }
         }
 
         private bool _isOpenFlyout;
@@ -44,7 +48,6 @@ namespace PasswordManager.ViewModels
             get => _isOpenFlyout;
             set => SetProperty(ref _isOpenFlyout, value);
         }
-
 
         private MainWindowViewModel() { }
 

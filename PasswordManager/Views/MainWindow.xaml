@@ -75,7 +75,7 @@
                     <TextBox
                         x:Name="SearchTextBox"
                         Grid.Column="1"
-                        Margin="8 32 8 0"
+                        Margin="8 40 8 0"
                         VerticalAlignment="Center"
                         md:HintAssist.Hint="Search"
                         md:HintAssist.IsFloating="False"

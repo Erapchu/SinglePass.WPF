@@ -41,34 +41,34 @@ namespace PasswordManager.ViewModels
             set => SetProperty(ref _credentialViewModel, value);
         }
 
-        private string _captionText;
         public string CaptionText
         {
-            get => _captionText;
-            private set => SetProperty(ref _captionText, value);
+            get
+            {
+                switch (_mode)
+                {
+                    case CredentialsDialogMode.Edit:
+                        return "Edit";
+                    case CredentialsDialogMode.New:
+                        return "New";
+                    case CredentialsDialogMode.View:
+                        return "Details";
+                    default:
+                        break;
+                }
+
+                return string.Empty;
+            }
         }
 
-        private CredentialsDialogMode _mode;
+        private CredentialsDialogMode _mode = CredentialsDialogMode.View;
         public CredentialsDialogMode Mode
         {
             get => _mode;
             set
             {
                 SetProperty(ref _mode, value);
-                switch (_mode)
-                {
-                    case CredentialsDialogMode.Edit:
-                        CaptionText = "Edit";
-                        break;
-                    case CredentialsDialogMode.New:
-                        CaptionText = "New";
-                        break;
-                    case CredentialsDialogMode.View:
-                        CaptionText = "Details";
-                        break;
-                    default:
-                        break;
-                }
+                OnPropertyChanged(nameof(CaptionText));
             }
         }
 

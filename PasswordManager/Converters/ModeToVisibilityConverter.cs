@@ -13,14 +13,16 @@ namespace PasswordManager.Converters
         {
             if (value is CredentialsDialogMode mode)
             {
+                var inverse = parameter is string sparam && sparam == "inverse";
+
                 switch (mode)
                 {
                     case CredentialsDialogMode.New:
-                        return Visibility.Visible;
+                        return inverse ? Visibility.Collapsed : Visibility.Visible;
                     case CredentialsDialogMode.View:
-                        return Visibility.Collapsed;
+                        return inverse ? Visibility.Visible : Visibility.Collapsed;
                     case CredentialsDialogMode.Edit:
-                        return Visibility.Visible;
+                        return inverse ? Visibility.Collapsed : Visibility.Visible;
                     default:
                         break;
                 }

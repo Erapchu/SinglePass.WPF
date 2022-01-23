@@ -77,7 +77,7 @@ namespace PasswordManager.ViewModels
             
         }
 
-        private void OkExecute(bool value)
+        private void OkExecute()
         {
             CredentialViewModel.NameFieldVM.ValidateValue();
             if (CredentialViewModel.NameFieldVM.HasErrors)
@@ -94,17 +94,23 @@ namespace PasswordManager.ViewModels
 
         private void EditExecute()
         {
+            if (CredentialViewModel is null)
+                return;
+
             CredentialViewModel = CredentialViewModel.Clone();
             Mode = CredentialsDialogMode.Edit;
         }
 
         private void DeleteExecute()
         {
+            if (CredentialViewModel is null)
+                return;
+
             Delete?.Invoke(CredentialViewModel);
         }
 
-        private RelayCommand<bool> _okCommand;
-        public RelayCommand<bool> OkCommand => _okCommand ??= new RelayCommand<bool>(OkExecute);
+        private RelayCommand _okCommand;
+        public RelayCommand OkCommand => _okCommand ??= new RelayCommand(OkExecute);
 
         private RelayCommand _cancelCommand;
         public RelayCommand CancelCommand => _cancelCommand ??= new RelayCommand(CancelExecute);

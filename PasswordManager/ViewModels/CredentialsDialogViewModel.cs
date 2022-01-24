@@ -70,6 +70,13 @@ namespace PasswordManager.ViewModels
             }
         }
 
+        private bool _isPasswordVisible;
+        public bool IsPasswordVisible
+        {
+            get => _isPasswordVisible;
+            set => SetProperty(ref _isPasswordVisible, value);
+        }
+
         public CredentialsDialogViewModel()
         {
 
@@ -97,6 +104,7 @@ namespace PasswordManager.ViewModels
 
             CredentialViewModel = CredentialViewModel.Clone();
             Mode = CredentialsDialogMode.Edit;
+            IsPasswordVisible = true;
         }
 
         private void DeleteExecute()

@@ -50,6 +50,7 @@ namespace PasswordManager.ViewModels
                 SetProperty(ref _selectedCredential, value);
                 ActiveCredentialDialogViewModel.Mode = CredentialsDialogMode.View;
                 ActiveCredentialDialogViewModel.CredentialViewModel = value;
+                ActiveCredentialDialogViewModel.IsPasswordVisible = false;
             }
         }
 
@@ -212,6 +213,7 @@ namespace PasswordManager.ViewModels
         {
             ActiveCredentialDialogViewModel.CredentialViewModel = new CredentialViewModel(new Credential());
             ActiveCredentialDialogViewModel.Mode = CredentialsDialogMode.New;
+            ActiveCredentialDialogViewModel.IsPasswordVisible = true;
         }
 
         private void CopyToClipboard(string data)

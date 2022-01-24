@@ -102,7 +102,14 @@ namespace PasswordManager.ViewModels
             {
                 await _settingsService.DeleteCredential(credVM.Model);
                 _credentials.Remove(credVM);
-                DisplayedCredentials.Remove(credVM);
+                var dIndex = DisplayedCredentials.IndexOf(credVM);
+                var countAfterDeletion = DisplayedCredentials.Count - 1;
+                var sIndex = dIndex >= countAfterDeletion ? countAfterDeletion - 1 : dIndex;
+                await FilterCredentialsAsync();
+                if (sIndex >= 0)
+                {
+                    SelectedCredential = DisplayedCredentials.ElementAt(sIndex);
+                }
             }
         }
 

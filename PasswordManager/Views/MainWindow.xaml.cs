@@ -29,7 +29,15 @@ namespace PasswordManager.Views
             InitializeComponent();
 
             _scope = scope.BeginLifetimeScope();
-            DataContext = scope.Resolve<MainWindowViewModel>();
+            var vm = scope.Resolve<MainWindowViewModel>();
+            vm.CredentialSelected += Vm_CredentialSelected;
+            DataContext = vm;
+        }
+
+        private void Vm_CredentialSelected(CredentialViewModel credVM)
+        {
+            var passStringLength = credVM.PasswordFieldVM.Value?.Length ?? 0;
+            PasswordsControl.CredentialsDialog.PasswordFieldBox.Password = new string('*', passStringLength);
         }
 
         private async void Window_Closed(object sender, EventArgs e)

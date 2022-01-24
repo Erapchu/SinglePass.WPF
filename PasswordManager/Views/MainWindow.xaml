@@ -98,7 +98,7 @@
                                 <md:TransitionerSlide.ForwardWipe>
                                     <md:FadeWipe Duration="0:0:0.2" />
                                 </md:TransitionerSlide.ForwardWipe>
-                                <local:PasswordsControl DataContext="{Binding PasswordsViewModel}" />
+                                <local:PasswordsControl x:Name="PasswordsControl" DataContext="{Binding PasswordsViewModel}" />
                             </md:TransitionerSlide>
                             <md:TransitionerSlide>
                                 <md:TransitionerSlide.OpeningEffects>

@@ -38,6 +38,8 @@ namespace PasswordManager.ViewModels
         private readonly ILogger _logger;
         private readonly List<CredentialViewModel> _credentials = new();
 
+        public event Action<CredentialViewModel> CredentialSelected;
+
         public ObservableCollectionDelayed<CredentialViewModel> DisplayedCredentials { get; private set; } = new();
         public CredentialsDialogViewModel ActiveCredentialDialogViewModel { get; }
 
@@ -51,6 +53,7 @@ namespace PasswordManager.ViewModels
                 ActiveCredentialDialogViewModel.Mode = CredentialsDialogMode.View;
                 ActiveCredentialDialogViewModel.CredentialViewModel = value;
                 ActiveCredentialDialogViewModel.IsPasswordVisible = false;
+                CredentialSelected?.Invoke(value);
             }
         }
 

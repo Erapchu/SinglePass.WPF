@@ -26,6 +26,8 @@ namespace PasswordManager.ViewModels
         private readonly SettingsService _settingsService;
         private readonly ILogger _logger;
 
+        public event Action<CredentialViewModel> CredentialSelected;
+
         public PasswordsViewModel PasswordsViewModel { get; }
         public SettingsViewModel SettingsViewModel { get; }
         public ObservableCollectionDelayed<NavigationItemViewModel> NavigationItems { get; }
@@ -58,11 +60,18 @@ namespace PasswordManager.ViewModels
             _settingsService = settingsService;
             _logger = logger;
 
+            PasswordsViewModel.CredentialSelected += PasswordsViewModel_CredentialSelected;
+
             NavigationItems = new ObservableCollectionDelayed<NavigationItemViewModel>(new List<NavigationItemViewModel>()
             {
                 PasswordsViewModel,
                 SettingsViewModel
             });
+        }
+
+        private void PasswordsViewModel_CredentialSelected(CredentialViewModel credVM)
+        {
+            CredentialSelected?.Invoke(credVM);
         }
 
         private async Task LoadingAsync()

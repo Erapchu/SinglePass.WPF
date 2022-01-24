@@ -1,4 +1,5 @@
-﻿using Autofac;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using NLog;
 using PasswordManager.Services;
 using PasswordManager.ViewModels;
@@ -14,7 +15,7 @@ namespace PasswordManager
     /// </summary>
     public partial class App : Application
     {
-        private IContainer _container;
+        private IHost _host;
         private ILogger _logger;
 
         public App()
@@ -37,32 +38,32 @@ namespace PasswordManager
         {
             InitializeComponent();
 
-            ConfigureServices();
+            var hostBuilder = CreateHostBuilder();
+            _host = hostBuilder.Build();
+
             _ = Task.Run(() =>
             {
-                _logger = _container.Resolve<ILogger>();
+                _logger = _host.Services.GetService<ILogger>();
                 _logger.Info("Log session started!");
             });
 
-            var mainWindow = _container.Resolve<MainWindow>();
+            var mainWindow = _host.Services.GetService<MainWindow>();
             mainWindow.Show();
         }
 
-        private void ConfigureServices()
-        {
-            var container = new ContainerBuilder();
-            container.RegisterType<MainWindow>().InstancePerLifetimeScope();
-            container.RegisterType<MainWindowViewModel>().InstancePerLifetimeScope();
-            container.RegisterType<SettingsService>().InstancePerLifetimeScope();
-            container.RegisterType<PasswordsViewModel>().InstancePerLifetimeScope();
-            container.RegisterType<SettingsViewModel>().InstancePerLifetimeScope();
-            container.RegisterType<CredentialsDialogViewModel>().InstancePerLifetimeScope();
-            
-            container.RegisterType<ThemeService>().SingleInstance();
-            container.Register(LoggerResolver.GetLogger).SingleInstance();
+        private IHostBuilder CreateHostBuilder() =>
+            Host.CreateDefaultBuilder().ConfigureServices(services =>
+            {
+                services.AddScoped<MainWindow>();
+                services.AddScoped<MainWindowViewModel>();
+                services.AddScoped<SettingsService>();
+                services.AddScoped<PasswordsViewModel>();
+                services.AddScoped<SettingsViewModel>();
+                services.AddScoped<CredentialsDialogViewModel>();
 
-            _container = container.Build();
-        }
+                services.AddSingleton<ThemeService>();
+                services.AddSingleton(s => LoggerResolver.GetLogger());
+            });
 
         private void Application_Exit(object sender, ExitEventArgs e)
         {

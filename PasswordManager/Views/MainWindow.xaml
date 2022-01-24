@@ -16,7 +16,6 @@
     MinWidth="500"
     MinHeight="300"
     d:DataContext="{x:Static vm:MainWindowViewModel.DesignTimeInstance}"
-    Closed="Window_Closed"
     mc:Ignorable="d">
     <Window.Resources>
         <ResourceDictionary>

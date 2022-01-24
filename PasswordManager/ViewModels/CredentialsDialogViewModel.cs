@@ -1,5 +1,6 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
+using NLog;
 using PasswordManager.Enums;
 using PasswordManager.Models;
 using System;
@@ -11,6 +12,8 @@ namespace PasswordManager.ViewModels
     {
         #region Design time instance
         private static readonly Lazy<CredentialsDialogViewModel> _lazy = new(GetDesignTimeVM);
+        private readonly ILogger _logger;
+
         public static CredentialsDialogViewModel DesignTimeInstance => _lazy.Value;
 
         private static CredentialsDialogViewModel GetDesignTimeVM()
@@ -21,7 +24,7 @@ namespace PasswordManager.ViewModels
                 AdditionalFields = additionalFields
             };
             var credVm = new CredentialViewModel(model);
-            var vm = new CredentialsDialogViewModel();
+            var vm = new CredentialsDialogViewModel(null);
             vm._credentialViewModel = credVm;
             vm.Mode = CredentialsDialogMode.View;
             return vm;
@@ -77,9 +80,9 @@ namespace PasswordManager.ViewModels
             set => SetProperty(ref _isPasswordVisible, value);
         }
 
-        public CredentialsDialogViewModel()
+        public CredentialsDialogViewModel(ILogger logger)
         {
-
+            _logger = logger;
         }
 
         private void OkExecute()
@@ -115,6 +118,21 @@ namespace PasswordManager.ViewModels
             Delete?.Invoke(CredentialViewModel);
         }
 
+        private void CopyToClipboard(string data)
+        {
+            if (string.IsNullOrWhiteSpace(data))
+                return;
+
+            try
+            {
+                System.Windows.Clipboard.SetText(data);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex);
+            }
+        }
+
         private RelayCommand _okCommand;
         public RelayCommand OkCommand => _okCommand ??= new RelayCommand(OkExecute);
 
@@ -126,5 +144,8 @@ namespace PasswordManager.ViewModels
 
         private RelayCommand _deleteCommand;
         public RelayCommand DeleteCommand => _deleteCommand ??= new RelayCommand(DeleteExecute);
+
+        private RelayCommand<string> _copyToClipboardCommand;
+        public RelayCommand<string> CopyToClipboardCommand => _copyToClipboardCommand ??= new RelayCommand<string>(CopyToClipboard);
     }
 }

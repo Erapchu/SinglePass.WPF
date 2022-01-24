@@ -219,25 +219,7 @@ namespace PasswordManager.ViewModels
             ActiveCredentialDialogViewModel.IsPasswordVisible = true;
         }
 
-        private void CopyToClipboard(string data)
-        {
-            if (string.IsNullOrWhiteSpace(data))
-                return;
-
-            try
-            {
-                System.Windows.Clipboard.SetText(data);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex);
-            }
-        }
-
         private RelayCommand _addCredentialCommand;
         public RelayCommand AddCredentialCommand => _addCredentialCommand ??= new RelayCommand(AddCredential);
-
-        private RelayCommand<string> _copyToClipboardCommand;
-        public RelayCommand<string> CopyToClipboardCommand => _copyToClipboardCommand ??= new RelayCommand<string>(CopyToClipboard);
     }
 }

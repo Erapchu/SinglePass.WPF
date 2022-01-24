@@ -208,28 +208,6 @@ namespace PasswordManager.ViewModels
             ActiveCredentialDialogViewModel.Mode = CredentialsDialogMode.New;
         }
 
-        private void EditCredential(CredentialViewModel credentialVM)
-        {
-            ActiveCredentialDialogViewModel.CredentialViewModel = credentialVM.Clone();
-            ActiveCredentialDialogViewModel.Mode = CredentialsDialogMode.Edit;
-        }
-
-        private async Task DeleteCredentialAsync(CredentialViewModel credVM)
-        {
-            var result = await MaterialMessageBox.ShowAsync(
-                "Delete credential?",
-                $"Name: {credVM.NameFieldVM.Value}",
-                MaterialMessageBoxButtons.YesNo,
-                MvvmHelper.MainWindowDialogName,
-                PackIconKind.Delete);
-            if (result == MaterialDialogResult.Yes)
-            {
-                await _settingsService.DeleteCredential(credVM.Model);
-                _credentials.Remove(credVM);
-                DisplayedCredentials.Remove(credVM);
-            }
-        }
-
         private void CopyToClipboard(string data)
         {
             if (string.IsNullOrWhiteSpace(data))
@@ -247,12 +225,6 @@ namespace PasswordManager.ViewModels
 
         private RelayCommand _addCredentialCommand;
         public RelayCommand AddCredentialCommand => _addCredentialCommand ??= new RelayCommand(AddCredential);
-
-        private RelayCommand<CredentialViewModel> _editCredentialCommand;
-        public RelayCommand<CredentialViewModel> EditCredentialCommand => _editCredentialCommand ??= new RelayCommand<CredentialViewModel>(EditCredential);
-
-        private AsyncRelayCommand<CredentialViewModel> _deleteCredentialCommand;
-        public AsyncRelayCommand<CredentialViewModel> DeleteCredentialCommand => _deleteCredentialCommand ??= new AsyncRelayCommand<CredentialViewModel>(DeleteCredentialAsync);
 
         private RelayCommand<string> _copyToClipboardCommand;
         public RelayCommand<string> CopyToClipboardCommand => _copyToClipboardCommand ??= new RelayCommand<string>(CopyToClipboard);

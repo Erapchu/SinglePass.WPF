@@ -36,7 +36,7 @@ namespace PasswordManager.Views
 
         private void Vm_CredentialSelected(CredentialViewModel credVM)
         {
-            var passStringLength = credVM.PasswordFieldVM.Value?.Length ?? 0;
+            var passStringLength = credVM?.PasswordFieldVM?.Value?.Length ?? 0;
             PasswordsControl.CredentialsDialog.PasswordFieldBox.Password = new string('*', passStringLength);
         }
 

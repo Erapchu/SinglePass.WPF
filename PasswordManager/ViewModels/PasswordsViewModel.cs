@@ -11,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Data;
 
 namespace PasswordManager.ViewModels
 {
@@ -112,25 +111,25 @@ namespace PasswordManager.ViewModels
             ActiveCredentialDialogViewModel.CredentialViewModel = SelectedCredential;
         }
 
-        private async void ActiveCredentialDialogViewModel_Accept(CredentialViewModel credVM)
+        private async void ActiveCredentialDialogViewModel_Accept(CredentialViewModel newCredVM, CredentialsDialogMode mode)
         {
-            if (ActiveCredentialDialogViewModel.Mode == CredentialsDialogMode.New)
+            if (mode == CredentialsDialogMode.New)
             {
-                await _settingsService.AddCredential(credVM.Model);
-                _credentials.Add(credVM);
+                await _settingsService.AddCredential(newCredVM.Model);
+                _credentials.Add(newCredVM);
                 await FilterCredentialsAsync();
             }
-            else if (ActiveCredentialDialogViewModel.Mode == CredentialsDialogMode.Edit)
+            else if (mode == CredentialsDialogMode.Edit)
             {
-                await _settingsService.EditCredential(credVM.Model);
-                var staleCredVM = _credentials.FirstOrDefault(c => c.Model.Equals(credVM.Model));
+                await _settingsService.EditCredential(newCredVM.Model);
+                var staleCredVM = _credentials.FirstOrDefault(c => c.Model.Equals(newCredVM.Model));
                 var staleIndex = _credentials.IndexOf(staleCredVM);
                 _credentials.Remove(staleCredVM);
-                _credentials.Insert(staleIndex, credVM);
+                _credentials.Insert(staleIndex, newCredVM);
                 await FilterCredentialsAsync();
             }
 
-            SelectedCredential = credVM;
+            SelectedCredential = newCredVM;
         }
 
         public async Task LoadCredentialsAsync()

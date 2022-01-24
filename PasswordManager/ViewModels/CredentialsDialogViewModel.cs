@@ -1,8 +1,6 @@
-﻿using MaterialDesignThemes.Wpf;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 using PasswordManager.Enums;
-using PasswordManager.Helpers;
 using PasswordManager.Models;
 using System;
 using System.Collections.Generic;
@@ -30,7 +28,7 @@ namespace PasswordManager.ViewModels
         }
         #endregion
 
-        public event Action<CredentialViewModel> Accept;
+        public event Action<CredentialViewModel, CredentialsDialogMode> Accept;
         public event Action<CredentialViewModel> Delete;
         public event Action Cancel;
 
@@ -74,7 +72,7 @@ namespace PasswordManager.ViewModels
 
         public CredentialsDialogViewModel()
         {
-            
+
         }
 
         private void OkExecute()
@@ -83,7 +81,7 @@ namespace PasswordManager.ViewModels
             if (CredentialViewModel.NameFieldVM.HasErrors)
                 return;
 
-            Accept?.Invoke(CredentialViewModel);
+            Accept?.Invoke(CredentialViewModel, Mode);
         }
 
         private void CancelExecute()

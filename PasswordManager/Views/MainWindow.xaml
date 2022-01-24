@@ -88,30 +88,28 @@
                     Grid.Column="1"
                     Width="1"
                     Fill="{DynamicResource MaterialDesignDivider}" />
-                <md:Card Grid.Column="2" md:ShadowAssist.ShadowDepth="Depth0">
-                    <AdornerDecorator Grid.Column="4">
-                        <md:Transitioner SelectedIndex="{Binding SelectedNavigationItemIndex}">
-                            <md:TransitionerSlide>
-                                <md:TransitionerSlide.OpeningEffects>
-                                    <md:TransitionEffect Kind="None" />
-                                </md:TransitionerSlide.OpeningEffects>
-                                <md:TransitionerSlide.ForwardWipe>
-                                    <md:FadeWipe Duration="0:0:0.2" />
-                                </md:TransitionerSlide.ForwardWipe>
-                                <local:PasswordsControl x:Name="PasswordsControl" DataContext="{Binding PasswordsViewModel}" />
-                            </md:TransitionerSlide>
-                            <md:TransitionerSlide>
-                                <md:TransitionerSlide.OpeningEffects>
-                                    <md:TransitionEffect Kind="None" />
-                                </md:TransitionerSlide.OpeningEffects>
-                                <md:TransitionerSlide.BackwardWipe>
-                                    <md:FadeWipe Duration="0:0:0.2" />
-                                </md:TransitionerSlide.BackwardWipe>
-                                <local:SettingsControl DataContext="{Binding SettingsViewModel}" />
-                            </md:TransitionerSlide>
-                        </md:Transitioner>
-                    </AdornerDecorator>
-                </md:Card>
+                <AdornerDecorator Grid.Column="2">
+                    <md:Transitioner SelectedIndex="{Binding SelectedNavigationItemIndex}">
+                        <md:TransitionerSlide>
+                            <md:TransitionerSlide.OpeningEffects>
+                                <md:TransitionEffect Kind="None" />
+                            </md:TransitionerSlide.OpeningEffects>
+                            <md:TransitionerSlide.ForwardWipe>
+                                <md:FadeWipe Duration="0:0:0.2" />
+                            </md:TransitionerSlide.ForwardWipe>
+                            <local:PasswordsControl x:Name="PasswordsControl" DataContext="{Binding PasswordsViewModel}" />
+                        </md:TransitionerSlide>
+                        <md:TransitionerSlide>
+                            <md:TransitionerSlide.OpeningEffects>
+                                <md:TransitionEffect Kind="None" />
+                            </md:TransitionerSlide.OpeningEffects>
+                            <md:TransitionerSlide.BackwardWipe>
+                                <md:FadeWipe Duration="0:0:0.2" />
+                            </md:TransitionerSlide.BackwardWipe>
+                            <local:SettingsControl DataContext="{Binding SettingsViewModel}" />
+                        </md:TransitionerSlide>
+                    </md:Transitioner>
+                </AdornerDecorator>
             </Grid>
         </Grid>
     </md:DialogHost>

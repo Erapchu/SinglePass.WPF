@@ -1,5 +1,4 @@
-﻿using Autofac;
-using NLog;
+﻿using NLog;
 using NLog.Config;
 using NLog.Targets.Wrappers;
 using PasswordManager.Helpers;
@@ -12,7 +11,7 @@ namespace PasswordManager.Services
     {
         public const string DefaultLogLayout = "${date}\t| ${level}\t| TID:#${threadid}> ${message}";
 
-        public static ILogger GetLogger(IComponentContext componentContext)
+        public static ILogger GetLogger()
         {
             var config = LogManager.Configuration ?? new LoggingConfiguration();
             var loggerName = Constants.AppName;

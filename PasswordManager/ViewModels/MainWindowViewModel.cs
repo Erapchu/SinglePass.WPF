@@ -5,6 +5,7 @@ using PasswordManager.Collections;
 using PasswordManager.Services;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PasswordManager.ViewModels
@@ -25,23 +26,25 @@ namespace PasswordManager.ViewModels
         private readonly SettingsService _settingsService;
         private readonly ILogger _logger;
 
+        public event Action<CredentialViewModel> CredentialSelected;
+
         public PasswordsViewModel PasswordsViewModel { get; }
         public SettingsViewModel SettingsViewModel { get; }
-
         public ObservableCollectionDelayed<NavigationItemViewModel> NavigationItems { get; }
 
         private int _selectedNavigationItemIndex;
         public int SelectedNavigationItemIndex
         {
             get => _selectedNavigationItemIndex;
-            set => SetProperty(ref _selectedNavigationItemIndex, value);
-        }
-
-        private bool _isOpenFlyout;
-        public bool IsOpenFlyout
-        {
-            get => _isOpenFlyout;
-            set => SetProperty(ref _isOpenFlyout, value);
+            set
+            {
+                SetProperty(ref _selectedNavigationItemIndex, value);
+                if (value == NavigationItemViewModel.PasswordsNavigationItemIndex)
+                {
+                    PasswordsViewModel.SearchTextFocused = false;
+                    PasswordsViewModel.SearchTextFocused = true;
+                }
+            }
         }
 
         private MainWindowViewModel() { }
@@ -57,7 +60,7 @@ namespace PasswordManager.ViewModels
             _settingsService = settingsService;
             _logger = logger;
 
-            PasswordsViewModel.OpenFlyoutRequested += PasswordsViewModel_OpenFlyoutRequested;
+            PasswordsViewModel.CredentialSelected += PasswordsViewModel_CredentialSelected;
 
             NavigationItems = new ObservableCollectionDelayed<NavigationItemViewModel>(new List<NavigationItemViewModel>()
             {
@@ -66,14 +69,15 @@ namespace PasswordManager.ViewModels
             });
         }
 
-        private void PasswordsViewModel_OpenFlyoutRequested(bool isOpen)
+        private void PasswordsViewModel_CredentialSelected(CredentialViewModel credVM)
         {
-            IsOpenFlyout = isOpen;
+            CredentialSelected?.Invoke(credVM);
         }
 
         private async Task LoadingAsync()
         {
             await PasswordsViewModel.LoadCredentialsAsync();
+            PasswordsViewModel.SearchTextFocused = true;
         }
 
         private AsyncRelayCommand _loadingCommand;

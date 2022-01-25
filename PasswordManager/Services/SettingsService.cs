@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using NLog;
+﻿using NLog;
 using PasswordManager.Helpers;
 using PasswordManager.Helpers.Threading;
 using PasswordManager.Models;
@@ -9,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,13 +16,7 @@ namespace PasswordManager.Services
 {
     public class SettingsService
     {
-        public Lazy<JsonSerializerSettings> _lazyDefaultSerializerSettings = new(() => new JsonSerializerSettings()
-        {
-            DefaultValueHandling = DefaultValueHandling.Include
-        });
-        public JsonSerializerSettings DefaultSerializerSettings => _lazyDefaultSerializerSettings.Value;
-
-        private readonly object _credentialsLock = new object();
+        private readonly object _credentialsLock = new();
 
         private readonly ILogger _logger;
         private List<Credential> _credentials;
@@ -85,7 +79,7 @@ namespace PasswordManager.Services
 
                     try
                     {
-                        credentials = JsonConvert.DeserializeObject<List<Credential>>(jsonText, DefaultSerializerSettings);
+                        credentials = JsonSerializer.Deserialize<List<Credential>>(jsonText);
                     }
                     catch (JsonException jsex)
                     {
@@ -206,7 +200,7 @@ namespace PasswordManager.Services
 
                     // Get copy and serialize
                     var credentials = Credentials;
-                    var jsonText = JsonConvert.SerializeObject(credentials, DefaultSerializerSettings);
+                    var jsonText = JsonSerializer.Serialize(credentials);
                     var encryptedBytes = AesCryptographyHelper.EncryptStringToBytes(jsonText, keyBytes, ivBytes);
 
                     using var bw = new BinaryWriter(fileStream);

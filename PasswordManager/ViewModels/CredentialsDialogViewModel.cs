@@ -1,13 +1,10 @@
-﻿using MaterialDesignThemes.Wpf;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
-using PasswordManager.Helpers;
+using NLog;
+using PasswordManager.Enums;
 using PasswordManager.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PasswordManager.ViewModels
 {
@@ -15,6 +12,8 @@ namespace PasswordManager.ViewModels
     {
         #region Design time instance
         private static readonly Lazy<CredentialsDialogViewModel> _lazy = new(GetDesignTimeVM);
+        private readonly ILogger _logger;
+
         public static CredentialsDialogViewModel DesignTimeInstance => _lazy.Value;
 
         private static CredentialsDialogViewModel GetDesignTimeVM()
@@ -25,31 +24,128 @@ namespace PasswordManager.ViewModels
                 AdditionalFields = additionalFields
             };
             var credVm = new CredentialViewModel(model);
-            var vm = new CredentialsDialogViewModel(credVm, "Lorem ipsum dolor sit amet");
+            var vm = new CredentialsDialogViewModel(null);
+            vm._credentialViewModel = credVm;
+            vm.Mode = CredentialsDialogMode.View;
             return vm;
         }
         #endregion
 
-        public CredentialViewModel CredentialViewModel { get; }
+        public event Action<CredentialViewModel, CredentialsDialogMode> Accept;
+        public event Action<CredentialViewModel> Delete;
+        public event Action Cancel;
 
-        public string CaptionText { get; }
-
-        public CredentialsDialogViewModel(CredentialViewModel credentialViewModel, string captionText)
+        private CredentialViewModel _credentialViewModel;
+        public CredentialViewModel CredentialViewModel
         {
-            CredentialViewModel = credentialViewModel ?? throw new ArgumentNullException(nameof(credentialViewModel));
-            CaptionText = captionText;
+            get => _credentialViewModel;
+            set => SetProperty(ref _credentialViewModel, value);
         }
 
-        private void OkExecute(bool value)
+        public string CaptionText
+        {
+            get
+            {
+                switch (_mode)
+                {
+                    case CredentialsDialogMode.Edit:
+                        return "Edit";
+                    case CredentialsDialogMode.New:
+                        return "New";
+                    case CredentialsDialogMode.View:
+                        return "Details";
+                    default:
+                        break;
+                }
+
+                return string.Empty;
+            }
+        }
+
+        private CredentialsDialogMode _mode = CredentialsDialogMode.View;
+        public CredentialsDialogMode Mode
+        {
+            get => _mode;
+            set
+            {
+                SetProperty(ref _mode, value);
+                OnPropertyChanged(nameof(CaptionText));
+            }
+        }
+
+        private bool _isPasswordVisible;
+        public bool IsPasswordVisible
+        {
+            get => _isPasswordVisible;
+            set => SetProperty(ref _isPasswordVisible, value);
+        }
+
+        public CredentialsDialogViewModel(ILogger logger)
+        {
+            _logger = logger;
+        }
+
+        private void OkExecute()
         {
             CredentialViewModel.NameFieldVM.ValidateValue();
             if (CredentialViewModel.NameFieldVM.HasErrors)
                 return;
 
-            DialogHost.Close(MvvmHelper.MainWindowDialogName, value);
+            Accept?.Invoke(CredentialViewModel, Mode);
         }
 
-        private RelayCommand<bool> _okCommand;
-        public RelayCommand<bool> OkCommand => _okCommand ??= new RelayCommand<bool>(OkExecute);
+        private void CancelExecute()
+        {
+            Mode = CredentialsDialogMode.View;
+            Cancel?.Invoke();
+        }
+
+        private void EditExecute()
+        {
+            if (CredentialViewModel is null)
+                return;
+
+            CredentialViewModel = CredentialViewModel.Clone();
+            Mode = CredentialsDialogMode.Edit;
+            IsPasswordVisible = true;
+        }
+
+        private void DeleteExecute()
+        {
+            if (CredentialViewModel is null)
+                return;
+
+            Delete?.Invoke(CredentialViewModel);
+        }
+
+        private void CopyToClipboard(string data)
+        {
+            if (string.IsNullOrWhiteSpace(data))
+                return;
+
+            try
+            {
+                System.Windows.Clipboard.SetText(data);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex);
+            }
+        }
+
+        private RelayCommand _okCommand;
+        public RelayCommand OkCommand => _okCommand ??= new RelayCommand(OkExecute);
+
+        private RelayCommand _cancelCommand;
+        public RelayCommand CancelCommand => _cancelCommand ??= new RelayCommand(CancelExecute);
+
+        private RelayCommand _editCommand;
+        public RelayCommand EditCommand => _editCommand ??= new RelayCommand(EditExecute);
+
+        private RelayCommand _deleteCommand;
+        public RelayCommand DeleteCommand => _deleteCommand ??= new RelayCommand(DeleteExecute);
+
+        private RelayCommand<string> _copyToClipboardCommand;
+        public RelayCommand<string> CopyToClipboardCommand => _copyToClipboardCommand ??= new RelayCommand<string>(CopyToClipboard);
     }
 }

@@ -16,7 +16,6 @@
     MinWidth="500"
     MinHeight="300"
     d:DataContext="{x:Static vm:MainWindowViewModel.DesignTimeInstance}"
-    Closed="Window_Closed"
     mc:Ignorable="d">
     <Window.Resources>
         <ResourceDictionary>
@@ -74,9 +73,8 @@
                 <ListBox
                     Grid.Column="0"
                     Width="250"
-                    Margin="0 32 0 0"
+                    Margin="0 36 0 0"
                     HorizontalContentAlignment="Stretch"
-                    md:RippleAssist.IsDisabled="True"
                     ItemTemplate="{StaticResource NavigationItemDataTemplate}"
                     ItemsSource="{Binding NavigationItems}"
                     SelectedIndex="{Binding SelectedNavigationItemIndex, UpdateSourceTrigger=PropertyChanged}"
@@ -89,37 +87,29 @@
                     Grid.Column="1"
                     Width="1"
                     Fill="{DynamicResource MaterialDesignDivider}" />
-                <md:Card Grid.Column="2" md:ShadowAssist.ShadowDepth="Depth0">
-                    <AdornerDecorator Grid.Column="4" Margin="0 32 0 0">
-                        <md:Transitioner SelectedIndex="{Binding SelectedNavigationItemIndex}">
-                            <md:TransitionerSlide>
-                                <md:TransitionerSlide.OpeningEffects>
-                                    <md:TransitionEffect Kind="None" />
-                                </md:TransitionerSlide.OpeningEffects>
-                                <md:TransitionerSlide.ForwardWipe>
-                                    <md:FadeWipe Duration="0:0:0.2" />
-                                </md:TransitionerSlide.ForwardWipe>
-                                <local:PasswordsControl DataContext="{Binding PasswordsViewModel}" />
-                            </md:TransitionerSlide>
-                            <md:TransitionerSlide>
-                                <md:TransitionerSlide.OpeningEffects>
-                                    <md:TransitionEffect Kind="None" />
-                                </md:TransitionerSlide.OpeningEffects>
-                                <md:TransitionerSlide.BackwardWipe>
-                                    <md:FadeWipe Duration="0:0:0.2" />
-                                </md:TransitionerSlide.BackwardWipe>
-                                <local:SettingsControl DataContext="{Binding SettingsViewModel}" />
-                            </md:TransitionerSlide>
-                        </md:Transitioner>
-                    </AdornerDecorator>
-                </md:Card>
+                <AdornerDecorator Grid.Column="2">
+                    <md:Transitioner SelectedIndex="{Binding SelectedNavigationItemIndex}">
+                        <md:TransitionerSlide>
+                            <md:TransitionerSlide.OpeningEffects>
+                                <md:TransitionEffect Kind="None" />
+                            </md:TransitionerSlide.OpeningEffects>
+                            <md:TransitionerSlide.ForwardWipe>
+                                <md:FadeWipe Duration="0:0:0.2" />
+                            </md:TransitionerSlide.ForwardWipe>
+                            <local:PasswordsControl x:Name="PasswordsControl" DataContext="{Binding PasswordsViewModel}" />
+                        </md:TransitionerSlide>
+                        <md:TransitionerSlide>
+                            <md:TransitionerSlide.OpeningEffects>
+                                <md:TransitionEffect Kind="None" />
+                            </md:TransitionerSlide.OpeningEffects>
+                            <md:TransitionerSlide.BackwardWipe>
+                                <md:FadeWipe Duration="0:0:0.2" />
+                            </md:TransitionerSlide.BackwardWipe>
+                            <local:SettingsControl DataContext="{Binding SettingsViewModel}" />
+                        </md:TransitionerSlide>
+                    </md:Transitioner>
+                </AdornerDecorator>
             </Grid>
-            <controls:Flyout
-                IsOpen="{Binding IsOpenFlyout}"
-                ShadowVisibility="Visible"
-                Position="Right">
-                <local:CredentialsDialog />
-            </controls:Flyout>
         </Grid>
     </md:DialogHost>
 </controls:MaterialWindow>

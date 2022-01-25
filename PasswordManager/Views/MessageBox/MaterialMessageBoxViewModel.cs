@@ -212,7 +212,7 @@ namespace PasswordManager.Views.MessageBox
         }
         #endregion
 
-        private readonly string _dialogIdentifier = null;
+        private readonly string _dialogIdentifier;
         private readonly MaterialMessageBoxButtons _materialMessageBoxButtons;
 
         public MaterialMessageBoxViewModel(
@@ -250,7 +250,8 @@ namespace PasswordManager.Views.MessageBox
                     break;
             }
 
-            DialogHost.Close(_dialogIdentifier, result);
+            if (DialogHost.IsDialogOpen(_dialogIdentifier))
+                DialogHost.Close(_dialogIdentifier, result);
         }
 
         private void Button2Action()
@@ -273,7 +274,8 @@ namespace PasswordManager.Views.MessageBox
                     break;
             }
 
-            DialogHost.Close(_dialogIdentifier, result);
+            if (DialogHost.IsDialogOpen(_dialogIdentifier))
+                DialogHost.Close(_dialogIdentifier, result);
         }
 
         private void Button3Action()
@@ -289,7 +291,8 @@ namespace PasswordManager.Views.MessageBox
                     break;
             }
 
-            DialogHost.Close(_dialogIdentifier, result);
+            if (DialogHost.IsDialogOpen(_dialogIdentifier))
+                DialogHost.Close(_dialogIdentifier, result);
         }
 
         #region Commands

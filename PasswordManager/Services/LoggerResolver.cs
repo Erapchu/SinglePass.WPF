@@ -11,8 +11,15 @@ namespace PasswordManager.Services
     {
         public const string DefaultLogLayout = "${date}\t| ${level}\t| TID:#${threadid}> ${message}";
 
+        private static ILogger _logger;
+
         public static ILogger GetLogger()
         {
+            if (_logger != null)
+            {
+                return _logger;
+            }
+
             var config = LogManager.Configuration ?? new LoggingConfiguration();
             var loggerName = Constants.AppName;
             var fileTargetName = $"{loggerName} File Log Target";
@@ -36,11 +43,11 @@ namespace PasswordManager.Services
             };
             var fileTargetWrapper = new AsyncTargetWrapper(fileTarget);
             config.AddTarget(fileTargetName, fileTargetWrapper);
-            config.LoggingRules.Add(new LoggingRule(loggerName, LogLevel.Trace, fileTargetWrapper));
+            config.AddRule(LogLevel.Trace, LogLevel.Fatal, fileTargetWrapper, loggerName);
 
             LogManager.Configuration = config;
-            var logger = LogManager.GetLogger(loggerName);
-            return logger;
+            _logger = LogManager.GetLogger(loggerName);
+            return _logger;
         }
     }
 }

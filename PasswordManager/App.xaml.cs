@@ -40,12 +40,8 @@ namespace PasswordManager
 
             var hostBuilder = CreateHostBuilder();
             _host = hostBuilder.Build();
-
-            _ = Task.Run(() =>
-            {
-                _logger = _host.Services.GetService<ILogger>();
-                _logger.Info("Log session started!");
-            });
+            _logger = _host.Services.GetService<ILogger>();
+            _logger.Info("Log session started!");
 
             var mainWindow = _host.Services.GetService<MainWindow>();
             mainWindow.Show();

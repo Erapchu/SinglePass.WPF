@@ -49,12 +49,31 @@ namespace PasswordManager
             _logger = _host.Services.GetService<ILogger<App>>();
             _logger.LogInformation("Log session started!");
 
+            // Resolve theme
+            var themeService = _host.Services.GetService<ThemeService>();
+
+            // Login
+            using (var loginScope = _host.Services.CreateScope())
+            {
+                var loginWindow = _host.Services.GetService<LoginWindow>();
+                var dialogResult = loginWindow.ShowDialog(); // Stop here
+                if (dialogResult == false)
+                {
+                    Shutdown();
+                    return;
+                }
+            }
+
+            // Open main window
             var mainWindow = _host.Services.GetService<MainWindow>();
             mainWindow.Show();
+            //TODO: implement NotifyIcon for WPF, leave explicit shutdown
+            ShutdownMode = ShutdownMode.OnLastWindowClose;
         }
 
         private IHostBuilder CreateHostBuilder() =>
-            Host.CreateDefaultBuilder().ConfigureServices(services =>
+            Host.CreateDefaultBuilder()
+            .ConfigureServices(services =>
             {
                 // NLog
                 services.AddLogging(lb =>
@@ -64,13 +83,16 @@ namespace PasswordManager
                     lb.AddNLog(_configuration);
                 });
 
+                services.AddScoped<LoginWindow>();
+                services.AddScoped<LoginWindowViewModel>();
+
                 services.AddScoped<MainWindow>();
                 services.AddScoped<MainWindowViewModel>();
-                services.AddScoped<SettingsService>();
                 services.AddScoped<PasswordsViewModel>();
                 services.AddScoped<SettingsViewModel>();
                 services.AddScoped<CredentialsDialogViewModel>();
 
+                services.AddSingleton<SettingsService>();
                 services.AddSingleton<ThemeService>();
             });
 

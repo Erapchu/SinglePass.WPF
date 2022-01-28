@@ -119,11 +119,14 @@ namespace PasswordManager.ViewModels
 
         private void ActiveCredentialDialogViewModel_Cancel()
         {
+            ActiveCredentialDialogViewModel.IsPasswordVisible = false;
+            ActiveCredentialDialogViewModel.Mode = CredentialsDialogMode.View;
             ActiveCredentialDialogViewModel.CredentialViewModel = SelectedCredential;
         }
 
         private async void ActiveCredentialDialogViewModel_Accept(CredentialViewModel newCredVM, CredentialsDialogMode mode)
         {
+            newCredVM.LastModifiedTime = DateTime.Now;
             if (mode == CredentialsDialogMode.New)
             {
                 await _settingsService.AddCredential(newCredVM.Model);

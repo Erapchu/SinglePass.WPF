@@ -32,6 +32,12 @@ namespace PasswordManager.ViewModels
         public PassFieldViewModel OtherFieldVM { get; }
         public ObservableCollection<PassFieldViewModel> AdditionalFields { get; }
 
+        public DateTime LastModifiedTime
+        {
+            get => Model.LastModifiedTime;
+            set => Model.LastModifiedTime = value;
+        }
+
         private bool _passwordVisible;
         public bool PasswordVisible
         {
@@ -47,6 +53,7 @@ namespace PasswordManager.ViewModels
             PasswordFieldVM = new PassFieldViewModel(credential.PasswordField);
             OtherFieldVM = new PassFieldViewModel(credential.OtherField);
             AdditionalFields = new ObservableCollection<PassFieldViewModel>(credential.AdditionalFields.Select(f => new PassFieldViewModel(f)));
+            LastModifiedTime = credential.LastModifiedTime;
         }
 
         internal CredentialViewModel Clone()

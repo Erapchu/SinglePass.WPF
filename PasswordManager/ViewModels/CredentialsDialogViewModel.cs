@@ -96,7 +96,6 @@ namespace PasswordManager.ViewModels
 
         private void CancelExecute()
         {
-            Mode = CredentialsDialogMode.View;
             Cancel?.Invoke();
         }
 

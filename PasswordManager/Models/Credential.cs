@@ -13,11 +13,12 @@ namespace PasswordManager.Models
         public PassField PasswordField { get; set; }
         public PassField OtherField { get; set; }
         public List<PassField> AdditionalFields { get; set; }
+        public DateTime LastModifiedTime { get; set; }
 
         public Credential()
         {
             Id = Guid.NewGuid();
-            NameField = new PassField() { Name = "Name*" };
+            NameField = new PassField() { Name = "Name" };
             LoginField = new PassField() { Name = "Login" };
             PasswordField = new PassField() { Name = "Password" };
             OtherField = new PassField() { Name = "Other" };
@@ -32,6 +33,7 @@ namespace PasswordManager.Models
             clone.LoginField = LoginField.Clone();
             clone.PasswordField = PasswordField.Clone();
             clone.OtherField = OtherField.Clone();
+            clone.LastModifiedTime = LastModifiedTime;
 
             foreach (var field in AdditionalFields)
             {

@@ -146,12 +146,11 @@ namespace PasswordManager.ViewModels
             SelectedCredential = newCredVM;
         }
 
-        public async Task LoadCredentialsAsync()
+        public void LoadCredentials()
         {
             try
             {
                 Loading = true;
-                await _settingsService.LoadCredentialsAsync();
                 var credentials = _settingsService.Credentials;
                 using var delayed = DisplayedCredentials.DelayNotifications();
                 foreach (var cred in credentials)

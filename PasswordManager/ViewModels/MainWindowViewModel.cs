@@ -76,7 +76,10 @@ namespace PasswordManager.ViewModels
 
         private async Task LoadingAsync()
         {
-            await PasswordsViewModel.LoadCredentialsAsync();
+            PasswordsViewModel.LoadCredentials();
+            
+            // Delay only for focus
+            await Task.Delay(1);
             PasswordsViewModel.SearchTextFocused = true;
         }
 

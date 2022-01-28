@@ -1,4 +1,4 @@
-﻿using NLog;
+﻿using Microsoft.Extensions.Logging;
 using PasswordManager.Helpers;
 using PasswordManager.Helpers.Threading;
 using PasswordManager.Models;
@@ -18,7 +18,7 @@ namespace PasswordManager.Services
     {
         private readonly object _credentialsLock = new();
 
-        private readonly ILogger _logger;
+        private readonly ILogger<SettingsService> _logger;
         private List<Credential> _credentials;
 
         private readonly string _key = "agddhethbqerthnmklutrasdcxzfgttr";
@@ -34,7 +34,7 @@ namespace PasswordManager.Services
             }
         }
 
-        public SettingsService(ILogger logger)
+        public SettingsService(ILogger<SettingsService> logger)
         {
             _logger = logger;
 
@@ -45,7 +45,7 @@ namespace PasswordManager.Services
         {
             _credentials = await Task.Run(() =>
             {
-                _logger.Info("Loading credentials from file...");
+                _logger.LogInformation("Loading credentials from file...");
                 var credentials = new List<Credential>();
                 try
                 {
@@ -57,7 +57,7 @@ namespace PasswordManager.Services
                     if (!File.Exists(pathToPasswordsFile))
                     {
                         // File is not exists yet
-                        _logger.Info("File is not exists.");
+                        _logger.LogInformation("File is not exists.");
                         return credentials;
                     }
 
@@ -83,18 +83,18 @@ namespace PasswordManager.Services
                     }
                     catch (JsonException jsex)
                     {
-                        _logger.Warn("Failed to deserialize credentials settings file content due to exception: {0}", jsex);
+                        _logger.LogWarning("Failed to deserialize credentials settings file content due to exception: {0}", jsex);
 
                         if (credentials is null)
                         {
-                            _logger.Info("Using empty credentials list");
+                            _logger.LogInformation("Using empty credentials list");
                             credentials = new();
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(ex);
+                    _logger.LogError(ex, string.Empty);
                 }
 
                 return credentials;
@@ -114,7 +114,7 @@ namespace PasswordManager.Services
                 if (index >= 0)
                 {
                     // Shouldn't be
-                    _logger.Warn("Duplicate credential found.");
+                    _logger.LogWarning("Duplicate credential found.");
                     return;
                 }
 
@@ -136,7 +136,7 @@ namespace PasswordManager.Services
                 var index = _credentials.IndexOf(credential);
                 if (index < 0)
                 {
-                    _logger.Warn("Prevented attempt to edit non-existed credential.");
+                    _logger.LogWarning("Prevented attempt to edit non-existed credential.");
                     return;
                 }
 
@@ -158,7 +158,7 @@ namespace PasswordManager.Services
                 var index = _credentials.IndexOf(credential);
                 if (index < 0)
                 {
-                    _logger.Warn("Prevented attempt to delete non-existed credential.");
+                    _logger.LogWarning("Prevented attempt to delete non-existed credential.");
                     return;
                 }
 
@@ -209,11 +209,11 @@ namespace PasswordManager.Services
                 }
                 catch (JsonException jsex)
                 {
-                    _logger.Warn("Failed to serialize credentials settings to file due to exception: {0}", jsex);
+                    _logger.LogWarning("Failed to serialize credentials settings to file due to exception: {0}", jsex);
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(ex);
+                    _logger.LogError(ex, string.Empty);
                 }
             });
         }

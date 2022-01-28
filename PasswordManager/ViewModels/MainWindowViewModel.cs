@@ -1,6 +1,6 @@
-﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
-using NLog;
 using PasswordManager.Collections;
 using PasswordManager.Services;
 using System;
@@ -24,7 +24,7 @@ namespace PasswordManager.ViewModels
         #endregion
 
         private readonly SettingsService _settingsService;
-        private readonly ILogger _logger;
+        private readonly ILogger<MainWindowViewModel> _logger;
 
         public event Action<CredentialViewModel> CredentialSelected;
 
@@ -53,7 +53,7 @@ namespace PasswordManager.ViewModels
             PasswordsViewModel passwordsViewModel,
             SettingsService settingsService,
             SettingsViewModel settingsViewModel,
-            ILogger logger)
+            ILogger<MainWindowViewModel> logger)
         {
             PasswordsViewModel = passwordsViewModel;
             SettingsViewModel = settingsViewModel;

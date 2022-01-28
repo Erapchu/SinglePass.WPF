@@ -1,6 +1,6 @@
-﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
-using NLog;
 using PasswordManager.Enums;
 using PasswordManager.Models;
 using System;
@@ -12,7 +12,7 @@ namespace PasswordManager.ViewModels
     {
         #region Design time instance
         private static readonly Lazy<CredentialsDialogViewModel> _lazy = new(GetDesignTimeVM);
-        private readonly ILogger _logger;
+        private readonly ILogger<CredentialsDialogViewModel> _logger;
 
         public static CredentialsDialogViewModel DesignTimeInstance => _lazy.Value;
 
@@ -80,7 +80,7 @@ namespace PasswordManager.ViewModels
             set => SetProperty(ref _isPasswordVisible, value);
         }
 
-        public CredentialsDialogViewModel(ILogger logger)
+        public CredentialsDialogViewModel(ILogger<CredentialsDialogViewModel> logger)
         {
             _logger = logger;
         }
@@ -96,7 +96,6 @@ namespace PasswordManager.ViewModels
 
         private void CancelExecute()
         {
-            Mode = CredentialsDialogMode.View;
             Cancel?.Invoke();
         }
 
@@ -129,7 +128,7 @@ namespace PasswordManager.ViewModels
             }
             catch (Exception ex)
             {
-                _logger.Error(ex);
+                _logger.LogError(ex, string.Empty);
             }
         }
 

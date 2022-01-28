@@ -15,6 +15,7 @@
     Height="500"
     MinWidth="500"
     MinHeight="300"
+    UseLayoutRounding="True"
     d:DataContext="{x:Static vm:MainWindowViewModel.DesignTimeInstance}"
     mc:Ignorable="d">
     <Window.Resources>
@@ -72,7 +73,7 @@
                 </Grid.ColumnDefinitions>
                 <ListBox
                     Grid.Column="0"
-                    Width="250"
+                    Width="220"
                     Margin="0 36 0 0"
                     HorizontalContentAlignment="Stretch"
                     ItemTemplate="{StaticResource NavigationItemDataTemplate}"

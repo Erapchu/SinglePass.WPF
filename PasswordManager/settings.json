@@ -1,0 +1,42 @@
+{
+  "NLog": {
+    "autoReload": true,
+    "throwConfigExceptions": true,
+    "extensions": [
+      { "assembly": "NLog.Extensions.Logging" }
+    ],
+    "variables": {
+      "logName": "PasswordManager",
+      "logDir": "${specialfolder:folder=LocalApplicationData}/PasswordManager/Logs",
+      "logDirArchive": "${var:logDir}/Archive",
+      "logLayout": "${date} | ${level:padding=-5:fixedLength=true} | TID:${threadid:padding=-2} | ${callsite:includeNamespace=False:cleanNamesOfAnonymousDelegates=True:cleanNamesOfAsyncContinuations=True}> ${message}"
+    },
+    "targets": {
+      "async": true,
+      "file": {
+        "type": "File",
+        "archiveAboveSize": 31457280,
+        "ArchiveDateFormat": "yyyyMMdd",
+        "archiveEvery": "Month",
+        "archiveFileName": "${logDirArchive}/${logName}.{##}.log",
+        "archiveNumbering": "DateAndSequence",
+        "autoFlush": "true",
+        "concurrentWrites": "true",
+        "createDirs": "true",
+        "deleteOldFileOnStartup": "false",
+        "encoding": "utf-8",
+        "fileName": "${logDir}/${logName}.log",
+        "layout": "${logLayout}",
+        "maxArchiveFiles": 50
+      }
+    },
+    "rules": [
+      {
+        "logger": "*",
+        //"levels": "Trace,Debug,Info,Warn,Error,Fatal",
+        "minLevel": "Trace",
+        "writeTo": "file"
+      }
+    ]
+  }
+}

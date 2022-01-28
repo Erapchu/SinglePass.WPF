@@ -1,6 +1,6 @@
 ﻿using MaterialDesignThemes.Wpf;
+using Microsoft.Extensions.Logging;
 using Microsoft.Toolkit.Mvvm.Input;
-using NLog;
 using PasswordManager.Collections;
 using PasswordManager.Enums;
 using PasswordManager.Helpers;
@@ -35,7 +35,7 @@ namespace PasswordManager.ViewModels
         #endregion
 
         private readonly SettingsService _settingsService;
-        private readonly ILogger _logger;
+        private readonly ILogger<PasswordsViewModel> _logger;
         private readonly List<CredentialViewModel> _credentials = new();
 
         public event Action<CredentialViewModel> CredentialSelected;
@@ -79,7 +79,7 @@ namespace PasswordManager.ViewModels
 
         public PasswordsViewModel(
             SettingsService settingsService,
-            ILogger logger,
+            ILogger<PasswordsViewModel> logger,
             CredentialsDialogViewModel credentialsDialogViewModel)
         {
             _settingsService = settingsService;
@@ -119,11 +119,14 @@ namespace PasswordManager.ViewModels
 
         private void ActiveCredentialDialogViewModel_Cancel()
         {
+            ActiveCredentialDialogViewModel.IsPasswordVisible = false;
+            ActiveCredentialDialogViewModel.Mode = CredentialsDialogMode.View;
             ActiveCredentialDialogViewModel.CredentialViewModel = SelectedCredential;
         }
 
         private async void ActiveCredentialDialogViewModel_Accept(CredentialViewModel newCredVM, CredentialsDialogMode mode)
         {
+            newCredVM.LastModifiedTime = DateTime.Now;
             if (mode == CredentialsDialogMode.New)
             {
                 await _settingsService.AddCredential(newCredVM.Model);
@@ -160,7 +163,7 @@ namespace PasswordManager.ViewModels
             }
             catch (Exception ex)
             {
-                _logger.Error(ex);
+                _logger.LogError(ex, string.Empty);
             }
             finally
             {
@@ -204,7 +207,7 @@ namespace PasswordManager.ViewModels
             }
             catch (Exception ex)
             {
-                _logger.Error(ex);
+                _logger.LogError(ex, string.Empty);
             }
             finally
             {

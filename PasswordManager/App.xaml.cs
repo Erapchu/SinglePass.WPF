@@ -1,11 +1,12 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using NLog;
+using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
 using PasswordManager.Services;
 using PasswordManager.ViewModels;
 using PasswordManager.Views;
 using System;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace PasswordManager
@@ -16,7 +17,8 @@ namespace PasswordManager
     public partial class App : Application
     {
         private IHost _host;
-        private ILogger _logger;
+        private ILogger<App> _logger;
+        private static IConfiguration _configuration;
 
         public App()
         {
@@ -26,22 +28,26 @@ namespace PasswordManager
 
         private void Current_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
-            _logger?.Error(e.Exception);
+            _logger?.LogError(e.Exception, "Dispatcher unhandled exception");
         }
 
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            _logger?.Error(e.ExceptionObject as Exception);
+            _logger?.LogError(e.ExceptionObject as Exception, "Domain unhandled exception");
         }
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
             InitializeComponent();
 
-            var hostBuilder = CreateHostBuilder();
-            _host = hostBuilder.Build();
-            _logger = _host.Services.GetService<ILogger>();
-            _logger.Info("Log session started!");
+            _configuration = new ConfigurationBuilder()
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                .AddJsonFile("settings.json", optional: false, reloadOnChange: true)
+                .AddEnvironmentVariables()
+                .Build();
+            _host = CreateHostBuilder().Build();
+            _logger = _host.Services.GetService<ILogger<App>>();
+            _logger.LogInformation("Log session started!");
 
             var mainWindow = _host.Services.GetService<MainWindow>();
             mainWindow.Show();
@@ -50,6 +56,14 @@ namespace PasswordManager
         private IHostBuilder CreateHostBuilder() =>
             Host.CreateDefaultBuilder().ConfigureServices(services =>
             {
+                // NLog
+                services.AddLogging(lb =>
+                {
+                    lb.ClearProviders();
+                    lb.SetMinimumLevel(LogLevel.Trace);
+                    lb.AddNLog(_configuration);
+                });
+
                 services.AddScoped<MainWindow>();
                 services.AddScoped<MainWindowViewModel>();
                 services.AddScoped<SettingsService>();
@@ -58,7 +72,6 @@ namespace PasswordManager
                 services.AddScoped<CredentialsDialogViewModel>();
 
                 services.AddSingleton<ThemeService>();
-                services.AddSingleton(s => LoggerResolver.GetLogger());
             });
 
         private void Application_Exit(object sender, ExitEventArgs e)

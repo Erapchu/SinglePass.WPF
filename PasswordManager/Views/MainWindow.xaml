@@ -15,6 +15,7 @@
     Height="500"
     MinWidth="500"
     MinHeight="300"
+    UseLayoutRounding="True"
     d:DataContext="{x:Static vm:MainWindowViewModel.DesignTimeInstance}"
     mc:Ignorable="d">
     <Window.Resources>

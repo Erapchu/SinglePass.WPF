@@ -53,14 +53,12 @@
                 <Button
                     Command="{Binding Button1Command}"
                     Content="{Binding Button1Text}"
-                    Cursor="Arrow"
                     IsDefault="{Binding Button1IsDefault}"
                     Style="{StaticResource MaterialDesignFlatButton}" />
                 <Button
                     Margin="8 0 0 0"
                     Command="{Binding Button2Command}"
                     Content="{Binding Button2Text}"
-                    Cursor="Arrow"
                     IsCancel="{Binding Button2IsCancel}"
                     Style="{StaticResource MaterialDesignFlatButton}"
                     Visibility="{Binding Button2Visible, Converter={StaticResource BooleanToVisibilityConverter}}" />
@@ -68,7 +66,6 @@
                     Margin="8 0 0 0"
                     Command="{Binding Button3Command}"
                     Content="{Binding Button3Text}"
-                    Cursor="Arrow"
                     IsCancel="{Binding Button3IsCancel}"
                     Style="{StaticResource MaterialDesignFlatButton}"
                     Visibility="{Binding Button3Visible, Converter={StaticResource BooleanToVisibilityConverter}}" />

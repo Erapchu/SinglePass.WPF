@@ -17,18 +17,26 @@ namespace PasswordManager.ViewModels
 
         private readonly SettingsService _settingsService;
         private readonly ILogger<LoginWindowViewModel> _logger;
+        private CancellationTokenSource _cancellationTokenSource;
+
+        public event Action Accept;
 
         private bool _loading;
-        /// <summary>
-        /// Indicates loading of some content.
-        /// </summary>
         public bool Loading
         {
             get => _loading;
             set => SetProperty(ref _loading, value);
         }
 
+        private string _helperText;
+        public string HelperText
+        {
+            get => _helperText;
+            set => SetProperty(ref _helperText, value);
+        }
+
         public bool Success { get; private set; }
+        public string Password { get; set; }
 
         public LoginWindowViewModel(
             SettingsService settingsService,
@@ -38,14 +46,29 @@ namespace PasswordManager.ViewModels
             _logger = logger;
         }
 
-        private async Task LoadingAsync(CancellationToken cancellationToken)
+        public async Task LoadingCredentialsAsync()
         {
+            if (string.IsNullOrWhiteSpace(Password) || Password.Length < 8)
+            {
+                HelperText = "Minimum 8 characters";
+                return;
+            }
+            else
+            {
+                HelperText = string.Empty;
+            }
+
             try
             {
+                _cancellationTokenSource?.Cancel();
+                _cancellationTokenSource = new();
+                var cancellationToken = _cancellationTokenSource.Token;
+
                 Loading = true;
-                await _settingsService.LoadCredentialsAsync();
+                await _settingsService.LoadCredentialsAsync(Password);
                 cancellationToken.ThrowIfCancellationRequested();
                 Success = true;
+                Accept?.Invoke();
             }
             catch (OperationCanceledException) { }
             catch (Exception ex)
@@ -59,6 +82,6 @@ namespace PasswordManager.ViewModels
         }
 
         private AsyncRelayCommand _loadingCommand;
-        public AsyncRelayCommand LoadingCommand => _loadingCommand ??= new AsyncRelayCommand(LoadingAsync);
+        public AsyncRelayCommand LoadingCommand => _loadingCommand ??= new AsyncRelayCommand(LoadingCredentialsAsync);
     }
 }

@@ -37,11 +37,10 @@ namespace PasswordManager.Services
         public SettingsService(ILogger<SettingsService> logger)
         {
             _logger = logger;
-
             _credentials = new List<Credential>();
         }
 
-        public async Task LoadCredentialsAsync()
+        public async Task LoadCredentialsAsync(string password)
         {
             _credentials = await Task.Run(() =>
             {
@@ -56,7 +55,6 @@ namespace PasswordManager.Services
 
                     if (!File.Exists(pathToPasswordsFile))
                     {
-                        // File is not exists yet
                         _logger.LogInformation("File is not exists.");
                         return credentials;
                     }
@@ -77,20 +75,7 @@ namespace PasswordManager.Services
 
                     var jsonText = AesCryptographyHelper.DecryptStringFromBytes(encryptedBytes, keyBytes, ivBytes);
 
-                    try
-                    {
-                        credentials = JsonSerializer.Deserialize<List<Credential>>(jsonText);
-                    }
-                    catch (JsonException jsex)
-                    {
-                        _logger.LogWarning("Failed to deserialize credentials settings file content due to exception: {0}", jsex);
-
-                        if (credentials is null)
-                        {
-                            _logger.LogInformation("Using empty credentials list");
-                            credentials = new();
-                        }
-                    }
+                    credentials = JsonSerializer.Deserialize<List<Credential>>(jsonText);
                 }
                 catch (Exception ex)
                 {
@@ -221,7 +206,7 @@ namespace PasswordManager.Services
         private static string GetHashForPath(string path)
         {
             var passPathBytes = Encoding.UTF8.GetBytes(path);
-            var hashData = System.Security.Cryptography.SHA256.HashData(passPathBytes);
+            var hashData = SHA256.HashData(passPathBytes);
             var hashedPath = Encoding.UTF8.GetString(hashData);
             return hashedPath;
         }

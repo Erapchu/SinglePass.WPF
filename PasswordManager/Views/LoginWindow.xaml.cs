@@ -1,5 +1,6 @@
 ﻿using PasswordManager.Controls;
 using PasswordManager.ViewModels;
+using System.Windows.Controls;
 
 namespace PasswordManager.Views
 {
@@ -15,18 +16,25 @@ namespace PasswordManager.Views
             InitializeComponent();
 
             DataContext = loginWindowViewModel;
+            loginWindowViewModel.Accept += LoginWindowViewModel_Accept;
         }
 
-        private async void PasswordBox_PasswordChanged(object sender, System.Windows.RoutedEventArgs e)
+        private void LoginWindowViewModel_Accept()
         {
-            var loadingCommand = ViewModel.LoadingCommand;
-            loadingCommand.Cancel();
-            //TODO: send password somehow here
-            await loadingCommand.ExecuteAsync(null);
-            if (ViewModel.Success)
-            {
-                DialogResult = true;
-            }
+            DialogResult = true;
+        }
+
+        private void PasswordBox_PasswordChanged(object sender, System.Windows.RoutedEventArgs e)
+        {
+            if (sender is not PasswordBox passwordBox)
+                return;
+
+            ViewModel.Password = passwordBox.Password;
+        }
+
+        private void MaterialWindow_Closed(object sender, System.EventArgs e)
+        {
+            ViewModel.Accept -= LoginWindowViewModel_Accept;
         }
     }
 }

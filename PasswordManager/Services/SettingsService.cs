@@ -16,12 +16,16 @@ namespace PasswordManager.Services
 {
     public class SettingsService
     {
+        private readonly byte[] _predefinedKeyPart = new byte[AesCryptographyHelper.KeyLength]
+        {
+            97, 238, 238, 23, 235, 212, 131, 197, 191, 5, 236, 111, 81, 47, 125, 191,
+            211, 41, 121, 148, 132, 70, 204, 94, 133, 220, 255, 225, 169, 242, 67, 114
+        };
         private readonly object _credentialsLock = new();
-
         private readonly ILogger<SettingsService> _logger;
-        private List<Credential> _credentials;
 
-        private readonly string _key = "agddhethbqerthnmklutrasdcxzfgttr";
+        private List<Credential> _credentials;
+        private byte[] _keyBytes;
 
         public List<Credential> Credentials
         {
@@ -71,9 +75,9 @@ namespace PasswordManager.Services
                     var encryptedBytes = new byte[fileStream.Length - ivLength];
                     br.Read(encryptedBytes);
 
-                    var keyBytes = Encoding.UTF8.GetBytes(_key);
+                    RestructureKeyBytes(password);
 
-                    var jsonText = AesCryptographyHelper.DecryptStringFromBytes(encryptedBytes, keyBytes, ivBytes);
+                    var jsonText = AesCryptographyHelper.DecryptStringFromBytes(encryptedBytes, _keyBytes, ivBytes);
 
                     credentials = JsonSerializer.Deserialize<List<Credential>>(jsonText);
                 }
@@ -177,8 +181,6 @@ namespace PasswordManager.Services
                     // Just to ensure
                     fileStream.Seek(0, SeekOrigin.Begin);
 
-                    var keyBytes = Encoding.UTF8.GetBytes(_key);
-
                     // Generate new IV for each new saving
                     using var aesObj = Aes.Create();
                     var ivBytes = aesObj.IV;
@@ -186,7 +188,7 @@ namespace PasswordManager.Services
                     // Get copy and serialize
                     var credentials = Credentials;
                     var jsonText = JsonSerializer.Serialize(credentials);
-                    var encryptedBytes = AesCryptographyHelper.EncryptStringToBytes(jsonText, keyBytes, ivBytes);
+                    var encryptedBytes = AesCryptographyHelper.EncryptStringToBytes(jsonText, _keyBytes, ivBytes);
 
                     using var bw = new BinaryWriter(fileStream);
                     bw.Write(ivBytes);
@@ -201,6 +203,22 @@ namespace PasswordManager.Services
                     _logger.LogError(ex, string.Empty);
                 }
             });
+        }
+
+        /// <summary>
+        /// Replaces pre-defined key bytes according to user password.
+        /// </summary>
+        /// <param name="password">User password.</param>
+        private void RestructureKeyBytes(string password)
+        {
+            _keyBytes = new byte[AesCryptographyHelper.KeyLength];
+            Array.Copy(_predefinedKeyPart, _keyBytes, AesCryptographyHelper.KeyLength);
+
+            var passBytes = Encoding.UTF8.GetBytes(password);
+            for (int i = 0; i < passBytes.Length; i++)
+            {
+                _keyBytes[i] = passBytes[i];
+            }
         }
 
         private static string GetHashForPath(string path)

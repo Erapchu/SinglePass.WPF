@@ -19,6 +19,11 @@
     WindowStartupLocation="CenterScreen"
     Closed="MaterialWindow_Closed"
     mc:Ignorable="d">
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding LoadingCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <Grid>
         <PasswordBox
             x:Name="LoginPasswordBox"
@@ -26,7 +31,7 @@
             MaxLength="32"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            md:HintAssist.Hint="Password"
+            md:HintAssist.Hint="{Binding HintText}"
             md:HintAssist.HelperText="{Binding HelperText}"
             PasswordChanged="PasswordBox_PasswordChanged"
             Style="{StaticResource MaterialDesignOutlinedPasswordBox}" />
@@ -39,7 +44,7 @@
                 md:ShadowAssist.ShadowDepth="Depth3"
                 md:ButtonProgressAssist.IsIndeterminate="True"
                 md:ButtonProgressAssist.IsIndicatorVisible="{Binding Loading}"
-                Command="{Binding LoadingCommand}"
+                Command="{Binding LoadCredentialsCommand}"
                 Content="Login"
                 IsDefault="True" />
             <Button

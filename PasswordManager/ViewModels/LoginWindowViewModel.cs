@@ -1,8 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
+using PasswordManager.Helpers;
 using PasswordManager.Services;
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,6 +20,7 @@ namespace PasswordManager.ViewModels
         private readonly SettingsService _settingsService;
         private readonly ILogger<LoginWindowViewModel> _logger;
         private CancellationTokenSource _cancellationTokenSource;
+        private bool _credentialsFileExist;
 
         public event Action Accept;
 
@@ -35,7 +38,13 @@ namespace PasswordManager.ViewModels
             set => SetProperty(ref _helperText, value);
         }
 
-        public bool Success { get; private set; }
+        private string _hintText = "Password";
+        public string HintText
+        {
+            get => _hintText;
+            set => SetProperty(ref _hintText, value);
+        }
+
         public string Password { get; set; }
 
         public LoginWindowViewModel(
@@ -46,7 +55,7 @@ namespace PasswordManager.ViewModels
             _logger = logger;
         }
 
-        public async Task LoadingCredentialsAsync()
+        public async Task LoadCredentialsAsync()
         {
             if (string.IsNullOrWhiteSpace(Password) || Password.Length < 8)
             {
@@ -60,15 +69,29 @@ namespace PasswordManager.ViewModels
 
             try
             {
-                _cancellationTokenSource?.Cancel();
-                _cancellationTokenSource = new();
-                var cancellationToken = _cancellationTokenSource.Token;
-
                 Loading = true;
-                await _settingsService.LoadCredentialsAsync(Password);
-                cancellationToken.ThrowIfCancellationRequested();
-                Success = true;
-                Accept?.Invoke();
+                if (!_credentialsFileExist)
+                {
+                    await _settingsService.SetNewPassword(Password);
+                    Accept?.Invoke();
+                }
+                else
+                {
+                    _cancellationTokenSource?.Cancel();
+                    _cancellationTokenSource = new();
+                    var cancellationToken = _cancellationTokenSource.Token;
+
+                    var loadingResult = await _settingsService.LoadCredentialsAsync(Password);
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (!loadingResult)
+                    {
+                        HelperText = "Password is incorrect";
+                    }
+                    else
+                    {
+                        Accept?.Invoke();
+                    }
+                }
             }
             catch (OperationCanceledException) { }
             catch (Exception ex)
@@ -81,7 +104,19 @@ namespace PasswordManager.ViewModels
             }
         }
 
+        private async Task LoadingAsync()
+        {
+            _credentialsFileExist = await _settingsService.IsCredentialsFileExistAsync();
+            if (!_credentialsFileExist)
+            {
+                HintText = "New password";
+            }
+        }
+
+        private AsyncRelayCommand _loadCredentialsCommand;
+        public AsyncRelayCommand LoadCredentialsCommand => _loadCredentialsCommand ??= new AsyncRelayCommand(LoadCredentialsAsync);
+
         private AsyncRelayCommand _loadingCommand;
-        public AsyncRelayCommand LoadingCommand => _loadingCommand ??= new AsyncRelayCommand(LoadingCredentialsAsync);
+        public AsyncRelayCommand LoadingCommand => _loadingCommand ??= new AsyncRelayCommand(LoadingAsync);
     }
 }

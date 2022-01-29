@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using PasswordManager.Enums;
 using PasswordManager.Helpers;
 using PasswordManager.Helpers.Threading;
 using PasswordManager.Models;
@@ -23,6 +24,7 @@ namespace PasswordManager.Services
         };
         private readonly object _credentialsLock = new();
         private readonly ILogger<SettingsService> _logger;
+        private readonly string _pathToPasswordsFile = Constants.PasswordsFilePath;
 
         private List<Credential> _credentials;
         private byte[] _keyBytes;
@@ -44,27 +46,31 @@ namespace PasswordManager.Services
             _credentials = new List<Credential>();
         }
 
-        public async Task LoadCredentialsAsync(string password)
+        public async Task<bool> IsCredentialsFileExistAsync()
         {
-            _credentials = await Task.Run(() =>
+            return await Task.Run(() => File.Exists(_pathToPasswordsFile));
+        }
+
+        public async Task SetNewPassword(string password)
+        {
+            RestructureKeyBytes(password);
+            await SaveCredentialsAsync();
+        }
+
+        public async Task<bool> LoadCredentialsAsync(string password)
+        {
+            return await Task.Run(() =>
             {
                 _logger.LogInformation("Loading credentials from file...");
-                var credentials = new List<Credential>();
+                bool success = false;
                 try
                 {
                     // Lock access to file for multithreading environment
-                    var pathToPasswordsFile = Constants.PasswordsFilePath;
-                    var hashedPath = GetHashForPath(pathToPasswordsFile);
+                    var hashedPath = GetHashForPath(_pathToPasswordsFile);
                     using var waitHandleLocker = EventWaitHandleLocker.MakeWithEventHandle(true, EventResetMode.AutoReset, hashedPath);
 
-                    if (!File.Exists(pathToPasswordsFile))
-                    {
-                        _logger.LogInformation("File is not exists.");
-                        return credentials;
-                    }
-
                     // Access to file
-                    using var fileStream = new FileStream(pathToPasswordsFile, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    using var fileStream = new FileStream(_pathToPasswordsFile, FileMode.Open, FileAccess.Read, FileShare.Read);
                     // Just to ensure
                     fileStream.Seek(0, SeekOrigin.Begin);
 
@@ -75,18 +81,28 @@ namespace PasswordManager.Services
                     var encryptedBytes = new byte[fileStream.Length - ivLength];
                     br.Read(encryptedBytes);
 
+                    // During loading, it's required to set key bytes for future
                     RestructureKeyBytes(password);
 
                     var jsonText = AesCryptographyHelper.DecryptStringFromBytes(encryptedBytes, _keyBytes, ivBytes);
 
-                    credentials = JsonSerializer.Deserialize<List<Credential>>(jsonText);
+                    _credentials = JsonSerializer.Deserialize<List<Credential>>(jsonText);
+                    success = true;
+                }
+                catch (JsonException jex)
+                {
+                    _logger.LogError(jex, "JSON exception raised");
+                }
+                catch (CryptographicException cex)
+                {
+                    _logger.LogError(cex, "Cryptographic exception raised");
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, string.Empty);
                 }
 
-                return credentials;
+                return success;
             });
         }
 
@@ -162,8 +178,7 @@ namespace PasswordManager.Services
             await Task.Run(() =>
             {
                 // Lock access to file for multithreading environment
-                var pathToPasswordsFile = Constants.PasswordsFilePath;
-                var hashedPath = GetHashForPath(pathToPasswordsFile);
+                var hashedPath = GetHashForPath(_pathToPasswordsFile);
 
                 var appdataDir = new DirectoryInfo(Constants.RoamingAppDataDirectoryPath);
                 if (!appdataDir.Exists)
@@ -176,7 +191,7 @@ namespace PasswordManager.Services
                 try
                 {
                     // Access to file
-                    using var fileStream = File.Open(pathToPasswordsFile, FileMode.Create, FileAccess.Write, FileShare.Read);
+                    using var fileStream = File.Open(_pathToPasswordsFile, FileMode.Create, FileAccess.Write, FileShare.Read);
 
                     // Just to ensure
                     fileStream.Seek(0, SeekOrigin.Begin);

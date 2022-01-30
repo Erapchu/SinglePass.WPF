@@ -15,9 +15,10 @@
     MinWidth="300"
     MinHeight="200"
     d:DataContext="{x:Static vm:LoginWindowViewModel.DesignTimeInstance}"
-    FocusManager.FocusedElement="{Binding ElementName=LoginPasswordBox}"
-    WindowStartupLocation="CenterScreen"
     Closed="MaterialWindow_Closed"
+    FocusManager.FocusedElement="{Binding ElementName=LoginPasswordBox}"
+    UseLayoutRounding="True"
+    WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Loaded">
@@ -28,11 +29,11 @@
         <PasswordBox
             x:Name="LoginPasswordBox"
             Width="300"
-            MaxLength="32"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            md:HintAssist.Hint="{Binding HintText}"
             md:HintAssist.HelperText="{Binding HelperText}"
+            md:HintAssist.Hint="{Binding HintText}"
+            MaxLength="32"
             PasswordChanged="PasswordBox_PasswordChanged"
             Style="{StaticResource MaterialDesignOutlinedPasswordBox}" />
         <StackPanel
@@ -41,15 +42,15 @@
             VerticalAlignment="Bottom"
             Orientation="Horizontal">
             <Button
-                md:ShadowAssist.ShadowDepth="Depth3"
                 md:ButtonProgressAssist.IsIndeterminate="True"
                 md:ButtonProgressAssist.IsIndicatorVisible="{Binding Loading}"
+                md:ShadowAssist.ShadowDepth="Depth3"
                 Command="{Binding LoadCredentialsCommand}"
                 Content="Login"
                 IsDefault="True" />
             <Button
-                md:ShadowAssist.ShadowDepth="Depth3"
                 Margin="8 0 0 0"
+                md:ShadowAssist.ShadowDepth="Depth3"
                 Content="Exit"
                 IsCancel="True"
                 Style="{StaticResource MaterialDesignPaperButton}" />

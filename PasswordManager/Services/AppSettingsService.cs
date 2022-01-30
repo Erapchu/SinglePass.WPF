@@ -1,7 +1,10 @@
 ﻿using PasswordManager.Helpers;
+using PasswordManager.Helpers.Threading;
 using PasswordManager.Models;
 using System.IO;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace PasswordManager.Services
 {
@@ -10,6 +13,19 @@ namespace PasswordManager.Services
         private readonly string _commonSettingsFilePath = Constants.CommonSettingsFilePath;
 
         public AppSettings Settings { get; } = new();
+
+        public bool IsDarkMode
+        {
+            get => Settings.IsDarkMode;
+            set
+            {
+                if (Settings.IsDarkMode == value)
+                    return;
+
+                Settings.IsDarkMode = value;
+                Save();
+            }
+        }
 
         public AppSettingsService()
         {
@@ -26,10 +42,15 @@ namespace PasswordManager.Services
             }
         }
 
-        public void Save()
+        public Task Save()
         {
-            using var fileStream = new FileStream(_commonSettingsFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
-            JsonSerializer.Serialize(fileStream, Settings);
+            return Task.Run(() =>
+            {
+                var hashedPath = HashHelper.GetHash(_commonSettingsFilePath);
+                using var waitHandleLocker = EventWaitHandleLocker.MakeWithEventHandle(true, EventResetMode.AutoReset, hashedPath);
+                using var fileStream = new FileStream(_commonSettingsFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
+                JsonSerializer.Serialize(fileStream, Settings);
+            });
         }
     }
 }

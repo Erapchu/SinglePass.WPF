@@ -12,12 +12,13 @@ namespace PasswordManager.ViewModels
 
         private static SettingsViewModel GetDesignTimeVM()
         {
-            var vm = new SettingsViewModel(null);
+            var vm = new SettingsViewModel(null, null);
             return vm;
         }
         #endregion
 
         private readonly ThemeService _themeService;
+        private readonly AppSettingsService _appSettingsService;
 
         public bool IsDarkMode
         {
@@ -29,12 +30,17 @@ namespace PasswordManager.ViewModels
 
                 _themeService.IsDarkMode = value;
                 OnPropertyChanged();
+
+                _appSettingsService.IsDarkMode = value;
             }
         }
 
-        public SettingsViewModel(ThemeService themeService)
+        public SettingsViewModel(
+            ThemeService themeService,
+            AppSettingsService appSettingsService)
         {
             _themeService = themeService;
+            _appSettingsService = appSettingsService;
 
             Name = "Settings";
             ItemIndex = SettingsNavigationItemIndex;

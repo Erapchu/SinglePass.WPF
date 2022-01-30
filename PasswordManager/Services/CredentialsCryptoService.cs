@@ -66,7 +66,7 @@ namespace PasswordManager.Services
                 try
                 {
                     // Lock access to file for multithreading environment
-                    var hashedPath = GetHashForPath(_pathToPasswordsFile);
+                    var hashedPath = HashHelper.GetHash(_pathToPasswordsFile);
                     using var waitHandleLocker = EventWaitHandleLocker.MakeWithEventHandle(true, EventResetMode.AutoReset, hashedPath);
 
                     // Access to file
@@ -178,7 +178,7 @@ namespace PasswordManager.Services
             await Task.Run(() =>
             {
                 // Lock access to file for multithreading environment
-                var hashedPath = GetHashForPath(_pathToPasswordsFile);
+                var hashedPath = HashHelper.GetHash(_pathToPasswordsFile);
 
                 using var waitHandleLocker = EventWaitHandleLocker.MakeWithEventHandle(true, EventResetMode.AutoReset, hashedPath);
 
@@ -228,19 +228,6 @@ namespace PasswordManager.Services
             {
                 _keyBytes[i] = passBytes[i];
             }
-        }
-
-        /// <summary>
-        /// Get SHA256 hash for string.
-        /// </summary>
-        /// <param name="path">Stringified path.</param>
-        /// <returns>SHA256 hash representation.</returns>
-        private static string GetHashForPath(string path)
-        {
-            var passPathBytes = Encoding.UTF8.GetBytes(path);
-            var hashData = SHA256.HashData(passPathBytes);
-            var hashedPath = Encoding.UTF8.GetString(hashData);
-            return hashedPath;
         }
     }
 }

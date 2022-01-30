@@ -34,7 +34,7 @@ namespace PasswordManager.ViewModels
         }
         #endregion
 
-        private readonly SettingsService _settingsService;
+        private readonly CredentialsCryptoService _credentialsCryptoService;
         private readonly ILogger<PasswordsViewModel> _logger;
         private readonly List<CredentialViewModel> _credentials = new();
 
@@ -78,11 +78,11 @@ namespace PasswordManager.ViewModels
         private PasswordsViewModel() { }
 
         public PasswordsViewModel(
-            SettingsService settingsService,
+            CredentialsCryptoService credentialsCryptoService,
             ILogger<PasswordsViewModel> logger,
             CredentialsDialogViewModel credentialsDialogViewModel)
         {
-            _settingsService = settingsService;
+            _credentialsCryptoService = credentialsCryptoService;
             _logger = logger;
 
             Name = "Credentials";
@@ -104,7 +104,7 @@ namespace PasswordManager.ViewModels
                 PackIconKind.Delete);
             if (result == MaterialDialogResult.Yes)
             {
-                await _settingsService.DeleteCredential(credVM.Model);
+                await _credentialsCryptoService.DeleteCredential(credVM.Model);
                 _credentials.Remove(credVM);
                 var dIndex = DisplayedCredentials.IndexOf(credVM);
                 var countAfterDeletion = DisplayedCredentials.Count - 1;
@@ -129,13 +129,13 @@ namespace PasswordManager.ViewModels
             newCredVM.LastModifiedTime = DateTime.Now;
             if (mode == CredentialsDialogMode.New)
             {
-                await _settingsService.AddCredential(newCredVM.Model);
+                await _credentialsCryptoService.AddCredential(newCredVM.Model);
                 _credentials.Add(newCredVM);
                 await FilterCredentialsAsync();
             }
             else if (mode == CredentialsDialogMode.Edit)
             {
-                await _settingsService.EditCredential(newCredVM.Model);
+                await _credentialsCryptoService.EditCredential(newCredVM.Model);
                 var staleCredVM = _credentials.FirstOrDefault(c => c.Model.Equals(newCredVM.Model));
                 var staleIndex = _credentials.IndexOf(staleCredVM);
                 _credentials.Remove(staleCredVM);
@@ -151,7 +151,7 @@ namespace PasswordManager.ViewModels
             try
             {
                 Loading = true;
-                var credentials = _settingsService.Credentials;
+                var credentials = _credentialsCryptoService.Credentials;
                 using var delayed = DisplayedCredentials.DelayNotifications();
                 foreach (var cred in credentials)
                 {

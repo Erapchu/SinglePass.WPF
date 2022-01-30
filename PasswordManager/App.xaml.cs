@@ -95,7 +95,7 @@ namespace PasswordManager
                 services.AddScoped<SettingsViewModel>();
                 services.AddScoped<CredentialsDialogViewModel>();
 
-                services.AddSingleton<SettingsService>();
+                services.AddSingleton<CredentialsCryptoService>();
                 services.AddSingleton<ThemeService>();
             });
 

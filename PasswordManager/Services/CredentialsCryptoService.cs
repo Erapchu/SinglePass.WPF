@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace PasswordManager.Services
 {
-    public class SettingsService
+    public class CredentialsCryptoService
     {
         private readonly byte[] _predefinedKeyPart = new byte[AesCryptographyHelper.KeyLength]
         {
@@ -23,7 +23,7 @@ namespace PasswordManager.Services
             211, 41, 121, 148, 132, 70, 204, 94, 133, 220, 255, 225, 169, 242, 67, 114
         };
         private readonly object _credentialsLock = new();
-        private readonly ILogger<SettingsService> _logger;
+        private readonly ILogger<CredentialsCryptoService> _logger;
         private readonly string _pathToPasswordsFile = Constants.PasswordsFilePath;
 
         private List<Credential> _credentials;
@@ -40,7 +40,7 @@ namespace PasswordManager.Services
             }
         }
 
-        public SettingsService(ILogger<SettingsService> logger)
+        public CredentialsCryptoService(ILogger<CredentialsCryptoService> logger)
         {
             _logger = logger;
             _credentials = new List<Credential>();

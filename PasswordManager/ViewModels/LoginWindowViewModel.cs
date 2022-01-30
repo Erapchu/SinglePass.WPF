@@ -17,7 +17,7 @@ namespace PasswordManager.ViewModels
         public static LoginWindowViewModel DesignTimeInstance => _lazy.Value;
         #endregion
 
-        private readonly SettingsService _settingsService;
+        private readonly CredentialsCryptoService _credentialsCryptoService;
         private readonly ILogger<LoginWindowViewModel> _logger;
         private CancellationTokenSource _cancellationTokenSource;
         private bool _credentialsFileExist;
@@ -48,10 +48,10 @@ namespace PasswordManager.ViewModels
         public string Password { get; set; }
 
         public LoginWindowViewModel(
-            SettingsService settingsService,
+            CredentialsCryptoService credentialsCryptoService,
             ILogger<LoginWindowViewModel> logger)
         {
-            _settingsService = settingsService;
+            _credentialsCryptoService = credentialsCryptoService;
             _logger = logger;
         }
 
@@ -72,7 +72,7 @@ namespace PasswordManager.ViewModels
                 Loading = true;
                 if (!_credentialsFileExist)
                 {
-                    await _settingsService.SetNewPassword(Password);
+                    await _credentialsCryptoService.SetNewPassword(Password);
                     Accept?.Invoke();
                 }
                 else
@@ -81,7 +81,7 @@ namespace PasswordManager.ViewModels
                     _cancellationTokenSource = new();
                     var cancellationToken = _cancellationTokenSource.Token;
 
-                    var loadingResult = await _settingsService.LoadCredentialsAsync(Password);
+                    var loadingResult = await _credentialsCryptoService.LoadCredentialsAsync(Password);
                     cancellationToken.ThrowIfCancellationRequested();
                     if (!loadingResult)
                     {
@@ -106,7 +106,7 @@ namespace PasswordManager.ViewModels
 
         private async Task LoadingAsync()
         {
-            _credentialsFileExist = await _settingsService.IsCredentialsFileExistAsync();
+            _credentialsFileExist = await _credentialsCryptoService.IsCredentialsFileExistAsync();
             if (!_credentialsFileExist)
             {
                 HintText = "New password";

@@ -23,7 +23,7 @@ namespace PasswordManager.ViewModels
         }
         #endregion
 
-        private readonly SettingsService _settingsService;
+        private readonly CredentialsCryptoService _credentialsCryptoService;
         private readonly ILogger<MainWindowViewModel> _logger;
 
         public event Action<CredentialViewModel> CredentialSelected;
@@ -51,13 +51,13 @@ namespace PasswordManager.ViewModels
 
         public MainWindowViewModel(
             PasswordsViewModel passwordsViewModel,
-            SettingsService settingsService,
+            CredentialsCryptoService credentialsCryptoService,
             SettingsViewModel settingsViewModel,
             ILogger<MainWindowViewModel> logger)
         {
             PasswordsViewModel = passwordsViewModel;
             SettingsViewModel = settingsViewModel;
-            _settingsService = settingsService;
+            _credentialsCryptoService = credentialsCryptoService;
             _logger = logger;
 
             PasswordsViewModel.CredentialSelected += PasswordsViewModel_CredentialSelected;

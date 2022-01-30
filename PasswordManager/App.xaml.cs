@@ -72,8 +72,6 @@ namespace PasswordManager
             // Open main window
             var mainWindow = _host.Services.GetService<MainWindow>();
             mainWindow.Show();
-            //TODO: implement NotifyIcon for WPF, leave explicit shutdown
-            ShutdownMode = ShutdownMode.OnLastWindowClose;
         }
 
         private IHostBuilder CreateHostBuilder() =>

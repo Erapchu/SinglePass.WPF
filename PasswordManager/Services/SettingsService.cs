@@ -236,6 +236,11 @@ namespace PasswordManager.Services
             }
         }
 
+        /// <summary>
+        /// Get SHA256 hash for string.
+        /// </summary>
+        /// <param name="path">Stringified path.</param>
+        /// <returns>SHA256 hash representation.</returns>
         private static string GetHashForPath(string path)
         {
             var passPathBytes = Encoding.UTF8.GetBytes(path);

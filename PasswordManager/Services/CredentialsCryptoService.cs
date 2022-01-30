@@ -180,12 +180,6 @@ namespace PasswordManager.Services
                 // Lock access to file for multithreading environment
                 var hashedPath = GetHashForPath(_pathToPasswordsFile);
 
-                var appdataDir = new DirectoryInfo(Constants.RoamingAppDataDirectoryPath);
-                if (!appdataDir.Exists)
-                {
-                    appdataDir.Create();
-                }
-
                 using var waitHandleLocker = EventWaitHandleLocker.MakeWithEventHandle(true, EventResetMode.AutoReset, hashedPath);
 
                 try

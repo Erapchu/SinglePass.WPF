@@ -5,7 +5,7 @@ namespace PasswordManager.Services
 {
     public class ThemeService
     {
-        private readonly CredentialsCryptoService _credentialsCryptoService;
+        private readonly AppSettingsService _appSettingsService;
         private readonly BundledTheme _bundledThemeDictionary;
 
         public bool IsDarkMode
@@ -28,9 +28,9 @@ namespace PasswordManager.Services
 
         public ITheme GetTheme() => _bundledThemeDictionary.GetTheme();
 
-        public ThemeService(CredentialsCryptoService credentialsCryptoService)
+        public ThemeService(AppSettingsService appSettingsService)
         {
-            _credentialsCryptoService = credentialsCryptoService;
+            _appSettingsService = appSettingsService;
 
             var app = System.Windows.Application.Current;
             if (app is null)
@@ -46,7 +46,7 @@ namespace PasswordManager.Services
             }
 
             bundledThemeDictionary.ColorAdjustment = new ColorAdjustment();
-            bundledThemeDictionary.BaseTheme = BaseTheme.Light;
+            bundledThemeDictionary.BaseTheme = _appSettingsService.Settings.IsDarkMode ? BaseTheme.Dark : BaseTheme.Light;
             bundledThemeDictionary.PrimaryColor = MaterialDesignColors.PrimaryColor.DeepPurple;
             bundledThemeDictionary.SecondaryColor = MaterialDesignColors.SecondaryColor.Lime;
 

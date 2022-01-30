@@ -6,10 +6,10 @@
       { "assembly": "NLog.Extensions.Logging" }
     ],
     "variables": {
-      "logName": "PasswordManager",
-      "logDir": "${specialfolder:folder=LocalApplicationData}/PasswordManager/Logs",
-      "logDirArchive": "${var:logDir}/Archive",
-      "logLayout": "${date} | ${level:padding=-5:fixedLength=true} | TID:${threadid:padding=-2} | ${callsite:includeNamespace=False:cleanNamesOfAnonymousDelegates=True:cleanNamesOfAsyncContinuations=True}> ${message}"
+        "logName": "PasswordManager",
+        "logDir": "${specialfolder:folder=LocalApplicationData}/PasswordManager/Logs",
+        "logDirArchive": "${var:logDir}/Archive",
+        "logLayout": "${date} | ${level:padding=-5:fixedLength=true} | TID:${threadid:padding=-2} | ${callsite:includeNamespace=False:cleanNamesOfAnonymousDelegates=True:cleanNamesOfAsyncContinuations=True}> ${message} ${exception:format=toString:innerFormat=toString}"
     },
     "targets": {
       "async": true,

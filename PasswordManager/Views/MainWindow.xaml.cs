@@ -1,6 +1,7 @@
 ﻿using PasswordManager.Controls;
 using PasswordManager.ViewModels;
 using System;
+using System.Windows;
 
 namespace PasswordManager.Views
 {
@@ -21,6 +22,12 @@ namespace PasswordManager.Views
         {
             var passStringLength = credVM?.PasswordFieldVM?.Value?.Length ?? 0;
             PasswordsControl.CredentialsDialog.PasswordFieldBox.Password = new string('*', passStringLength);
+        }
+
+        private void MaterialWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            //TODO: Shutdown process on main window close or hide window and cancel depend on settings
+            Application.Current.Shutdown();
         }
     }
 }

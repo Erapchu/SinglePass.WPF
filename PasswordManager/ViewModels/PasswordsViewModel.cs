@@ -10,7 +10,9 @@ using PasswordManager.Views.MessageBox;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Unidecode.NET;
 
 namespace PasswordManager.ViewModels
 {
@@ -186,10 +188,20 @@ namespace PasswordManager.ViewModels
                 {
                     filteredCredentials = await Task.Run(() =>
                     {
+                        string transliteratedText = null;
+                        if (Regex.IsMatch(filterText, @"\p{IsCyrillic}"))
+                        {
+                            // there is at least one cyrillic character in the string
+                            transliteratedText = filterText.Unidecode();
+                        }
+                        var translitCompare = !string.IsNullOrWhiteSpace(transliteratedText);
+
                         var fCreds = new List<CredentialViewModel>();
                         foreach (var cred in _credentials)
                         {
-                            if (cred.NameFieldVM.Value.IndexOf(filterText, StringComparison.OrdinalIgnoreCase) != -1)
+                            var nameValue = cred.NameFieldVM.Value;
+                            if (nameValue.IndexOf(filterText, StringComparison.OrdinalIgnoreCase) != -1
+                                || (translitCompare && nameValue.IndexOf(transliteratedText, StringComparison.OrdinalIgnoreCase) != -1))
                             {
                                 fCreds.Add(cred);
                             }

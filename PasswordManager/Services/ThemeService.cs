@@ -1,26 +1,35 @@
 ﻿using MaterialDesignThemes.Wpf;
+using System;
 using System.Linq;
+using System.Windows;
 
 namespace PasswordManager.Services
 {
     public class ThemeService
     {
-        private readonly CredentialsCryptoService _credentialsCryptoService;
+        private const string _defaultsSource = "pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml";
+
+        private readonly AppSettingsService _appSettingsService;
         private readonly BundledTheme _bundledThemeDictionary;
 
-        public bool IsDarkMode
+        public BaseTheme ThemeMode
         {
-            get => GetTheme().GetBaseTheme() == BaseTheme.Dark;
+            get => GetTheme().GetBaseTheme();
             set
             {
                 ITheme theme = GetTheme();
-
-                var currentBaseTheme = theme.GetBaseTheme();
-                if (currentBaseTheme == BaseTheme.Dark && value
-                    || currentBaseTheme == BaseTheme.Light && !value)
+                if (theme.GetBaseTheme() == value)
                     return;
 
-                IBaseTheme newBaseTheme = value ? Theme.Dark : Theme.Light;
+                IBaseTheme newBaseTheme;
+                if (value == BaseTheme.Inherit)
+                {
+                    newBaseTheme = Theme.GetSystemTheme()?.GetBaseTheme() ?? Theme.Light;
+                }
+                else
+                {
+                    newBaseTheme = value.GetBaseTheme();
+                }
                 theme.SetBaseTheme(newBaseTheme);
                 _bundledThemeDictionary.SetTheme(theme);
             }
@@ -28,11 +37,11 @@ namespace PasswordManager.Services
 
         public ITheme GetTheme() => _bundledThemeDictionary.GetTheme();
 
-        public ThemeService(CredentialsCryptoService credentialsCryptoService)
+        public ThemeService(AppSettingsService appSettingsService)
         {
-            _credentialsCryptoService = credentialsCryptoService;
+            _appSettingsService = appSettingsService;
 
-            var app = System.Windows.Application.Current;
+            var app = Application.Current;
             if (app is null)
                 return;
 
@@ -45,8 +54,19 @@ namespace PasswordManager.Services
                 appMergedDictionaries.Add(bundledThemeDictionary);
             }
 
+            var materialDefaultsUri = new Uri(_defaultsSource);
+            var defaultsDictionary = appMergedDictionaries.FirstOrDefault(rd => rd.Source == materialDefaultsUri);
+            if (defaultsDictionary is null)
+            {
+                defaultsDictionary = new ResourceDictionary()
+                {
+                    Source = materialDefaultsUri,
+                };
+                appMergedDictionaries.Add(defaultsDictionary);
+            }
+
             bundledThemeDictionary.ColorAdjustment = new ColorAdjustment();
-            bundledThemeDictionary.BaseTheme = BaseTheme.Light;
+            bundledThemeDictionary.BaseTheme = _appSettingsService.Settings.ThemeMode;
             bundledThemeDictionary.PrimaryColor = MaterialDesignColors.PrimaryColor.DeepPurple;
             bundledThemeDictionary.SecondaryColor = MaterialDesignColors.SecondaryColor.Lime;
 

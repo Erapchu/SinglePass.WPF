@@ -5,7 +5,8 @@
     xmlns:controls="clr-namespace:PasswordManager.Controls">
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/PasswordManager;component/Themes/MaterialWindowTemplates.xaml"/>
-        <ResourceDictionary Source="pack://application:,,,/PasswordManager;component/Themes/FlyoutTemplates.xaml"/>
+        <!--<ResourceDictionary Source="pack://application:,,,/PasswordManager;component/Themes/FlyoutTemplates.xaml"/>-->
+        
     </ResourceDictionary.MergedDictionaries>
 
     <Style TargetType="{x:Type controls:Flyout}" BasedOn="{StaticResource FlyoutStyle}"/>

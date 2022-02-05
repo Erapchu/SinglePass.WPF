@@ -41,6 +41,10 @@ namespace PasswordManager
         {
             InitializeComponent();
 
+            // Welcome window
+            var welcomeWindow = new WelcomeWindow();
+            welcomeWindow.Show();
+
             _configuration = new ConfigurationBuilder()
                 .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                 .AddJsonFile("settings.json", optional: false, reloadOnChange: true)
@@ -61,7 +65,9 @@ namespace PasswordManager
             using (var loginScope = _host.Services.CreateScope())
             {
                 var loginWindow = _host.Services.GetService<LoginWindow>();
-                var dialogResult = loginWindow.ShowDialog(); // Stop here
+                welcomeWindow.Close();
+                bool? dialogResult = loginWindow.ShowDialog(); // Stop here
+
                 if (dialogResult == false)
                 {
                     Shutdown();
@@ -97,6 +103,7 @@ namespace PasswordManager
 
                 services.AddSingleton<CredentialsCryptoService>();
                 services.AddSingleton<ThemeService>();
+                services.AddSingleton<AppSettingsService>();
             });
 
         private void Application_Exit(object sender, ExitEventArgs e)

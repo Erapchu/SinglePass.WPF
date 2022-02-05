@@ -68,7 +68,7 @@ namespace PasswordManager
                 welcomeWindow.Close();
                 bool? dialogResult = loginWindow.ShowDialog(); // Stop here
 
-                if (dialogResult == false)
+                if (dialogResult != true)
                 {
                     Shutdown();
                     return;

@@ -15,13 +15,14 @@
     Height="500"
     MinWidth="500"
     MinHeight="300"
-    UseLayoutRounding="True"
     d:DataContext="{x:Static vm:MainWindowViewModel.DesignTimeInstance}"
+    Closing="MaterialWindow_Closing"
+    UseLayoutRounding="True"
     mc:Ignorable="d">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/PasswordManager;component/Themes/SeparatorTemplates.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/PasswordManager;component/Themes/SeparatorTemplates.xaml"/>
                 <ResourceDictionary Source="pack://application:,,,/PasswordManager;component/Themes/DialogHostTemplates.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <DataTemplate x:Key="NavigationItemDataTemplate" DataType="{x:Type vm:NavigationItemViewModel}">
@@ -84,10 +85,7 @@
                         <Style BasedOn="{StaticResource MaterialDesignScrollBarMinimal}" TargetType="{x:Type ScrollBar}" />
                     </ListBox.Resources>
                 </ListBox>
-                <Rectangle
-                    Grid.Column="1"
-                    Width="1"
-                    Fill="{DynamicResource MaterialDesignDivider}" />
+                <Separator Grid.Column="1" Style="{StaticResource MaterialDesignVerticalSeparator}" />
                 <AdornerDecorator Grid.Column="2">
                     <md:Transitioner SelectedIndex="{Binding SelectedNavigationItemIndex}">
                         <md:TransitionerSlide>

@@ -5,17 +5,16 @@
     xmlns:local="clr-namespace:PasswordManager"
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
     Exit="Application_Exit"
-    ShutdownMode="OnLastWindowClose"
+    ShutdownMode="OnExplicitShutdown"
     Startup="Application_Startup">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <md:BundledTheme />
                 <!--<md:BundledTheme
                     BaseTheme="Light"
                     PrimaryColor="Blue"
-                    SecondaryColor="Yellow" />-->
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
+                    SecondaryColor="Yellow" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />-->
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

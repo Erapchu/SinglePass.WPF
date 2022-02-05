@@ -11,6 +11,11 @@ namespace PasswordManager.Helpers
         /// </summary>
         public const int IVLength = 16;
 
+        /// <summary>
+        /// Length of Key for encryption/decryption.
+        /// </summary>
+        public const int KeyLength = 32;
+
         public static byte[] EncryptStringToBytes(string plainText, byte[] key, byte[] IV)
         {
             // Check arguments.

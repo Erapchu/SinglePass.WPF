@@ -14,14 +14,52 @@
     mc:Ignorable="d">
     <UserControl.Resources>
         <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/PasswordManager;component/Themes/SeparatorTemplates.xaml" />
+            </ResourceDictionary.MergedDictionaries>
             <conv:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid Margin="0 32 0 0">
-        <StackPanel Margin="8">
-            <RadioButton Content="Inherit" IsChecked="{Binding ThemeMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static md:BaseTheme.Inherit}}" />
-            <RadioButton Content="Dark" IsChecked="{Binding ThemeMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static md:BaseTheme.Dark}}" />
-            <RadioButton Content="Light" IsChecked="{Binding ThemeMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static md:BaseTheme.Light}}" />
+        <StackPanel>
+            <md:Card Margin="16 8" md:ShadowAssist.ShadowDepth="Depth1">
+                <Expander Background="Transparent">
+                    <Expander.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <md:PackIcon
+                                Width="24"
+                                Height="24"
+                                VerticalAlignment="Center"
+                                Kind="PaletteOutline" />
+                            <TextBlock
+                                Margin="16 0 0 0"
+                                VerticalAlignment="Center"
+                                Text="Personalize" />
+                        </StackPanel>
+                    </Expander.Header>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Separator Background="{DynamicResource MaterialDesignDivider}" />
+                        <StackPanel Grid.Row="1" Margin="16 8">
+                            <RadioButton
+                                Margin="0 8"
+                                Content="Inherit"
+                                IsChecked="{Binding ThemeMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static md:BaseTheme.Inherit}}" />
+                            <RadioButton
+                                Margin="0 8"
+                                Content="Dark"
+                                IsChecked="{Binding ThemeMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static md:BaseTheme.Dark}}" />
+                            <RadioButton
+                                Margin="0 8"
+                                Content="Light"
+                                IsChecked="{Binding ThemeMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static md:BaseTheme.Light}}" />
+                        </StackPanel>
+                    </Grid>
+                </Expander>
+            </md:Card>
         </StackPanel>
     </Grid>
 </UserControl>

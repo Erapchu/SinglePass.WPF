@@ -20,18 +20,19 @@ namespace PasswordManager.ViewModels
         private readonly ThemeService _themeService;
         private readonly AppSettingsService _appSettingsService;
 
-        public bool IsDarkMode
+        public BaseTheme ThemeMode
         {
-            get => _themeService.IsDarkMode;
+            get => _appSettingsService.ThemeMode;
             set
             {
-                if (_themeService.IsDarkMode == value)
-                    return;
-
-                _themeService.IsDarkMode = value;
+                _appSettingsService.ThemeMode = value;
                 OnPropertyChanged();
 
-                _appSettingsService.IsDarkMode = value;
+                // Don't switch theme if the same
+                if (_themeService.ThemeMode.GetBaseTheme() == value.GetBaseTheme())
+                    return;
+
+                _themeService.ThemeMode = value;
             }
         }
 

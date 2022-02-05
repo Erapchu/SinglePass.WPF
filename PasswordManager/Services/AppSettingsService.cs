@@ -1,4 +1,5 @@
-﻿using PasswordManager.Helpers;
+﻿using Microsoft.Extensions.Logging;
+using PasswordManager.Helpers;
 using PasswordManager.Helpers.Threading;
 using PasswordManager.Models;
 using System.IO;
@@ -11,23 +12,24 @@ namespace PasswordManager.Services
     public class AppSettingsService
     {
         private readonly string _commonSettingsFilePath = Constants.CommonSettingsFilePath;
+        private readonly ILogger<AppSettingsService> _logger;
 
         public AppSettings Settings { get; } = new();
 
-        public bool IsDarkMode
+        public MaterialDesignThemes.Wpf.BaseTheme ThemeMode
         {
-            get => Settings.IsDarkMode;
+            get => Settings.ThemeMode;
             set
             {
-                if (Settings.IsDarkMode == value)
+                if (Settings.ThemeMode == value)
                     return;
 
-                Settings.IsDarkMode = value;
+                Settings.ThemeMode = value;
                 Save();
             }
         }
 
-        public AppSettingsService()
+        public AppSettingsService(ILogger<AppSettingsService> logger)
         {
             if (File.Exists(_commonSettingsFilePath))
             {
@@ -40,6 +42,8 @@ namespace PasswordManager.Services
                 // First save
                 Save();
             }
+
+            _logger = logger;
         }
 
         public Task Save()
@@ -50,6 +54,7 @@ namespace PasswordManager.Services
                 using var waitHandleLocker = EventWaitHandleLocker.MakeWithEventHandle(true, EventResetMode.AutoReset, hashedPath);
                 using var fileStream = new FileStream(_commonSettingsFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
                 JsonSerializer.Serialize(fileStream, Settings);
+                _logger.LogInformation("Settings saved to file");
             });
         }
     }

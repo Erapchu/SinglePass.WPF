@@ -22,13 +22,14 @@
     </UserControl.Resources>
     <Grid Margin="0 32 0 0">
         <StackPanel>
-            <md:Card Margin="16 8" md:ShadowAssist.ShadowDepth="Depth1">
-                <Expander Background="Transparent">
-                    <Expander.Header>
+            <GroupBox Margin="16 8" Style="{StaticResource MaterialDesignCardGroupBox}">
+                <GroupBox.HeaderTemplate>
+                    <DataTemplate>
                         <StackPanel Orientation="Horizontal">
                             <md:PackIcon
                                 Width="24"
                                 Height="24"
+                                Margin="8 0 0 0"
                                 VerticalAlignment="Center"
                                 Kind="PaletteOutline" />
                             <TextBlock
@@ -36,30 +37,29 @@
                                 VerticalAlignment="Center"
                                 Text="Personalize" />
                         </StackPanel>
-                    </Expander.Header>
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-                        <Separator Background="{DynamicResource MaterialDesignDivider}" />
-                        <StackPanel Grid.Row="1" Margin="16 8">
-                            <RadioButton
-                                Margin="0 8"
-                                Content="Inherit"
-                                IsChecked="{Binding ThemeMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static md:BaseTheme.Inherit}}" />
-                            <RadioButton
-                                Margin="0 8"
-                                Content="Dark"
-                                IsChecked="{Binding ThemeMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static md:BaseTheme.Dark}}" />
-                            <RadioButton
-                                Margin="0 8"
-                                Content="Light"
-                                IsChecked="{Binding ThemeMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static md:BaseTheme.Light}}" />
-                        </StackPanel>
-                    </Grid>
-                </Expander>
-            </md:Card>
+                    </DataTemplate>
+                </GroupBox.HeaderTemplate>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="1" Margin="16 8">
+                        <RadioButton
+                            Margin="0 8"
+                            Content="Inherit"
+                            IsChecked="{Binding ThemeMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static md:BaseTheme.Inherit}}" />
+                        <RadioButton
+                            Margin="0 8"
+                            Content="Dark"
+                            IsChecked="{Binding ThemeMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static md:BaseTheme.Dark}}" />
+                        <RadioButton
+                            Margin="0 8"
+                            Content="Light"
+                            IsChecked="{Binding ThemeMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static md:BaseTheme.Light}}" />
+                    </StackPanel>
+                </Grid>
+            </GroupBox>
         </StackPanel>
     </Grid>
 </UserControl>

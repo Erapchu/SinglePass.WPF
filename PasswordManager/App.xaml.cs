@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog;
 using NLog.Extensions.Logging;
+using PasswordManager.Controls;
 using PasswordManager.Services;
 using PasswordManager.ViewModels;
 using PasswordManager.Views;
@@ -17,9 +18,11 @@ namespace PasswordManager
     /// </summary>
     public partial class App : Application
     {
+        private static IConfiguration _configuration;
+
         private IHost _host;
         private Logger _logger;
-        private static IConfiguration _configuration;
+        private TrayIcon _trayIcon;
 
         public App()
         {
@@ -60,6 +63,9 @@ namespace PasswordManager
 
             // Resolve theme
             var themeService = _host.Services.GetService<ThemeService>();
+
+            // Create tray icon
+            _trayIcon = new TrayIcon();
 
             // Login
             using (var loginScope = _host.Services.CreateScope())

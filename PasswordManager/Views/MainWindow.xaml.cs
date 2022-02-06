@@ -27,7 +27,9 @@ namespace PasswordManager.Views
         private void MaterialWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             //TODO: Shutdown process on main window close or hide window and cancel depend on settings
-            Application.Current.Shutdown();
+            Hide();
+            ShowInTaskbar = false;
+            e.Cancel = true;
         }
     }
 }

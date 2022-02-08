@@ -22,9 +22,17 @@
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/PasswordManager;component/Themes/SeparatorTemplates.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/PasswordManager;component/Themes/SeparatorTemplates.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/PasswordManager;component/Themes/DialogHostTemplates.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <Style
+                x:Key="CustomNavigationListboxItem"
+                BasedOn="{StaticResource MaterialDesignNavigationPrimaryListBoxItem}"
+                TargetType="{x:Type ListBoxItem}">
+                <EventSetter Event="PreviewMouseDown" Handler="ListBoxItem_PreviewMouseDown"/>
+            </Style>
+
             <DataTemplate x:Key="NavigationItemDataTemplate" DataType="{x:Type vm:NavigationItemViewModel}">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -77,6 +85,7 @@
                     Width="220"
                     Margin="0 36 0 0"
                     HorizontalContentAlignment="Stretch"
+                    ItemContainerStyle="{StaticResource CustomNavigationListboxItem}"
                     ItemTemplate="{StaticResource NavigationItemDataTemplate}"
                     ItemsSource="{Binding NavigationItems}"
                     SelectedIndex="{Binding SelectedNavigationItemIndex, UpdateSourceTrigger=PropertyChanged}"

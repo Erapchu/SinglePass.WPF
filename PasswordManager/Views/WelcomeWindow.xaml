@@ -28,7 +28,6 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 FontSize="20"
-                FontFamily="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto"
                 Text="Loading Password Manager..." />
         </Border>
     </Grid>

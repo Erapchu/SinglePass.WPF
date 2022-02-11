@@ -66,6 +66,7 @@
     <Grid>
         <tb:TaskbarIcon
             x:Name="TaskbarIcon"
+            IconSource="/PasswordManager;component/Resources/pass-man.ico"
             ContextMenu="{StaticResource TaskbarContextMenu}"
             LeftClickCommand="{Binding OpenMainWindowCommand}"
             NoLeftClickDelay="True"

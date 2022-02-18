@@ -13,8 +13,6 @@
 
     <SolidColorBrush x:Key="RedTransparentBrush" Color="#DEE50000" />
     <SolidColorBrush x:Key="RedTransparentDarkBrush" Color="#EE900000" />
-    <SolidColorBrush x:Key="GreyTransparentBrush" Color="#33000000" />
-    <SolidColorBrush x:Key="GreyTransparentPressedBrush" Color="#55000000" />
 
     <Style
         x:Key="CaptionButtonStyle"
@@ -32,32 +30,36 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
-                    <Border
-                        x:Name="border"
-                        Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        SnapsToDevicePixels="True">
-                        <ContentPresenter
-                            x:Name="contentPresenter"
-                            Margin="{TemplateBinding Padding}"
-                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                            Content="{TemplateBinding Content}"
-                            ContentStringFormat="{TemplateBinding ContentStringFormat}"
-                            ContentTemplate="{TemplateBinding ContentTemplate}"
-                            Focusable="False"
-                            RecognizesAccessKey="True"
-                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-                    </Border>
+                    <Grid>
+                        <Border
+                            x:Name="BackLayout"
+                            Background="{DynamicResource MaterialDesignBody}"
+                            Opacity="0"/>
+                        <Border
+                            x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            SnapsToDevicePixels="True">
+                            <ContentPresenter
+                                x:Name="contentPresenter"
+                                Margin="{TemplateBinding Padding}"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                Content="{TemplateBinding Content}"
+                                ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                Focusable="False"
+                                RecognizesAccessKey="True"
+                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                        </Border>
+                    </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="true">
-                            <Setter Property="Background" Value="{StaticResource GreyTransparentBrush}" />
-                            <Setter Property="BorderBrush" Value="{StaticResource GreyTransparentBrush}" />
+                            <Setter TargetName="BackLayout" Property="Opacity" Value="0.2" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter Property="Background" Value="{StaticResource GreyTransparentPressedBrush}" />
-                            <Setter Property="BorderBrush" Value="{StaticResource GreyTransparentPressedBrush}" />
+                            <Setter TargetName="BackLayout" Property="Opacity" Value="0.5" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="false">
                             <Setter Property="Opacity" Value="0.23" />
@@ -112,7 +114,7 @@
                         BorderThickness="1">
                         <Grid>
                             <!--  Caption panel with window buttons, title and icon  -->
-                            <Grid Panel.ZIndex="1" VerticalAlignment="Top">
+                            <Grid VerticalAlignment="Top" Panel.ZIndex="1">
                                 <Grid.Visibility>
                                     <MultiBinding Converter="{StaticResource CaptionVisibilityConverter}">
                                         <Binding Path="(componentModel:DesignerProperties.IsInDesignMode)" RelativeSource="{RelativeSource TemplatedParent}" />

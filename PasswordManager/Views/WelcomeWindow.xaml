@@ -8,16 +8,27 @@
     Title="WelcomeWindow"
     Width="300"
     Height="300"
+    AllowsTransparency="True"
+    Background="Transparent"
     ResizeMode="NoResize"
     ShowInTaskbar="False"
     WindowStartupLocation="CenterScreen"
     WindowStyle="None"
     mc:Ignorable="d">
     <Grid>
-        <TextBlock
-            FontSize="20"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Text="Loading Password Manager..." />
+        <Border CornerRadius="16">
+            <Border.Background>
+                <LinearGradientBrush>
+                    <GradientStop Color="#8bcaff" Offset="0"/>
+                    <GradientStop Color="#f083da" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.Background>
+            <TextBlock
+                Foreground="White"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontSize="20"
+                Text="Loading Password Manager..." />
+        </Border>
     </Grid>
 </Window>

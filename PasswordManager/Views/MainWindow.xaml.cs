@@ -2,6 +2,7 @@
 using PasswordManager.ViewModels;
 using System;
 using System.Windows;
+using System.Windows.Input;
 
 namespace PasswordManager.Views
 {
@@ -27,7 +28,17 @@ namespace PasswordManager.Views
         private void MaterialWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             //TODO: Shutdown process on main window close or hide window and cancel depend on settings
-            Application.Current.Shutdown();
+            Hide();
+            ShowInTaskbar = false;
+            e.Cancel = true;
+        }
+
+        private void ListBoxItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var anyCtrlPressed = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
+
+            if (anyCtrlPressed)
+                e.Handled = true;
         }
     }
 }

@@ -20,7 +20,7 @@
             <conv:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
-    <Grid Margin="0 32 0 0" MaxWidth="800">
+    <Grid MaxWidth="800">
         <StackPanel>
             <GroupBox Margin="16 8" Style="{StaticResource MaterialDesignCardGroupBox}">
                 <GroupBox.HeaderTemplate>

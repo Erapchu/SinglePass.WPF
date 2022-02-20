@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="clr-namespace:PasswordManager.Controls"
+    xmlns:conv="clr-namespace:PasswordManager.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:helpers="clr-namespace:PasswordManager.Helpers"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
@@ -25,12 +26,13 @@
                 <ResourceDictionary Source="pack://application:,,,/PasswordManager;component/Themes/SeparatorTemplates.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/PasswordManager;component/Themes/DialogHostTemplates.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <helpers:BindingProxy x:Key="Proxy" Data="{Binding .}" />
 
             <Style
                 x:Key="CustomNavigationListboxItem"
                 BasedOn="{StaticResource MaterialDesignNavigationPrimaryListBoxItem}"
                 TargetType="{x:Type ListBoxItem}">
-                <EventSetter Event="PreviewMouseDown" Handler="ListBoxItem_PreviewMouseDown"/>
+                <EventSetter Event="PreviewMouseDown" Handler="ListBoxItem_PreviewMouseDown" />
             </Style>
 
             <DataTemplate x:Key="NavigationItemDataTemplate" DataType="{x:Type vm:NavigationItemViewModel}">
@@ -62,6 +64,8 @@
                         Visibility="{Binding Loading, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 </Grid>
             </DataTemplate>
+
+            <conv:TransitionVisibilityConverter x:Key="TransitionVisibilityConverter" />
         </ResourceDictionary>
     </Window.Resources>
     <i:Interaction.Triggers>
@@ -96,26 +100,18 @@
                 </ListBox>
                 <Separator Grid.Column="1" Style="{StaticResource MaterialDesignVerticalSeparator}" />
                 <AdornerDecorator Grid.Column="2">
-                    <md:Transitioner SelectedIndex="{Binding SelectedNavigationItemIndex}">
-                        <md:TransitionerSlide>
-                            <md:TransitionerSlide.OpeningEffects>
-                                <md:TransitionEffect Kind="None" />
-                            </md:TransitionerSlide.OpeningEffects>
-                            <md:TransitionerSlide.ForwardWipe>
-                                <md:FadeWipe Duration="0:0:0.2" />
-                            </md:TransitionerSlide.ForwardWipe>
+                    <Grid>
+                        <Grid Visibility="{Binding SelectedNavigationItemIndex, Converter={StaticResource TransitionVisibilityConverter}, ConverterParameter={x:Static vm:NavigationItemViewModel.PasswordsNavigationItemIndex}}">
                             <local:PasswordsControl x:Name="PasswordsControl" DataContext="{Binding PasswordsViewModel}" />
-                        </md:TransitionerSlide>
-                        <md:TransitionerSlide>
-                            <md:TransitionerSlide.OpeningEffects>
-                                <md:TransitionEffect Kind="None" />
-                            </md:TransitionerSlide.OpeningEffects>
-                            <md:TransitionerSlide.BackwardWipe>
-                                <md:FadeWipe Duration="0:0:0.2" />
-                            </md:TransitionerSlide.BackwardWipe>
+                        </Grid>
+                        <ScrollViewer
+                            Margin="0 32 0 0"
+                            HorizontalScrollBarVisibility="Disabled"
+                            VerticalScrollBarVisibility="Auto"
+                            Visibility="{Binding SelectedNavigationItemIndex, Converter={StaticResource TransitionVisibilityConverter}, ConverterParameter={x:Static vm:NavigationItemViewModel.SettingsNavigationItemIndex}}">
                             <local:SettingsControl DataContext="{Binding SettingsViewModel}" />
-                        </md:TransitionerSlide>
-                    </md:Transitioner>
+                        </ScrollViewer>
+                    </Grid>
                 </AdornerDecorator>
             </Grid>
         </Grid>

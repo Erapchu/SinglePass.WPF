@@ -27,11 +27,6 @@ namespace PasswordManager.ViewModels
             {
                 _appSettingsService.ThemeMode = value;
                 OnPropertyChanged();
-
-                // Don't switch theme if the same
-                if (_themeService.ThemeMode.GetBaseTheme() == value.GetBaseTheme())
-                    return;
-
                 _themeService.ThemeMode = value;
             }
         }

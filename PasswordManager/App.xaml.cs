@@ -63,6 +63,7 @@ namespace PasswordManager
 
             // Resolve theme
             var themeService = _host.Services.GetService<ThemeService>();
+            themeService.Init();
 
             // Create tray icon
             _trayIcon = new TrayIcon();

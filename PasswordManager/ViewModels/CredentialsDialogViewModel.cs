@@ -35,7 +35,19 @@ namespace PasswordManager.ViewModels
         public event Action<CredentialViewModel> Delete;
         public event Action Cancel;
 
+        private RelayCommand _okCommand;
+        private RelayCommand _cancelCommand;
+        private RelayCommand _editCommand;
+        private RelayCommand _deleteCommand;
+        private RelayCommand<string> _copyToClipboardCommand;
         private CredentialViewModel _credentialViewModel;
+
+        public RelayCommand OkCommand => _okCommand ??= new RelayCommand(OkExecute);
+        public RelayCommand CancelCommand => _cancelCommand ??= new RelayCommand(CancelExecute);
+        public RelayCommand EditCommand => _editCommand ??= new RelayCommand(EditExecute);
+        public RelayCommand DeleteCommand => _deleteCommand ??= new RelayCommand(DeleteExecute);
+        public RelayCommand<string> CopyToClipboardCommand => _copyToClipboardCommand ??= new RelayCommand<string>(CopyToClipboard);
+
         public CredentialViewModel CredentialViewModel
         {
             get => _credentialViewModel;
@@ -131,20 +143,5 @@ namespace PasswordManager.ViewModels
                 _logger.LogError(ex, string.Empty);
             }
         }
-
-        private RelayCommand _okCommand;
-        public RelayCommand OkCommand => _okCommand ??= new RelayCommand(OkExecute);
-
-        private RelayCommand _cancelCommand;
-        public RelayCommand CancelCommand => _cancelCommand ??= new RelayCommand(CancelExecute);
-
-        private RelayCommand _editCommand;
-        public RelayCommand EditCommand => _editCommand ??= new RelayCommand(EditExecute);
-
-        private RelayCommand _deleteCommand;
-        public RelayCommand DeleteCommand => _deleteCommand ??= new RelayCommand(DeleteExecute);
-
-        private RelayCommand<string> _copyToClipboardCommand;
-        public RelayCommand<string> CopyToClipboardCommand => _copyToClipboardCommand ??= new RelayCommand<string>(CopyToClipboard);
     }
 }

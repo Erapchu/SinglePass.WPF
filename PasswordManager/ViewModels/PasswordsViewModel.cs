@@ -236,6 +236,7 @@ namespace PasswordManager.ViewModels
             ActiveCredentialDialogViewModel.CredentialViewModel = new CredentialViewModel(new Credential());
             ActiveCredentialDialogViewModel.Mode = CredentialsDialogMode.New;
             ActiveCredentialDialogViewModel.IsPasswordVisible = true;
+            ActiveCredentialDialogViewModel.SetFocus();
         }
 
         private void HandleSearchKeyEvent(KeyEventArgs args)

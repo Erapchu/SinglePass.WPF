@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Unidecode.NET;
 
 namespace PasswordManager.ViewModels
@@ -76,6 +77,8 @@ namespace PasswordManager.ViewModels
             get => _searchTextFocused;
             set => SetProperty(ref _searchTextFocused, value);
         }
+
+
 
         private PasswordsViewModel() { }
 
@@ -233,7 +236,36 @@ namespace PasswordManager.ViewModels
             ActiveCredentialDialogViewModel.IsPasswordVisible = true;
         }
 
+        private void HandleSearchKeyEvent(KeyEventArgs args)
+        {
+            if (args is null)
+                return;
+
+            if (args.Key == Key.Up)
+            {
+                // Select previous
+                var selectedIndex = DisplayedCredentials.IndexOf(SelectedCredential);
+                if (selectedIndex != -1 && selectedIndex > 0)
+                {
+                    SelectedCredential = DisplayedCredentials[selectedIndex - 1];
+                }
+            }
+
+            if (args.Key == Key.Down)
+            {
+                // Select next
+                var selectedIndex = DisplayedCredentials.IndexOf(SelectedCredential);
+                if (selectedIndex != -1 && selectedIndex < DisplayedCredentials.Count - 1)
+                {
+                    SelectedCredential = DisplayedCredentials[selectedIndex + 1];
+                }
+            }
+        }
+
         private RelayCommand _addCredentialCommand;
         public RelayCommand AddCredentialCommand => _addCredentialCommand ??= new RelayCommand(AddCredential);
+
+        private RelayCommand<KeyEventArgs> _searchKeyEventCommand;
+        public RelayCommand<KeyEventArgs> SearchKeyEventCommand => _searchKeyEventCommand ??= new RelayCommand<KeyEventArgs>(HandleSearchKeyEvent);
     }
 }

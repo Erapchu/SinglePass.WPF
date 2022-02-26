@@ -23,16 +23,16 @@ namespace PasswordManager.ViewModels
         }
         #endregion
 
-        private readonly CredentialsCryptoService _credentialsCryptoService;
-        private readonly ILogger<MainWindowViewModel> _logger;
-
         public event Action<CredentialViewModel> CredentialSelected;
 
+        private AsyncRelayCommand _loadingCommand;
+        private int _selectedNavigationItemIndex;
+
+        public AsyncRelayCommand LoadingCommand => _loadingCommand ??= new AsyncRelayCommand(LoadingAsync);
         public PasswordsViewModel PasswordsViewModel { get; }
         public SettingsViewModel SettingsViewModel { get; }
         public ObservableCollectionDelayed<NavigationItemViewModel> NavigationItems { get; }
 
-        private int _selectedNavigationItemIndex;
         public int SelectedNavigationItemIndex
         {
             get => _selectedNavigationItemIndex;
@@ -51,14 +51,10 @@ namespace PasswordManager.ViewModels
 
         public MainWindowViewModel(
             PasswordsViewModel passwordsViewModel,
-            CredentialsCryptoService credentialsCryptoService,
-            SettingsViewModel settingsViewModel,
-            ILogger<MainWindowViewModel> logger)
+            SettingsViewModel settingsViewModel)
         {
             PasswordsViewModel = passwordsViewModel;
             SettingsViewModel = settingsViewModel;
-            _credentialsCryptoService = credentialsCryptoService;
-            _logger = logger;
 
             PasswordsViewModel.CredentialSelected += PasswordsViewModel_CredentialSelected;
 
@@ -82,8 +78,5 @@ namespace PasswordManager.ViewModels
             await Task.Delay(1);
             PasswordsViewModel.SearchTextFocused = true;
         }
-
-        private AsyncRelayCommand _loadingCommand;
-        public AsyncRelayCommand LoadingCommand => _loadingCommand ??= new AsyncRelayCommand(LoadingAsync);
     }
 }

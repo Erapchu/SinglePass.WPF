@@ -79,15 +79,19 @@
                 </GroupBox.HeaderTemplate>
                 <Grid Margin="16">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="auto" />
                     </Grid.ColumnDefinitions>
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <md:PackIcon Kind="GoogleDrive"/>
-                        <TextBlock Text="Google Drive" Margin="8 0 0 0"/>
+                    <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                        <md:PackIcon Kind="GoogleDrive" />
+                        <TextBlock Margin="8 0 0 0" Text="Google Drive" />
                     </StackPanel>
-                    <ToggleButton Grid.Column="2" Style="{StaticResource MaterialDesignSwitchAccentToggleButton}" />
+                    <ToggleButton
+                        Grid.Column="2"
+                        Cursor="Hand"
+                        Style="{StaticResource MaterialDesignSwitchAccentToggleButton}"
+                        Command="{Binding GoogleLoginCommand}"/>
                 </Grid>
             </GroupBox>
         </StackPanel>

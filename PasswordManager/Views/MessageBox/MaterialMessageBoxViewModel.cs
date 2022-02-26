@@ -19,8 +19,17 @@ namespace PasswordManager.Views.MessageBox
         }
         #endregion
 
-        #region public string Header
         private string _header;
+        private string _content;
+        private PackIconKind? _iconKind;
+        private RelayCommand _button1Command;
+        private RelayCommand _button2Command;
+        private RelayCommand _button3Command;
+
+        public RelayCommand Button1Command => _button1Command ??= new RelayCommand(Button1Action);
+        public RelayCommand Button2Command => _button2Command ??= new RelayCommand(Button2Action);
+        public RelayCommand Button3Command => _button3Command ??= new RelayCommand(Button3Action);
+
         public string Header
         {
             get => _header;
@@ -35,10 +44,7 @@ namespace PasswordManager.Views.MessageBox
         }
 
         public HorizontalAlignment HeaderHorizontalAlignment => IconVisible ? HorizontalAlignment.Center : HorizontalAlignment.Left;
-        #endregion
 
-        #region public string Content
-        private string _content;
         public string Content
         {
             get => _content;
@@ -51,9 +57,7 @@ namespace PasswordManager.Views.MessageBox
                 OnPropertyChanged();
             }
         }
-        #endregion
 
-        private PackIconKind? _iconKind;
         public PackIconKind? IconKind
         {
             get => _iconKind;
@@ -69,7 +73,6 @@ namespace PasswordManager.Views.MessageBox
 
         public bool IconVisible => IconKind != null;
 
-        #region public string Button1
         public string Button1Text
         {
             get
@@ -93,9 +96,7 @@ namespace PasswordManager.Views.MessageBox
         }
 
         public bool Button1IsDefault => true;
-        #endregion
 
-        #region public string Button2
         public string Button2Text
         {
             get
@@ -152,9 +153,7 @@ namespace PasswordManager.Views.MessageBox
                 };
             }
         }
-        #endregion
 
-        #region public string Button3
         public string Button3Text
         {
             get
@@ -210,7 +209,6 @@ namespace PasswordManager.Views.MessageBox
                 };
             }
         }
-        #endregion
 
         private readonly string _dialogIdentifier;
         private readonly MaterialMessageBoxButtons _materialMessageBoxButtons;
@@ -294,20 +292,5 @@ namespace PasswordManager.Views.MessageBox
             if (DialogHost.IsDialogOpen(_dialogIdentifier))
                 DialogHost.Close(_dialogIdentifier, result);
         }
-
-        #region Commands
-
-        private RelayCommand _button1Command;
-        public RelayCommand Button1Command => _button1Command
-            ?? (_button1Command = new RelayCommand(Button1Action));
-
-        private RelayCommand _button2Command;
-        public RelayCommand Button2Command => _button2Command
-            ?? (_button2Command = new RelayCommand(Button2Action));
-
-        private RelayCommand _button3Command;
-        public RelayCommand Button3Command => _button3Command
-            ?? (_button3Command = new RelayCommand(Button3Action));
-        #endregion
     }
 }

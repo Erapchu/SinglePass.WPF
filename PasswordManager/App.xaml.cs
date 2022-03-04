@@ -111,6 +111,7 @@ namespace PasswordManager
                 services.AddSingleton<CredentialsCryptoService>();
                 services.AddSingleton<ThemeService>();
                 services.AddSingleton<AppSettingsService>();
+                services.AddSingleton<OAuthProviderService>();
             });
 
         private void Application_Exit(object sender, ExitEventArgs e)

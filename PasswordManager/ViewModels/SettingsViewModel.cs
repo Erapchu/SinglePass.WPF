@@ -1,6 +1,4 @@
-﻿using Google.Apis.Auth.OAuth2;
-using Google.Apis.Drive.v3;
-using MaterialDesignThemes.Wpf;
+﻿using MaterialDesignThemes.Wpf;
 using Microsoft.Extensions.Logging;
 using Microsoft.Toolkit.Mvvm.Input;
 using PasswordManager.Helpers;
@@ -28,6 +26,7 @@ namespace PasswordManager.ViewModels
         private readonly ThemeService _themeService;
         private readonly AppSettingsService _appSettingsService;
         private readonly ILogger<SettingsViewModel> _logger;
+        private readonly OAuthProviderService _oAuthProviderService;
         private AsyncRelayCommand _googleLoginCommand;
 
         public BaseTheme ThemeMode
@@ -48,11 +47,13 @@ namespace PasswordManager.ViewModels
         public SettingsViewModel(
             ThemeService themeService,
             AppSettingsService appSettingsService,
-            ILogger<SettingsViewModel> logger)
+            ILogger<SettingsViewModel> logger,
+            OAuthProviderService oAuthProviderService)
         {
             _themeService = themeService;
             _appSettingsService = appSettingsService;
             _logger = logger;
+            _oAuthProviderService = oAuthProviderService;
 
             Name = "Settings";
             ItemIndex = SettingsNavigationItemIndex;
@@ -68,7 +69,9 @@ namespace PasswordManager.ViewModels
                 var token = processingControl.ViewModel.CancellationToken;
                 _ = DialogHost.Show(processingControl, windowDialogName); // Don't await dialog host
 
-                // TODO: Provide secrets with configuration from .json
+                await _oAuthProviderService.AuthorizeAsync(Authorization.Enums.CloudType.GoogleDrive, token);
+
+                /*// TODO: Provide secrets with configuration from .json
                 var clientSecrets = new ClientSecrets()
                 {
                     ClientId = "",
@@ -85,11 +88,11 @@ namespace PasswordManager.ViewModels
                     clientSecrets,
                     new[] { DriveService.Scope.DriveFile },
                     userId,
-                    token);
+                    token);*/
 
                 _logger.LogInformation("Authorization process to Google Drive has been complete.");
 
-                if (userCredential != null)
+                //if (userCredential != null)
                 {
                     // Close dialog
                     DialogHost.Close(windowDialogName);

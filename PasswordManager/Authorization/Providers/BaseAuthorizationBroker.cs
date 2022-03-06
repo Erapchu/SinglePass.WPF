@@ -28,7 +28,7 @@ namespace PasswordManager.Authorization.Providers
             {
                 throw new Exception("Code was empty!");
             }
-            await RetrieveToken(response.Code, redirectUri);
+            await RetrieveToken(response.Code, redirectUri, cancellationToken);
         }
 
         private HttpListener StartListener(string redirectUri)
@@ -46,21 +46,21 @@ namespace PasswordManager.Authorization.Providers
             Process.Start(new ProcessStartInfo("cmd", $"/c start \"\" \"{uri}\"") { CreateNoWindow = true });
         }
 
-        private async Task<AuthorizationCodeResponseUrl> GetResponseFromListener(HttpListener listener, CancellationToken ct)
+        private async Task<AuthorizationCodeResponseUrl> GetResponseFromListener(HttpListener listener, CancellationToken cancellationToken)
         {
             HttpListenerContext context;
             // Set up cancellation. HttpListener.GetContextAsync() doesn't accept a cancellation token,
             // the HttpListener needs to be stopped which immediately aborts the GetContextAsync() call.
-            using (ct.Register(listener.Stop))
+            using (cancellationToken.Register(listener.Stop))
             {
                 // Wait to get the authorization code response.
                 try
                 {
                     context = await listener.GetContextAsync().ConfigureAwait(false);
                 }
-                catch (Exception) when (ct.IsCancellationRequested)
+                catch (Exception) when (cancellationToken.IsCancellationRequested)
                 {
-                    ct.ThrowIfCancellationRequested();
+                    cancellationToken.ThrowIfCancellationRequested();
                     // Next line will never be reached because cancellation will always have been requested in this catch block.
                     // But it's required to satisfy compiler.
                     throw new InvalidOperationException();
@@ -78,8 +78,8 @@ namespace PasswordManager.Authorization.Providers
             context.Response.SendChunked = false;
             context.Response.KeepAlive = false;
             var output = context.Response.OutputStream;
-            await output.WriteAsync(bytes, ct).ConfigureAwait(false);
-            await output.FlushAsync(ct).ConfigureAwait(false);
+            await output.WriteAsync(bytes, cancellationToken).ConfigureAwait(false);
+            await output.FlushAsync(cancellationToken).ConfigureAwait(false);
             output.Close();
             context.Response.Close();
 
@@ -87,7 +87,7 @@ namespace PasswordManager.Authorization.Providers
             return new AuthorizationCodeResponseUrl(coll.AllKeys.ToDictionary(k => k, k => coll[k]));
         }
 
-        private async Task<string> RetrieveToken(string code, string redirectUri)
+        private async Task<string> RetrieveToken(string code, string redirectUri, CancellationToken cancellationToken)
         {
             string result;
 
@@ -100,7 +100,7 @@ namespace PasswordManager.Authorization.Providers
                 {
                     Content = new StringContent(postData, Encoding.UTF8, "application/x-www-form-urlencoded")
                 };
-                var response = await client.SendAsync(request);
+                var response = await client.SendAsync(request, cancellationToken);
                 using (var content = response.Content)
                 {
                     var json = content.ReadAsStringAsync().Result;

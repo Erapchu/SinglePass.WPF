@@ -1,8 +1,8 @@
-﻿using PasswordManager.Authorization.Interfaces;
+﻿using PasswordManager.Authorization.Helpers;
+using PasswordManager.Authorization.Interfaces;
 using PasswordManager.Authorization.Responses;
 using System;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -21,29 +21,14 @@ namespace PasswordManager.Authorization.Providers
         {
             var redirectUri = BuildRedirectUri();
             var authorizationUri = BuildAuthorizationUri(redirectUri);
-            using var listener = StartListener(redirectUri);
-            OpenBrowser(authorizationUri);
+            using var listener = OAuthHelper.StartListener(redirectUri);
+            OAuthHelper.OpenBrowser(authorizationUri);
             var response = await GetResponseFromListener(listener, cancellationToken);
             if (string.IsNullOrWhiteSpace(response?.Code))
             {
                 throw new Exception("Code was empty!");
             }
             await RetrieveToken(response.Code, redirectUri, cancellationToken);
-        }
-
-        private HttpListener StartListener(string redirectUri)
-        {
-            var listener = new HttpListener();
-            listener.Prefixes.Add(redirectUri);
-            listener.Start();
-            return listener;
-        }
-
-        private void OpenBrowser(string uri)
-        {
-            uri = System.Text.RegularExpressions.Regex.Replace(uri, @"(\\*)" + "\"", @"$1$1\" + "\"");
-            uri = System.Text.RegularExpressions.Regex.Replace(uri, @"(\\+)$", @"$1$1");
-            Process.Start(new ProcessStartInfo("cmd", $"/c start \"\" \"{uri}\"") { CreateNoWindow = true });
         }
 
         private async Task<AuthorizationCodeResponseUrl> GetResponseFromListener(HttpListener listener, CancellationToken cancellationToken)

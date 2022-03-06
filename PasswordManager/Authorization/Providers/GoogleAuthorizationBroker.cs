@@ -29,7 +29,7 @@ namespace PasswordManager.Authorization.Providers
 
         protected override string BuildRedirectUri()
         {
-            var unusedPort = PortHelper.GetRandomUnusedPort();
+            var unusedPort = OAuthHelper.GetRandomUnusedPort();
             return $"http://localhost:{unusedPort}/";
         }
 

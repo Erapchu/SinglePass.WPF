@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PasswordManager.Authorization.Helpers;
+using PasswordManager.Authorization.Responses;
 using PasswordManager.Helpers;
 using System;
 using System.IO;
@@ -68,8 +69,9 @@ namespace PasswordManager.Authorization.Providers
 
         protected async override Task SaveResponse(string tokenResponse, CancellationToken cancellationToken)
         {
+            var tokenObject = JsonSerializer.Deserialize<GoogleDriveTokenResponse>(tokenResponse);
             using var fileStream = new FileStream(Constants.GoogleDriveFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
-            await JsonSerializer.SerializeAsync(fileStream, tokenResponse, cancellationToken: cancellationToken);
+            await JsonSerializer.SerializeAsync(fileStream, tokenObject, cancellationToken: cancellationToken);
             _logger.LogInformation("Token response saved to file");
         }
     }

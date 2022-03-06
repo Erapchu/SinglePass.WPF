@@ -2,8 +2,6 @@
 using PasswordManager.Authorization.Interfaces;
 using PasswordManager.Authorization.Providers;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace PasswordManager.Authorization.Services
 {
@@ -20,7 +18,7 @@ namespace PasswordManager.Authorization.Services
         {
             return cloudType switch
             {
-                CloudType.GoogleDrive => new GoogleAuthorizationBroker(),
+                CloudType.GoogleDrive => _serviceProvider.GetService(typeof(GoogleAuthorizationBroker)) as IAuthorizationBroker,
                 _ => null,
             };
         }

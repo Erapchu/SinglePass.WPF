@@ -8,24 +8,26 @@ namespace PasswordManager.Helpers
         public const string AppName = "PasswordManager";
         public const string PasswordsFileName = "PassMan.dat";
         public const string CommonSettingsFileName = "CommonSettings.json";
+        public const string GoogleDriveFileName = "GoogleDrive.json";
 
         public static string LocalAppDataDirectoryPath { get; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), AppName);
         public static string RoamingAppDataDirectoryPath { get; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppName);
         public static string PasswordsFilePath { get; } = Path.Combine(RoamingAppDataDirectoryPath, PasswordsFileName);
         public static string CommonSettingsFilePath { get; } = Path.Combine(RoamingAppDataDirectoryPath, CommonSettingsFileName);
+        public static string GoogleDriveFilePath { get; } = Path.Combine(LocalAppDataDirectoryPath, GoogleDriveFileName);
 
         static Constants()
         {
-            var roamingAppdataDir = new DirectoryInfo(RoamingAppDataDirectoryPath);
-            if (!roamingAppdataDir.Exists)
-            {
-                roamingAppdataDir.Create();
-            }
+            CreateIfNotExists(RoamingAppDataDirectoryPath);
+            CreateIfNotExists(LocalAppDataDirectoryPath);
+        }
 
-            var localAppdataDir = new DirectoryInfo(LocalAppDataDirectoryPath);
-            if (!localAppdataDir.Exists)
+        private static void CreateIfNotExists(string path)
+        {
+            var dirInfo = new DirectoryInfo(path);
+            if (!dirInfo.Exists)
             {
-                localAppdataDir.Create();
+                dirInfo.Create();
             }
         }
     }

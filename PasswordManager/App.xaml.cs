@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog;
 using NLog.Extensions.Logging;
+using PasswordManager.Authorization.Providers;
 using PasswordManager.Authorization.Services;
 using PasswordManager.Controls;
 using PasswordManager.Services;
@@ -99,6 +100,10 @@ namespace PasswordManager
                     lb.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
                     lb.AddNLog(_configuration);
                 });
+
+                services.Configure<GoogleDriveConfig>(_configuration.GetSection("Settings:GoogleDriveConfig"));
+
+                services.AddTransient<GoogleAuthorizationBroker>();
 
                 services.AddScoped<LoginWindow>();
                 services.AddScoped<LoginWindowViewModel>();

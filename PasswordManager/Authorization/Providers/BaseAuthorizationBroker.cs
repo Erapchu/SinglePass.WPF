@@ -14,9 +14,6 @@ namespace PasswordManager.Authorization.Providers
 {
     public abstract class BaseAuthorizationBroker : IAuthorizationBroker
     {
-        protected string ClientId { get; set; }
-        protected string ClientSecret { get; set; }
-
         public async Task AuthorizeAsync(CancellationToken cancellationToken)
         {
             var redirectUri = BuildRedirectUri();
@@ -28,7 +25,8 @@ namespace PasswordManager.Authorization.Providers
             {
                 throw new Exception("Code was empty!");
             }
-            await RetrieveToken(response.Code, redirectUri, cancellationToken);
+            var tokenResponse = await RetrieveToken(response.Code, redirectUri, cancellationToken);
+            await SaveResponse(tokenResponse, cancellationToken);
         }
 
         private async Task<AuthorizationCodeResponseUrl> GetResponseFromListener(HttpListener listener, CancellationToken cancellationToken)
@@ -86,11 +84,9 @@ namespace PasswordManager.Authorization.Providers
                     Content = new StringContent(postData, Encoding.UTF8, "application/x-www-form-urlencoded")
                 };
                 var response = await client.SendAsync(request, cancellationToken);
-                using (var content = response.Content)
-                {
-                    var json = content.ReadAsStringAsync().Result;
-                    result = json;//JsonSerializer.Deserialize<AuthResponse>(json);
-                }
+                using var content = response.Content;
+                var json = content.ReadAsStringAsync(cancellationToken).Result;
+                result = json;//JsonSerializer.Deserialize<AuthResponse>(json);
             }
             return result;
         }
@@ -105,5 +101,6 @@ namespace PasswordManager.Authorization.Providers
         protected abstract string BuildTokenEndpointUri();
         protected abstract string BuildRefreshAccessTokenUri();
         protected abstract string BuildRequestForToken(string code, string redirectUri);
+        protected abstract Task SaveResponse(string tokenResponse, CancellationToken cancellationToken);
     }
 }

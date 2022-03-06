@@ -1,30 +1,44 @@
-﻿using PasswordManager.Authorization.Helpers;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using PasswordManager.Authorization.Helpers;
+using PasswordManager.Helpers;
 using System;
+using System.IO;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace PasswordManager.Authorization.Providers
 {
+    public class GoogleDriveConfig
+    {
+        public string ClientId { get; init; }
+        public string ClientSecret { get; init; }
+        public string Scopes { get; init; }
+    }
+
     public class GoogleAuthorizationBroker : BaseAuthorizationBroker
     {
-        private readonly string _scopes;
+        private readonly ILogger<GoogleAuthorizationBroker> _logger;
+        private readonly GoogleDriveConfig _config;
 
-        public GoogleAuthorizationBroker()
+        public GoogleAuthorizationBroker(ILogger<GoogleAuthorizationBroker> logger, IOptions<GoogleDriveConfig> options)
         {
-            ClientId = "977481544425-32f220l78p3tpmg8t0bu5un78nhhvp34.apps.googleusercontent.com";
-            ClientSecret = "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";
-            _scopes = "https://www.googleapis.com/auth/drive.file";
+            _config = options.Value;
+            _logger = logger;
         }
 
         protected override string BuildAuthorizationUri(string redirectUri)
         {
             return "https://accounts.google.com/o/oauth2/v2/auth?" +
-                $"scope={HttpUtility.UrlEncode(_scopes)}&" +
+                $"scope={HttpUtility.UrlEncode(_config.Scopes)}&" +
                 "access_type=offline&" +
                 "include_granted_scopes=true&" +
                 "response_type=code&" +
                 "state=state_parameter_passthrough_value&" +
                 $"redirect_uri={HttpUtility.UrlEncode(redirectUri)}&" +
-                $"client_id={ClientId}";
+                $"client_id={_config.ClientId}";
         }
 
         protected override string BuildRedirectUri()
@@ -41,8 +55,8 @@ namespace PasswordManager.Authorization.Providers
         protected override string BuildRequestForToken(string code, string redirectUri)
         {
             return $"code={code}&" +
-                $"client_id={ClientId}&" +
-                $"client_secret={ClientSecret}&" +
+                $"client_id={_config.ClientId}&" +
+                $"client_secret={_config.ClientSecret}&" +
                 $"redirect_uri={HttpUtility.UrlEncode(redirectUri)}&" +
                 $"grant_type=authorization_code";
         }
@@ -50,6 +64,13 @@ namespace PasswordManager.Authorization.Providers
         protected override string BuildTokenEndpointUri()
         {
             return "https://oauth2.googleapis.com/token";
+        }
+
+        protected async override Task SaveResponse(string tokenResponse, CancellationToken cancellationToken)
+        {
+            using var fileStream = new FileStream(Constants.GoogleDriveFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
+            await JsonSerializer.SerializeAsync(fileStream, tokenResponse, cancellationToken: cancellationToken);
+            _logger.LogInformation("Token response saved to file");
         }
     }
 }

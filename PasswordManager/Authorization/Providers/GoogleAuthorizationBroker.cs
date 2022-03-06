@@ -4,11 +4,11 @@ using System.Web;
 
 namespace PasswordManager.Authorization.Providers
 {
-    public class GoogleAuthProvider : BaseAuthProvider
+    public class GoogleAuthorizationBroker : BaseAuthorizationBroker
     {
         private readonly string _scopes;
 
-        public GoogleAuthProvider()
+        public GoogleAuthorizationBroker()
         {
             ClientId = "977481544425-32f220l78p3tpmg8t0bu5un78nhhvp34.apps.googleusercontent.com";
             ClientSecret = "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";

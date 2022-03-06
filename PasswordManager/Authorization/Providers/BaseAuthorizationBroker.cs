@@ -1,4 +1,5 @@
-﻿using PasswordManager.Authorization.Responses;
+﻿using PasswordManager.Authorization.Interfaces;
+using PasswordManager.Authorization.Responses;
 using System;
 using System.Collections.Specialized;
 using System.Diagnostics;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace PasswordManager.Authorization.Providers
 {
-    public abstract class BaseAuthProvider
+    public abstract class BaseAuthorizationBroker : IAuthorizationBroker
     {
         protected string ClientId { get; set; }
         protected string ClientSecret { get; set; }

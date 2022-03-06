@@ -1,6 +1,8 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Microsoft.Extensions.Logging;
 using Microsoft.Toolkit.Mvvm.Input;
+using PasswordManager.Authorization.Enums;
+using PasswordManager.Authorization.Services;
 using PasswordManager.Helpers;
 using PasswordManager.Services;
 using PasswordManager.Views;
@@ -69,7 +71,8 @@ namespace PasswordManager.ViewModels
                 var token = processingControl.ViewModel.CancellationToken;
                 _ = DialogHost.Show(processingControl, windowDialogName); // Don't await dialog host
 
-                await _oAuthProviderService.AuthorizeAsync(Authorization.Enums.CloudType.GoogleDrive, token);
+                var oauthBroker = _oAuthProviderService.GetAuthorizationBroker(CloudType.GoogleDrive);
+                await oauthBroker.AuthorizeAsync(token);
 
                 /*// TODO: Provide secrets with configuration from .json
                 var clientSecrets = new ClientSecrets()

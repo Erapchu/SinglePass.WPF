@@ -118,6 +118,8 @@ namespace PasswordManager
                 services.AddSingleton<ThemeService>();
                 services.AddSingleton<AppSettingsService>();
                 services.AddSingleton<OAuthProviderService>();
+                services.AddSingleton<GoogleDriveService>();
+                services.AddSingleton<GoogleDriveTokenHolder>();
             });
 
         private void Application_Exit(object sender, ExitEventArgs e)

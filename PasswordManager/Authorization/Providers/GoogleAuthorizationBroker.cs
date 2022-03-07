@@ -1,11 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using PasswordManager.Authorization.Helpers;
-using PasswordManager.Authorization.Responses;
-using PasswordManager.Helpers;
-using System;
-using System.IO;
-using System.Text.Json;
+using PasswordManager.Services;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -21,13 +16,15 @@ namespace PasswordManager.Authorization.Providers
 
     public class GoogleAuthorizationBroker : BaseAuthorizationBroker
     {
-        private readonly ILogger<GoogleAuthorizationBroker> _logger;
         private readonly GoogleDriveConfig _config;
+        private readonly GoogleDriveTokenHolder _googleDriveTokenHolder;
 
-        public GoogleAuthorizationBroker(ILogger<GoogleAuthorizationBroker> logger, IOptions<GoogleDriveConfig> options)
+        public GoogleAuthorizationBroker(
+            IOptions<GoogleDriveConfig> options,
+            GoogleDriveTokenHolder googleDriveTokenHolder)
         {
             _config = options.Value;
-            _logger = logger;
+            _googleDriveTokenHolder = googleDriveTokenHolder;
         }
 
         protected override string BuildAuthorizationUri(string redirectUri)
@@ -48,9 +45,17 @@ namespace PasswordManager.Authorization.Providers
             return $"http://localhost:{unusedPort}/";
         }
 
-        protected override string BuildRefreshAccessTokenUri()
+        protected override string BuildRefreshAccessTokenEndpointUri()
         {
-            throw new NotImplementedException();
+            return "https://oauth2.googleapis.com/token";
+        }
+
+        protected override string BuildRequestForRefreshToken()
+        {
+            return $"client_id={_config.ClientId}&" +
+                $"client_secret={_config.ClientSecret}&" +
+                $"refresh_token={_googleDriveTokenHolder.Token.RefreshToken}&" +
+                $"grant_type=refresh_token";
         }
 
         protected override string BuildRequestForToken(string code, string redirectUri)
@@ -69,10 +74,7 @@ namespace PasswordManager.Authorization.Providers
 
         protected async override Task SaveResponse(string tokenResponse, CancellationToken cancellationToken)
         {
-            var tokenObject = JsonSerializer.Deserialize<GoogleDriveTokenResponse>(tokenResponse);
-            using var fileStream = new FileStream(Constants.GoogleDriveFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
-            await JsonSerializer.SerializeAsync(fileStream, tokenObject, cancellationToken: cancellationToken);
-            _logger.LogInformation("Token response saved to file");
+            await _googleDriveTokenHolder.SetToken(tokenResponse, cancellationToken);
         }
     }
 }

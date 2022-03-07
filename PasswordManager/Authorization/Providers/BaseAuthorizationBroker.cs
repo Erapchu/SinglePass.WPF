@@ -29,6 +29,27 @@ namespace PasswordManager.Authorization.Providers
             await SaveResponse(tokenResponse, cancellationToken);
         }
 
+        public async Task<string> RefreshAccessToken(CancellationToken cancellationToken)
+        {
+            string result;
+
+            using (var client = new HttpClient())
+            {
+                var refreshTokenEndpointUri = BuildRefreshAccessTokenEndpointUri();
+                client.BaseAddress = new Uri(refreshTokenEndpointUri);
+                var postData = BuildRequestForRefreshToken();
+                var request = new HttpRequestMessage(HttpMethod.Post, string.Empty)
+                {
+                    Content = new StringContent(postData, Encoding.UTF8, "application/x-www-form-urlencoded")
+                };
+                var response = await client.SendAsync(request, cancellationToken);
+                using var content = response.Content;
+                var json = await content.ReadAsStringAsync(cancellationToken);
+                result = json;//JsonSerializer.Deserialize<AuthResponse>(json);
+            }
+            return result;
+        }
+
         private async Task<AuthorizationCodeResponseUrl> GetResponseFromListener(HttpListener listener, CancellationToken cancellationToken)
         {
             HttpListenerContext context;
@@ -85,7 +106,7 @@ namespace PasswordManager.Authorization.Providers
                 };
                 var response = await client.SendAsync(request, cancellationToken);
                 using var content = response.Content;
-                var json = content.ReadAsStringAsync(cancellationToken).Result;
+                var json = await content.ReadAsStringAsync(cancellationToken);
                 result = json;//JsonSerializer.Deserialize<AuthResponse>(json);
             }
             return result;
@@ -99,8 +120,9 @@ namespace PasswordManager.Authorization.Providers
         protected abstract string BuildRedirectUri();
         protected abstract string BuildAuthorizationUri(string redirectUri);
         protected abstract string BuildTokenEndpointUri();
-        protected abstract string BuildRefreshAccessTokenUri();
         protected abstract string BuildRequestForToken(string code, string redirectUri);
+        protected abstract string BuildRefreshAccessTokenEndpointUri();
+        protected abstract string BuildRequestForRefreshToken();
         protected abstract Task SaveResponse(string tokenResponse, CancellationToken cancellationToken);
     }
 }

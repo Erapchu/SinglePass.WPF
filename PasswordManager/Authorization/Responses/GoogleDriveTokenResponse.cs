@@ -9,6 +9,9 @@ namespace PasswordManager.Authorization.Responses
 {
     public class GoogleDriveTokenResponse
     {
+        [JsonPropertyName("init_date")]
+        public DateTime InitDate { get; init; } = DateTime.Now;
+
         [JsonPropertyName("access_token")]
         public string AccessToken { get; init; }
 
@@ -23,5 +26,11 @@ namespace PasswordManager.Authorization.Responses
 
         [JsonPropertyName("token_type")]
         public string TokenType { get; init; }
+
+        [JsonIgnore]
+        public DateTime ExpirationDate => InitDate.AddSeconds(ExpiresIn);
+
+        [JsonIgnore]
+        public bool RefreshRequired => ExpirationDate <= DateTime.UtcNow;
     }
 }

@@ -31,7 +31,28 @@ namespace PasswordManager.Services
 
         public async Task SetToken(string tokenResponse, CancellationToken cancellationToken)
         {
-            Token = JsonSerializer.Deserialize<GoogleDriveTokenResponse>(tokenResponse);
+            var tempToken = JsonSerializer.Deserialize<GoogleDriveTokenResponse>(tokenResponse);
+
+            if (!string.IsNullOrWhiteSpace(tempToken.RefreshToken))
+            {
+                // Refresh token reset
+                Token = tempToken;
+            }
+            else
+            {
+                // Leave refresh token as is
+                var refreshToken = Token.RefreshToken;
+                Token = new GoogleDriveTokenResponse()
+                {
+                    AccessToken = tempToken.AccessToken,
+                    ExpiresIn = tempToken.ExpiresIn,
+                    InitDate = tempToken.InitDate,
+                    Scope = tempToken.Scope,
+                    TokenType = tempToken.TokenType,
+                    RefreshToken = refreshToken
+                };
+            }
+
             using var fileStream = new FileStream(Constants.GoogleDriveFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
             await JsonSerializer.SerializeAsync(fileStream, Token, cancellationToken: cancellationToken);
             _logger.LogInformation("Token response saved to file");

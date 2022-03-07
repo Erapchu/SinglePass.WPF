@@ -36,10 +36,8 @@ namespace PasswordManager.Authorization.Providers
             await SaveResponse(tokenResponse, cancellationToken);
         }
 
-        public async Task<string> RefreshAccessToken(CancellationToken cancellationToken)
+        public async Task RefreshAccessToken(CancellationToken cancellationToken)
         {
-            string result;
-
             var client = _httpClientFactory.CreateClient();
             var refreshTokenEndpointUri = BuildRefreshAccessTokenEndpointUri();
             client.BaseAddress = new Uri(refreshTokenEndpointUri);
@@ -51,9 +49,7 @@ namespace PasswordManager.Authorization.Providers
             var response = await client.SendAsync(request, cancellationToken);
             using var content = response.Content;
             var json = await content.ReadAsStringAsync(cancellationToken);
-            result = json;//JsonSerializer.Deserialize<AuthResponse>(json);
-            
-            return result;
+            await SaveResponse(json, cancellationToken);
         }
 
         private async Task<AuthorizationCodeResponseUrl> GetResponseFromListener(HttpListener listener, CancellationToken cancellationToken)

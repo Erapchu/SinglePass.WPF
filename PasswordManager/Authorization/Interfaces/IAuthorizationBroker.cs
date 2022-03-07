@@ -6,5 +6,6 @@ namespace PasswordManager.Authorization.Interfaces
     public interface IAuthorizationBroker
     {
         Task AuthorizeAsync(CancellationToken cancellationToken);
+        Task RefreshAccessToken(CancellationToken cancellationToken);
     }
 }

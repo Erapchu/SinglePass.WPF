@@ -1,10 +1,11 @@
-﻿using PasswordManager.Authorization.Responses;
+﻿using PasswordManager.Authorization.Services;
 using PasswordManager.Helpers;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Net.Mime;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PasswordManager.Services
@@ -13,15 +14,25 @@ namespace PasswordManager.Services
     {
         private readonly GoogleDriveTokenHolder _googleDriveTokenHolder;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly OAuthProviderService _oAuthProviderService;
 
-        public GoogleDriveService(GoogleDriveTokenHolder googleDriveTokenHolder, IHttpClientFactory httpClientFactory)
+        public GoogleDriveService(
+            GoogleDriveTokenHolder googleDriveTokenHolder,
+            IHttpClientFactory httpClientFactory,
+            OAuthProviderService oAuthProviderService)
         {
             _googleDriveTokenHolder = googleDriveTokenHolder;
             _httpClientFactory = httpClientFactory;
+            _oAuthProviderService = oAuthProviderService;
         }
 
         public async Task Synchronize()
         {
+            if (_googleDriveTokenHolder.Token.RefreshRequired)
+            {
+                var authorizationBroker = _oAuthProviderService.GetAuthorizationBroker(Authorization.Enums.CloudType.GoogleDrive);
+                await authorizationBroker.RefreshAccessToken(CancellationToken.None);
+            }
             var accessToken = _googleDriveTokenHolder.Token.AccessToken;
 
             var client = _httpClientFactory.CreateClient();

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using PasswordManager.Authorization.Helpers;
 using PasswordManager.Services;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -21,7 +22,8 @@ namespace PasswordManager.Authorization.Providers
 
         public GoogleAuthorizationBroker(
             IOptions<GoogleDriveConfig> options,
-            GoogleDriveTokenHolder googleDriveTokenHolder)
+            GoogleDriveTokenHolder googleDriveTokenHolder,
+            IHttpClientFactory httpClientFactory): base(httpClientFactory)
         {
             _config = options.Value;
             _googleDriveTokenHolder = googleDriveTokenHolder;

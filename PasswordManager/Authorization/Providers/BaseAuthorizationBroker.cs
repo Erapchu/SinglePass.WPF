@@ -14,6 +14,13 @@ namespace PasswordManager.Authorization.Providers
 {
     public abstract class BaseAuthorizationBroker : IAuthorizationBroker
     {
+        private readonly IHttpClientFactory _httpClientFactory;
+
+        public BaseAuthorizationBroker(IHttpClientFactory httpClientFactory)
+        {
+            _httpClientFactory = httpClientFactory;
+        }
+
         public async Task AuthorizeAsync(CancellationToken cancellationToken)
         {
             var redirectUri = BuildRedirectUri();
@@ -33,20 +40,19 @@ namespace PasswordManager.Authorization.Providers
         {
             string result;
 
-            using (var client = new HttpClient())
+            var client = _httpClientFactory.CreateClient();
+            var refreshTokenEndpointUri = BuildRefreshAccessTokenEndpointUri();
+            client.BaseAddress = new Uri(refreshTokenEndpointUri);
+            var postData = BuildRequestForRefreshToken();
+            var request = new HttpRequestMessage(HttpMethod.Post, string.Empty)
             {
-                var refreshTokenEndpointUri = BuildRefreshAccessTokenEndpointUri();
-                client.BaseAddress = new Uri(refreshTokenEndpointUri);
-                var postData = BuildRequestForRefreshToken();
-                var request = new HttpRequestMessage(HttpMethod.Post, string.Empty)
-                {
-                    Content = new StringContent(postData, Encoding.UTF8, "application/x-www-form-urlencoded")
-                };
-                var response = await client.SendAsync(request, cancellationToken);
-                using var content = response.Content;
-                var json = await content.ReadAsStringAsync(cancellationToken);
-                result = json;//JsonSerializer.Deserialize<AuthResponse>(json);
-            }
+                Content = new StringContent(postData, Encoding.UTF8, "application/x-www-form-urlencoded")
+            };
+            var response = await client.SendAsync(request, cancellationToken);
+            using var content = response.Content;
+            var json = await content.ReadAsStringAsync(cancellationToken);
+            result = json;//JsonSerializer.Deserialize<AuthResponse>(json);
+            
             return result;
         }
 
@@ -95,20 +101,19 @@ namespace PasswordManager.Authorization.Providers
         {
             string result;
 
-            using (var client = new HttpClient())
+            var client = _httpClientFactory.CreateClient();
+            var tokenEndpointUri = BuildTokenEndpointUri();
+            client.BaseAddress = new Uri(tokenEndpointUri);
+            var postData = BuildRequestForToken(code, redirectUri);
+            var request = new HttpRequestMessage(HttpMethod.Post, string.Empty)
             {
-                var tokenEndpointUri = BuildTokenEndpointUri();
-                client.BaseAddress = new Uri(tokenEndpointUri);
-                var postData = BuildRequestForToken(code, redirectUri);
-                var request = new HttpRequestMessage(HttpMethod.Post, string.Empty)
-                {
-                    Content = new StringContent(postData, Encoding.UTF8, "application/x-www-form-urlencoded")
-                };
-                var response = await client.SendAsync(request, cancellationToken);
-                using var content = response.Content;
-                var json = await content.ReadAsStringAsync(cancellationToken);
-                result = json;//JsonSerializer.Deserialize<AuthResponse>(json);
-            }
+                Content = new StringContent(postData, Encoding.UTF8, "application/x-www-form-urlencoded")
+            };
+            var response = await client.SendAsync(request, cancellationToken);
+            using var content = response.Content;
+            var json = await content.ReadAsStringAsync(cancellationToken);
+            result = json;//JsonSerializer.Deserialize<AuthResponse>(json);
+            
             return result;
         }
 

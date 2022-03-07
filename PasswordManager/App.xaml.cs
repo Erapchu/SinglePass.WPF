@@ -101,6 +101,8 @@ namespace PasswordManager
                     lb.AddNLog(_configuration);
                 });
 
+                services.AddHttpClient();
+
                 services.Configure<GoogleDriveConfig>(_configuration.GetSection("Settings:GoogleDriveConfig"));
 
                 services.AddTransient<GoogleAuthorizationBroker>();

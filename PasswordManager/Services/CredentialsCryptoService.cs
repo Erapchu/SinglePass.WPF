@@ -179,7 +179,7 @@ namespace PasswordManager.Services
 
         private async Task SaveCredentialsAndSync()
         {
-            await Task.Run(() => 
+            await Task.Run(async () =>
             {
                 // Lock access to file for multithreading environment
                 var hashedPath = HashHelper.GetHash(_pathToPasswordsFile);
@@ -208,7 +208,7 @@ namespace PasswordManager.Services
                         bw.Write(encryptedBytes);
                     }
 
-                    _googleDriveService.Synchronize();
+                    await _googleDriveService.Synchronize();
                 }
                 catch (JsonException jsex)
                 {

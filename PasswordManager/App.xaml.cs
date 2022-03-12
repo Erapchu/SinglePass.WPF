@@ -6,7 +6,7 @@ using NLog;
 using NLog.Extensions.Logging;
 using PasswordManager.Authorization.Brokers;
 using PasswordManager.Authorization.Holders;
-using PasswordManager.Authorization.Services;
+using PasswordManager.Clouds.Services;
 using PasswordManager.Controls;
 using PasswordManager.Services;
 using PasswordManager.ViewModels;
@@ -104,10 +104,15 @@ namespace PasswordManager
 
                 services.AddHttpClient();
 
+                // Clouds
+                // Google
                 services.Configure<GoogleDriveConfig>(_configuration.GetSection("Settings:GoogleDriveConfig"));
-
                 services.AddTransient<GoogleAuthorizationBroker>();
+                services.AddTransient<GoogleDriveTokenHolder>();
+                services.AddTransient<GoogleDriveCloudService>();
+                services.AddSingleton<CloudServiceProvider>();
 
+                // Windows
                 services.AddScoped<LoginWindow>();
                 services.AddScoped<LoginWindowViewModel>();
 
@@ -117,13 +122,11 @@ namespace PasswordManager
                 services.AddScoped<SettingsViewModel>();
                 services.AddScoped<CredentialsDialogViewModel>();
 
+                // Main services
                 services.AddSingleton<CredentialsCryptoService>();
                 services.AddSingleton<ThemeService>();
                 services.AddSingleton<AppSettingsService>();
                 services.AddSingleton<SyncService>();
-
-                services.AddSingleton<OAuthBrokerProviderService>();
-                services.AddSingleton<GoogleDriveTokenHolder>();
             });
 
         private void Application_Exit(object sender, ExitEventArgs e)

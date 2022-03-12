@@ -1,13 +1,12 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Microsoft.Extensions.Logging;
 using Microsoft.Toolkit.Mvvm.Input;
-using PasswordManager.Authorization.Enums;
-using PasswordManager.Authorization.Services;
+using PasswordManager.Cloud.Enums;
+using PasswordManager.Clouds.Services;
 using PasswordManager.Helpers;
 using PasswordManager.Services;
 using PasswordManager.Views;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace PasswordManager.ViewModels
@@ -28,7 +27,7 @@ namespace PasswordManager.ViewModels
         private readonly ThemeService _themeService;
         private readonly AppSettingsService _appSettingsService;
         private readonly ILogger<SettingsViewModel> _logger;
-        private readonly OAuthBrokerProviderService _oAuthBrokerProviderService;
+        private readonly CloudServiceProvider _cloudServiceProvider;
         private AsyncRelayCommand _googleLoginCommand;
 
         public BaseTheme ThemeMode
@@ -50,12 +49,12 @@ namespace PasswordManager.ViewModels
             ThemeService themeService,
             AppSettingsService appSettingsService,
             ILogger<SettingsViewModel> logger,
-            OAuthBrokerProviderService oAuthBrokerProviderService)
+            CloudServiceProvider cloudServiceProvider)
         {
             _themeService = themeService;
             _appSettingsService = appSettingsService;
             _logger = logger;
-            _oAuthBrokerProviderService = oAuthBrokerProviderService;
+            _cloudServiceProvider = cloudServiceProvider;
 
             Name = "Settings";
             ItemIndex = SettingsNavigationItemIndex;
@@ -71,8 +70,9 @@ namespace PasswordManager.ViewModels
                 var token = processingControl.ViewModel.CancellationToken;
                 _ = DialogHost.Show(processingControl, windowDialogName); // Don't await dialog host
 
-                var oauthBroker = _oAuthBrokerProviderService.GetAuthorizationBroker(CloudType.GoogleDrive);
-                await oauthBroker.AuthorizeAsync(token);
+                // TODO: Select different clouds
+                var cloudService = _cloudServiceProvider.GetCloudService(CloudType.GoogleDrive);
+                await cloudService.AuthorizationBroker.AuthorizeAsync(token);
 
                 /*// TODO: Provide secrets with configuration from .json
                 var clientSecrets = new ClientSecrets()

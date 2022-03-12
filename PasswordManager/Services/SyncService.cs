@@ -1,11 +1,7 @@
-﻿using PasswordManager.Authorization.Enums;
-using PasswordManager.Authorization.Services;
+﻿using PasswordManager.Cloud.Enums;
+using PasswordManager.Clouds.Services;
 using PasswordManager.Helpers;
 using System.IO;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
-using System.Net.Mime;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,37 +9,18 @@ namespace PasswordManager.Services
 {
     public class SyncService
     {
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly OAuthBrokerProviderService _oAuthBrokerProviderService;
+        private readonly CloudServiceProvider _cloudServiceProvider;
 
-        public SyncService(
-            IHttpClientFactory httpClientFactory,
-            OAuthBrokerProviderService oAuthBrokerProviderService)
+        public SyncService(CloudServiceProvider cloudServiceProvider)
         {
-            _httpClientFactory = httpClientFactory;
-            _oAuthBrokerProviderService = oAuthBrokerProviderService;
+            _cloudServiceProvider = cloudServiceProvider;
         }
 
         public async Task Synchronize()
         {
-            // TODO: Google Drive for now
-            var authorizationBroker = _oAuthBrokerProviderService.GetAuthorizationBroker(CloudType.GoogleDrive);
-            if (authorizationBroker.TokenHolder.Token.RefreshRequired)
-            {
-                await authorizationBroker.RefreshAccessToken(CancellationToken.None);
-            }
-            var accessToken = authorizationBroker.TokenHolder.Token.AccessToken;
-
-            var client = _httpClientFactory.CreateClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
+            var cloudService = _cloudServiceProvider.GetCloudService(CloudType.GoogleDrive);
             using var fileStream = File.Open(Constants.PasswordsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            var metaContent = JsonContent.Create(new { name = Constants.PasswordsFileName });
-            var streamContent = new StreamContent(fileStream);
-            var multipart = new MultipartContent { metaContent, streamContent };
-            streamContent.Headers.ContentType = new MediaTypeHeaderValue(MediaTypeNames.Application.Octet);
-            streamContent.Headers.ContentLength = fileStream.Length;
-            var result = await client.PostAsync("https://www.googleapis.com/upload/drive/v3/files?uploadtype=multipart", multipart);
+            await cloudService.Upload(fileStream, Constants.PasswordsFileName, CancellationToken.None);
         }
     }
 }

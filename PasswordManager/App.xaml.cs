@@ -119,7 +119,7 @@ namespace PasswordManager
                 services.AddSingleton<CredentialsCryptoService>();
                 services.AddSingleton<ThemeService>();
                 services.AddSingleton<AppSettingsService>();
-                services.AddSingleton<OAuthProviderService>();
+                services.AddSingleton<OAuthBrokerProviderService>();
                 services.AddSingleton<GoogleDriveService>();
                 services.AddSingleton<GoogleDriveTokenHolder>();
             });

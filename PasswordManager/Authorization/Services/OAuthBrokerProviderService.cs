@@ -5,11 +5,11 @@ using System;
 
 namespace PasswordManager.Authorization.Services
 {
-    public class OAuthProviderService
+    public class OAuthBrokerProviderService
     {
         private readonly IServiceProvider _serviceProvider;
 
-        public OAuthProviderService(IServiceProvider serviceProvider)
+        public OAuthBrokerProviderService(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
         }

@@ -14,23 +14,23 @@ namespace PasswordManager.Services
     {
         private readonly GoogleDriveTokenHolder _googleDriveTokenHolder;
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly OAuthProviderService _oAuthProviderService;
+        private readonly OAuthBrokerProviderService _oAuthBrokerProviderService;
 
         public GoogleDriveService(
             GoogleDriveTokenHolder googleDriveTokenHolder,
             IHttpClientFactory httpClientFactory,
-            OAuthProviderService oAuthProviderService)
+            OAuthBrokerProviderService oAuthBrokerProviderService)
         {
             _googleDriveTokenHolder = googleDriveTokenHolder;
             _httpClientFactory = httpClientFactory;
-            _oAuthProviderService = oAuthProviderService;
+            _oAuthBrokerProviderService = oAuthBrokerProviderService;
         }
 
         public async Task Synchronize()
         {
             if (_googleDriveTokenHolder.Token.RefreshRequired)
             {
-                var authorizationBroker = _oAuthProviderService.GetAuthorizationBroker(Authorization.Enums.CloudType.GoogleDrive);
+                var authorizationBroker = _oAuthBrokerProviderService.GetAuthorizationBroker(Authorization.Enums.CloudType.GoogleDrive);
                 await authorizationBroker.RefreshAccessToken(CancellationToken.None);
             }
             var accessToken = _googleDriveTokenHolder.Token.AccessToken;

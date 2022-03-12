@@ -28,7 +28,7 @@ namespace PasswordManager.ViewModels
         private readonly ThemeService _themeService;
         private readonly AppSettingsService _appSettingsService;
         private readonly ILogger<SettingsViewModel> _logger;
-        private readonly OAuthProviderService _oAuthProviderService;
+        private readonly OAuthBrokerProviderService _oAuthBrokerProviderService;
         private AsyncRelayCommand _googleLoginCommand;
 
         public BaseTheme ThemeMode
@@ -50,12 +50,12 @@ namespace PasswordManager.ViewModels
             ThemeService themeService,
             AppSettingsService appSettingsService,
             ILogger<SettingsViewModel> logger,
-            OAuthProviderService oAuthProviderService)
+            OAuthBrokerProviderService oAuthBrokerProviderService)
         {
             _themeService = themeService;
             _appSettingsService = appSettingsService;
             _logger = logger;
-            _oAuthProviderService = oAuthProviderService;
+            _oAuthBrokerProviderService = oAuthBrokerProviderService;
 
             Name = "Settings";
             ItemIndex = SettingsNavigationItemIndex;
@@ -71,7 +71,7 @@ namespace PasswordManager.ViewModels
                 var token = processingControl.ViewModel.CancellationToken;
                 _ = DialogHost.Show(processingControl, windowDialogName); // Don't await dialog host
 
-                var oauthBroker = _oAuthProviderService.GetAuthorizationBroker(CloudType.GoogleDrive);
+                var oauthBroker = _oAuthBrokerProviderService.GetAuthorizationBroker(CloudType.GoogleDrive);
                 await oauthBroker.AuthorizeAsync(token);
 
                 /*// TODO: Provide secrets with configuration from .json

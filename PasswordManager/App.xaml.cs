@@ -128,7 +128,7 @@ namespace PasswordManager
 
         private void Application_Exit(object sender, ExitEventArgs e)
         {
-            // Save last window settings
+            // TODO: Save last window settings
         }
     }
 }

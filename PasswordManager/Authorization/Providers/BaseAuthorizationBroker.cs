@@ -1,7 +1,6 @@
 ﻿using PasswordManager.Authorization.Helpers;
 using PasswordManager.Authorization.Interfaces;
 using PasswordManager.Authorization.Responses;
-using PasswordManager.Services;
 using System;
 using System.Collections.Specialized;
 using System.Linq;
@@ -113,7 +112,7 @@ namespace PasswordManager.Authorization.Providers
             using var content = response.Content;
             var json = await content.ReadAsStringAsync(cancellationToken);
             result = json;//JsonSerializer.Deserialize<AuthResponse>(json);
-            
+
             return result;
         }
 

@@ -1,4 +1,5 @@
-﻿using PasswordManager.Authorization.Services;
+﻿using PasswordManager.Authorization.Enums;
+using PasswordManager.Authorization.Services;
 using PasswordManager.Helpers;
 using System.IO;
 using System.Net.Http;
@@ -26,7 +27,7 @@ namespace PasswordManager.Services
         public async Task Synchronize()
         {
             // TODO: Google Drive for now
-            var authorizationBroker = _oAuthBrokerProviderService.GetAuthorizationBroker(Authorization.Enums.CloudType.GoogleDrive);
+            var authorizationBroker = _oAuthBrokerProviderService.GetAuthorizationBroker(CloudType.GoogleDrive);
             if (authorizationBroker.TokenHolder.Token.RefreshRequired)
             {
                 await authorizationBroker.RefreshAccessToken(CancellationToken.None);

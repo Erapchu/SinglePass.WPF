@@ -2,7 +2,6 @@
 using PasswordManager.Authorization.Helpers;
 using PasswordManager.Authorization.Holders;
 using PasswordManager.Authorization.Interfaces;
-using PasswordManager.Services;
 using System.Net.Http;
 using System.Web;
 

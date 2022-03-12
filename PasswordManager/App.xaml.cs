@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog;
 using NLog.Extensions.Logging;
+using PasswordManager.Authorization.Holders;
 using PasswordManager.Authorization.Providers;
 using PasswordManager.Authorization.Services;
 using PasswordManager.Controls;
@@ -119,8 +120,9 @@ namespace PasswordManager
                 services.AddSingleton<CredentialsCryptoService>();
                 services.AddSingleton<ThemeService>();
                 services.AddSingleton<AppSettingsService>();
+                services.AddSingleton<SyncService>();
+
                 services.AddSingleton<OAuthBrokerProviderService>();
-                services.AddSingleton<GoogleDriveService>();
                 services.AddSingleton<GoogleDriveTokenHolder>();
             });
 

@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using PasswordManager.Authorization.Helpers;
+using PasswordManager.Authorization.Holders;
+using PasswordManager.Authorization.Interfaces;
 using PasswordManager.Services;
 using System.Net.Http;
 using System.Web;
@@ -16,15 +18,15 @@ namespace PasswordManager.Authorization.Providers
     public class GoogleAuthorizationBroker : BaseAuthorizationBroker
     {
         private readonly GoogleDriveConfig _config;
-        private readonly GoogleDriveTokenHolder _googleDriveTokenHolder;
+        private readonly ITokenHolder _tokenHolder;
 
         public GoogleAuthorizationBroker(
             IOptions<GoogleDriveConfig> options,
-            GoogleDriveTokenHolder googleDriveTokenHolder,
-            IHttpClientFactory httpClientFactory) : base(httpClientFactory, googleDriveTokenHolder)
+            GoogleDriveTokenHolder tokenHolder,
+            IHttpClientFactory httpClientFactory) : base(httpClientFactory, tokenHolder)
         {
             _config = options.Value;
-            _googleDriveTokenHolder = googleDriveTokenHolder;
+            _tokenHolder = tokenHolder;
         }
 
         protected override string BuildAuthorizationUri(string redirectUri)
@@ -54,7 +56,7 @@ namespace PasswordManager.Authorization.Providers
         {
             return $"client_id={_config.ClientId}&" +
                 $"client_secret={_config.ClientSecret}&" +
-                $"refresh_token={_googleDriveTokenHolder.Token.RefreshToken}&" +
+                $"refresh_token={_tokenHolder.Token.RefreshToken}&" +
                 $"grant_type=refresh_token";
         }
 

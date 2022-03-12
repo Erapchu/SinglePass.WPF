@@ -10,30 +10,28 @@ using System.Threading.Tasks;
 
 namespace PasswordManager.Services
 {
-    public class GoogleDriveService
+    public class SyncService
     {
-        private readonly GoogleDriveTokenHolder _googleDriveTokenHolder;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly OAuthBrokerProviderService _oAuthBrokerProviderService;
 
-        public GoogleDriveService(
-            GoogleDriveTokenHolder googleDriveTokenHolder,
+        public SyncService(
             IHttpClientFactory httpClientFactory,
             OAuthBrokerProviderService oAuthBrokerProviderService)
         {
-            _googleDriveTokenHolder = googleDriveTokenHolder;
             _httpClientFactory = httpClientFactory;
             _oAuthBrokerProviderService = oAuthBrokerProviderService;
         }
 
         public async Task Synchronize()
         {
-            if (_googleDriveTokenHolder.Token.RefreshRequired)
+            // TODO: Google Drive for now
+            var authorizationBroker = _oAuthBrokerProviderService.GetAuthorizationBroker(Authorization.Enums.CloudType.GoogleDrive);
+            if (authorizationBroker.TokenHolder.Token.RefreshRequired)
             {
-                var authorizationBroker = _oAuthBrokerProviderService.GetAuthorizationBroker(Authorization.Enums.CloudType.GoogleDrive);
                 await authorizationBroker.RefreshAccessToken(CancellationToken.None);
             }
-            var accessToken = _googleDriveTokenHolder.Token.AccessToken;
+            var accessToken = authorizationBroker.TokenHolder.Token.AccessToken;
 
             var client = _httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);

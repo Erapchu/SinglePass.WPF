@@ -16,12 +16,13 @@ namespace PasswordManager.Authorization.Providers
     public abstract class BaseAuthorizationBroker : IAuthorizationBroker
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly GoogleDriveTokenHolder _googleDriveTokenHolder;
 
-        public BaseAuthorizationBroker(IHttpClientFactory httpClientFactory, GoogleDriveTokenHolder googleDriveTokenHolder)
+        public ITokenHolder TokenHolder { get; }
+
+        public BaseAuthorizationBroker(IHttpClientFactory httpClientFactory, ITokenHolder tokenHolder)
         {
             _httpClientFactory = httpClientFactory;
-            _googleDriveTokenHolder = googleDriveTokenHolder;
+            TokenHolder = tokenHolder;
         }
 
         public async Task AuthorizeAsync(CancellationToken cancellationToken)
@@ -36,7 +37,7 @@ namespace PasswordManager.Authorization.Providers
                 throw new Exception("Code was empty!");
             }
             var tokenResponse = await RetrieveToken(response.Code, redirectUri, cancellationToken);
-            await _googleDriveTokenHolder.SetAndSaveToken(tokenResponse, cancellationToken);
+            await TokenHolder.SetAndSaveToken(tokenResponse, cancellationToken);
         }
 
         public async Task RefreshAccessToken(CancellationToken cancellationToken)
@@ -52,7 +53,7 @@ namespace PasswordManager.Authorization.Providers
             var response = await client.SendAsync(request, cancellationToken);
             using var content = response.Content;
             var json = await content.ReadAsStringAsync(cancellationToken);
-            await _googleDriveTokenHolder.SetAndSaveToken(json, cancellationToken);
+            await TokenHolder.SetAndSaveToken(json, cancellationToken);
         }
 
         private async Task<AuthorizationCodeResponseUrl> GetResponseFromListener(HttpListener listener, CancellationToken cancellationToken)

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using PasswordManager.Authorization.Interfaces;
 using PasswordManager.Authorization.Responses;
 using PasswordManager.Helpers;
 using System.IO;
@@ -6,13 +7,13 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PasswordManager.Services
+namespace PasswordManager.Authorization.Holders
 {
-    public class GoogleDriveTokenHolder
+    public class GoogleDriveTokenHolder : ITokenHolder
     {
         private readonly ILogger _logger;
 
-        public GoogleDriveTokenResponse Token { get; private set; }
+        public ITokenResponse Token { get; private set; }
 
         public GoogleDriveTokenHolder(ILogger<GoogleDriveTokenHolder> logger)
         {

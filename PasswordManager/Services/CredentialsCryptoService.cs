@@ -24,7 +24,7 @@ namespace PasswordManager.Services
         };
         private readonly object _credentialsLock = new();
         private readonly ILogger<CredentialsCryptoService> _logger;
-        private readonly GoogleDriveService _googleDriveService;
+        private readonly SyncService _syncService;
         private readonly string _pathToPasswordsFile = Constants.PasswordsFilePath;
 
         private List<Credential> _credentials;
@@ -43,10 +43,10 @@ namespace PasswordManager.Services
 
         public CredentialsCryptoService(
             ILogger<CredentialsCryptoService> logger,
-            GoogleDriveService googleDriveService)
+            SyncService syncService)
         {
             _logger = logger;
-            _googleDriveService = googleDriveService;
+            _syncService = syncService;
             _credentials = new List<Credential>();
         }
 
@@ -208,7 +208,7 @@ namespace PasswordManager.Services
                         bw.Write(encryptedBytes);
                     }
 
-                    await _googleDriveService.Synchronize();
+                    await _syncService.Synchronize();
                 }
                 catch (JsonException jsex)
                 {

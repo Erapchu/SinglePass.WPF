@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using PasswordManager.Authorization.Interfaces;
+using System;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace PasswordManager.Authorization.Responses
 {
-    public class GoogleDriveTokenResponse
+    public class GoogleDriveTokenResponse : ITokenResponse
     {
         [JsonPropertyName("init_date")]
         public DateTime InitDate { get; init; } = DateTime.Now;

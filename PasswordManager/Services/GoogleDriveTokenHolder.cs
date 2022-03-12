@@ -17,10 +17,10 @@ namespace PasswordManager.Services
         public GoogleDriveTokenHolder(ILogger<GoogleDriveTokenHolder> logger)
         {
             _logger = logger;
-            ReadTokenFromFile();
+            ReadToken();
         }
 
-        private void ReadTokenFromFile()
+        private void ReadToken()
         {
             if (!File.Exists(Constants.GoogleDriveFilePath))
                 return;
@@ -29,7 +29,7 @@ namespace PasswordManager.Services
             Token = JsonSerializer.Deserialize<GoogleDriveTokenResponse>(fileStream);
         }
 
-        public async Task SetToken(string tokenResponse, CancellationToken cancellationToken)
+        public async Task SetAndSaveToken(string tokenResponse, CancellationToken cancellationToken)
         {
             var tempToken = JsonSerializer.Deserialize<GoogleDriveTokenResponse>(tokenResponse);
 

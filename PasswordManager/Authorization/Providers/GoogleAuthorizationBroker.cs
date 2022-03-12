@@ -2,8 +2,6 @@
 using PasswordManager.Authorization.Helpers;
 using PasswordManager.Services;
 using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Web;
 
 namespace PasswordManager.Authorization.Providers
@@ -23,7 +21,7 @@ namespace PasswordManager.Authorization.Providers
         public GoogleAuthorizationBroker(
             IOptions<GoogleDriveConfig> options,
             GoogleDriveTokenHolder googleDriveTokenHolder,
-            IHttpClientFactory httpClientFactory): base(httpClientFactory)
+            IHttpClientFactory httpClientFactory) : base(httpClientFactory, googleDriveTokenHolder)
         {
             _config = options.Value;
             _googleDriveTokenHolder = googleDriveTokenHolder;
@@ -72,11 +70,6 @@ namespace PasswordManager.Authorization.Providers
         protected override string BuildTokenEndpointUri()
         {
             return "https://oauth2.googleapis.com/token";
-        }
-
-        protected async override Task SaveResponse(string tokenResponse, CancellationToken cancellationToken)
-        {
-            await _googleDriveTokenHolder.SetToken(tokenResponse, cancellationToken);
         }
     }
 }

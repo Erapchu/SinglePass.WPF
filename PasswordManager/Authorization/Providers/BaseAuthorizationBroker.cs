@@ -1,6 +1,7 @@
 ﻿using PasswordManager.Authorization.Helpers;
 using PasswordManager.Authorization.Interfaces;
 using PasswordManager.Authorization.Responses;
+using PasswordManager.Services;
 using System;
 using System.Collections.Specialized;
 using System.Linq;
@@ -15,10 +16,12 @@ namespace PasswordManager.Authorization.Providers
     public abstract class BaseAuthorizationBroker : IAuthorizationBroker
     {
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly GoogleDriveTokenHolder _googleDriveTokenHolder;
 
-        public BaseAuthorizationBroker(IHttpClientFactory httpClientFactory)
+        public BaseAuthorizationBroker(IHttpClientFactory httpClientFactory, GoogleDriveTokenHolder googleDriveTokenHolder)
         {
             _httpClientFactory = httpClientFactory;
+            _googleDriveTokenHolder = googleDriveTokenHolder;
         }
 
         public async Task AuthorizeAsync(CancellationToken cancellationToken)
@@ -33,7 +36,7 @@ namespace PasswordManager.Authorization.Providers
                 throw new Exception("Code was empty!");
             }
             var tokenResponse = await RetrieveToken(response.Code, redirectUri, cancellationToken);
-            await SaveResponse(tokenResponse, cancellationToken);
+            await _googleDriveTokenHolder.SetAndSaveToken(tokenResponse, cancellationToken);
         }
 
         public async Task RefreshAccessToken(CancellationToken cancellationToken)
@@ -49,7 +52,7 @@ namespace PasswordManager.Authorization.Providers
             var response = await client.SendAsync(request, cancellationToken);
             using var content = response.Content;
             var json = await content.ReadAsStringAsync(cancellationToken);
-            await SaveResponse(json, cancellationToken);
+            await _googleDriveTokenHolder.SetAndSaveToken(json, cancellationToken);
         }
 
         private async Task<AuthorizationCodeResponseUrl> GetResponseFromListener(HttpListener listener, CancellationToken cancellationToken)
@@ -124,6 +127,5 @@ namespace PasswordManager.Authorization.Providers
         protected abstract string BuildRequestForToken(string code, string redirectUri);
         protected abstract string BuildRefreshAccessTokenEndpointUri();
         protected abstract string BuildRequestForRefreshToken();
-        protected abstract Task SaveResponse(string tokenResponse, CancellationToken cancellationToken);
     }
 }

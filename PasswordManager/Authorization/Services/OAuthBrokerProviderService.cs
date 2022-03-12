@@ -1,6 +1,6 @@
-﻿using PasswordManager.Authorization.Enums;
+﻿using PasswordManager.Authorization.Brokers;
+using PasswordManager.Authorization.Enums;
 using PasswordManager.Authorization.Interfaces;
-using PasswordManager.Authorization.Providers;
 using System;
 
 namespace PasswordManager.Authorization.Services

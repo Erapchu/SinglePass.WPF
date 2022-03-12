@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PasswordManager.Authorization.Providers
+namespace PasswordManager.Authorization.Brokers
 {
     public abstract class BaseAuthorizationBroker : IAuthorizationBroker
     {

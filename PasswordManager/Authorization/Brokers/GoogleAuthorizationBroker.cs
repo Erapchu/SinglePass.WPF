@@ -5,7 +5,7 @@ using PasswordManager.Authorization.Interfaces;
 using System.Net.Http;
 using System.Web;
 
-namespace PasswordManager.Authorization.Providers
+namespace PasswordManager.Authorization.Brokers
 {
     public class GoogleDriveConfig
     {

@@ -28,6 +28,6 @@ namespace PasswordManager.Authorization.Responses
         public DateTime ExpirationDate => InitDate.AddSeconds(ExpiresIn);
 
         [JsonIgnore]
-        public bool RefreshRequired => ExpirationDate <= DateTime.UtcNow;
+        public bool RefreshRequired => ExpirationDate <= DateTime.Now;
     }
 }

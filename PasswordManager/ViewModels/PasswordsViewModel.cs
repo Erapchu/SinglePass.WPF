@@ -133,24 +133,33 @@ namespace PasswordManager.ViewModels
 
         private async void ActiveCredentialDialogViewModel_Accept(CredentialViewModel newCredVM, CredentialsDialogMode mode)
         {
-            newCredVM.LastModifiedTime = DateTime.Now;
-            if (mode == CredentialsDialogMode.New)
+            try
             {
-                await _credentialsCryptoService.AddCredential(newCredVM.Model);
-                _credentials.Add(newCredVM);
-                await FilterCredentialsAsync();
-            }
-            else if (mode == CredentialsDialogMode.Edit)
-            {
-                await _credentialsCryptoService.EditCredential(newCredVM.Model);
-                var staleCredVM = _credentials.FirstOrDefault(c => c.Model.Equals(newCredVM.Model));
-                var staleIndex = _credentials.IndexOf(staleCredVM);
-                _credentials.Remove(staleCredVM);
-                _credentials.Insert(staleIndex, newCredVM);
-                await FilterCredentialsAsync();
-            }
+                Loading = true;
 
-            SelectedCredential = newCredVM;
+                newCredVM.LastModifiedTime = DateTime.Now;
+                if (mode == CredentialsDialogMode.New)
+                {
+                    await _credentialsCryptoService.AddCredential(newCredVM.Model);
+                    _credentials.Add(newCredVM);
+                    await FilterCredentialsAsync();
+                }
+                else if (mode == CredentialsDialogMode.Edit)
+                {
+                    await _credentialsCryptoService.EditCredential(newCredVM.Model);
+                    var staleCredVM = _credentials.FirstOrDefault(c => c.Model.Equals(newCredVM.Model));
+                    var staleIndex = _credentials.IndexOf(staleCredVM);
+                    _credentials.Remove(staleCredVM);
+                    _credentials.Insert(staleIndex, newCredVM);
+                    await FilterCredentialsAsync();
+                }
+
+                SelectedCredential = newCredVM;
+            }
+            finally
+            {
+                Loading = false;
+            }
         }
 
         public void LoadCredentials()

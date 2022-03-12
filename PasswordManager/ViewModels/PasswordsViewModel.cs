@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Unidecode.NET;
 
 namespace PasswordManager.ViewModels
@@ -36,16 +37,22 @@ namespace PasswordManager.ViewModels
         }
         #endregion
 
+        public event Action<CredentialViewModel> CredentialSelected;
+
         private readonly CredentialsCryptoService _credentialsCryptoService;
         private readonly ILogger<PasswordsViewModel> _logger;
         private readonly List<CredentialViewModel> _credentials = new();
+        private CredentialViewModel _selectedCredential;
+        private string _searchText;
+        private bool _searchTextFocused;
+        private RelayCommand _addCredentialCommand;
+        private RelayCommand<KeyEventArgs> _searchKeyEventCommand;
 
-        public event Action<CredentialViewModel> CredentialSelected;
-
+        public RelayCommand AddCredentialCommand => _addCredentialCommand ??= new RelayCommand(AddCredential);
+        public RelayCommand<KeyEventArgs> SearchKeyEventCommand => _searchKeyEventCommand ??= new RelayCommand<KeyEventArgs>(HandleSearchKeyEvent);
         public ObservableCollectionDelayed<CredentialViewModel> DisplayedCredentials { get; private set; } = new();
         public CredentialsDialogViewModel ActiveCredentialDialogViewModel { get; }
 
-        private CredentialViewModel _selectedCredential;
         public CredentialViewModel SelectedCredential
         {
             get => _selectedCredential;
@@ -59,7 +66,6 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        private string _searchText;
         public string SearchText
         {
             get => _searchText;
@@ -70,7 +76,6 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        private bool _searchTextFocused;
         public bool SearchTextFocused
         {
             get => _searchTextFocused;
@@ -231,9 +236,33 @@ namespace PasswordManager.ViewModels
             ActiveCredentialDialogViewModel.CredentialViewModel = new CredentialViewModel(new Credential());
             ActiveCredentialDialogViewModel.Mode = CredentialsDialogMode.New;
             ActiveCredentialDialogViewModel.IsPasswordVisible = true;
+            ActiveCredentialDialogViewModel.SetFocus();
         }
 
-        private RelayCommand _addCredentialCommand;
-        public RelayCommand AddCredentialCommand => _addCredentialCommand ??= new RelayCommand(AddCredential);
+        private void HandleSearchKeyEvent(KeyEventArgs args)
+        {
+            if (args is null)
+                return;
+
+            if (args.Key == Key.Up)
+            {
+                // Select previous
+                var selectedIndex = DisplayedCredentials.IndexOf(SelectedCredential);
+                if (selectedIndex != -1 && selectedIndex > 0)
+                {
+                    SelectedCredential = DisplayedCredentials[selectedIndex - 1];
+                }
+            }
+
+            if (args.Key == Key.Down)
+            {
+                // Select next
+                var selectedIndex = DisplayedCredentials.IndexOf(SelectedCredential);
+                if (selectedIndex != -1 && selectedIndex < DisplayedCredentials.Count - 1)
+                {
+                    SelectedCredential = DisplayedCredentials[selectedIndex + 1];
+                }
+            }
+        }
     }
 }

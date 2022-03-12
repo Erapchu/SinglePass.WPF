@@ -35,7 +35,22 @@ namespace PasswordManager.ViewModels
         public event Action<CredentialViewModel> Delete;
         public event Action Cancel;
 
+        private RelayCommand _okCommand;
+        private RelayCommand _cancelCommand;
+        private RelayCommand _editCommand;
+        private RelayCommand _deleteCommand;
+        private RelayCommand<string> _copyToClipboardCommand;
         private CredentialViewModel _credentialViewModel;
+        private CredentialsDialogMode _mode = CredentialsDialogMode.View;
+        private bool _isPasswordVisible;
+        private bool _isNameTextBoxFocused;
+
+        public RelayCommand OkCommand => _okCommand ??= new RelayCommand(OkExecute);
+        public RelayCommand CancelCommand => _cancelCommand ??= new RelayCommand(CancelExecute);
+        public RelayCommand EditCommand => _editCommand ??= new RelayCommand(EditExecute);
+        public RelayCommand DeleteCommand => _deleteCommand ??= new RelayCommand(DeleteExecute);
+        public RelayCommand<string> CopyToClipboardCommand => _copyToClipboardCommand ??= new RelayCommand<string>(CopyToClipboard);
+
         public CredentialViewModel CredentialViewModel
         {
             get => _credentialViewModel;
@@ -62,7 +77,6 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        private CredentialsDialogMode _mode = CredentialsDialogMode.View;
         public CredentialsDialogMode Mode
         {
             get => _mode;
@@ -73,11 +87,16 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        private bool _isPasswordVisible;
         public bool IsPasswordVisible
         {
             get => _isPasswordVisible;
             set => SetProperty(ref _isPasswordVisible, value);
+        }
+
+        public bool IsNameTextBoxFocused
+        {
+            get => _isNameTextBoxFocused;
+            set => SetProperty(ref _isNameTextBoxFocused, value);
         }
 
         public CredentialsDialogViewModel(ILogger<CredentialsDialogViewModel> logger)
@@ -107,6 +126,7 @@ namespace PasswordManager.ViewModels
             CredentialViewModel = CredentialViewModel.Clone();
             Mode = CredentialsDialogMode.Edit;
             IsPasswordVisible = true;
+            SetFocus();
         }
 
         private void DeleteExecute()
@@ -132,19 +152,10 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        private RelayCommand _okCommand;
-        public RelayCommand OkCommand => _okCommand ??= new RelayCommand(OkExecute);
-
-        private RelayCommand _cancelCommand;
-        public RelayCommand CancelCommand => _cancelCommand ??= new RelayCommand(CancelExecute);
-
-        private RelayCommand _editCommand;
-        public RelayCommand EditCommand => _editCommand ??= new RelayCommand(EditExecute);
-
-        private RelayCommand _deleteCommand;
-        public RelayCommand DeleteCommand => _deleteCommand ??= new RelayCommand(DeleteExecute);
-
-        private RelayCommand<string> _copyToClipboardCommand;
-        public RelayCommand<string> CopyToClipboardCommand => _copyToClipboardCommand ??= new RelayCommand<string>(CopyToClipboard);
+        public void SetFocus()
+        {
+            IsNameTextBoxFocused = false;
+            IsNameTextBoxFocused = true;
+        }
     }
 }

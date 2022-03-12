@@ -4,10 +4,14 @@
     xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=PresentationFramework"
     xmlns:controls="clr-namespace:PasswordManager.Controls"
     xmlns:converters="clr-namespace:PasswordManager.Converters"
+    xmlns:helpers="clr-namespace:PasswordManager.Helpers"
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
 
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/PasswordManager;component/Themes/IconControlStyle.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+
     <converters:CaptionVisibilityConverter x:Key="CaptionVisibilityConverter" />
-    <converters:IconCheckConverter x:Key="IconCheckConverter" />
     <converters:WindowCaptionButtonVisibilityConverter x:Key="WindowCaptionButtonVisibilityConverter" />
     <converters:WindowCaptionButtonEnabledConverter x:Key="WindowCaptionButtonEnabledConverter" />
 
@@ -34,7 +38,7 @@
                         <Border
                             x:Name="BackLayout"
                             Background="{DynamicResource MaterialDesignBody}"
-                            Opacity="0"/>
+                            Opacity="0" />
                         <Border
                             x:Name="border"
                             Background="{TemplateBinding Background}"
@@ -129,13 +133,18 @@
                                         <ColumnDefinition Width="auto" />
                                     </Grid.ColumnDefinitions>
                                     <!--  Icon  -->
-                                    <Image
-                                        Grid.Column="0"
-                                        Width="20"
-                                        Height="20"
-                                        Margin="7 0 0 0"
+                                    <Border
+                                        x:Name="Icon"
+                                        Width="16"
+                                        Height="16"
+                                        Margin="8 0 0 0"
                                         VerticalAlignment="Center"
-                                        Source="{TemplateBinding Icon, Converter={StaticResource IconCheckConverter}}" />
+                                        Background="Transparent">
+                                        <Control
+                                            Focusable="False"
+                                            IsHitTestVisible="False"
+                                            Style="{DynamicResource {x:Static helpers:ResourceKeys.IconControlStyle}}" />
+                                    </Border>
                                     <!--  Title  -->
                                     <TextBlock
                                         Grid.Column="1"

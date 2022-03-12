@@ -19,8 +19,8 @@
         <Border CornerRadius="16">
             <Border.Background>
                 <LinearGradientBrush>
-                    <GradientStop Color="#8bcaff" Offset="0"/>
-                    <GradientStop Color="#f083da" Offset="1"/>
+                    <GradientStop Color="#18caff" Offset="0"/>
+                    <GradientStop Color="#ff83da" Offset="1"/>
                 </LinearGradientBrush>
             </Border.Background>
             <TextBlock

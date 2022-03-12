@@ -20,7 +20,7 @@
             <conv:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
-    <Grid Margin="0 32 0 0">
+    <Grid MaxWidth="800">
         <StackPanel>
             <GroupBox Margin="16 8" Style="{StaticResource MaterialDesignCardGroupBox}">
                 <GroupBox.HeaderTemplate>
@@ -58,6 +58,40 @@
                             Content="Light"
                             IsChecked="{Binding ThemeMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static md:BaseTheme.Light}}" />
                     </StackPanel>
+                </Grid>
+            </GroupBox>
+            <GroupBox Margin="16 8" Style="{StaticResource MaterialDesignCardGroupBox}">
+                <GroupBox.HeaderTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <md:PackIcon
+                                Width="24"
+                                Height="24"
+                                Margin="8 0 0 0"
+                                VerticalAlignment="Center"
+                                Kind="CloudOutline" />
+                            <TextBlock
+                                Margin="16 0 0 0"
+                                VerticalAlignment="Center"
+                                Text="Cloud Sync" />
+                        </StackPanel>
+                    </DataTemplate>
+                </GroupBox.HeaderTemplate>
+                <Grid Margin="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                        <md:PackIcon Kind="GoogleDrive" />
+                        <TextBlock Margin="8 0 0 0" Text="Google Drive" />
+                    </StackPanel>
+                    <ToggleButton
+                        Grid.Column="2"
+                        Cursor="Hand"
+                        Style="{StaticResource MaterialDesignSwitchAccentToggleButton}"
+                        Command="{Binding GoogleLoginCommand}"/>
                 </Grid>
             </GroupBox>
         </StackPanel>

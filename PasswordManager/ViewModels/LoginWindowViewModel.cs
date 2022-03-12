@@ -17,28 +17,33 @@ namespace PasswordManager.ViewModels
         public static LoginWindowViewModel DesignTimeInstance => _lazy.Value;
         #endregion
 
+        public event Action Accept;
+
         private readonly CredentialsCryptoService _credentialsCryptoService;
         private readonly ILogger<LoginWindowViewModel> _logger;
         private CancellationTokenSource _cancellationTokenSource;
         private bool _credentialsFileExist;
-
-        public event Action Accept;
-
+        private AsyncRelayCommand _loadCredentialsCommand;
+        private AsyncRelayCommand _loadingCommand;
         private bool _loading;
+        private string _helperText;
+        private string _hintText = "Password";
+
+        public AsyncRelayCommand LoadCredentialsCommand => _loadCredentialsCommand ??= new AsyncRelayCommand(LoadCredentialsAsync);
+        public AsyncRelayCommand LoadingCommand => _loadingCommand ??= new AsyncRelayCommand(LoadingAsync);
+
         public bool Loading
         {
             get => _loading;
             set => SetProperty(ref _loading, value);
         }
 
-        private string _helperText;
         public string HelperText
         {
             get => _helperText;
             set => SetProperty(ref _helperText, value);
         }
 
-        private string _hintText = "Password";
         public string HintText
         {
             get => _hintText;
@@ -112,11 +117,5 @@ namespace PasswordManager.ViewModels
                 HintText = "New password";
             }
         }
-
-        private AsyncRelayCommand _loadCredentialsCommand;
-        public AsyncRelayCommand LoadCredentialsCommand => _loadCredentialsCommand ??= new AsyncRelayCommand(LoadCredentialsAsync);
-
-        private AsyncRelayCommand _loadingCommand;
-        public AsyncRelayCommand LoadingCommand => _loadingCommand ??= new AsyncRelayCommand(LoadingAsync);
     }
 }

@@ -10,7 +10,7 @@ namespace PasswordManager.Services
         private const string _defaultsSource = "pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml";
 
         private readonly AppSettingsService _appSettingsService;
-        private readonly BundledTheme _bundledThemeDictionary;
+        private BundledTheme _bundledThemeDictionary;
 
         public BaseTheme ThemeMode
         {
@@ -18,7 +18,8 @@ namespace PasswordManager.Services
             set
             {
                 ITheme theme = GetTheme();
-                if (theme.GetBaseTheme() == value)
+                // Here we are going to compare Themes, not Enums
+                if (theme.GetBaseTheme().GetBaseTheme() == value.GetBaseTheme())
                     return;
 
                 IBaseTheme newBaseTheme;
@@ -40,7 +41,10 @@ namespace PasswordManager.Services
         public ThemeService(AppSettingsService appSettingsService)
         {
             _appSettingsService = appSettingsService;
+        }
 
+        public void Init()
+        {
             var app = Application.Current;
             if (app is null)
                 return;

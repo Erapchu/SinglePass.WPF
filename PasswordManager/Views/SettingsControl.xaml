@@ -8,6 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:vm="clr-namespace:PasswordManager.ViewModels"
+    xmlns:cloudEnums="clr-namespace:PasswordManager.Cloud.Enums"
     d:DataContext="{x:Static vm:SettingsViewModel.DesignTimeInstance}"
     d:DesignHeight="450"
     d:DesignWidth="800"
@@ -91,7 +92,9 @@
                         Grid.Column="2"
                         Cursor="Hand"
                         Style="{StaticResource MaterialDesignSwitchAccentToggleButton}"
-                        Command="{Binding GoogleLoginCommand}"/>
+                        IsChecked="{Binding GoogleDriveEnabled}"
+                        Command="{Binding LoginCommand}"
+                        CommandParameter="{x:Static cloudEnums:CloudType.GoogleDrive}"/>
                 </Grid>
             </GroupBox>
         </StackPanel>

@@ -24,6 +24,7 @@ namespace PasswordManager.Services
         };
         private readonly object _credentialsLock = new();
         private readonly ILogger<CredentialsCryptoService> _logger;
+        private readonly SyncService _syncService;
         private readonly string _pathToPasswordsFile = Constants.PasswordsFilePath;
 
         private List<Credential> _credentials;
@@ -40,9 +41,12 @@ namespace PasswordManager.Services
             }
         }
 
-        public CredentialsCryptoService(ILogger<CredentialsCryptoService> logger)
+        public CredentialsCryptoService(
+            ILogger<CredentialsCryptoService> logger,
+            SyncService syncService)
         {
             _logger = logger;
+            _syncService = syncService;
             _credentials = new List<Credential>();
         }
 
@@ -54,7 +58,7 @@ namespace PasswordManager.Services
         public async Task SetNewPassword(string password)
         {
             RestructureKeyBytes(password);
-            await SaveCredentialsAsync();
+            await SaveCredentialsAndSync();
         }
 
         public async Task<bool> LoadCredentialsAsync(string password)
@@ -126,7 +130,7 @@ namespace PasswordManager.Services
                 _credentials.Add(credential);
             }
 
-            await SaveCredentialsAsync();
+            await SaveCredentialsAndSync();
         }
 
         public async Task EditCredential(Credential credential)
@@ -148,7 +152,7 @@ namespace PasswordManager.Services
                 _credentials[index] = credential;
             }
 
-            await SaveCredentialsAsync();
+            await SaveCredentialsAndSync();
         }
 
         public async Task DeleteCredential(Credential credential)
@@ -170,10 +174,10 @@ namespace PasswordManager.Services
                 _credentials.RemoveAt(index);
             }
 
-            await SaveCredentialsAsync();
+            await SaveCredentialsAndSync();
         }
 
-        public async Task SaveCredentialsAsync()
+        private async Task SaveCredentialsAndSync()
         {
             await Task.Run(() =>
             {
@@ -185,23 +189,26 @@ namespace PasswordManager.Services
                 try
                 {
                     // Access to file
-                    using var fileStream = File.Open(_pathToPasswordsFile, FileMode.Create, FileAccess.Write, FileShare.Read);
+                    using (var fileStream = File.Open(_pathToPasswordsFile, FileMode.Create, FileAccess.Write, FileShare.Read))
+                    {
+                        // Just to ensure
+                        fileStream.Seek(0, SeekOrigin.Begin);
 
-                    // Just to ensure
-                    fileStream.Seek(0, SeekOrigin.Begin);
+                        // Generate new IV for each new saving
+                        using var aesObj = Aes.Create();
+                        var ivBytes = aesObj.IV;
 
-                    // Generate new IV for each new saving
-                    using var aesObj = Aes.Create();
-                    var ivBytes = aesObj.IV;
+                        // Get copy and serialize
+                        var credentials = Credentials;
+                        var jsonText = JsonSerializer.Serialize(credentials);
+                        var encryptedBytes = AesCryptographyHelper.EncryptStringToBytes(jsonText, _keyBytes, ivBytes);
 
-                    // Get copy and serialize
-                    var credentials = Credentials;
-                    var jsonText = JsonSerializer.Serialize(credentials);
-                    var encryptedBytes = AesCryptographyHelper.EncryptStringToBytes(jsonText, _keyBytes, ivBytes);
+                        using var bw = new BinaryWriter(fileStream);
+                        bw.Write(ivBytes);
+                        bw.Write(encryptedBytes);
+                    }
 
-                    using var bw = new BinaryWriter(fileStream);
-                    bw.Write(ivBytes);
-                    bw.Write(encryptedBytes);
+                    _ = _syncService.Synchronize();
                 }
                 catch (JsonException jsex)
                 {

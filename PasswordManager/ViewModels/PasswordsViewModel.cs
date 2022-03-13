@@ -40,6 +40,7 @@ namespace PasswordManager.ViewModels
         public event Action<CredentialViewModel> CredentialSelected;
 
         private readonly CredentialsCryptoService _credentialsCryptoService;
+        private readonly SyncService _syncService;
         private readonly ILogger<PasswordsViewModel> _logger;
         private readonly List<CredentialViewModel> _credentials = new();
         private CredentialViewModel _selectedCredential;
@@ -47,6 +48,7 @@ namespace PasswordManager.ViewModels
         private bool _searchTextFocused;
         private RelayCommand _addCredentialCommand;
         private RelayCommand<KeyEventArgs> _searchKeyEventCommand;
+        private bool _cloudSyncInProgress;
 
         public RelayCommand AddCredentialCommand => _addCredentialCommand ??= new RelayCommand(AddCredential);
         public RelayCommand<KeyEventArgs> SearchKeyEventCommand => _searchKeyEventCommand ??= new RelayCommand<KeyEventArgs>(HandleSearchKeyEvent);
@@ -82,15 +84,25 @@ namespace PasswordManager.ViewModels
             set => SetProperty(ref _searchTextFocused, value);
         }
 
+        public bool CloudSyncInProgress
+        {
+            get => _cloudSyncInProgress;
+            set => SetProperty(ref _cloudSyncInProgress, value);
+        }
+
         private PasswordsViewModel() { }
 
         public PasswordsViewModel(
             CredentialsCryptoService credentialsCryptoService,
+            SyncService syncService,
             ILogger<PasswordsViewModel> logger,
             CredentialsDialogViewModel credentialsDialogViewModel)
         {
             _credentialsCryptoService = credentialsCryptoService;
+            _syncService = syncService;
             _logger = logger;
+
+            _syncService.SyncReport += SyncService_SyncReport;
 
             Name = "Credentials";
             ItemIndex = PasswordsNavigationItemIndex;
@@ -99,6 +111,11 @@ namespace PasswordManager.ViewModels
             ActiveCredentialDialogViewModel.Accept += ActiveCredentialDialogViewModel_Accept;
             ActiveCredentialDialogViewModel.Cancel += ActiveCredentialDialogViewModel_Cancel;
             ActiveCredentialDialogViewModel.Delete += ActiveCredentialDialogViewModel_Delete;
+        }
+
+        private void SyncService_SyncReport(bool obj)
+        {
+            CloudSyncInProgress = obj;
         }
 
         private async void ActiveCredentialDialogViewModel_Delete(CredentialViewModel credVM)
@@ -133,24 +150,33 @@ namespace PasswordManager.ViewModels
 
         private async void ActiveCredentialDialogViewModel_Accept(CredentialViewModel newCredVM, CredentialsDialogMode mode)
         {
-            newCredVM.LastModifiedTime = DateTime.Now;
-            if (mode == CredentialsDialogMode.New)
+            try
             {
-                await _credentialsCryptoService.AddCredential(newCredVM.Model);
-                _credentials.Add(newCredVM);
-                await FilterCredentialsAsync();
-            }
-            else if (mode == CredentialsDialogMode.Edit)
-            {
-                await _credentialsCryptoService.EditCredential(newCredVM.Model);
-                var staleCredVM = _credentials.FirstOrDefault(c => c.Model.Equals(newCredVM.Model));
-                var staleIndex = _credentials.IndexOf(staleCredVM);
-                _credentials.Remove(staleCredVM);
-                _credentials.Insert(staleIndex, newCredVM);
-                await FilterCredentialsAsync();
-            }
+                Loading = true;
 
-            SelectedCredential = newCredVM;
+                newCredVM.LastModifiedTime = DateTime.Now;
+                if (mode == CredentialsDialogMode.New)
+                {
+                    await _credentialsCryptoService.AddCredential(newCredVM.Model);
+                    _credentials.Add(newCredVM);
+                    await FilterCredentialsAsync();
+                }
+                else if (mode == CredentialsDialogMode.Edit)
+                {
+                    await _credentialsCryptoService.EditCredential(newCredVM.Model);
+                    var staleCredVM = _credentials.FirstOrDefault(c => c.Model.Equals(newCredVM.Model));
+                    var staleIndex = _credentials.IndexOf(staleCredVM);
+                    _credentials.Remove(staleCredVM);
+                    _credentials.Insert(staleIndex, newCredVM);
+                    await FilterCredentialsAsync();
+                }
+
+                SelectedCredential = newCredVM;
+            }
+            finally
+            {
+                Loading = false;
+            }
         }
 
         public void LoadCredentials()

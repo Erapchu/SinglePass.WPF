@@ -19,14 +19,13 @@ namespace PasswordManager.Services
         public MaterialDesignThemes.Wpf.BaseTheme ThemeMode
         {
             get => Settings.ThemeMode;
-            set
-            {
-                if (Settings.ThemeMode == value)
-                    return;
+            set => Settings.ThemeMode = value;
+        }
 
-                Settings.ThemeMode = value;
-                Save();
-            }
+        public bool GoogleDriveEnabled
+        {
+            get => Settings.GoogleDriveEnabled;
+            set => Settings.GoogleDriveEnabled = value;
         }
 
         public AppSettingsService(ILogger<AppSettingsService> logger)

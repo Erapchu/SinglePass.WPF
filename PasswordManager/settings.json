@@ -1,4 +1,11 @@
 {
+  "Settings": {
+    "GoogleDriveConfig": {
+      "ClientId": "977481544425-32f220l78p3tpmg8t0bu5un78nhhvp34.apps.googleusercontent.com",
+      "ClientSecret": "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",
+      "Scopes": "https://www.googleapis.com/auth/drive.file"
+    }
+  },
   "NLog": {
     "autoReload": true,
     "throwConfigExceptions": true,
@@ -6,10 +13,10 @@
       { "assembly": "NLog.Extensions.Logging" }
     ],
     "variables": {
-        "logName": "PasswordManager",
-        "logDir": "${specialfolder:folder=LocalApplicationData}/PasswordManager/Logs",
-        "logDirArchive": "${var:logDir}/Archive",
-        "logLayout": "${date} | ${level:padding=-5:fixedLength=true} | TID:${threadid:padding=-2} | ${callsite:includeNamespace=False:cleanNamesOfAnonymousDelegates=True:cleanNamesOfAsyncContinuations=True}> ${message} ${exception:format=toString:innerFormat=toString}"
+      "logName": "PasswordManager",
+      "logDir": "${specialfolder:folder=LocalApplicationData}/PasswordManager/Logs",
+      "logDirArchive": "${var:logDir}/Archive",
+      "logLayout": "${date} | ${level:padding=-5:fixedLength=true} | TID:${threadid:padding=-2} | ${callsite:includeNamespace=False:cleanNamesOfAnonymousDelegates=True:cleanNamesOfAsyncContinuations=True}> ${message} ${exception:format=toString:innerFormat=toString}"
     },
     "targets": {
       "async": true,

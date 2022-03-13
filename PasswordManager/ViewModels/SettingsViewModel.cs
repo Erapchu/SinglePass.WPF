@@ -75,18 +75,16 @@ namespace PasswordManager.ViewModels
         private async Task Login(CloudType cloudType)
         {
             var windowDialogName = MvvmHelper.MainWindowDialogName;
-            var success = false;
+            var authorizing = false;
+            switch (cloudType)
+            {
+                case CloudType.GoogleDrive:
+                    authorizing = !GoogleDriveEnabled;
+                    break;
+            }
 
             try
             {
-                var authorizing = false;
-                switch (cloudType)
-                {
-                    case CloudType.GoogleDrive:
-                        authorizing = GoogleDriveEnabled;
-                        break;
-                }
-
                 if (authorizing)
                 {
                     // Authorize
@@ -98,13 +96,17 @@ namespace PasswordManager.ViewModels
                     await cloudService.AuthorizationBroker.AuthorizeAsync(token);
 
                     _logger.LogInformation($"Authorization process to {cloudType} has been complete.");
+                    GoogleDriveEnabled = true;
+                    await _appSettingsService.Save();
                     DialogHost.Close(windowDialogName);
                 }
                 else
                 {
                     // TODO: Revoke
+
+                    GoogleDriveEnabled = false;
+                    await _appSettingsService.Save();
                 }
-                success = true;
             }
             catch (OperationCanceledException)
             {
@@ -118,18 +120,6 @@ namespace PasswordManager.ViewModels
             {
                 if (DialogHost.IsDialogOpen(windowDialogName))
                     DialogHost.Close(windowDialogName);
-
-                if (success)
-                    await _appSettingsService.Save();
-                else
-                {
-                    switch (cloudType)
-                    {
-                        case CloudType.GoogleDrive:
-                            GoogleDriveEnabled = false;
-                            break;
-                    }
-                }
             }
         }
     }

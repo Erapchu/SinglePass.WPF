@@ -154,9 +154,11 @@ namespace PasswordManager.ViewModels
             {
                 Loading = true;
 
-                newCredVM.LastModifiedTime = DateTime.Now;
+                var dateTimeNow = DateTime.Now;
+                newCredVM.LastModifiedTime = dateTimeNow;
                 if (mode == CredentialsDialogMode.New)
                 {
+                    newCredVM.CreationTime = dateTimeNow;
                     await _credentialsCryptoService.AddCredential(newCredVM.Model);
                     _credentials.Add(newCredVM);
                     await FilterCredentialsAsync();

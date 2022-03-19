@@ -88,7 +88,7 @@ namespace PasswordManager.ViewModels
                 if (authorizing)
                 {
                     // Authorize
-                    var processingControl = new ProcessingControl("Authorizing...", windowDialogName);
+                    var processingControl = new ProcessingControl("Authorizing...", "Please, continue authorization or cancel it...", windowDialogName);
                     var token = processingControl.ViewModel.CancellationToken;
                     _ = DialogHost.Show(processingControl, windowDialogName); // Don't await dialog host
 

@@ -94,8 +94,25 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="User name: "/>
-                        <Image />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition Width="auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <Image Source="{Binding GoogleProfilePicture}" Width="64" Height="64"/>
+                                <TextBlock Text="{Binding GoogleUserName}" Margin="0 8 0 0" MaxWidth="80" TextTrimming="CharacterEllipsis"/>
+                            </StackPanel>
+                            <Button
+                                Grid.Column="1"
+                                Style="{StaticResource MaterialDesignFlatButton}"
+                                ToolTip="Download credentials file">
+                                <StackPanel Orientation="Horizontal">
+                                    <md:PackIcon Kind="Download"/>
+                                    <TextBlock Text="Download"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
                         <Button
                             Grid.Column="2"
                             Style="{StaticResource MaterialDesignFlatAccentButton}"

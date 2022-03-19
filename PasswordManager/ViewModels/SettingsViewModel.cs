@@ -70,6 +70,24 @@ namespace PasswordManager.ViewModels
             Name = "Settings";
             ItemIndex = SettingsNavigationItemIndex;
             IconKind = PackIconKind.Settings;
+
+            _ = Task.Run(FetchUserInfos);
+        }
+
+        private async Task FetchUserInfos()
+        {
+            try
+            {
+                if (GoogleDriveEnabled)
+                {
+                    var cloudService = _cloudServiceProvider.GetCloudService(CloudType.GoogleDrive);
+                    var userInfo = await cloudService.GetUserInfo();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, string.Empty);
+            }
         }
 
         private async Task Login(CloudType cloudType)
@@ -98,7 +116,9 @@ namespace PasswordManager.ViewModels
                     _logger.LogInformation($"Authorization process to {cloudType} has been complete.");
                     GoogleDriveEnabled = true;
                     await _appSettingsService.Save();
-                    DialogHost.Close(windowDialogName);
+
+                    // TODO: Check file after authorization?? and notify user about ability to download?
+                    await cloudService.GetUserInfo(token);
                 }
                 else
                 {

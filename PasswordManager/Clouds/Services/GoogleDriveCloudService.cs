@@ -10,6 +10,7 @@ using System.Net.Mime;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace PasswordManager.Clouds.Services
 {
@@ -35,14 +36,19 @@ namespace PasswordManager.Clouds.Services
             }
         }
 
-        public async Task Upload(Stream stream, string fileName, CancellationToken cancellationToken)
+        private HttpClient GetHttpClient()
         {
-            await RefreshAccessTokenIfRequired(cancellationToken);
-
             var accessToken = AuthorizationBroker.TokenHolder.Token.AccessToken;
 
             var client = _httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            return client;
+        }
+
+        public async Task Upload(Stream stream, string fileName, CancellationToken cancellationToken)
+        {
+            await RefreshAccessTokenIfRequired(cancellationToken);
+            var client = GetHttpClient();
 
             // Check and search file
             using var filesResponse = await client.GetAsync("https://www.googleapis.com/drive/v3/files?q=trashed%3Dfalse", cancellationToken);
@@ -68,6 +74,16 @@ namespace PasswordManager.Clouds.Services
                 // Create
                 var r = await client.PostAsync("https://www.googleapis.com/upload/drive/v3/files?uploadtype=multipart", multipart, cancellationToken);
             }
+        }
+
+        public async Task GetUserInfo(CancellationToken cancellationToken)
+        {
+            await RefreshAccessTokenIfRequired(cancellationToken);
+            var client = GetHttpClient();
+
+            using var userInfoResponse = await client.GetAsync("https://www.googleapis.com/oauth2/v3/userinfo", cancellationToken);
+            using var content = userInfoResponse.Content;
+            var jsonResponse = await content.ReadAsStringAsync(cancellationToken);
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿using PasswordManager.Cloud.Enums;
-
-namespace PasswordManager.Clouds.Models
+﻿namespace PasswordManager.Clouds.Models
 {
     public class BaseUserInfo
     {

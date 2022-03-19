@@ -31,6 +31,8 @@ namespace PasswordManager.ViewModels
         private readonly ILogger<SettingsViewModel> _logger;
         private readonly CloudServiceProvider _cloudServiceProvider;
         private AsyncRelayCommand<CloudType> _loginCommand;
+        private string _googleProfileUrl;
+        private string _googleUserName;
 
         public BaseTheme ThemeMode
         {
@@ -44,9 +46,26 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        public bool GoogleDriveEnabled => _appSettingsService.GoogleCloudSettings != null;
-        public string GoogleProfileUrl => _appSettingsService.GoogleCloudSettings?.UserInfo?.ProfileUrl;
-        public string GoogleUserName => _appSettingsService.GoogleCloudSettings?.UserInfo?.UserName;
+        public bool GoogleDriveEnabled
+        {
+            get => _appSettingsService.GoogleDriveEnabled;
+            set
+            {
+                _appSettingsService.GoogleDriveEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string GoogleProfileUrl
+        {
+            get => _googleProfileUrl;
+            set => SetProperty(ref _googleProfileUrl, value);
+        }
+        public string GoogleUserName
+        {
+            get => _googleUserName;
+            set => SetProperty(ref _googleUserName, value);
+        }
 
         public AsyncRelayCommand<CloudType> LoginCommand => _loginCommand ??= new AsyncRelayCommand<CloudType>(Login);
 
@@ -66,6 +85,26 @@ namespace PasswordManager.ViewModels
             Name = "Settings";
             ItemIndex = SettingsNavigationItemIndex;
             IconKind = PackIconKind.Settings;
+
+            Task.Run(FetchStoragesUserInfo);
+        }
+
+        private async Task FetchStoragesUserInfo()
+        {
+            try
+            {
+                if (GoogleDriveEnabled)
+                {
+                    var cloudService = _cloudServiceProvider.GetCloudService(CloudType.GoogleDrive);
+                    var googleUserInfo = await cloudService.GetUserInfo(CancellationToken.None);
+                    GoogleProfileUrl = googleUserInfo.ProfileUrl;
+                    GoogleUserName = googleUserInfo.UserName;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, string.Empty);
+            }
         }
 
         private async Task Login(CloudType cloudType)
@@ -95,24 +134,17 @@ namespace PasswordManager.ViewModels
 
                     // TODO: Check file after authorization?? and notify user about ability to download?
                     var googleUserInfo = await cloudService.GetUserInfo(token);
-                    _appSettingsService.GoogleCloudSettings = new CloudSettings()
-                    {
-                        UserInfo = googleUserInfo,
-                    };
-                    OnPropertyChanged(nameof(GoogleDriveEnabled));
-                    OnPropertyChanged(nameof(GoogleProfileUrl));
-                    OnPropertyChanged(nameof(GoogleUserName));
-
+                    GoogleDriveEnabled = true;
                     await _appSettingsService.Save();
+
+                    GoogleProfileUrl = googleUserInfo.ProfileUrl;
+                    GoogleUserName = googleUserInfo.UserName;
                 }
                 else
                 {
                     // TODO: Revoke
 
-                    _appSettingsService.GoogleCloudSettings = null;
-                    OnPropertyChanged(nameof(GoogleDriveEnabled));
-
-
+                    GoogleDriveEnabled = false;
                     await _appSettingsService.Save();
                 }
             }

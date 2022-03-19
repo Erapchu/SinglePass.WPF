@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
+using PasswordManager.Cloud.Enums;
 using PasswordManager.Helpers;
 using PasswordManager.Helpers.Threading;
 using PasswordManager.Models;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Threading;
@@ -22,10 +24,10 @@ namespace PasswordManager.Services
             set => Settings.ThemeMode = value;
         }
 
-        public bool GoogleDriveEnabled
+        public CloudSettings GoogleCloudSettings
         {
-            get => Settings.GoogleDriveEnabled;
-            set => Settings.GoogleDriveEnabled = value;
+            get => Settings.GoogleCloudSettings;
+            set => Settings.GoogleCloudSettings = value;
         }
 
         public AppSettingsService(ILogger<AppSettingsService> logger)

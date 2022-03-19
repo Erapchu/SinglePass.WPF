@@ -47,7 +47,7 @@ namespace PasswordManager.Services
             try
             {
                 var cloudTypesToSync = new List<CloudType>();
-                if (_appSettingsService.GoogleDriveEnabled)
+                if (_appSettingsService.GoogleCloudSettings.Enabled)
                 {
                     cloudTypesToSync.Add(CloudType.GoogleDrive);
                 }

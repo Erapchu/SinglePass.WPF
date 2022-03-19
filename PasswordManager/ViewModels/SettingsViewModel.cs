@@ -4,9 +4,11 @@ using Microsoft.Toolkit.Mvvm.Input;
 using PasswordManager.Cloud.Enums;
 using PasswordManager.Clouds.Services;
 using PasswordManager.Helpers;
+using PasswordManager.Models;
 using PasswordManager.Services;
 using PasswordManager.Views;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PasswordManager.ViewModels
@@ -44,10 +46,30 @@ namespace PasswordManager.ViewModels
 
         public bool GoogleDriveEnabled
         {
-            get => _appSettingsService.GoogleDriveEnabled;
+            get => _appSettingsService.GoogleCloudSettings.Enabled;
             set
             {
-                _appSettingsService.GoogleDriveEnabled = value;
+                _appSettingsService.GoogleCloudSettings.Enabled = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string GoogleProfileUrl
+        {
+            get => _appSettingsService.GoogleCloudSettings.UserInfo.ProfileUrl;
+            set
+            {
+                _appSettingsService.GoogleCloudSettings.UserInfo.ProfileUrl = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string GoogleUserName
+        {
+            get => _appSettingsService.GoogleCloudSettings.UserInfo.UserName;
+            set
+            {
+                _appSettingsService.GoogleCloudSettings.UserInfo.UserName = value;
                 OnPropertyChanged();
             }
         }
@@ -70,24 +92,6 @@ namespace PasswordManager.ViewModels
             Name = "Settings";
             ItemIndex = SettingsNavigationItemIndex;
             IconKind = PackIconKind.Settings;
-
-            _ = Task.Run(FetchUserInfos);
-        }
-
-        private async Task FetchUserInfos()
-        {
-            try
-            {
-                if (GoogleDriveEnabled)
-                {
-                    var cloudService = _cloudServiceProvider.GetCloudService(CloudType.GoogleDrive);
-                    var userInfo = await cloudService.GetUserInfo();
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, string.Empty);
-            }
         }
 
         private async Task Login(CloudType cloudType)
@@ -118,13 +122,20 @@ namespace PasswordManager.ViewModels
                     await _appSettingsService.Save();
 
                     // TODO: Check file after authorization?? and notify user about ability to download?
-                    await cloudService.GetUserInfo(token);
+                    var googleUserInfo = await cloudService.GetUserInfo(token);
+
+                    GoogleUserName = googleUserInfo.UserName;
+                    GoogleProfileUrl = googleUserInfo.ProfileUrl;
+
+                    await _appSettingsService.Save();
                 }
                 else
                 {
                     // TODO: Revoke
 
                     GoogleDriveEnabled = false;
+
+
                     await _appSettingsService.Save();
                 }
             }

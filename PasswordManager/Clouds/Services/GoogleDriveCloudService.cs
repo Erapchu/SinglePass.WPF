@@ -76,7 +76,7 @@ namespace PasswordManager.Clouds.Services
             }
         }
 
-        public async Task GetUserInfo(CancellationToken cancellationToken)
+        public async Task<BaseUserInfo> GetUserInfo(CancellationToken cancellationToken)
         {
             await RefreshAccessTokenIfRequired(cancellationToken);
             var client = GetHttpClient();
@@ -84,6 +84,8 @@ namespace PasswordManager.Clouds.Services
             using var userInfoResponse = await client.GetAsync("https://www.googleapis.com/oauth2/v3/userinfo", cancellationToken);
             using var content = userInfoResponse.Content;
             var jsonResponse = await content.ReadAsStringAsync(cancellationToken);
+            var userInfo = JsonSerializer.Deserialize<GoogleUserInfo>(jsonResponse);
+            return userInfo.ToBaseUserInfo();
         }
     }
 }

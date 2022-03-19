@@ -2,6 +2,7 @@
 using PasswordManager.Authorization.Interfaces;
 using PasswordManager.Authorization.Responses;
 using PasswordManager.Helpers;
+using System;
 using System.IO;
 using System.Text.Json;
 using System.Threading;
@@ -23,11 +24,18 @@ namespace PasswordManager.Authorization.Holders
 
         private void ReadToken()
         {
-            if (!File.Exists(Constants.GoogleDriveFilePath))
-                return;
+            try
+            {
+                if (!File.Exists(Constants.GoogleDriveFilePath))
+                    return;
 
-            using var fileStream = new FileStream(Constants.GoogleDriveFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            Token = JsonSerializer.Deserialize<GoogleDriveTokenResponse>(fileStream);
+                using var fileStream = new FileStream(Constants.GoogleDriveFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                Token = JsonSerializer.Deserialize<GoogleDriveTokenResponse>(fileStream);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, string.Empty);
+            }
         }
 
         public async Task SetAndSaveToken(string tokenResponse, CancellationToken cancellationToken)
@@ -57,6 +65,20 @@ namespace PasswordManager.Authorization.Holders
             using var fileStream = new FileStream(Constants.GoogleDriveFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
             await JsonSerializer.SerializeAsync(fileStream, Token as GoogleDriveTokenResponse, cancellationToken: cancellationToken);
             _logger.LogInformation("Token response saved to file");
+        }
+
+        public Task RemoveToken()
+        {
+            try
+            {
+                var fileInfo = new FileInfo(Constants.GoogleDriveFilePath);
+                fileInfo.Delete();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, string.Empty);
+            }
+            return Task.CompletedTask;
         }
     }
 }

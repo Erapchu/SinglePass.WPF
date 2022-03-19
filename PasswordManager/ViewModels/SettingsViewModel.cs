@@ -117,17 +117,17 @@ namespace PasswordManager.ViewModels
                     authorizing = !GoogleDriveEnabled;
                     break;
             }
+            var cloudService = _cloudServiceProvider.GetCloudService(cloudType);
 
             try
             {
                 if (authorizing)
                 {
                     // Authorize
-                    var processingControl = new ProcessingControl("Authorizing...", "Please, continue authorization or cancel it...", windowDialogName);
+                    var processingControl = new ProcessingControl("Authorizing...", "Please, continue authorization or cancel it.", windowDialogName);
                     var token = processingControl.ViewModel.CancellationToken;
                     _ = DialogHost.Show(processingControl, windowDialogName); // Don't await dialog host
 
-                    var cloudService = _cloudServiceProvider.GetCloudService(cloudType);
                     await cloudService.AuthorizationBroker.AuthorizeAsync(token);
 
                     _logger.LogInformation($"Authorization process to {cloudType} has been complete.");
@@ -142,7 +142,12 @@ namespace PasswordManager.ViewModels
                 }
                 else
                 {
-                    // TODO: Revoke
+                    // Revoke
+                    var processingControl = new ProcessingControl("Signing out...", "Please, wait.", windowDialogName);
+                    var token = processingControl.ViewModel.CancellationToken;
+                    _ = DialogHost.Show(processingControl, windowDialogName); // Don't await dialog host
+
+                    await cloudService.AuthorizationBroker.RevokeToken(token);
 
                     GoogleDriveEnabled = false;
                     await _appSettingsService.Save();

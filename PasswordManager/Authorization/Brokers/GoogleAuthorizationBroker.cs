@@ -69,5 +69,10 @@ namespace PasswordManager.Authorization.Brokers
         {
             return "https://oauth2.googleapis.com/token";
         }
+
+        protected override string BuildRevokeTokenEndpointUri()
+        {
+            return $"https://oauth2.googleapis.com/revoke?token={TokenHolder.Token.RefreshToken}";
+        }
     }
 }

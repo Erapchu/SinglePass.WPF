@@ -6,10 +6,10 @@
     xmlns:local="clr-namespace:PasswordManager.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:PasswordManager.ViewModels"
-    Height="160"
-    Width="240"
+    MaxWidth="360"
+    MinHeight="200"
     d:DataContext="{x:Static vm:ProcessingViewModel.DesignTimeInstance}"
-    d:DesignHeight="160"
+    d:DesignHeight="200"
     d:DesignWidth="240"
     mc:Ignorable="d">
     <Grid>
@@ -18,25 +18,29 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
-        <StackPanel VerticalAlignment="Center" Margin="16 16 16 0">
+        <StackPanel Margin="16 16 16 0" VerticalAlignment="Center">
             <TextBlock
                 VerticalAlignment="Center"
                 Style="{StaticResource MaterialDesignBody1TextBlock}"
                 Text="{Binding HeadText}" />
-            <TextBlock Margin="0 8 0 0" Text="{Binding MidText}"/>
+            <TextBlock
+                Margin="0 8 0 0"
+                Text="{Binding MidText}"
+                TextWrapping="Wrap" />
         </StackPanel>
         <ProgressBar
+            Grid.Row="1"
+            Margin="16"
             Width="36"
             Height="36"
-            Grid.Row="1"
-            VerticalAlignment="Center"
             HorizontalAlignment="Center"
+            VerticalAlignment="Center"
             IsIndeterminate="True"
             Style="{StaticResource MaterialDesignCircularProgressBar}" />
         <Button
-            HorizontalAlignment="Right"
             Grid.Row="2"
             Margin="16 0 16 16"
+            HorizontalAlignment="Right"
             Command="{Binding CancelCommand}"
             Content="Cancel"
             Style="{StaticResource MaterialDesignFlatButton}" />

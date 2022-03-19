@@ -5,18 +5,11 @@ namespace PasswordManager.Models
 {
     public class CloudSettings
     {
-        public CloudType CloudType { get; set; }
-        public bool Enabled { get; set; }
-        public BaseUserInfo UserInfo { get; set; } = new BaseUserInfo();
+        public BaseUserInfo UserInfo { get; set; }
 
         public CloudSettings()
         {
-
-        }
-
-        public CloudSettings(CloudType cloudType)
-        {
-            CloudType = cloudType;
+            UserInfo = new BaseUserInfo();
         }
     }
 }

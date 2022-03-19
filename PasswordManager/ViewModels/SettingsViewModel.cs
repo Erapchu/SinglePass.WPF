@@ -44,35 +44,9 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        public bool GoogleDriveEnabled
-        {
-            get => _appSettingsService.GoogleCloudSettings.Enabled;
-            set
-            {
-                _appSettingsService.GoogleCloudSettings.Enabled = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public string GoogleProfileUrl
-        {
-            get => _appSettingsService.GoogleCloudSettings.UserInfo.ProfileUrl;
-            set
-            {
-                _appSettingsService.GoogleCloudSettings.UserInfo.ProfileUrl = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public string GoogleUserName
-        {
-            get => _appSettingsService.GoogleCloudSettings.UserInfo.UserName;
-            set
-            {
-                _appSettingsService.GoogleCloudSettings.UserInfo.UserName = value;
-                OnPropertyChanged();
-            }
-        }
+        public bool GoogleDriveEnabled => _appSettingsService.GoogleCloudSettings != null;
+        public string GoogleProfileUrl => _appSettingsService.GoogleCloudSettings?.UserInfo?.ProfileUrl;
+        public string GoogleUserName => _appSettingsService.GoogleCloudSettings?.UserInfo?.UserName;
 
         public AsyncRelayCommand<CloudType> LoginCommand => _loginCommand ??= new AsyncRelayCommand<CloudType>(Login);
 
@@ -118,14 +92,16 @@ namespace PasswordManager.ViewModels
                     await cloudService.AuthorizationBroker.AuthorizeAsync(token);
 
                     _logger.LogInformation($"Authorization process to {cloudType} has been complete.");
-                    GoogleDriveEnabled = true;
-                    await _appSettingsService.Save();
 
                     // TODO: Check file after authorization?? and notify user about ability to download?
                     var googleUserInfo = await cloudService.GetUserInfo(token);
-
-                    GoogleUserName = googleUserInfo.UserName;
-                    GoogleProfileUrl = googleUserInfo.ProfileUrl;
+                    _appSettingsService.GoogleCloudSettings = new CloudSettings()
+                    {
+                        UserInfo = googleUserInfo,
+                    };
+                    OnPropertyChanged(nameof(GoogleDriveEnabled));
+                    OnPropertyChanged(nameof(GoogleProfileUrl));
+                    OnPropertyChanged(nameof(GoogleUserName));
 
                     await _appSettingsService.Save();
                 }
@@ -133,7 +109,8 @@ namespace PasswordManager.ViewModels
                 {
                     // TODO: Revoke
 
-                    GoogleDriveEnabled = false;
+                    _appSettingsService.GoogleCloudSettings = null;
+                    OnPropertyChanged(nameof(GoogleDriveEnabled));
 
 
                     await _appSettingsService.Save();

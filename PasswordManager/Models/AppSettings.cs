@@ -9,7 +9,7 @@ namespace PasswordManager.Models
 
         public AppSettings()
         {
-            GoogleCloudSettings = new CloudSettings(CloudType.GoogleDrive);
+
         }
     }
 }

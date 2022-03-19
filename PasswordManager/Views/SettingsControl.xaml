@@ -100,8 +100,8 @@
                                 <ColumnDefinition Width="auto"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel>
-                                <Image Source="{Binding GoogleProfilePicture}" Width="64" Height="64"/>
-                                <TextBlock Text="{Binding GoogleUserName}" Margin="0 8 0 0" MaxWidth="80" TextTrimming="CharacterEllipsis"/>
+                                <Image Source="{Binding GoogleProfileUrl}" Width="64" Height="64"/>
+                                <TextBlock Text="{Binding GoogleUserName}" Margin="0 8 0 0" MaxWidth="160" TextTrimming="CharacterEllipsis"/>
                             </StackPanel>
                             <Button
                                 Grid.Column="1"

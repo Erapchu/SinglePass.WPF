@@ -15,20 +15,28 @@ namespace PasswordManager.ViewModels
         private static ProcessingViewModel GetDesignTimeVM()
         {
             var vm = new ProcessingViewModel();
-            vm.ProcessingText = "Authorizing...";
+            vm.HeadText = "Authorizing...";
+            vm.MidText = "Please wait!";
             return vm;
         }
         #endregion
 
         private readonly string _dialogIdentifier;
-        private string _processingText;
+        private string _headText;
+        private string _midText;
         private RelayCommand _cancelCommand;
         private CancellationTokenSource _processingCTS;
 
-        public string ProcessingText
+        public string HeadText
         {
-            get => _processingText;
-            set => SetProperty(ref _processingText, value);
+            get => _headText;
+            set => SetProperty(ref _headText, value);
+        }
+
+        public string MidText
+        {
+            get => _midText;
+            set => SetProperty(ref _midText, value);
         }
 
         public RelayCommand CancelCommand => _cancelCommand ??= new RelayCommand(Cancel);
@@ -36,9 +44,10 @@ namespace PasswordManager.ViewModels
 
         private ProcessingViewModel() { }
 
-        public ProcessingViewModel(string processingText, string dialogIdentifier)
+        public ProcessingViewModel(string processingText, string midText, string dialogIdentifier)
         {
-            _processingText = processingText;
+            _headText = processingText;
+            _midText = midText;
             _dialogIdentifier = dialogIdentifier;
             _processingCTS = new CancellationTokenSource();
         }

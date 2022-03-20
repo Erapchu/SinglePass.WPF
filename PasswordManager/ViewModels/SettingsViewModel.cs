@@ -61,6 +61,7 @@ namespace PasswordManager.ViewModels
             get => _googleProfileUrl;
             set => SetProperty(ref _googleProfileUrl, value);
         }
+
         public string GoogleUserName
         {
             get => _googleUserName;
@@ -95,10 +96,7 @@ namespace PasswordManager.ViewModels
             {
                 if (GoogleDriveEnabled)
                 {
-                    var cloudService = _cloudServiceProvider.GetCloudService(CloudType.GoogleDrive);
-                    var googleUserInfo = await cloudService.GetUserInfo(CancellationToken.None);
-                    GoogleProfileUrl = googleUserInfo.ProfileUrl;
-                    GoogleUserName = googleUserInfo.UserName;
+                    await SetUserInfoFromCloud(CloudType.GoogleDrive, CancellationToken.None);
                 }
             }
             catch (Exception ex)
@@ -133,12 +131,10 @@ namespace PasswordManager.ViewModels
                     _logger.LogInformation($"Authorization process to {cloudType} has been complete.");
 
                     // TODO: Check file after authorization?? and notify user about ability to download?
-                    var googleUserInfo = await cloudService.GetUserInfo(token);
                     GoogleDriveEnabled = true;
                     await _appSettingsService.Save();
 
-                    GoogleProfileUrl = googleUserInfo.ProfileUrl;
-                    GoogleUserName = googleUserInfo.UserName;
+                    _ = SetUserInfoFromCloud(cloudType, CancellationToken.None); // Don't await set user info for now
                 }
                 else
                 {
@@ -151,6 +147,8 @@ namespace PasswordManager.ViewModels
 
                     GoogleDriveEnabled = false;
                     await _appSettingsService.Save();
+
+                    ClearUserInfo(cloudType);
                 }
             }
             catch (OperationCanceledException)
@@ -165,6 +163,37 @@ namespace PasswordManager.ViewModels
             {
                 if (DialogHost.IsDialogOpen(windowDialogName))
                     DialogHost.Close(windowDialogName);
+            }
+        }
+
+        private void ClearUserInfo(CloudType cloudType)
+        {
+            switch (cloudType)
+            {
+                case CloudType.GoogleDrive:
+                    GoogleProfileUrl = null;
+                    GoogleUserName = null;
+                    break;
+            }
+        }
+
+        private async Task SetUserInfoFromCloud(CloudType cloudType, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var cloudService = _cloudServiceProvider.GetCloudService(cloudType);
+                var userInfo = await cloudService.GetUserInfo(cancellationToken);
+                switch (cloudType)
+                {
+                    case CloudType.GoogleDrive:
+                        GoogleProfileUrl = userInfo.ProfileUrl;
+                        GoogleUserName = userInfo.UserName;
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, string.Empty);
             }
         }
     }

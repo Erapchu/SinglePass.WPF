@@ -105,11 +105,12 @@
                             </StackPanel>
                             <Button
                                 Grid.Column="1"
+                                Margin="8 0 0 0"
                                 Style="{StaticResource MaterialDesignFlatButton}"
-                                ToolTip="Download credentials file">
+                                ToolTip="Sync credentials file">
                                 <StackPanel Orientation="Horizontal">
-                                    <md:PackIcon Kind="Download"/>
-                                    <TextBlock Text="Download"/>
+                                    <md:PackIcon Kind="Sync"/>
+                                    <TextBlock Margin="8 0 0 0" Text="Force synchronize"/>
                                 </StackPanel>
                             </Button>
                         </Grid>

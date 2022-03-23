@@ -21,10 +21,28 @@ namespace PasswordManager.Views
 
             WindowsClipboard.SetText(inputData);
 
-            Windows_keybd_event.keybd_event(Windows_keybd_event.VK_CONTROL, 0, 0, UIntPtr.Zero);
-            Windows_keybd_event.keybd_event(Windows_keybd_event.VK_V, 0, 0, UIntPtr.Zero);
-            Windows_keybd_event.keybd_event(Windows_keybd_event.VK_V, 0, Windows_keybd_event.KEYEVENTF_KEYUP, UIntPtr.Zero);
-            Windows_keybd_event.keybd_event(Windows_keybd_event.VK_CONTROL, 0, Windows_keybd_event.KEYEVENTF_KEYUP, UIntPtr.Zero);
+            INPUT[] inputs = new INPUT[4];
+
+            inputs[0].type = WindowsKeyboard.INPUT_KEYBOARD;
+            inputs[0].U.ki.wVk = WindowsKeyboard.VK_CONTROL;
+
+            inputs[1].type = WindowsKeyboard.INPUT_KEYBOARD;
+            inputs[1].U.ki.wVk = WindowsKeyboard.VK_V;
+
+            inputs[2].type = WindowsKeyboard.INPUT_KEYBOARD;
+            inputs[2].U.ki.wVk = WindowsKeyboard.VK_V;
+            inputs[2].U.ki.dwFlags = WindowsKeyboard.KEYEVENTF_KEYUP;
+
+            inputs[3].type = WindowsKeyboard.INPUT_KEYBOARD;
+            inputs[3].U.ki.wVk = WindowsKeyboard.VK_CONTROL;
+            inputs[3].U.ki.dwFlags = WindowsKeyboard.KEYEVENTF_KEYUP;
+
+            var uSent = WindowsKeyboard.SendInput((uint)inputs.Length, inputs, INPUT.Size);
+
+            //WindowsKeyboard.keybd_event(WindowsKeyboard.VK_CONTROL, 0, 0, UIntPtr.Zero);
+            //WindowsKeyboard.keybd_event(WindowsKeyboard.VK_V, 0, 0, UIntPtr.Zero);
+            //WindowsKeyboard.keybd_event(WindowsKeyboard.VK_V, 0, WindowsKeyboard.KEYEVENTF_KEYUP, UIntPtr.Zero);
+            //WindowsKeyboard.keybd_event(WindowsKeyboard.VK_CONTROL, 0, WindowsKeyboard.KEYEVENTF_KEYUP, UIntPtr.Zero);
 
             IsOpen = false;
         }

@@ -111,7 +111,7 @@ namespace PasswordManager.Helpers
             }
         }
 
-        public static async Task<string?> GetTextAsync(CancellationToken cancellation)
+        public static async Task<string> GetTextAsync(CancellationToken cancellation)
         {
             if (!IsClipboardFormatAvailable(CF_UNICODETEXT))
             {
@@ -122,7 +122,7 @@ namespace PasswordManager.Helpers
             return InnerGet();
         }
 
-        public static string? GetText()
+        public static string GetText()
         {
             if (!IsClipboardFormatAvailable(CF_UNICODETEXT))
             {
@@ -133,7 +133,7 @@ namespace PasswordManager.Helpers
             return InnerGet();
         }
 
-        private static string? InnerGet()
+        private static string InnerGet()
         {
             IntPtr handle = default;
 

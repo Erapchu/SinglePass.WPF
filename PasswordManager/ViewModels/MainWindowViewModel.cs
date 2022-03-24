@@ -44,6 +44,11 @@ namespace PasswordManager.ViewModels
                 SetProperty(ref _selectedNavigationItem, value);
                 _selectedNavigationItem.IsVisible = true;
 
+                if (_selectedNavigationItem is SettingsViewModel settingsViewModel)
+                {
+                    _ = settingsViewModel.FetchUserInfoIfRequired();
+                }
+
                 if (_selectedNavigationItem is PasswordsViewModel passwordsViewModel)
                 {
                     passwordsViewModel.SearchTextFocused = false;

@@ -19,8 +19,11 @@
                 <ResourceDictionary Source="pack://application:,,,/PasswordManager;component/Themes/SeparatorTemplates.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <conv:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
-            <conv:BooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" TrueValue="Collapsed" FalseValue="Visible"/>
-            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <conv:BooleanToVisibilityConverter
+                x:Key="InverseBooleanToVisibilityConverter"
+                FalseValue="Visible"
+                TrueValue="Collapsed" />
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid MaxWidth="800">
@@ -86,22 +89,33 @@
                         Command="{Binding LoginCommand}"
                         CommandParameter="{x:Static cloudEnums:CloudType.GoogleDrive}"
                         Content="SIGN IN"
-                        Visibility="{Binding GoogleDriveEnabled, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
-                        Style="{StaticResource MaterialDesignFlatAccentButton}" />
+                        Style="{StaticResource MaterialDesignFlatAccentButton}"
+                        Visibility="{Binding GoogleDriveEnabled, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                     <Grid Visibility="{Binding GoogleDriveEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="auto" />
                         </Grid.ColumnDefinitions>
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="auto"/>
-                                <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition Width="auto" />
+                                <ColumnDefinition Width="auto" />
                             </Grid.ColumnDefinitions>
                             <StackPanel>
-                                <Image Source="{Binding GoogleProfileUrl}" Width="64" Height="64"/>
-                                <TextBlock Text="{Binding GoogleUserName}" Margin="0 8 0 0" MaxWidth="160" TextTrimming="CharacterEllipsis"/>
+                                <Ellipse Width="64" Height="64">
+                                    <Ellipse.Fill>
+                                        <ImageBrush ImageSource="{Binding GoogleProfileUrl}" Stretch="UniformToFill" />
+                                    </Ellipse.Fill>
+                                </Ellipse>
+                                <TextBlock
+                                    Grid.Row="1"
+                                    MaxWidth="160"
+                                    Margin="0 8 0 0"
+                                    HorizontalAlignment="Center"
+                                    Text="{Binding GoogleUserName}"
+                                    TextAlignment="Center"
+                                    TextTrimming="CharacterEllipsis" />
                             </StackPanel>
                             <Button
                                 Grid.Column="1"
@@ -109,17 +123,17 @@
                                 Style="{StaticResource MaterialDesignFlatButton}"
                                 ToolTip="Sync credentials file">
                                 <StackPanel Orientation="Horizontal">
-                                    <md:PackIcon Kind="Sync"/>
-                                    <TextBlock Margin="8 0 0 0" Text="Force synchronize"/>
+                                    <md:PackIcon Kind="Sync" />
+                                    <TextBlock Margin="8 0 0 0" Text="Force synchronize" />
                                 </StackPanel>
                             </Button>
                         </Grid>
                         <Button
                             Grid.Column="2"
-                            Style="{StaticResource MaterialDesignFlatAccentButton}"
-                            Content="SIGN OUT"
                             Command="{Binding LoginCommand}"
-                            CommandParameter="{x:Static cloudEnums:CloudType.GoogleDrive}"/>
+                            CommandParameter="{x:Static cloudEnums:CloudType.GoogleDrive}"
+                            Content="SIGN OUT"
+                            Style="{StaticResource MaterialDesignFlatAccentButton}" />
                     </Grid>
                 </Grid>
             </GroupBox>

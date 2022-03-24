@@ -86,15 +86,15 @@ namespace PasswordManager.ViewModels
             Name = "Settings";
             ItemIndex = SettingsNavigationItemIndex;
             IconKind = PackIconKind.Settings;
-
-            Task.Run(FetchStoragesUserInfo);
         }
 
-        private async Task FetchStoragesUserInfo()
+        internal async Task FetchUserInfoIfRequired()
         {
             try
             {
-                if (GoogleDriveEnabled)
+                if (GoogleDriveEnabled
+                    && string.IsNullOrWhiteSpace(GoogleProfileUrl)
+                    && string.IsNullOrWhiteSpace(GoogleUserName))
                 {
                     await SetUserInfoFromCloud(CloudType.GoogleDrive, CancellationToken.None);
                 }

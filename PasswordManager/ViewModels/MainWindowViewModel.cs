@@ -26,23 +26,28 @@ namespace PasswordManager.ViewModels
         public event Action<CredentialViewModel> CredentialSelected;
 
         private AsyncRelayCommand _loadingCommand;
-        private int _selectedNavigationItemIndex;
+        private NavigationItemViewModel _selectedNavigationItem;
 
         public AsyncRelayCommand LoadingCommand => _loadingCommand ??= new AsyncRelayCommand(LoadingAsync);
         public PasswordsViewModel PasswordsViewModel { get; }
         public SettingsViewModel SettingsViewModel { get; }
         public ObservableCollectionDelayed<NavigationItemViewModel> NavigationItems { get; }
 
-        public int SelectedNavigationItemIndex
+        public NavigationItemViewModel SelectedNavigationItem
         {
-            get => _selectedNavigationItemIndex;
+            get => _selectedNavigationItem;
             set
             {
-                SetProperty(ref _selectedNavigationItemIndex, value);
-                if (value == NavigationItemViewModel.PasswordsNavigationItemIndex)
+                if (_selectedNavigationItem != null)
+                    _selectedNavigationItem.IsVisible = false;
+
+                SetProperty(ref _selectedNavigationItem, value);
+                _selectedNavigationItem.IsVisible = true;
+
+                if (_selectedNavigationItem is PasswordsViewModel passwordsViewModel)
                 {
-                    PasswordsViewModel.SearchTextFocused = false;
-                    PasswordsViewModel.SearchTextFocused = true;
+                    passwordsViewModel.SearchTextFocused = false;
+                    passwordsViewModel.SearchTextFocused = true;
                 }
             }
         }
@@ -55,6 +60,7 @@ namespace PasswordManager.ViewModels
         {
             PasswordsViewModel = passwordsViewModel;
             SettingsViewModel = settingsViewModel;
+            SelectedNavigationItem = PasswordsViewModel;
 
             PasswordsViewModel.CredentialSelected += PasswordsViewModel_CredentialSelected;
 

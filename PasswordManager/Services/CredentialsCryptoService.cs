@@ -50,9 +50,9 @@ namespace PasswordManager.Services
             _credentials = new List<Credential>();
         }
 
-        public async Task<bool> IsCredentialsFileExistAsync()
+        public Task<bool> IsCredentialsFileExistAsync()
         {
-            return await Task.Run(() => File.Exists(_pathToPasswordsFile));
+            return Task.FromResult(File.Exists(_pathToPasswordsFile));
         }
 
         public async Task SetNewPassword(string password)

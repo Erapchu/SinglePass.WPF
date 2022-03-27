@@ -153,12 +153,13 @@ namespace PasswordManager.ViewModels
                             "Yes - merge\r\nNo - replace from cloud",
                             MaterialMessageBoxButtons.YesNo,
                             windowDialogName,
-                            PackIconKind.QuestionAnswer));
+                            PackIconKind.QuestionMark));
                         var result = (MaterialDialogResult)await showTask;
                         // TODO: Replace credentials by cloud file or merge
                         switch (result)
                         {
                             case MaterialDialogResult.Yes:
+
                                 break;
                             case MaterialDialogResult.No:
                                 break;

@@ -10,6 +10,7 @@ namespace PasswordManager.Clouds.Interfaces
     {
         IAuthorizationBroker AuthorizationBroker { get; }
         Task Upload(Stream stream, string fileName, CancellationToken cancellationToken);
+        Task<Stream> Download(string fileName, CancellationToken cancellationToken);
         Task<BaseUserInfo> GetUserInfo(CancellationToken cancellationToken);
     }
 }

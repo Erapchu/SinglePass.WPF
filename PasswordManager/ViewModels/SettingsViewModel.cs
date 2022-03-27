@@ -4,9 +4,9 @@ using Microsoft.Toolkit.Mvvm.Input;
 using PasswordManager.Cloud.Enums;
 using PasswordManager.Clouds.Services;
 using PasswordManager.Helpers;
-using PasswordManager.Models;
 using PasswordManager.Services;
 using PasswordManager.Views;
+using PasswordManager.Views.MessageBox;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -96,7 +96,7 @@ namespace PasswordManager.ViewModels
                     && string.IsNullOrWhiteSpace(GoogleProfileUrl)
                     && string.IsNullOrWhiteSpace(GoogleUserName))
                 {
-                    await SetUserInfoFromCloud(CloudType.GoogleDrive, CancellationToken.None);
+                    await FetchUserInfoFromCloud(CloudType.GoogleDrive, CancellationToken.None);
                 }
             }
             catch (Exception ex)
@@ -124,17 +124,44 @@ namespace PasswordManager.ViewModels
                     // Authorize
                     var processingControl = new ProcessingControl("Authorizing...", "Please, continue authorization or cancel it.", windowDialogName);
                     var token = processingControl.ViewModel.CancellationToken;
-                    _ = DialogHost.Show(processingControl, windowDialogName); // Don't await dialog host
+                    var showTask = DialogHost.Show(processingControl, windowDialogName); // Don't await dialog host
+                    var dialogSession = DialogHost.GetDialogSession(windowDialogName);
 
                     await cloudService.AuthorizationBroker.AuthorizeAsync(token);
-
                     _logger.LogInformation($"Authorization process to {cloudType} has been complete.");
-
-                    // TODO: Check file after authorization?? and notify user about ability to download?
                     GoogleDriveEnabled = true;
                     await _appSettingsService.Save();
 
-                    _ = SetUserInfoFromCloud(cloudType, CancellationToken.None); // Don't await set user info for now
+                    processingControl.ViewModel.HeadText = "Checking file...";
+                    processingControl.ViewModel.MidText = string.Format("Please, wait while we checking existing passwords on your account. The target file is {0}", Helpers.Constants.PasswordsFileName);
+
+                    using var fileStream = await cloudService.Download(Helpers.Constants.PasswordsFileName, token);
+                    if (fileStream != null)
+                    {
+                        // File is here
+                        dialogSession.UpdateContent(MaterialMessageBox.GetInstance(
+                            "Merge existing passwords?",
+                            "Yes - merge\r\nNo - replace from cloud",
+                            MaterialMessageBoxButtons.YesNo,
+                            windowDialogName,
+                            PackIconKind.QuestionAnswer));
+                        var result = (MaterialDialogResult)await showTask;
+                        // TODO: Replace credentials by cloud file or merge
+                        switch (result)
+                        {
+                            case MaterialDialogResult.Yes:
+                                break;
+                            case MaterialDialogResult.No:
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        // File doesn't exists, just replace
+                        
+                    }
+
+                    _ = FetchUserInfoFromCloud(cloudType, CancellationToken.None); // Don't await set user info for now
                 }
                 else
                 {
@@ -177,7 +204,7 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        private async Task SetUserInfoFromCloud(CloudType cloudType, CancellationToken cancellationToken)
+        private async Task FetchUserInfoFromCloud(CloudType cloudType, CancellationToken cancellationToken)
         {
             try
             {

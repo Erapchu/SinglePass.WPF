@@ -10,7 +10,6 @@ using System.Net.Mime;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace PasswordManager.Clouds.Services
 {
@@ -74,6 +73,25 @@ namespace PasswordManager.Clouds.Services
                 // Create
                 var r = await client.PostAsync("https://www.googleapis.com/upload/drive/v3/files?uploadtype=multipart", multipart, cancellationToken);
             }
+        }
+
+        public async Task<Stream> Download(string fileName, CancellationToken cancellationToken)
+        {
+            await RefreshAccessTokenIfRequired(cancellationToken);
+            var client = GetHttpClient();
+
+            using var filesResponse = await client.GetAsync("https://www.googleapis.com/drive/v3/files?q=trashed%3Dfalse", cancellationToken);
+            using var filesContent = filesResponse.Content;
+            var jsonResponse = await filesContent.ReadAsStringAsync(cancellationToken);
+            var fileList = JsonSerializer.Deserialize<GoogleDriveFileList>(jsonResponse);
+            var targetFile = fileList.Files.Find(f => f.Name == fileName);
+
+            if (targetFile is null)
+                return null;
+
+            var fileResponse = await client.GetAsync($"https://www.googleapis.com/drive/v3/files/{targetFile.Id}?alt=media", cancellationToken);
+            var fileContent = fileResponse.Content;
+            return await fileContent.ReadAsStreamAsync(cancellationToken);
         }
 
         public async Task<BaseUserInfo> GetUserInfo(CancellationToken cancellationToken)

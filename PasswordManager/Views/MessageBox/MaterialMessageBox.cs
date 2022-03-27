@@ -5,20 +5,6 @@ namespace PasswordManager.Views.MessageBox
 {
     public static class MaterialMessageBox
     {
-        public static MaterialMessageBoxContent GetInstance(
-            string header,
-            string content,
-            MaterialMessageBoxButtons buttons,
-            string dialogIdentifier,
-            PackIconKind? packIconKind = null)
-        {
-            var instance = new MaterialMessageBoxContent
-            {
-                DataContext = new MaterialMessageBoxViewModel(header, content, buttons, dialogIdentifier, packIconKind)
-            };
-            return instance;
-        }
-
         /// <summary>
         /// Shows materialized analog of standard MessageBox. To use this method you need to set <see cref="DialogHost"/> instance in your window
         /// (typically this may be specified towards the root of a Window's XAML).
@@ -35,7 +21,10 @@ namespace PasswordManager.Views.MessageBox
             string dialogIdentifier,
             PackIconKind? packIconKind = null)
         {
-            var instance = GetInstance(header, content, buttons, dialogIdentifier, packIconKind);
+            var instance = new MaterialMessageBoxContent
+            {
+                DataContext = new MaterialMessageBoxViewModel(header, content, buttons, dialogIdentifier, packIconKind)
+            };
             var result = await DialogHost.Show(instance, dialogIdentifier);
 
             return result is null ? MaterialDialogResult.None : (MaterialDialogResult)result;

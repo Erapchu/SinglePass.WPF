@@ -22,6 +22,7 @@ namespace PasswordManager.ViewModels
         private static SettingsViewModel GetDesignTimeVM()
         {
             var vm = new SettingsViewModel();
+            vm.FetchingUserInfo = true;
             return vm;
         }
         #endregion
@@ -33,6 +34,7 @@ namespace PasswordManager.ViewModels
         private AsyncRelayCommand<CloudType> _loginCommand;
         private string _googleProfileUrl;
         private string _googleUserName;
+        private bool _fetchingUserInfo;
 
         public BaseTheme ThemeMode
         {
@@ -68,6 +70,12 @@ namespace PasswordManager.ViewModels
             set => SetProperty(ref _googleUserName, value);
         }
 
+        public bool FetchingUserInfo
+        {
+            get => _fetchingUserInfo;
+            set => SetProperty(ref _fetchingUserInfo, value);
+        }
+
         public AsyncRelayCommand<CloudType> LoginCommand => _loginCommand ??= new AsyncRelayCommand<CloudType>(Login);
 
         private SettingsViewModel() { }
@@ -93,6 +101,7 @@ namespace PasswordManager.ViewModels
             try
             {
                 if (GoogleDriveEnabled
+                    && !FetchingUserInfo
                     && string.IsNullOrWhiteSpace(GoogleProfileUrl)
                     && string.IsNullOrWhiteSpace(GoogleUserName))
                 {
@@ -208,6 +217,7 @@ namespace PasswordManager.ViewModels
         {
             try
             {
+                FetchingUserInfo = true;
                 var cloudService = _cloudServiceProvider.GetCloudService(cloudType);
                 var userInfo = await cloudService.GetUserInfo(cancellationToken);
                 switch (cloudType)
@@ -221,6 +231,10 @@ namespace PasswordManager.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError(ex, string.Empty);
+            }
+            finally
+            {
+                FetchingUserInfo = false;
             }
         }
     }

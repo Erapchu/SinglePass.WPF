@@ -97,37 +97,35 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="auto" />
                         </Grid.ColumnDefinitions>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="auto" />
-                                <ColumnDefinition Width="auto" />
-                            </Grid.ColumnDefinitions>
-                            <StackPanel>
-                                <Ellipse Width="64" Height="64">
-                                    <Ellipse.Fill>
-                                        <ImageBrush ImageSource="{Binding GoogleProfileUrl}" Stretch="UniformToFill" />
-                                    </Ellipse.Fill>
-                                </Ellipse>
-                                <TextBlock
-                                    Grid.Row="1"
-                                    MaxWidth="160"
-                                    Margin="0 8 0 0"
-                                    HorizontalAlignment="Center"
-                                    Text="{Binding GoogleUserName}"
-                                    TextAlignment="Center"
-                                    TextTrimming="CharacterEllipsis" />
-                            </StackPanel>
-                            <Button
-                                Grid.Column="1"
-                                Margin="8 0 0 0"
-                                Style="{StaticResource MaterialDesignFlatButton}"
-                                ToolTip="Sync credentials file">
-                                <StackPanel Orientation="Horizontal">
-                                    <md:PackIcon Kind="Sync" />
-                                    <TextBlock Margin="8 0 0 0" Text="Force synchronize" />
-                                </StackPanel>
-                            </Button>
-                        </Grid>
+                        <StackPanel Width="120" Visibility="{Binding FetchingUserInfo, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <ProgressBar
+                                Width="64"
+                                Height="64"
+                                IsIndeterminate="True"
+                                Style="{StaticResource MaterialDesignCircularProgressBar}" />
+                            <TextBlock
+                                Margin="0 8 0 0"
+                                HorizontalAlignment="Center"
+                                Text="Loading..."
+                                TextAlignment="Center"
+                                TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                        <StackPanel Width="120" Visibility="{Binding FetchingUserInfo, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                            <Ellipse
+                                Width="64"
+                                Height="64"
+                                HorizontalAlignment="Center">
+                                <Ellipse.Fill>
+                                    <ImageBrush ImageSource="{Binding GoogleProfileUrl}" Stretch="UniformToFill" />
+                                </Ellipse.Fill>
+                            </Ellipse>
+                            <TextBlock
+                                Margin="0 8 0 0"
+                                HorizontalAlignment="Center"
+                                Text="{Binding GoogleUserName}"
+                                TextAlignment="Center"
+                                TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
                         <Button
                             Grid.Column="2"
                             Command="{Binding LoginCommand}"

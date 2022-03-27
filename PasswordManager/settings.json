@@ -41,7 +41,7 @@
       {
         "logger": "*",
         //"levels": "Trace,Debug,Info,Warn,Error,Fatal",
-        "minLevel": "Trace",
+        "minLevel": "Info",
         "writeTo": "file"
       }
     ]

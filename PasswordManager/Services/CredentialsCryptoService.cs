@@ -58,10 +58,9 @@ namespace PasswordManager.Services
             return Task.FromResult(File.Exists(_pathToPasswordsFile));
         }
 
-        public async Task SetPassword(string password)
+        public void SetPassword(string password)
         {
             PasswordSecure = SecureStringHelper.MakeSecureString(password);
-            await SaveCredentialsAndSync();
         }
 
         public async Task<bool> LoadCredentialsAsync()

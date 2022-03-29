@@ -110,6 +110,7 @@ namespace PasswordManager
                 services.AddTransient<GoogleAuthorizationBroker>();
                 services.AddTransient<GoogleDriveTokenHolder>();
                 services.AddTransient<GoogleDriveCloudService>();
+                services.AddTransient<CryptoService>();
                 services.AddSingleton<CloudServiceProvider>();
 
                 // Windows

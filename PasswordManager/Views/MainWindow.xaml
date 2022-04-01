@@ -65,7 +65,7 @@
                 </Grid>
             </DataTemplate>
 
-            <conv:TransitionVisibilityConverter x:Key="TransitionVisibilityConverter" />
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         </ResourceDictionary>
     </Window.Resources>
     <i:Interaction.Triggers>
@@ -92,7 +92,7 @@
                     ItemContainerStyle="{StaticResource CustomNavigationListboxItem}"
                     ItemTemplate="{StaticResource NavigationItemDataTemplate}"
                     ItemsSource="{Binding NavigationItems}"
-                    SelectedIndex="{Binding SelectedNavigationItemIndex, UpdateSourceTrigger=PropertyChanged}"
+                    SelectedItem="{Binding SelectedNavigationItem}"
                     Style="{StaticResource MaterialDesignNavigationPrimaryListBox}">
                     <ListBox.Resources>
                         <Style BasedOn="{StaticResource MaterialDesignScrollBarMinimal}" TargetType="{x:Type ScrollBar}" />
@@ -101,15 +101,16 @@
                 <Separator Grid.Column="1" Style="{StaticResource MaterialDesignVerticalSeparator}" />
                 <AdornerDecorator Grid.Column="2">
                     <Grid>
-                        <Grid Visibility="{Binding SelectedNavigationItemIndex, Converter={StaticResource TransitionVisibilityConverter}, ConverterParameter={x:Static vm:NavigationItemViewModel.PasswordsNavigationItemIndex}}">
-                            <local:PasswordsControl x:Name="PasswordsControl" DataContext="{Binding PasswordsViewModel}" />
+                        <Grid DataContext="{Binding PasswordsViewModel}" Visibility="{Binding IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <local:PasswordsControl x:Name="PasswordsControl" />
                         </Grid>
                         <ScrollViewer
                             Margin="0 32 0 0"
+                            DataContext="{Binding SettingsViewModel}"
                             HorizontalScrollBarVisibility="Disabled"
                             VerticalScrollBarVisibility="Auto"
-                            Visibility="{Binding SelectedNavigationItemIndex, Converter={StaticResource TransitionVisibilityConverter}, ConverterParameter={x:Static vm:NavigationItemViewModel.SettingsNavigationItemIndex}}">
-                            <local:SettingsControl DataContext="{Binding SettingsViewModel}" />
+                            Visibility="{Binding IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <local:SettingsControl />
                         </ScrollViewer>
                     </Grid>
                 </AdornerDecorator>

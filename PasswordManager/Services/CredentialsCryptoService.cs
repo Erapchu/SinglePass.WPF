@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using PasswordManager.Enums;
 using PasswordManager.Helpers;
 using PasswordManager.Helpers.Threading;
 using PasswordManager.Models;
@@ -7,8 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security;
 using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,19 +16,13 @@ namespace PasswordManager.Services
 {
     public class CredentialsCryptoService
     {
-        private readonly byte[] _predefinedKeyPart = new byte[AesCryptographyHelper.KeyLength]
-        {
-            97, 238, 238, 23, 235, 212, 131, 197, 191, 5, 236, 111, 81, 47, 125, 191,
-            211, 41, 121, 148, 132, 70, 204, 94, 133, 220, 255, 225, 169, 242, 67, 114
-        };
         private readonly object _credentialsLock = new();
         private readonly ILogger<CredentialsCryptoService> _logger;
         private readonly SyncService _syncService;
+        private readonly CryptoService _cryptoService;
         private readonly string _pathToPasswordsFile = Constants.PasswordsFilePath;
 
-        private List<Credential> _credentials;
-        private byte[] _keyBytes;
-
+        private List<Credential> _credentials = new();
         public List<Credential> Credentials
         {
             get
@@ -39,29 +32,38 @@ namespace PasswordManager.Services
                     return _credentials.ToList();
                 }
             }
+            private set
+            {
+                lock (_credentialsLock)
+                {
+                    _credentials = value;
+                }
+            }
         }
+
+        private SecureString PasswordSecure { get; set; }
 
         public CredentialsCryptoService(
             ILogger<CredentialsCryptoService> logger,
-            SyncService syncService)
+            SyncService syncService,
+            CryptoService cryptoService)
         {
             _logger = logger;
             _syncService = syncService;
-            _credentials = new List<Credential>();
+            _cryptoService = cryptoService;
         }
 
-        public async Task<bool> IsCredentialsFileExistAsync()
+        public Task<bool> IsCredentialsFileExistAsync()
         {
-            return await Task.Run(() => File.Exists(_pathToPasswordsFile));
+            return Task.FromResult(File.Exists(_pathToPasswordsFile));
         }
 
-        public async Task SetNewPassword(string password)
+        public void SetPassword(string password)
         {
-            RestructureKeyBytes(password);
-            await SaveCredentialsAndSync();
+            PasswordSecure = SecureStringHelper.MakeSecureString(password);
         }
 
-        public async Task<bool> LoadCredentialsAsync(string password)
+        public async Task<bool> LoadCredentialsAsync()
         {
             return await Task.Run(() =>
             {
@@ -78,19 +80,8 @@ namespace PasswordManager.Services
                     // Just to ensure
                     fileStream.Seek(0, SeekOrigin.Begin);
 
-                    using var br = new BinaryReader(fileStream);
-                    var ivLength = AesCryptographyHelper.IVLength;
-                    var ivBytes = new byte[ivLength];
-                    br.Read(ivBytes);
-                    var encryptedBytes = new byte[fileStream.Length - ivLength];
-                    br.Read(encryptedBytes);
-
-                    // During loading, it's required to set key bytes for future
-                    RestructureKeyBytes(password);
-
-                    var jsonText = AesCryptographyHelper.DecryptStringFromBytes(encryptedBytes, _keyBytes, ivBytes);
-
-                    _credentials = JsonSerializer.Deserialize<List<Credential>>(jsonText);
+                    var password = SecureStringHelper.GetString(PasswordSecure);
+                    Credentials = _cryptoService.DecryptFromStream<List<Credential>>(fileStream, password);
                     success = true;
                 }
                 catch (JsonException jex)
@@ -177,6 +168,41 @@ namespace PasswordManager.Services
             await SaveCredentialsAndSync();
         }
 
+        public async Task Merge(List<Credential> newCredentials)
+        {
+            var anyChanges = false;
+
+            foreach (var newCredential in newCredentials)
+            {
+                var currentIndex = _credentials.IndexOf(newCredential);
+                if (currentIndex >= 0)
+                {
+                    // The same found
+                    var currentCredential = _credentials[currentIndex];
+                    if (currentCredential.LastModifiedTime < newCredential.LastModifiedTime)
+                    {
+                        _credentials[currentIndex] = newCredential;
+                        anyChanges = true;
+                    }
+                }
+                else
+                {
+                    // New add
+                    _credentials.Add(newCredential);
+                    anyChanges = true;
+                }
+            }
+
+            if (anyChanges)
+                await SaveCredentialsAndSync();
+        }
+
+        public async Task Replace(List<Credential> newCredentials)
+        {
+            _credentials = newCredentials;
+            await SaveCredentialsAndSync();
+        }
+
         private async Task SaveCredentialsAndSync()
         {
             await Task.Run(() =>
@@ -194,18 +220,8 @@ namespace PasswordManager.Services
                         // Just to ensure
                         fileStream.Seek(0, SeekOrigin.Begin);
 
-                        // Generate new IV for each new saving
-                        using var aesObj = Aes.Create();
-                        var ivBytes = aesObj.IV;
-
-                        // Get copy and serialize
-                        var credentials = Credentials;
-                        var jsonText = JsonSerializer.Serialize(credentials);
-                        var encryptedBytes = AesCryptographyHelper.EncryptStringToBytes(jsonText, _keyBytes, ivBytes);
-
-                        using var bw = new BinaryWriter(fileStream);
-                        bw.Write(ivBytes);
-                        bw.Write(encryptedBytes);
+                        var password = SecureStringHelper.GetString(PasswordSecure);
+                        _cryptoService.EncryptToStream(Credentials, fileStream, password);
                     }
 
                     _ = _syncService.Synchronize();
@@ -219,22 +235,6 @@ namespace PasswordManager.Services
                     _logger.LogError(ex, string.Empty);
                 }
             });
-        }
-
-        /// <summary>
-        /// Replaces pre-defined key bytes according to user password.
-        /// </summary>
-        /// <param name="password">User password.</param>
-        private void RestructureKeyBytes(string password)
-        {
-            _keyBytes = new byte[AesCryptographyHelper.KeyLength];
-            Array.Copy(_predefinedKeyPart, _keyBytes, AesCryptographyHelper.KeyLength);
-
-            var passBytes = Encoding.UTF8.GetBytes(password);
-            for (int i = 0; i < passBytes.Length; i++)
-            {
-                _keyBytes[i] = passBytes[i];
-            }
         }
     }
 }

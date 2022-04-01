@@ -77,7 +77,7 @@ namespace PasswordManager.ViewModels
                 Loading = true;
                 if (!_credentialsFileExist)
                 {
-                    await _credentialsCryptoService.SetNewPassword(Password);
+                    _credentialsCryptoService.SetPassword(Password);
                     Accept?.Invoke();
                 }
                 else
@@ -86,7 +86,8 @@ namespace PasswordManager.ViewModels
                     _cancellationTokenSource = new();
                     var cancellationToken = _cancellationTokenSource.Token;
 
-                    var loadingResult = await _credentialsCryptoService.LoadCredentialsAsync(Password);
+                    _credentialsCryptoService.SetPassword(Password);
+                    var loadingResult = await _credentialsCryptoService.LoadCredentialsAsync();
                     cancellationToken.ThrowIfCancellationRequested();
                     if (!loadingResult)
                     {

@@ -23,11 +23,11 @@ namespace PasswordManager.Views
     {
         public ProcessingViewModel ViewModel => DataContext as ProcessingViewModel;
 
-        public ProcessingControl(string processingText, string dialogIdentifier)
+        public ProcessingControl(string headText, string midText, string dialogIdentifier)
         {
             InitializeComponent();
 
-            DataContext = new ProcessingViewModel(processingText, dialogIdentifier);
+            DataContext = new ProcessingViewModel(headText, midText, dialogIdentifier);
         }
     }
 }

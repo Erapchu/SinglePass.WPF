@@ -23,6 +23,7 @@ namespace PasswordManager.Views
         {
             var passStringLength = credVM?.PasswordFieldVM?.Value?.Length ?? 0;
             PasswordsControl.CredentialsDialog.PasswordFieldBox.Password = new string('*', passStringLength);
+            PasswordsControl.CredentialsListBox.ScrollIntoView(credVM);
         }
 
         private void MaterialWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)

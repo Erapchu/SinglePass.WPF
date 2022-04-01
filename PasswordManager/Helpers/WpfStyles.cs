@@ -32,9 +32,17 @@ namespace PasswordManager.Helpers
                     .Select(i => WinApiProvider.LoadImage(WinApiProvider.GetModuleHandle(null), new IntPtr(i), 1, size, size, 0))
                     .FirstOrDefault(i => i != IntPtr.Zero);
 
-                return hIcon == IntPtr.Zero
-                    ? null
-                    : Imaging.CreateBitmapSourceFromHIcon(hIcon, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                if (hIcon == IntPtr.Zero)
+                {
+                    return null;
+                }
+                else
+                {
+                    var bitmapSource = Imaging.CreateBitmapSourceFromHIcon(hIcon, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                    // Do we need to delete object?
+                    //var deleted = WinApiProvider.DeleteObject(hIcon);
+                    return bitmapSource;
+                }
             }
             catch (Exception)
             {

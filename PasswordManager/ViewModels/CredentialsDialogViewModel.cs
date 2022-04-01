@@ -2,6 +2,7 @@
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 using PasswordManager.Enums;
+using PasswordManager.Helpers;
 using PasswordManager.Models;
 using System;
 using System.Collections.Generic;
@@ -144,7 +145,7 @@ namespace PasswordManager.ViewModels
 
             try
             {
-                System.Windows.Clipboard.SetText(data);
+                WindowsClipboard.SetText(data);
             }
             catch (Exception ex)
             {

@@ -1,0 +1,61 @@
+﻿<UserControl
+    x:Class="PasswordManager.Views.InputBox.MaterialInputBoxContent"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:PasswordManager.Views.InputBox"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+    MinWidth="200"
+    MaxWidth="700"
+    Loaded="UserControl_Loaded"
+    d:DesignHeight="200"
+    d:DesignWidth="300"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <Grid Margin="24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+            <TextBlock
+                Grid.Row="0"
+                Margin="0 0 0 16"
+                Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                Text="{Binding Header}"
+                TextTrimming="CharacterEllipsis" />
+            <TextBox
+                x:Name="InputedTextBox"
+                Grid.Row="1"
+                Margin="0 0 0 24"
+                md:HintAssist.Hint="{Binding Hint}"
+                md:HintAssist.IsFloating="True"
+                Text="{Binding InputedText, UpdateSourceTrigger=PropertyChanged}" />
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Button
+                    Grid.Column="0"
+                    Command="{Binding AcceptCommand}"
+                    Content="OK"
+                    IsDefault="True"
+                    Style="{StaticResource MaterialDesignFlatButton}" />
+                <Button
+                    Grid.Column="1"
+                    Margin="8 0 0 0"
+                    Command="{Binding CancelCommand}"
+                    Content="Cancel"
+                    IsCancel="True"
+                    Style="{StaticResource MaterialDesignFlatButton}" />
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -7,5 +7,6 @@ namespace PasswordManager.Authorization.Interfaces
     {
         ITokenResponse Token { get; }
         Task SetAndSaveToken(string tokenResponse, CancellationToken cancellationToken);
+        Task RemoveToken();
     }
 }

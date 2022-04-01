@@ -9,5 +9,5 @@
         
     </ResourceDictionary.MergedDictionaries>
 
-    <Style TargetType="{x:Type controls:Flyout}" BasedOn="{StaticResource FlyoutStyle}"/>
+    <!--<Style TargetType="{x:Type controls:Flyout}" BasedOn="{StaticResource FlyoutStyle}"/>-->
 </ResourceDictionary>

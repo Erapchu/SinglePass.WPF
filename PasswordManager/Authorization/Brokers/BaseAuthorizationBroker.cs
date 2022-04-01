@@ -43,9 +43,8 @@ namespace PasswordManager.Authorization.Brokers
         {
             var client = _httpClientFactory.CreateClient();
             var refreshTokenEndpointUri = BuildRefreshAccessTokenEndpointUri();
-            client.BaseAddress = new Uri(refreshTokenEndpointUri);
             var postData = BuildRequestForRefreshToken();
-            var request = new HttpRequestMessage(HttpMethod.Post, string.Empty)
+            var request = new HttpRequestMessage(HttpMethod.Post, new Uri(refreshTokenEndpointUri))
             {
                 Content = new StringContent(postData, Encoding.UTF8, "application/x-www-form-urlencoded")
             };
@@ -53,6 +52,17 @@ namespace PasswordManager.Authorization.Brokers
             using var content = response.Content;
             var json = await content.ReadAsStringAsync(cancellationToken);
             await TokenHolder.SetAndSaveToken(json, cancellationToken);
+        }
+
+        public async Task RevokeToken(CancellationToken cancellationToken)
+        {
+            await TokenHolder.RemoveToken();
+            var client = _httpClientFactory.CreateClient();
+            var revokeTokenEndpointUri = BuildRevokeTokenEndpointUri();
+            var stringContent = new StringContent(string.Empty, Encoding.UTF8, "application/x-www-form-urlencoded");
+            var response = await client.PostAsync(revokeTokenEndpointUri, stringContent, cancellationToken);
+            using var content = response.Content;
+            var json = await content.ReadAsStringAsync(cancellationToken);
         }
 
         private async Task<AuthorizationCodeResponseUrl> GetResponseFromListener(HttpListener listener, CancellationToken cancellationToken)
@@ -102,9 +112,8 @@ namespace PasswordManager.Authorization.Brokers
 
             var client = _httpClientFactory.CreateClient();
             var tokenEndpointUri = BuildTokenEndpointUri();
-            client.BaseAddress = new Uri(tokenEndpointUri);
             var postData = BuildRequestForToken(code, redirectUri);
-            var request = new HttpRequestMessage(HttpMethod.Post, string.Empty)
+            var request = new HttpRequestMessage(HttpMethod.Post, new Uri(tokenEndpointUri))
             {
                 Content = new StringContent(postData, Encoding.UTF8, "application/x-www-form-urlencoded")
             };
@@ -127,5 +136,6 @@ namespace PasswordManager.Authorization.Brokers
         protected abstract string BuildRequestForToken(string code, string redirectUri);
         protected abstract string BuildRefreshAccessTokenEndpointUri();
         protected abstract string BuildRequestForRefreshToken();
+        protected abstract string BuildRevokeTokenEndpointUri();
     }
 }

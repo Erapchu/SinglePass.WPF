@@ -14,6 +14,7 @@ namespace PasswordManager.Models
         public PassField OtherField { get; set; }
         public List<PassField> AdditionalFields { get; set; }
         public DateTime LastModifiedTime { get; set; }
+        public DateTime CreationTime { get; set; }
 
         public Credential()
         {
@@ -34,6 +35,7 @@ namespace PasswordManager.Models
             clone.PasswordField = PasswordField.Clone();
             clone.OtherField = OtherField.Clone();
             clone.LastModifiedTime = LastModifiedTime;
+            clone.CreationTime = CreationTime;
 
             foreach (var field in AdditionalFields)
             {

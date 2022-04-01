@@ -21,7 +21,10 @@ namespace PasswordManager.Views.MessageBox
             string dialogIdentifier,
             PackIconKind? packIconKind = null)
         {
-            var instance = new MaterialMessageBoxContent { DataContext = new MaterialMessageBoxViewModel(header, content, buttons, dialogIdentifier, packIconKind) };
+            var instance = new MaterialMessageBoxContent
+            {
+                DataContext = new MaterialMessageBoxViewModel(header, content, buttons, dialogIdentifier, packIconKind)
+            };
             var result = await DialogHost.Show(instance, dialogIdentifier);
 
             return result is null ? MaterialDialogResult.None : (MaterialDialogResult)result;

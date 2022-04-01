@@ -8,5 +8,6 @@ namespace PasswordManager.Authorization.Interfaces
         ITokenHolder TokenHolder { get; }
         Task AuthorizeAsync(CancellationToken cancellationToken);
         Task RefreshAccessToken(CancellationToken cancellationToken);
+        Task RevokeToken(CancellationToken cancellationToken);
     }
 }

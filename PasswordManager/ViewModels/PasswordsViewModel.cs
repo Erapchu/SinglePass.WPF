@@ -84,12 +84,6 @@ namespace PasswordManager.ViewModels
             set => SetProperty(ref _searchTextFocused, value);
         }
 
-        public bool CloudSyncInProgress
-        {
-            get => _cloudSyncInProgress;
-            set => SetProperty(ref _cloudSyncInProgress, value);
-        }
-
         private PasswordsViewModel() { }
 
         public PasswordsViewModel(
@@ -115,7 +109,7 @@ namespace PasswordManager.ViewModels
 
         private void SyncService_SyncReport(bool obj)
         {
-            CloudSyncInProgress = obj;
+            Loading = obj;
         }
 
         private async void ActiveCredentialDialogViewModel_Delete(CredentialViewModel credVM)
@@ -154,9 +148,11 @@ namespace PasswordManager.ViewModels
             {
                 Loading = true;
 
-                newCredVM.LastModifiedTime = DateTime.Now;
+                var dateTimeNow = DateTime.Now;
+                newCredVM.LastModifiedTime = dateTimeNow;
                 if (mode == CredentialsDialogMode.New)
                 {
+                    newCredVM.CreationTime = dateTimeNow;
                     await _credentialsCryptoService.AddCredential(newCredVM.Model);
                     _credentials.Add(newCredVM);
                     await FilterCredentialsAsync();

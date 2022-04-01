@@ -168,6 +168,41 @@ namespace PasswordManager.Services
             await SaveCredentialsAndSync();
         }
 
+        public async Task Merge(List<Credential> newCredentials)
+        {
+            var anyChanges = false;
+
+            foreach (var newCredential in newCredentials)
+            {
+                var currentIndex = _credentials.IndexOf(newCredential);
+                if (currentIndex >= 0)
+                {
+                    // The same found
+                    var currentCredential = _credentials[currentIndex];
+                    if (currentCredential.LastModifiedTime < newCredential.LastModifiedTime)
+                    {
+                        _credentials[currentIndex] = newCredential;
+                        anyChanges = true;
+                    }
+                }
+                else
+                {
+                    // New add
+                    _credentials.Add(newCredential);
+                    anyChanges = true;
+                }
+            }
+
+            if (anyChanges)
+                await SaveCredentialsAndSync();
+        }
+
+        public async Task Replace(List<Credential> newCredentials)
+        {
+            _credentials = newCredentials;
+            await SaveCredentialsAndSync();
+        }
+
         private async Task SaveCredentialsAndSync()
         {
             await Task.Run(() =>

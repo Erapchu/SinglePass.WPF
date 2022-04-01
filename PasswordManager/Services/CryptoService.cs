@@ -22,7 +22,9 @@ namespace PasswordManager.Services
 
         public T DecryptFromStream<T>(Stream stream, string password)
         {
-            using var br = new BinaryReader(stream);
+            stream.Seek(0, SeekOrigin.Begin);
+
+            var br = new BinaryReader(stream);
             var ivLength = AesCryptographyHelper.IVLength;
             var ivBytes = new byte[ivLength];
             br.Read(ivBytes);
@@ -38,6 +40,8 @@ namespace PasswordManager.Services
 
         public void EncryptToStream<T>(T obj, Stream stream, string password)
         {
+            stream.Seek(0, SeekOrigin.Begin);
+
             var keyBytes = GetRestructuredKeyBytes(password);
 
             // Generate new IV for each new saving

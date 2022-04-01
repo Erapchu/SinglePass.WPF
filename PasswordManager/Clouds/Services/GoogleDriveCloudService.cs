@@ -1,7 +1,9 @@
-﻿using PasswordManager.Authorization.Brokers;
+﻿using HttpMultipartParser;
+using PasswordManager.Authorization.Brokers;
 using PasswordManager.Authorization.Interfaces;
 using PasswordManager.Clouds.Interfaces;
 using PasswordManager.Clouds.Models;
+using PasswordManager.Helpers;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -110,7 +112,18 @@ namespace PasswordManager.Clouds.Services
             getFileStreamRM.RequestUri = new System.Uri($"https://www.googleapis.com/drive/v3/files/{targetFile.Id}?alt=media");
             var fileResponse = await client.SendAsync(getFileStreamRM, cancellationToken).ConfigureAwait(false);
             var fileContent = fileResponse.Content;
-            return await fileContent.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+            using var fullStream = await fileContent.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+
+            var multipart = await MultipartFormDataParser.ParseAsync(fullStream).ConfigureAwait(false);
+            foreach (var file in multipart.Files)
+            {
+                if (file.ContentType == MediaTypeNames.Application.Octet)
+                {
+                    return file.Data;
+                }
+            }
+
+            return null;
         }
 
         public async Task<BaseUserInfo> GetUserInfo(CancellationToken cancellationToken)

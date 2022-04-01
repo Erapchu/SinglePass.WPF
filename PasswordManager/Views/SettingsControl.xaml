@@ -127,6 +127,15 @@
                                 TextTrimming="CharacterEllipsis" />
                         </StackPanel>
                         <Button
+                            Grid.Column="1"
+                            md:ButtonProgressAssist.IsIndeterminate="True"
+                            md:ButtonProgressAssist.IsIndicatorVisible="{Binding SyncProcessing}"
+                            Command="{Binding SyncCommand}"
+                            CommandParameter="{x:Static cloudEnums:CloudType.GoogleDrive}"
+                            Content="{md:PackIcon Kind=CloudSync, Size=24}"
+                            Style="{StaticResource MaterialDesignFloatingActionButton}"
+                            ToolTip="Synchronize credentials with Google" />
+                        <Button
                             Grid.Column="2"
                             Command="{Binding LoginCommand}"
                             CommandParameter="{x:Static cloudEnums:CloudType.GoogleDrive}"

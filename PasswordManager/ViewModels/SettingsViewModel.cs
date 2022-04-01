@@ -36,10 +36,14 @@ namespace PasswordManager.ViewModels
         private readonly CloudServiceProvider _cloudServiceProvider;
         private readonly CryptoService _cryptoService;
         private readonly CredentialsCryptoService _credentialsCryptoService;
+        private readonly SyncService _syncService;
+
         private AsyncRelayCommand<CloudType> _loginCommand;
+        private AsyncRelayCommand<CloudType> _syncCommand;
         private string _googleProfileUrl;
         private string _googleUserName;
         private bool _fetchingUserInfo;
+        private bool _syncProcessing;
 
         public BaseTheme ThemeMode
         {
@@ -81,7 +85,15 @@ namespace PasswordManager.ViewModels
             set => SetProperty(ref _fetchingUserInfo, value);
         }
 
+        public bool SyncProcessing
+        {
+            get => _syncProcessing;
+            set => SetProperty(ref _syncProcessing, value);
+        }
+
         public AsyncRelayCommand<CloudType> LoginCommand => _loginCommand ??= new AsyncRelayCommand<CloudType>(Login);
+
+        public AsyncRelayCommand<CloudType> SyncCommand => _syncCommand ??= new AsyncRelayCommand<CloudType>(SyncCredentials);
 
         private SettingsViewModel() { }
 
@@ -90,7 +102,9 @@ namespace PasswordManager.ViewModels
             AppSettingsService appSettingsService,
             ILogger<SettingsViewModel> logger,
             CloudServiceProvider cloudServiceProvider,
-            CryptoService cryptoService)
+            CryptoService cryptoService,
+            SyncService syncService,
+            CredentialsCryptoService credentialsCryptoService)
         {
             Name = "Settings";
             ItemIndex = SettingsNavigationItemIndex;
@@ -101,7 +115,8 @@ namespace PasswordManager.ViewModels
             _logger = logger;
             _cloudServiceProvider = cloudServiceProvider;
             _cryptoService = cryptoService;
-            //_credentialsCryptoService = credentialsCryptoService;
+            _credentialsCryptoService = credentialsCryptoService;
+            _syncService = syncService;
         }
 
         internal async Task FetchUserInfoIfRequired()
@@ -147,59 +162,8 @@ namespace PasswordManager.ViewModels
                     _logger.LogInformation($"Authorization process to {cloudType} has been complete.");
                     GoogleDriveEnabled = true;
                     await _appSettingsService.Save();
+
                     _ = FetchUserInfoFromCloud(cloudType, CancellationToken.None); // Don't await set user info for now
-
-                    processingControl.ViewModel.HeadText = "Checking file...";
-                    processingControl.ViewModel.MidText = string.Format("Please, wait while we checking existing passwords on your account. The target file is {0}", Helpers.Constants.PasswordsFileName);
-
-                    using var fileStream = await cloudService.Download(Helpers.Constants.PasswordsFileName, token);
-                    if (fileStream != null)
-                    {
-                        // File is here
-                        DialogHost.Close(windowDialogName);
-                        var result = await MaterialMessageBox.ShowAsync(
-                            "Merge existing credentials?",
-                            "Yes - merge\r\nNo - replace from cloud",
-                            MaterialMessageBoxButtons.YesNo,
-                            windowDialogName,
-                            PackIconKind.QuestionMark);
-
-                        var success = false;
-                        List<Credential> cloudCredentials = null;
-                        do
-                        {
-                            var cloudPassword = await MaterialInputBox.ShowAsync(
-                                "Input password of cloud file",
-                                "Password",
-                                windowDialogName);
-
-                            try
-                            {
-                                cloudCredentials = _cryptoService.DecryptFromStream<List<Credential>>(fileStream, cloudPassword);
-                                success = true;
-                            }
-                            catch (Exception ex)
-                            {
-                                _logger.LogError(ex, string.Empty);
-                            }
-                        }
-                        while (!success);
-
-                        switch (result)
-                        {
-                            case MaterialDialogResult.Yes:
-                                // Merge
-                                break;
-                            case MaterialDialogResult.No:
-                                // Replace
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        // File doesn't exists, just replace
-                        
-                    }
                 }
                 else
                 {
@@ -264,6 +228,81 @@ namespace PasswordManager.ViewModels
             finally
             {
                 FetchingUserInfo = false;
+            }
+        }
+
+        private async Task SyncCredentials(CloudType cloudType)
+        {
+            try
+            {
+                SyncProcessing = true;
+
+                var cloudService = _cloudServiceProvider.GetCloudService(cloudType);
+                var windowDialogName = MvvmHelper.MainWindowDialogName;
+                using var fileStream = await cloudService.Download(Helpers.Constants.PasswordsFileName, CancellationToken.None);
+
+                if (fileStream != null)
+                {
+                    // File is here
+                    var result = await MaterialMessageBox.ShowAsync(
+                        "Merge existing credentials?",
+                        "Yes - merge\r\nNo - replace from cloud\r\nOr cancel operation",
+                        MaterialMessageBoxButtons.YesNoCancel,
+                        windowDialogName,
+                        PackIconKind.QuestionMark);
+
+                    if (result == MaterialDialogResult.Cancel)
+                        return;
+
+                    var success = false;
+                    List<Credential> cloudCredentials = null;
+                    do
+                    {
+                        var cloudPassword = await MaterialInputBox.ShowAsync(
+                            "Input password of cloud file",
+                            "Password",
+                            windowDialogName);
+
+                        if (cloudPassword is null)
+                            return;
+
+                        try
+                        {
+                            cloudCredentials = _cryptoService.DecryptFromStream<List<Credential>>(fileStream, cloudPassword);
+                            success = true;
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, string.Empty);
+                        }
+                    }
+                    while (!success);
+
+                    switch (result)
+                    {
+                        case MaterialDialogResult.Yes:
+                            // Merge
+                            await _credentialsCryptoService.Merge(cloudCredentials);
+                            break;
+                        case MaterialDialogResult.No:
+                            // Replace
+                            await _credentialsCryptoService.Replace(cloudCredentials);
+                            break;
+                    }
+                }
+                else
+                {
+                    // File doesn't exists, just sync
+                    await _syncService.Synchronize();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, string.Empty);
+            }
+            finally
+            {
+                SyncProcessing = false;
             }
         }
     }

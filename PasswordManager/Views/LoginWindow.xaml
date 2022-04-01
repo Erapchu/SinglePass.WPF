@@ -15,11 +15,17 @@
     MinWidth="300"
     MinHeight="200"
     d:DataContext="{x:Static vm:LoginWindowViewModel.DesignTimeInstance}"
+    Activated="MaterialWindow_Activated"
     Closed="MaterialWindow_Closed"
     FocusManager.FocusedElement="{Binding ElementName=LoginPasswordBox}"
     UseLayoutRounding="True"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
+    <Window.Resources>
+        <ResourceDictionary>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        </ResourceDictionary>
+    </Window.Resources>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Loaded">
             <i:InvokeCommandAction Command="{Binding LoadingCommand}" />
@@ -35,7 +41,24 @@
             md:HintAssist.Hint="{Binding HintText}"
             MaxLength="32"
             PasswordChanged="PasswordBox_PasswordChanged"
-            Style="{StaticResource MaterialDesignOutlinedPasswordBox}" />
+            Style="{StaticResource MaterialDesignOutlinedPasswordBox}">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="GotFocus">
+                    <i:InvokeCommandAction Command="{Binding RefreshCapsLockCommand}" />
+                </i:EventTrigger>
+                <i:EventTrigger EventName="KeyDown">
+                    <i:InvokeCommandAction Command="{Binding RefreshCapsLockCommand}" PassEventArgsToCommand="True" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </PasswordBox>
+        <TextBlock
+            Margin="10"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Bottom"
+            Opacity="0.5"
+            Text="CAPS LOCK enabled"
+            TextAlignment="Right"
+            Visibility="{Binding IsCapsLockEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
         <StackPanel
             Margin="16"
             HorizontalAlignment="Right"

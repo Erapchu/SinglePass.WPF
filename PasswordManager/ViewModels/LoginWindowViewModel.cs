@@ -7,6 +7,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace PasswordManager.ViewModels
 {
@@ -28,9 +29,11 @@ namespace PasswordManager.ViewModels
         private bool _loading;
         private string _helperText;
         private string _hintText = "Password";
+        private RelayCommand<KeyEventArgs> _refreshCapsLockCommand;
 
         public AsyncRelayCommand LoadCredentialsCommand => _loadCredentialsCommand ??= new AsyncRelayCommand(LoadCredentialsAsync);
         public AsyncRelayCommand LoadingCommand => _loadingCommand ??= new AsyncRelayCommand(LoadingAsync);
+        public RelayCommand<KeyEventArgs> RefreshCapsLockCommand => _refreshCapsLockCommand ??= new RelayCommand<KeyEventArgs>(RefreshCapsLock);
 
         public bool Loading
         {
@@ -49,6 +52,8 @@ namespace PasswordManager.ViewModels
             get => _hintText;
             set => SetProperty(ref _hintText, value);
         }
+
+        public bool IsCapsLockEnabled => Console.CapsLock;
 
         public string Password { get; set; }
 
@@ -117,6 +122,12 @@ namespace PasswordManager.ViewModels
             {
                 HintText = "New password";
             }
+        }
+
+        private void RefreshCapsLock(KeyEventArgs args)
+        {
+            if (args is null || args.Key == Key.CapsLock)
+                OnPropertyChanged(nameof(IsCapsLockEnabled));
         }
     }
 }

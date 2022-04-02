@@ -144,42 +144,32 @@ namespace PasswordManager.ViewModels
 
         private async void ActiveCredentialDialogViewModel_Accept(CredentialViewModel newCredVM, CredentialsDialogMode mode)
         {
-            try
+            var dateTimeNow = DateTime.Now;
+            newCredVM.LastModifiedTime = dateTimeNow;
+            if (mode == CredentialsDialogMode.New)
             {
-                Loading = true;
-
-                var dateTimeNow = DateTime.Now;
-                newCredVM.LastModifiedTime = dateTimeNow;
-                if (mode == CredentialsDialogMode.New)
-                {
-                    newCredVM.CreationTime = dateTimeNow;
-                    await _credentialsCryptoService.AddCredential(newCredVM.Model);
-                    _credentials.Add(newCredVM);
-                    await FilterCredentialsAsync();
-                }
-                else if (mode == CredentialsDialogMode.Edit)
-                {
-                    await _credentialsCryptoService.EditCredential(newCredVM.Model);
-                    var staleCredVM = _credentials.FirstOrDefault(c => c.Model.Equals(newCredVM.Model));
-                    var staleIndex = _credentials.IndexOf(staleCredVM);
-                    _credentials.Remove(staleCredVM);
-                    _credentials.Insert(staleIndex, newCredVM);
-                    await FilterCredentialsAsync();
-                }
-
-                SelectedCredential = newCredVM;
+                newCredVM.CreationTime = dateTimeNow;
+                await _credentialsCryptoService.AddCredential(newCredVM.Model);
+                _credentials.Add(newCredVM);
+                await FilterCredentialsAsync();
             }
-            finally
+            else if (mode == CredentialsDialogMode.Edit)
             {
-                Loading = false;
+                await _credentialsCryptoService.EditCredential(newCredVM.Model);
+                var staleCredVM = _credentials.FirstOrDefault(c => c.Model.Equals(newCredVM.Model));
+                var staleIndex = _credentials.IndexOf(staleCredVM);
+                _credentials.Remove(staleCredVM);
+                _credentials.Insert(staleIndex, newCredVM);
+                await FilterCredentialsAsync();
             }
+
+            SelectedCredential = newCredVM;
         }
 
         public void LoadCredentials()
         {
             try
             {
-                Loading = true;
                 var credentials = _credentialsCryptoService.Credentials;
                 using var delayed = DisplayedCredentials.DelayNotifications();
                 foreach (var cred in credentials)
@@ -193,17 +183,12 @@ namespace PasswordManager.ViewModels
             {
                 _logger.LogError(ex, string.Empty);
             }
-            finally
-            {
-                Loading = false;
-            }
         }
 
         public async Task FilterCredentialsAsync()
         {
             try
             {
-                Loading = true;
                 List<CredentialViewModel> filteredCredentials = null;
                 var filterText = SearchText;
 
@@ -246,10 +231,6 @@ namespace PasswordManager.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError(ex, string.Empty);
-            }
-            finally
-            {
-                Loading = false;
             }
         }
 

@@ -48,7 +48,6 @@ namespace PasswordManager.ViewModels
         private bool _searchTextFocused;
         private RelayCommand _addCredentialCommand;
         private RelayCommand<KeyEventArgs> _searchKeyEventCommand;
-        private bool _cloudSyncInProgress;
 
         public RelayCommand AddCredentialCommand => _addCredentialCommand ??= new RelayCommand(AddCredential);
         public RelayCommand<KeyEventArgs> SearchKeyEventCommand => _searchKeyEventCommand ??= new RelayCommand<KeyEventArgs>(HandleSearchKeyEvent);
@@ -166,10 +165,13 @@ namespace PasswordManager.ViewModels
             SelectedCredential = newCredVM;
         }
 
-        public void LoadCredentials()
+        public void ReloadCredentials()
         {
             try
             {
+                DisplayedCredentials.Clear();
+                _credentials.Clear();
+
                 var credentials = _credentialsCryptoService.Credentials;
                 using var delayed = DisplayedCredentials.DelayNotifications();
                 foreach (var cred in credentials)

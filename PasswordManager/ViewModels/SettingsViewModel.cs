@@ -45,6 +45,8 @@ namespace PasswordManager.ViewModels
         private bool _fetchingUserInfo;
         private bool _syncProcessing;
 
+        public event Action SyncCompleted;
+
         public BaseTheme ThemeMode
         {
             get => _appSettingsService.ThemeMode;
@@ -302,6 +304,7 @@ namespace PasswordManager.ViewModels
             }
             finally
             {
+                SyncCompleted?.Invoke();
                 SyncProcessing = false;
             }
         }

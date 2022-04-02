@@ -68,12 +68,18 @@ namespace PasswordManager.ViewModels
             SelectedNavigationItem = PasswordsViewModel;
 
             PasswordsViewModel.CredentialSelected += PasswordsViewModel_CredentialSelected;
+            SettingsViewModel.SyncCompleted += SettingsViewModel_SyncCompleted;
 
             NavigationItems = new ObservableCollectionDelayed<NavigationItemViewModel>(new List<NavigationItemViewModel>()
             {
                 PasswordsViewModel,
                 SettingsViewModel
             });
+        }
+
+        private void SettingsViewModel_SyncCompleted()
+        {
+            PasswordsViewModel.ReloadCredentials();
         }
 
         private void PasswordsViewModel_CredentialSelected(CredentialViewModel credVM)
@@ -83,7 +89,7 @@ namespace PasswordManager.ViewModels
 
         private async Task LoadingAsync()
         {
-            PasswordsViewModel.LoadCredentials();
+            PasswordsViewModel.ReloadCredentials();
             
             // Delay only for focus
             await Task.Delay(1);

@@ -116,7 +116,7 @@
                                 Height="64"
                                 HorizontalAlignment="Center">
                                 <Ellipse.Fill>
-                                    <ImageBrush ImageSource="{Binding GoogleProfileUrl}" Stretch="UniformToFill" />
+                                    <ImageBrush ImageSource="{Binding GoogleProfileImage}" Stretch="UniformToFill" />
                                 </Ellipse.Fill>
                             </Ellipse>
                             <TextBlock

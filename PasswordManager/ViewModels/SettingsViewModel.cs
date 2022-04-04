@@ -11,8 +11,11 @@ using PasswordManager.Views.InputBox;
 using PasswordManager.Views.MessageBox;
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace PasswordManager.ViewModels
 {
@@ -36,11 +39,12 @@ namespace PasswordManager.ViewModels
         private readonly CloudServiceProvider _cloudServiceProvider;
         private readonly CryptoService _cryptoService;
         private readonly CredentialsCryptoService _credentialsCryptoService;
+        private readonly IHttpClientFactory _httpClientFactory;
         private readonly SyncService _syncService;
 
         private AsyncRelayCommand<CloudType> _loginCommand;
         private AsyncRelayCommand<CloudType> _syncCommand;
-        private string _googleProfileUrl;
+        private ImageSource _googleProfileImage;
         private string _googleUserName;
         private bool _fetchingUserInfo;
         private bool _syncProcessing;
@@ -69,10 +73,10 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        public string GoogleProfileUrl
+        public ImageSource GoogleProfileImage
         {
-            get => _googleProfileUrl;
-            set => SetProperty(ref _googleProfileUrl, value);
+            get => _googleProfileImage;
+            set => SetProperty(ref _googleProfileImage, value);
         }
 
         public string GoogleUserName
@@ -106,7 +110,8 @@ namespace PasswordManager.ViewModels
             CloudServiceProvider cloudServiceProvider,
             CryptoService cryptoService,
             SyncService syncService,
-            CredentialsCryptoService credentialsCryptoService)
+            CredentialsCryptoService credentialsCryptoService,
+            IHttpClientFactory httpClientFactory)
         {
             Name = "Settings";
             ItemIndex = SettingsNavigationItemIndex;
@@ -118,6 +123,7 @@ namespace PasswordManager.ViewModels
             _cloudServiceProvider = cloudServiceProvider;
             _cryptoService = cryptoService;
             _credentialsCryptoService = credentialsCryptoService;
+            _httpClientFactory = httpClientFactory;
             _syncService = syncService;
         }
 
@@ -127,7 +133,7 @@ namespace PasswordManager.ViewModels
             {
                 if (GoogleDriveEnabled
                     && !FetchingUserInfo
-                    && string.IsNullOrWhiteSpace(GoogleProfileUrl)
+                    && GoogleProfileImage is null
                     && string.IsNullOrWhiteSpace(GoogleUserName))
                 {
                     await FetchUserInfoFromCloud(CloudType.GoogleDrive, CancellationToken.None);
@@ -202,7 +208,7 @@ namespace PasswordManager.ViewModels
             switch (cloudType)
             {
                 case CloudType.GoogleDrive:
-                    GoogleProfileUrl = null;
+                    GoogleProfileImage = null;
                     GoogleUserName = null;
                     break;
             }
@@ -215,10 +221,22 @@ namespace PasswordManager.ViewModels
                 FetchingUserInfo = true;
                 var cloudService = _cloudServiceProvider.GetCloudService(cloudType);
                 var userInfo = await cloudService.GetUserInfo(cancellationToken);
+
+                var client = _httpClientFactory.CreateClient();
+                var request = new HttpRequestMessage(HttpMethod.Get, userInfo.ProfileUrl);
+                using var response = await client.SendAsync(request, cancellationToken);
+                using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+                var bitmapImage = new BitmapImage();
+                bitmapImage.BeginInit();
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.StreamSource = stream;
+                bitmapImage.EndInit();
+                bitmapImage.Freeze();
+
                 switch (cloudType)
                 {
                     case CloudType.GoogleDrive:
-                        GoogleProfileUrl = userInfo.ProfileUrl;
+                        GoogleProfileImage = bitmapImage;
                         GoogleUserName = userInfo.UserName;
                         break;
                 }

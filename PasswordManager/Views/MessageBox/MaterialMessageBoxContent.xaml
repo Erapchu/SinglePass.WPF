@@ -40,12 +40,18 @@
                 Style="{StaticResource MaterialDesignHeadline6TextBlock}"
                 Text="{Binding Header}"
                 TextTrimming="CharacterEllipsis" />
-            <TextBlock
+            <ScrollViewer
                 Grid.Row="2"
                 Margin="0 0 0 24"
-                Text="{Binding Content}"
-                TextTrimming="CharacterEllipsis"
-                TextWrapping="Wrap" />
+                md:ScrollViewerAssist.IsAutoHideEnabled="True">
+                <ScrollViewer.Resources>
+                    <Style TargetType="ScrollBar" BasedOn="{StaticResource MaterialDesignScrollBarMinimal}"/>
+                </ScrollViewer.Resources>
+                <TextBlock
+                    Text="{Binding Content}"
+                    TextTrimming="CharacterEllipsis"
+                    TextWrapping="Wrap" />
+            </ScrollViewer>
             <StackPanel
                 Grid.Row="3"
                 HorizontalAlignment="Right"

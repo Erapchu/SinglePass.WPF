@@ -302,11 +302,21 @@ namespace PasswordManager.ViewModels
                     {
                         case MaterialDialogResult.Yes:
                             // Merge
-                            await _credentialsCryptoService.Merge(cloudCredentials);
+                            var mergeResult = await _credentialsCryptoService.Merge(cloudCredentials);
+                            await MaterialMessageBox.ShowAsync(
+                                "Credentials successfully merged",
+                                mergeResult.ToString(),
+                                MaterialMessageBoxButtons.OK,
+                                windowDialogName);
                             break;
                         case MaterialDialogResult.No:
                             // Replace
                             await _credentialsCryptoService.Replace(cloudCredentials);
+                            await MaterialMessageBox.ShowAsync(
+                                "Credentials successfully replaced",
+                                "Please, check out them",
+                                MaterialMessageBoxButtons.OK,
+                                windowDialogName);
                             break;
                     }
                 }

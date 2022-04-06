@@ -168,9 +168,9 @@ namespace PasswordManager.Services
             await SaveCredentialsAndSync();
         }
 
-        public async Task Merge(List<Credential> newCredentials)
+        public async Task<CredentialsMergeResult> Merge(List<Credential> newCredentials)
         {
-            var anyChanges = false;
+            var result = new CredentialsMergeResult();
 
             foreach (var newCredential in newCredentials)
             {
@@ -182,19 +182,21 @@ namespace PasswordManager.Services
                     if (currentCredential.LastModifiedTime < newCredential.LastModifiedTime)
                     {
                         _credentials[currentIndex] = newCredential;
-                        anyChanges = true;
+                        result.ChangedCredentials.Add(currentCredential);
                     }
                 }
                 else
                 {
                     // New add
                     _credentials.Add(newCredential);
-                    anyChanges = true;
+                    result.NewCredentials.Add(newCredential);
                 }
             }
 
-            if (anyChanges)
+            if (result.NewCredentials.Count > 0 || result.ChangedCredentials.Count > 0)
                 await SaveCredentialsAndSync();
+
+            return result;
         }
 
         public async Task Replace(List<Credential> newCredentials)

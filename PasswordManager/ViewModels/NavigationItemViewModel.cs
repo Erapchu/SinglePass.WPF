@@ -5,9 +5,6 @@ namespace PasswordManager.ViewModels
 {
     public class NavigationItemViewModel : ObservableRecipient
     {
-        public static int PasswordsNavigationItemIndex { get; } = 0;
-        public static int SettingsNavigationItemIndex { get; } = 1;
-
         private bool _loading;
         private bool _isVisible;
 
@@ -15,11 +12,6 @@ namespace PasswordManager.ViewModels
         /// Name of settings item.
         /// </summary>
         public string Name { get; protected set; }
-
-        /// <summary>
-        /// Item index.
-        /// </summary>
-        public int ItemIndex { get; protected set; }
 
         /// <summary>
         /// Icon kind.

@@ -120,6 +120,7 @@ namespace PasswordManager
                 services.AddScoped<MainWindow>();
                 services.AddScoped<MainWindowViewModel>();
                 services.AddScoped<PasswordsViewModel>();
+                services.AddScoped<CloudSyncViewModel>();
                 services.AddScoped<SettingsViewModel>();
                 services.AddScoped<CredentialsDialogViewModel>();
 

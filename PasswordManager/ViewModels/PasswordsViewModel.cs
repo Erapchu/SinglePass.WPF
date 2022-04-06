@@ -91,15 +91,15 @@ namespace PasswordManager.ViewModels
             ILogger<PasswordsViewModel> logger,
             CredentialsDialogViewModel credentialsDialogViewModel)
         {
+            Name = "Credentials";
+            IconKind = PackIconKind.Password;
+
             _credentialsCryptoService = credentialsCryptoService;
             _syncService = syncService;
             _logger = logger;
 
             _syncService.SyncReport += SyncService_SyncReport;
 
-            Name = "Credentials";
-            ItemIndex = PasswordsNavigationItemIndex;
-            IconKind = PackIconKind.Password;
             ActiveCredentialDialogViewModel = credentialsDialogViewModel;
             ActiveCredentialDialogViewModel.Accept += ActiveCredentialDialogViewModel_Accept;
             ActiveCredentialDialogViewModel.Cancel += ActiveCredentialDialogViewModel_Cancel;

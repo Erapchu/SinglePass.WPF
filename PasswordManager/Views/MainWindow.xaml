@@ -101,16 +101,24 @@
                 <Separator Grid.Column="1" Style="{StaticResource MaterialDesignVerticalSeparator}" />
                 <AdornerDecorator Grid.Column="2">
                     <Grid>
-                        <Grid DataContext="{Binding PasswordsViewModel}" Visibility="{Binding IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid DataContext="{Binding PasswordsVM}" Visibility="{Binding IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <local:PasswordsControl x:Name="PasswordsControl" />
                         </Grid>
                         <ScrollViewer
                             Margin="0 32 0 0"
-                            DataContext="{Binding SettingsViewModel}"
+                            DataContext="{Binding SettingsVM}"
                             HorizontalScrollBarVisibility="Disabled"
                             VerticalScrollBarVisibility="Auto"
                             Visibility="{Binding IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <local:SettingsControl />
+                        </ScrollViewer>
+                        <ScrollViewer
+                            Margin="0 32 0 0"
+                            DataContext="{Binding CloudSyncVM}"
+                            HorizontalScrollBarVisibility="Disabled"
+                            VerticalScrollBarVisibility="Auto"
+                            Visibility="{Binding IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <local:CloudSyncControl />
                         </ScrollViewer>
                     </Grid>
                 </AdornerDecorator>

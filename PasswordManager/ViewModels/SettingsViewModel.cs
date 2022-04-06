@@ -281,7 +281,8 @@ namespace PasswordManager.ViewModels
                         var cloudPassword = await MaterialInputBox.ShowAsync(
                             "Input password of cloud file",
                             "Password",
-                            windowDialogName);
+                            windowDialogName,
+                            true);
 
                         if (cloudPassword is null)
                             return;

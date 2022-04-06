@@ -8,9 +8,10 @@
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
     MinWidth="200"
     MaxWidth="700"
-    Loaded="UserControl_Loaded"
+    d:DataContext="{x:Static local:MaterialInputBoxViewModel.DesignTimeInstance}"
     d:DesignHeight="200"
     d:DesignWidth="300"
+    Loaded="UserControl_Loaded"
     mc:Ignorable="d">
     <UserControl.Resources>
         <ResourceDictionary>
@@ -31,12 +32,21 @@
                 Text="{Binding Header}"
                 TextTrimming="CharacterEllipsis" />
             <TextBox
-                x:Name="InputedTextBox"
+                x:Name="TextInputBox"
                 Grid.Row="1"
                 Margin="0 0 0 24"
                 md:HintAssist.Hint="{Binding Hint}"
                 md:HintAssist.IsFloating="True"
-                Text="{Binding InputedText, UpdateSourceTrigger=PropertyChanged}" />
+                Text="{Binding InputedText, UpdateSourceTrigger=PropertyChanged}"
+                Visibility="Collapsed" />
+            <PasswordBox
+                x:Name="PasswordInputBox"
+                Grid.Row="1"
+                Margin="0 0 0 24"
+                md:HintAssist.Hint="{Binding Hint}"
+                md:HintAssist.IsFloating="True"
+                Visibility="Collapsed"
+                PasswordChanged="PasswordInputBox_PasswordChanged"/>
             <Grid Grid.Row="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />

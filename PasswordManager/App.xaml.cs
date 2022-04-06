@@ -12,6 +12,7 @@ using PasswordManager.Services;
 using PasswordManager.ViewModels;
 using PasswordManager.Views;
 using System;
+using System.Threading;
 using System.Windows;
 
 namespace PasswordManager
@@ -21,14 +22,20 @@ namespace PasswordManager
     /// </summary>
     public partial class App : Application
     {
+        private readonly Mutex _mutex;
         private static IConfiguration _configuration;
 
         private IHost _host;
         private Logger _logger;
         private TrayIcon _trayIcon;
 
+        private bool IsFirstInstance { get; }
+
         public App()
         {
+            _mutex = new Mutex(true, "PurplePassword_CBD9AADE-1A82-48A2-9F7F-4F0EAAABEA30", out bool isFirstInstance);
+            IsFirstInstance = isFirstInstance;
+
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
         }
@@ -47,47 +54,54 @@ namespace PasswordManager
         {
             InitializeComponent();
 
-            // Welcome window
-            var welcomeWindow = new WelcomeWindow();
-            welcomeWindow.Show();
-
-            _configuration = new ConfigurationBuilder()
-                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                .AddJsonFile("settings.json", optional: false, reloadOnChange: true)
-                .AddEnvironmentVariables()
-                .Build();
-
-            _logger = LogManager.Setup()
-                .LoadConfigurationFromSection(_configuration)
-                .GetCurrentClassLogger();
-
-            _host = CreateHostBuilder().Build();
-            _logger.Info("Log session started!");
-
-            // Resolve theme
-            var themeService = _host.Services.GetService<ThemeService>();
-            themeService.Init();
-
-            // Create tray icon
-            _trayIcon = new TrayIcon();
-
-            // Login
-            using (var loginScope = _host.Services.CreateScope())
+            if (IsFirstInstance)
             {
-                var loginWindow = _host.Services.GetService<LoginWindow>();
-                welcomeWindow.Close();
-                bool? dialogResult = loginWindow.ShowDialog(); // Stop here
+                // Welcome window
+                var welcomeWindow = new WelcomeWindow();
+                welcomeWindow.Show();
 
-                if (dialogResult != true)
+                _configuration = new ConfigurationBuilder()
+                    .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                    .AddJsonFile("settings.json", optional: false, reloadOnChange: true)
+                    .AddEnvironmentVariables()
+                    .Build();
+
+                _logger = LogManager.Setup()
+                    .LoadConfigurationFromSection(_configuration)
+                    .GetCurrentClassLogger();
+
+                _host = CreateHostBuilder().Build();
+                _logger.Info("Log session started!");
+
+                // Resolve theme
+                var themeService = _host.Services.GetService<ThemeService>();
+                themeService.Init();
+
+                // Create tray icon
+                _trayIcon = new TrayIcon();
+
+                // Login
+                using (var loginScope = _host.Services.CreateScope())
                 {
-                    Shutdown();
-                    return;
-                }
-            }
+                    var loginWindow = _host.Services.GetService<LoginWindow>();
+                    welcomeWindow.Close();
+                    bool? dialogResult = loginWindow.ShowDialog(); // Stop here
 
-            // Open main window
-            var mainWindow = _host.Services.GetService<MainWindow>();
-            mainWindow.Show();
+                    if (dialogResult != true)
+                    {
+                        Shutdown();
+                        return;
+                    }
+                }
+
+                // Open main window
+                var mainWindow = _host.Services.GetService<MainWindow>();
+                mainWindow.Show();
+            }
+            else
+            {
+                Shutdown();
+            }
         }
 
         private IHostBuilder CreateHostBuilder() =>

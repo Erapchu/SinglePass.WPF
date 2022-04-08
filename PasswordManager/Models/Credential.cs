@@ -7,35 +7,38 @@ namespace PasswordManager.Models
     [DebuggerDisplay("{NameField.Value}")]
     public class Credential
     {
-        public Guid Id { get; set; }
-        public PassField NameField { get; set; }
-        public PassField LoginField { get; set; }
-        public PassField PasswordField { get; set; }
-        public PassField OtherField { get; set; }
-        public List<PassField> AdditionalFields { get; set; }
+        public Guid Id { get; init; }
+        public PassField NameField { get; set; } = new PassField() { Name = "Name" };
+        public PassField LoginField { get; set; } = new PassField() { Name = "Login" };
+        public PassField PasswordField { get; set; } = new PassField() { Name = "Password" };
+        public PassField OtherField { get; set; } = new PassField() { Name = "Other" };
+        public List<PassField> AdditionalFields { get; set; } = new List<PassField>();
         public DateTime LastModifiedTime { get; set; }
         public DateTime CreationTime { get; set; }
 
-        public Credential()
+        public Credential() { }
+
+        public static Credential CreateNew()
         {
-            Id = Guid.NewGuid();
-            NameField = new PassField() { Name = "Name" };
-            LoginField = new PassField() { Name = "Login" };
-            PasswordField = new PassField() { Name = "Password" };
-            OtherField = new PassField() { Name = "Other" };
-            AdditionalFields = new List<PassField>();
+            var credential = new Credential
+            {
+                Id = Guid.NewGuid()
+            };
+            return credential;
         }
 
         internal Credential Clone()
         {
-            var clone = new Credential();
-            clone.Id = Id;
-            clone.NameField = NameField.Clone();
-            clone.LoginField = LoginField.Clone();
-            clone.PasswordField = PasswordField.Clone();
-            clone.OtherField = OtherField.Clone();
-            clone.LastModifiedTime = LastModifiedTime;
-            clone.CreationTime = CreationTime;
+            var clone = new Credential
+            {
+                Id = Id,
+                NameField = NameField.Clone(),
+                LoginField = LoginField.Clone(),
+                PasswordField = PasswordField.Clone(),
+                OtherField = OtherField.Clone(),
+                LastModifiedTime = LastModifiedTime,
+                CreationTime = CreationTime
+            };
 
             foreach (var field in AdditionalFields)
             {

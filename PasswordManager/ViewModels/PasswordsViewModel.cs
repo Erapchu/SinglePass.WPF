@@ -26,7 +26,7 @@ namespace PasswordManager.ViewModels
         private static PasswordsViewModel GetDesignTimeVM()
         {
             var vm = new PasswordsViewModel();
-            var cred = new Credential();
+            var cred = Credential.CreateNew();
             cred.NameField.Value = "Test";
             cred.LoginField.Value = "TestLogin";
             cred.PasswordField.Value = "TestPass";
@@ -238,7 +238,7 @@ namespace PasswordManager.ViewModels
 
         private void AddCredential()
         {
-            ActiveCredentialDialogViewModel.CredentialViewModel = new CredentialViewModel(new Credential());
+            ActiveCredentialDialogViewModel.CredentialViewModel = new CredentialViewModel(Credential.CreateNew());
             ActiveCredentialDialogViewModel.Mode = CredentialsDialogMode.New;
             ActiveCredentialDialogViewModel.IsPasswordVisible = true;
             ActiveCredentialDialogViewModel.SetFocus();

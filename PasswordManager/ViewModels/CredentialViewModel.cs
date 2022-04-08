@@ -16,10 +16,9 @@ namespace PasswordManager.ViewModels
         private static CredentialViewModel GetDesignTimeVM()
         {
             var additionalFields = new List<PassField>() { new PassField() { Name = "Design additional field", Value = "Test value" } };
-            var model = new Credential()
-            {
-                AdditionalFields = additionalFields
-            };
+            var model = Credential.CreateNew();
+            model.AdditionalFields = additionalFields;
+
             var vm = new CredentialViewModel(model);
             return vm;
         }

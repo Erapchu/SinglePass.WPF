@@ -63,6 +63,11 @@ namespace PasswordManager.Services
             PasswordSecure = SecureStringHelper.MakeSecureString(password);
         }
 
+        public string GetPassword()
+        {
+            return SecureStringHelper.GetString(PasswordSecure);
+        }
+
         public async Task<bool> LoadCredentialsAsync()
         {
             return await Task.Run(() =>
@@ -80,8 +85,7 @@ namespace PasswordManager.Services
                     // Just to ensure
                     fileStream.Seek(0, SeekOrigin.Begin);
 
-                    var password = SecureStringHelper.GetString(PasswordSecure);
-                    Credentials = _cryptoService.DecryptFromStream<List<Credential>>(fileStream, password);
+                    Credentials = _cryptoService.DecryptFromStream<List<Credential>>(fileStream, GetPassword());
                     success = true;
                 }
                 catch (JsonException jex)
@@ -222,8 +226,7 @@ namespace PasswordManager.Services
                         // Just to ensure
                         fileStream.Seek(0, SeekOrigin.Begin);
 
-                        var password = SecureStringHelper.GetString(PasswordSecure);
-                        _cryptoService.EncryptToStream(Credentials, fileStream, password);
+                        _cryptoService.EncryptToStream(Credentials, fileStream, GetPassword());
                     }
 
                     _ = _syncService.Synchronize();

@@ -98,7 +98,7 @@ namespace PasswordManager.ViewModels
             SyncService syncService)
         {
             Name = "Cloud sync";
-            IconKind = PackIconKind.CloudOutline;
+            IconKind = PackIconKind.Cloud;
 
             _appSettingsService = appSettingsService;
             _cloudServiceProvider = cloudServiceProvider;
@@ -234,6 +234,9 @@ namespace PasswordManager.ViewModels
 
         private async Task SyncCredentials(CloudType cloudType)
         {
+            if (SyncProcessing)
+                return;
+
             try
             {
                 SyncProcessing = true;
@@ -244,63 +247,41 @@ namespace PasswordManager.ViewModels
 
                 if (fileStream != null)
                 {
-                    // File is here
-                    var result = await MaterialMessageBox.ShowAsync(
-                        "Merge existing credentials?",
-                        "Yes - merge\r\nNo - replace from cloud\r\nOr cancel operation",
-                        MaterialMessageBoxButtons.YesNoCancel,
-                        windowDialogName,
-                        PackIconKind.QuestionMark);
-
-                    if (result == MaterialDialogResult.Cancel)
-                        return;
-
-                    var success = false;
                     List<Credential> cloudCredentials = null;
+                    var password = _credentialsCryptoService.GetPassword();
+
                     do
                     {
-                        var cloudPassword = await MaterialInputBox.ShowAsync(
-                            "Input password of cloud file",
-                            "Password",
-                            windowDialogName,
-                            true);
-
-                        if (cloudPassword is null)
-                            return;
-
                         try
                         {
-                            cloudCredentials = _cryptoService.DecryptFromStream<List<Credential>>(fileStream, cloudPassword);
-                            success = true;
+                            cloudCredentials = _cryptoService.DecryptFromStream<List<Credential>>(fileStream, password);
                         }
                         catch (Exception ex)
                         {
                             _logger.LogError(ex, string.Empty);
                         }
-                    }
-                    while (!success);
 
-                    switch (result)
-                    {
-                        case MaterialDialogResult.Yes:
-                            // Merge
-                            var mergeResult = await _credentialsCryptoService.Merge(cloudCredentials);
-                            await MaterialMessageBox.ShowAsync(
-                                "Credentials successfully merged",
-                                mergeResult.ToString(),
-                                MaterialMessageBoxButtons.OK,
-                                windowDialogName);
-                            break;
-                        case MaterialDialogResult.No:
-                            // Replace
-                            await _credentialsCryptoService.Replace(cloudCredentials);
-                            await MaterialMessageBox.ShowAsync(
-                                "Credentials successfully replaced",
-                                "Please, check out them",
-                                MaterialMessageBoxButtons.OK,
-                                windowDialogName);
-                            break;
+                        if (cloudCredentials is null)
+                        {
+                            password = await MaterialInputBox.ShowAsync(
+                                "Input password of cloud file",
+                                "Password",
+                                windowDialogName,
+                                true);
+
+                            if (password is null)
+                                return; // Cancel operation
+                        }
                     }
+                    while (cloudCredentials is null);
+
+                    // Merge
+                    var mergeResult = await _credentialsCryptoService.Merge(cloudCredentials);
+                    await MaterialMessageBox.ShowAsync(
+                        "Credentials successfully merged",
+                        mergeResult.ToString(),
+                        MaterialMessageBoxButtons.OK,
+                        windowDialogName);
                 }
                 else
                 {

@@ -29,7 +29,7 @@ namespace PasswordManager.ViewModels
         private readonly ILogger<SettingsViewModel> _logger;
         private AsyncRelayCommand _changePasswordCommand;
         private string _newPassword;
-        private bool _newPasswordSetProcessing;
+        private string _newPasswordHelperText;
 
         public BaseTheme ThemeMode
         {
@@ -53,10 +53,10 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        public bool NewPasswordSetProcessing
+        public string NewPasswordHelperText
         {
-            get => _newPasswordSetProcessing;
-            set => SetProperty(ref _newPasswordSetProcessing, value);
+            get => _newPasswordHelperText;
+            set => SetProperty(ref _newPasswordHelperText, value);
         }
 
         public event Action NewPasswordIsSet;
@@ -82,22 +82,25 @@ namespace PasswordManager.ViewModels
 
         private async Task ChangePasswordAsync()
         {
-            if (NewPasswordSetProcessing || string.IsNullOrWhiteSpace(NewPassword) || NewPassword.Length < 8)
+            if (Loading || string.IsNullOrWhiteSpace(NewPassword) || NewPassword.Length < 8)
+            {
+                NewPasswordHelperText = "Minimum symbols count is 8";
                 return;
+            }
 
+            NewPasswordHelperText = string.Empty;
             var dialogIdentifier = MvvmHelper.MainWindowDialogName;
+            var success = false;
 
             try
             {
-                NewPasswordSetProcessing = true;
-
-                var processingDialog = new ProcessingControl("Setting up new password...", "Please wait", dialogIdentifier);
-                _ = DialogHost.Show(processingDialog, dialogIdentifier);
+                Loading = true;
 
                 _credentialsCryptoService.SetPassword(NewPassword);
                 await _credentialsCryptoService.SaveCredentialsAndSync();
 
                 NewPasswordIsSet?.Invoke();
+                success = true;
             }
             catch (Exception ex)
             {
@@ -105,17 +108,17 @@ namespace PasswordManager.ViewModels
             }
             finally
             {
-                if (DialogHost.IsDialogOpen(dialogIdentifier))
-                    DialogHost.Close(dialogIdentifier);
+                Loading = false;
+            }
 
+            if (success)
+            {
                 await MaterialMessageBox.ShowAsync(
                     "Success",
                     "New password applied",
                     MaterialMessageBoxButtons.OK,
                     dialogIdentifier,
                     PackIconKind.Tick);
-
-                NewPasswordSetProcessing = false;
             }
         }
 

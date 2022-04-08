@@ -11,8 +11,8 @@
     d:DataContext="{x:Static vm:SettingsViewModel.DesignTimeInstance}"
     d:DesignHeight="450"
     d:DesignWidth="800"
-    mc:Ignorable="d"
-    DataContextChanged="UserControl_DataContextChanged">
+    DataContextChanged="UserControl_DataContextChanged"
+    mc:Ignorable="d">
     <UserControl.Resources>
         <ResourceDictionary>
             <conv:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
@@ -83,15 +83,17 @@
                     </Grid.ColumnDefinitions>
                     <PasswordBox
                         x:Name="NewPasswordBox"
+                        md:HintAssist.HelperText="{Binding NewPasswordHelperText}"
                         md:HintAssist.Hint="New password"
                         md:HintAssist.IsFloating="True"
+                        MinWidth="200"
                         MaxLength="32"
-                        PasswordChanged="PasswordBox_PasswordChanged"/>
+                        PasswordChanged="PasswordBox_PasswordChanged" />
                     <Button
                         Grid.Column="2"
+                        Command="{Binding ChangePasswordCommand}"
                         Content="Change"
-                        Style="{StaticResource MaterialDesignFlatAccentButton}"
-                        Command="{Binding ChangePasswordCommand}"/>
+                        Style="{StaticResource MaterialDesignFlatAccentButton}" />
                 </Grid>
             </GroupBox>
         </StackPanel>

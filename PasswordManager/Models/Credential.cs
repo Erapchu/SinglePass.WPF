@@ -37,6 +37,7 @@ namespace PasswordManager.Models
                 LoginField = LoginField.Clone(),
                 PasswordField = PasswordField.Clone(),
                 OtherField = OtherField.Clone(),
+                SiteField = SiteField.Clone(),
                 LastModifiedTime = LastModifiedTime,
                 CreationTime = CreationTime
             };

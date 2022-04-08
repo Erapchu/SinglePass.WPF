@@ -12,6 +12,7 @@ namespace PasswordManager.Models
         public PassField LoginField { get; set; } = new PassField() { Name = "Login" };
         public PassField PasswordField { get; set; } = new PassField() { Name = "Password" };
         public PassField OtherField { get; set; } = new PassField() { Name = "Other" };
+        public PassField SiteField { get; set; } = new PassField() { Name = "Site" };
         public List<PassField> AdditionalFields { get; set; } = new List<PassField>();
         public DateTime LastModifiedTime { get; set; }
         public DateTime CreationTime { get; set; }

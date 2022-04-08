@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows.Media;
 
 namespace PasswordManager.ViewModels
 {
@@ -29,6 +30,7 @@ namespace PasswordManager.ViewModels
         public PassFieldViewModel LoginFieldVM { get; }
         public PassFieldViewModel PasswordFieldVM { get; }
         public PassFieldViewModel OtherFieldVM { get; }
+        public PassFieldViewModel SiteFieldVM { get; }
         public ObservableCollection<PassFieldViewModel> AdditionalFields { get; }
 
         public DateTime LastModifiedTime
@@ -50,6 +52,14 @@ namespace PasswordManager.ViewModels
             set => SetProperty(ref _passwordVisible, value);
         }
 
+        public ImageSource FavIcon
+        {
+            get
+            {
+                return null;
+            }
+        }
+
         public CredentialViewModel(Credential credential)
         {
             Model = credential ?? throw new ArgumentNullException(nameof(credential));
@@ -57,6 +67,7 @@ namespace PasswordManager.ViewModels
             LoginFieldVM = new PassFieldViewModel(credential.LoginField);
             PasswordFieldVM = new PassFieldViewModel(credential.PasswordField);
             OtherFieldVM = new PassFieldViewModel(credential.OtherField);
+            SiteFieldVM = new PassFieldViewModel(credential.SiteField);
             AdditionalFields = new ObservableCollection<PassFieldViewModel>(credential.AdditionalFields.Select(f => new PassFieldViewModel(f)));
             LastModifiedTime = credential.LastModifiedTime;
             CreationTime = credential.CreationTime;

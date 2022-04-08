@@ -11,7 +11,8 @@
     d:DataContext="{x:Static vm:SettingsViewModel.DesignTimeInstance}"
     d:DesignHeight="450"
     d:DesignWidth="800"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    DataContextChanged="UserControl_DataContextChanged">
     <UserControl.Resources>
         <ResourceDictionary>
             <conv:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
@@ -55,6 +56,42 @@
                             Content="Light"
                             IsChecked="{Binding ThemeMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static md:BaseTheme.Light}}" />
                     </StackPanel>
+                </Grid>
+            </GroupBox>
+            <GroupBox Margin="16 8" Style="{StaticResource MaterialDesignCardGroupBox}">
+                <GroupBox.HeaderTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <md:PackIcon
+                                Width="24"
+                                Height="24"
+                                Margin="8 0 0 0"
+                                VerticalAlignment="Center"
+                                Kind="Key" />
+                            <TextBlock
+                                Margin="16 0 0 0"
+                                VerticalAlignment="Center"
+                                Text="Change password" />
+                        </StackPanel>
+                    </DataTemplate>
+                </GroupBox.HeaderTemplate>
+                <Grid Margin="16 8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <PasswordBox
+                        x:Name="NewPasswordBox"
+                        md:HintAssist.Hint="New password"
+                        md:HintAssist.IsFloating="True"
+                        MaxLength="32"
+                        PasswordChanged="PasswordBox_PasswordChanged"/>
+                    <Button
+                        Grid.Column="2"
+                        Content="Change"
+                        Style="{StaticResource MaterialDesignFlatAccentButton}"
+                        Command="{Binding ChangePasswordCommand}"/>
                 </Grid>
             </GroupBox>
         </StackPanel>

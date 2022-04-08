@@ -205,7 +205,7 @@ namespace PasswordManager.Services
             await SaveCredentialsAndSync();
         }
 
-        private async Task SaveCredentialsAndSync()
+        public async Task SaveCredentialsAndSync()
         {
             await Task.Run(() =>
             {

@@ -34,7 +34,7 @@ namespace PasswordManager.ViewModels
 
         private readonly AppSettingsService _appSettingsService;
         private readonly CloudServiceProvider _cloudServiceProvider;
-        private readonly ILogger<SettingsViewModel> _logger;
+        private readonly ILogger<CloudSyncViewModel> _logger;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly CredentialsCryptoService _credentialsCryptoService;
         private readonly CryptoService _cryptoService;
@@ -95,7 +95,8 @@ namespace PasswordManager.ViewModels
             IHttpClientFactory httpClientFactory,
             CredentialsCryptoService credentialsCryptoService,
             CryptoService cryptoService,
-            SyncService syncService)
+            SyncService syncService,
+            ILogger<CloudSyncViewModel> logger)
         {
             Name = "Cloud sync";
             IconKind = PackIconKind.Cloud;
@@ -106,6 +107,7 @@ namespace PasswordManager.ViewModels
             _credentialsCryptoService = credentialsCryptoService;
             _cryptoService = cryptoService;
             _syncService = syncService;
+            _logger = logger;
         }
 
         private async Task Login(CloudType cloudType)

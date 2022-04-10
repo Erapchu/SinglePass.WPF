@@ -148,6 +148,8 @@ namespace PasswordManager
         private void Application_Exit(object sender, ExitEventArgs e)
         {
             // TODO: Save last window settings
+
+            _logger?.Info($"The application is shutting down{Environment.NewLine}");
         }
     }
 }

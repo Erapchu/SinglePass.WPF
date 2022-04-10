@@ -87,6 +87,7 @@ namespace PasswordManager.Services
 
                     Credentials = _cryptoService.DecryptFromStream<List<Credential>>(fileStream, GetPassword());
                     success = true;
+                    _logger.LogInformation($"Credentials loaded from file, count: {Credentials.Count}");
                 }
                 catch (JsonException jex)
                 {

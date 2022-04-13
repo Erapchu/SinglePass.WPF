@@ -36,8 +36,6 @@ namespace PasswordManager.ViewModels
         private readonly CloudServiceProvider _cloudServiceProvider;
         private readonly ILogger<CloudSyncViewModel> _logger;
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly CredentialsCryptoService _credentialsCryptoService;
-        private readonly CryptoService _cryptoService;
         private readonly SyncService _syncService;
 
         private bool _syncProcessing;
@@ -93,8 +91,6 @@ namespace PasswordManager.ViewModels
             AppSettingsService appSettingsService,
             CloudServiceProvider cloudServiceProvider,
             IHttpClientFactory httpClientFactory,
-            CredentialsCryptoService credentialsCryptoService,
-            CryptoService cryptoService,
             SyncService syncService,
             ILogger<CloudSyncViewModel> logger)
         {
@@ -104,8 +100,6 @@ namespace PasswordManager.ViewModels
             _appSettingsService = appSettingsService;
             _cloudServiceProvider = cloudServiceProvider;
             _httpClientFactory = httpClientFactory;
-            _credentialsCryptoService = credentialsCryptoService;
-            _cryptoService = cryptoService;
             _syncService = syncService;
             _logger = logger;
         }
@@ -188,6 +182,9 @@ namespace PasswordManager.ViewModels
 
         private async Task FetchUserInfoFromCloud(CloudType cloudType, CancellationToken cancellationToken)
         {
+            if (FetchingUserInfo)
+                return;
+
             try
             {
                 FetchingUserInfo = true;
@@ -243,53 +240,7 @@ namespace PasswordManager.ViewModels
             {
                 SyncProcessing = true;
 
-                var cloudService = _cloudServiceProvider.GetCloudService(cloudType);
-                var windowDialogName = MvvmHelper.MainWindowDialogName;
-                using var fileStream = await cloudService.Download(Helpers.Constants.PasswordsFileName, CancellationToken.None);
-
-                if (fileStream != null)
-                {
-                    List<Credential> cloudCredentials = null;
-                    var password = _credentialsCryptoService.GetPassword();
-
-                    do
-                    {
-                        try
-                        {
-                            cloudCredentials = _cryptoService.DecryptFromStream<List<Credential>>(fileStream, password);
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, string.Empty);
-                        }
-
-                        if (cloudCredentials is null)
-                        {
-                            password = await MaterialInputBox.ShowAsync(
-                                "Input password of cloud file",
-                                "Password",
-                                windowDialogName,
-                                true);
-
-                            if (password is null)
-                                return; // Cancel operation
-                        }
-                    }
-                    while (cloudCredentials is null);
-
-                    // Merge
-                    var mergeResult = await _credentialsCryptoService.Merge(cloudCredentials);
-                    await MaterialMessageBox.ShowAsync(
-                        "Credentials successfully merged",
-                        mergeResult.ToString(),
-                        MaterialMessageBoxButtons.OK,
-                        windowDialogName);
-                }
-                else
-                {
-                    // File doesn't exists, just sync
-                    await _syncService.Synchronize();
-                }
+                await _syncService.Synchronize(cloudType);
             }
             catch (Exception ex)
             {

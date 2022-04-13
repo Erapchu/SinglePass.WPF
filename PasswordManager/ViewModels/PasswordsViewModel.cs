@@ -40,7 +40,6 @@ namespace PasswordManager.ViewModels
         public event Action<CredentialViewModel> CredentialSelected;
 
         private readonly CredentialsCryptoService _credentialsCryptoService;
-        private readonly SyncService _syncService;
         private readonly ILogger<PasswordsViewModel> _logger;
         private readonly List<CredentialViewModel> _credentials = new();
         private CredentialViewModel _selectedCredential;
@@ -87,7 +86,6 @@ namespace PasswordManager.ViewModels
 
         public PasswordsViewModel(
             CredentialsCryptoService credentialsCryptoService,
-            SyncService syncService,
             ILogger<PasswordsViewModel> logger,
             CredentialsDialogViewModel credentialsDialogViewModel)
         {
@@ -95,20 +93,12 @@ namespace PasswordManager.ViewModels
             IconKind = PackIconKind.Password;
 
             _credentialsCryptoService = credentialsCryptoService;
-            _syncService = syncService;
             _logger = logger;
-
-            _syncService.SyncReport += SyncService_SyncReport;
 
             ActiveCredentialDialogViewModel = credentialsDialogViewModel;
             ActiveCredentialDialogViewModel.Accept += ActiveCredentialDialogViewModel_Accept;
             ActiveCredentialDialogViewModel.Cancel += ActiveCredentialDialogViewModel_Cancel;
             ActiveCredentialDialogViewModel.Delete += ActiveCredentialDialogViewModel_Delete;
-        }
-
-        private void SyncService_SyncReport(bool obj)
-        {
-            Loading = obj;
         }
 
         private async void ActiveCredentialDialogViewModel_Delete(CredentialViewModel credVM)

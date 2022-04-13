@@ -9,6 +9,7 @@ namespace PasswordManager.Models
     {
         public IList<Credential> NewCredentials { get; } = new List<Credential>();
         public IList<Credential> ChangedCredentials { get; } = new List<Credential>();
+        public bool AnyChanges => NewCredentials.Count > 0 || ChangedCredentials.Count > 0;
 
         public override string ToString()
         {

@@ -97,7 +97,7 @@ namespace PasswordManager.ViewModels
                 Loading = true;
 
                 _credentialsCryptoService.SetPassword(NewPassword);
-                await _credentialsCryptoService.SaveCredentialsAndSync();
+                await _credentialsCryptoService.SaveCredentials();
 
                 NewPasswordIsSet?.Invoke();
                 success = true;

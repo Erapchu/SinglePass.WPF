@@ -18,7 +18,6 @@ namespace PasswordManager.Services
     {
         private readonly object _credentialsLock = new();
         private readonly ILogger<CredentialsCryptoService> _logger;
-        private readonly SyncService _syncService;
         private readonly CryptoService _cryptoService;
         private readonly string _pathToPasswordsFile = Constants.PasswordsFilePath;
 
@@ -45,11 +44,9 @@ namespace PasswordManager.Services
 
         public CredentialsCryptoService(
             ILogger<CredentialsCryptoService> logger,
-            SyncService syncService,
             CryptoService cryptoService)
         {
             _logger = logger;
-            _syncService = syncService;
             _cryptoService = cryptoService;
         }
 
@@ -126,7 +123,7 @@ namespace PasswordManager.Services
                 _credentials.Add(credential);
             }
 
-            await SaveCredentialsAndSync();
+            await SaveCredentials();
         }
 
         public async Task EditCredential(Credential credential)
@@ -148,7 +145,7 @@ namespace PasswordManager.Services
                 _credentials[index] = credential;
             }
 
-            await SaveCredentialsAndSync();
+            await SaveCredentials();
         }
 
         public async Task DeleteCredential(Credential credential)
@@ -170,36 +167,36 @@ namespace PasswordManager.Services
                 _credentials.RemoveAt(index);
             }
 
-            await SaveCredentialsAndSync();
+            await SaveCredentials();
         }
 
-        public async Task<CredentialsMergeResult> Merge(List<Credential> newCredentials)
+        public async Task<CredentialsMergeResult> Merge(List<Credential> mergingCreds)
         {
             var result = new CredentialsMergeResult();
 
-            foreach (var newCredential in newCredentials)
+            foreach (var mergingCred in mergingCreds)
             {
-                var currentIndex = _credentials.IndexOf(newCredential);
-                if (currentIndex >= 0)
+                var existingIndex = _credentials.IndexOf(mergingCred);
+                if (existingIndex >= 0)
                 {
-                    // The same found
-                    var currentCredential = _credentials[currentIndex];
-                    if (currentCredential.LastModifiedTime < newCredential.LastModifiedTime)
+                    // Update
+                    var currentCred = _credentials[existingIndex];
+                    if (currentCred.LastModifiedTime < mergingCred.LastModifiedTime)
                     {
-                        _credentials[currentIndex] = newCredential;
-                        result.ChangedCredentials.Add(currentCredential);
+                        _credentials[existingIndex] = mergingCred;
+                        result.ChangedCredentials.Add(currentCred);
                     }
                 }
                 else
                 {
-                    // New add
-                    _credentials.Add(newCredential);
-                    result.NewCredentials.Add(newCredential);
+                    // New
+                    _credentials.Add(mergingCred);
+                    result.NewCredentials.Add(mergingCred);
                 }
             }
 
-            if (result.NewCredentials.Count > 0 || result.ChangedCredentials.Count > 0)
-                await SaveCredentialsAndSync();
+            if (result.AnyChanges)
+                await SaveCredentials();
 
             return result;
         }
@@ -207,10 +204,10 @@ namespace PasswordManager.Services
         public async Task Replace(List<Credential> newCredentials)
         {
             _credentials = newCredentials;
-            await SaveCredentialsAndSync();
+            await SaveCredentials();
         }
 
-        public async Task SaveCredentialsAndSync()
+        public async Task SaveCredentials()
         {
             await Task.Run(() =>
             {
@@ -222,15 +219,11 @@ namespace PasswordManager.Services
                 try
                 {
                     // Access to file
-                    using (var fileStream = File.Open(_pathToPasswordsFile, FileMode.Create, FileAccess.Write, FileShare.Read))
-                    {
-                        // Just to ensure
-                        fileStream.Seek(0, SeekOrigin.Begin);
+                    using var fileStream = File.Open(_pathToPasswordsFile, FileMode.Create, FileAccess.Write, FileShare.Read);
+                    // Just to ensure
+                    fileStream.Seek(0, SeekOrigin.Begin);
 
-                        _cryptoService.EncryptToStream(Credentials, fileStream, GetPassword());
-                    }
-
-                    _ = _syncService.Synchronize();
+                    _cryptoService.EncryptToStream(Credentials, fileStream, GetPassword());
                 }
                 catch (JsonException jsex)
                 {

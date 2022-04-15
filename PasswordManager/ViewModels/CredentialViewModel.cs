@@ -1,4 +1,5 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
+using PasswordManager.Helpers;
 using PasswordManager.Models;
 using System;
 using System.Collections.Generic;
@@ -52,13 +53,8 @@ namespace PasswordManager.ViewModels
             set => SetProperty(ref _passwordVisible, value);
         }
 
-        public ImageSource FavIcon
-        {
-            get
-            {
-                return null;
-            }
-        }
+        private ImageSource _favIcon;
+        public ImageSource FavIcon => _favIcon ??= RemoteImagesServiceHolder.Service.GetImage(SiteFieldVM.Value);
 
         public CredentialViewModel(Credential credential)
         {

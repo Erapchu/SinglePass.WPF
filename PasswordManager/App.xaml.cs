@@ -8,6 +8,7 @@ using PasswordManager.Authorization.Brokers;
 using PasswordManager.Authorization.Holders;
 using PasswordManager.Clouds.Services;
 using PasswordManager.Controls;
+using PasswordManager.Helpers;
 using PasswordManager.Services;
 using PasswordManager.ViewModels;
 using PasswordManager.Views;
@@ -80,6 +81,9 @@ namespace PasswordManager
                 // Create tray icon
                 _trayIcon = new TrayIcon();
 
+                // Set some static services
+                RemoteImagesServiceHolder.Service = _host.Services.GetService<RemoteImagesService>();
+
                 // Login
                 using (var loginScope = _host.Services.CreateScope())
                 {
@@ -143,6 +147,7 @@ namespace PasswordManager
                 services.AddSingleton<ThemeService>();
                 services.AddSingleton<AppSettingsService>();
                 services.AddSingleton<SyncService>();
+                services.AddSingleton<RemoteImagesService>();
             });
 
         private void Application_Exit(object sender, ExitEventArgs e)

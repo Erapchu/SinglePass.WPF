@@ -85,20 +85,38 @@
                                 TextTrimming="CharacterEllipsis" />
                         </StackPanel>
                         <StackPanel Grid.Column="1">
-                            <Button
-                                md:ButtonProgressAssist.IsIndeterminate="True"
-                                md:ButtonProgressAssist.IsIndicatorVisible="{Binding SyncProcessing}"
-                                Command="{Binding SyncCommand}"
-                                CommandParameter="{x:Static cloudEnums:CloudType.GoogleDrive}"
-                                Content="{md:PackIcon Kind=CloudSync, Size=24}"
-                                Style="{StaticResource MaterialDesignFloatingActionButton}"
-                                ToolTip="Synchronize credentials with Google" />
-                            <TextBlock
-                                MaxWidth="300"
-                                HorizontalAlignment="Center"
-                                Margin="0 8 0 0"
-                                Text="{Binding MergeStage}"
-                                TextTrimming="CharacterEllipsis" />
+                            <StackPanel>
+                                <Button
+                                    HorizontalAlignment="Center"
+                                    md:ButtonProgressAssist.IsIndeterminate="True"
+                                    md:ButtonProgressAssist.IsIndicatorVisible="{Binding SyncProcessing}"
+                                    Command="{Binding SyncCommand}"
+                                    CommandParameter="{x:Static cloudEnums:CloudType.GoogleDrive}"
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    ToolTip="Synchronize credentials with Google">
+                                    <StackPanel Orientation="Horizontal">
+                                        <md:PackIcon
+                                            Width="20"
+                                            Height="20"
+                                            VerticalAlignment="Center"
+                                            Kind="Merge" />
+                                        <TextBlock
+                                            Margin="8 0 0 0"
+                                            VerticalAlignment="Center"
+                                            Text="Merge" />
+                                    </StackPanel>
+                                </Button>
+                                <TextBlock
+                                    MaxWidth="300"
+                                    Margin="0 8 0 0"
+                                    HorizontalAlignment="Center"
+                                    Text="{Binding MergeStage}"
+                                    TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+
+                            <StackPanel>
+                                
+                            </StackPanel>
                         </StackPanel>
                         <Button
                             Grid.Column="2"

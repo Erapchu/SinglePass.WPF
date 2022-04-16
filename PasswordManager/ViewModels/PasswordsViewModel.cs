@@ -204,7 +204,14 @@ namespace PasswordManager.ViewModels
                         foreach (var cred in _credentials)
                         {
                             var nameValue = cred.NameFieldVM.Value;
+                            var loginValue = cred.LoginFieldVM.Value;
+                            var websiteValue = cred.SiteFieldVM.Value;
+                            var otherValue = cred.OtherFieldVM.Value;
+
                             if (nameValue.IndexOf(filterText, StringComparison.OrdinalIgnoreCase) != -1
+                                || (loginValue != null && loginValue.IndexOf(filterText, StringComparison.OrdinalIgnoreCase) != -1)
+                                || (websiteValue != null && websiteValue.IndexOf(filterText, StringComparison.OrdinalIgnoreCase) != -1)
+                                || (otherValue != null && otherValue.IndexOf(filterText, StringComparison.OrdinalIgnoreCase) != -1)
                                 || (translitCompare && nameValue.IndexOf(transliteratedText, StringComparison.OrdinalIgnoreCase) != -1))
                             {
                                 fCreds.Add(cred);

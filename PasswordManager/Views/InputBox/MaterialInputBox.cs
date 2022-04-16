@@ -12,10 +12,15 @@ namespace PasswordManager.Views.InputBox
         /// <param name="header">Header of the dialog.</param>
         /// <param name="hint">Hint text.</param>
         /// <param name="dialogIdentifier"><see cref="DialogHost"/> identifier where need to show materialized message box. It's analog of window's HWND.</param>
+        /// <param name="passwordInput"><see langword="true"/> for password input.</param>
         /// <returns>Inputed text by user or <see langword="null"/> in case if output is not string.</returns>
-        public static async Task<string> ShowAsync(string header, string hint, string dialogIdentifier)
+        public static async Task<string> ShowAsync(
+            string header,
+            string hint,
+            string dialogIdentifier,
+            bool passwordInput = false)
         {
-            var instance = new MaterialInputBoxContent()
+            var instance = new MaterialInputBoxContent(passwordInput)
             {
                 DataContext = new MaterialInputBoxViewModel(header, hint, dialogIdentifier)
             };

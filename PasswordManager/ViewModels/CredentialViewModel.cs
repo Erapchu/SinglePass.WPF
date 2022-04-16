@@ -1,9 +1,11 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
+using PasswordManager.Helpers;
 using PasswordManager.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows.Media;
 
 namespace PasswordManager.ViewModels
 {
@@ -16,10 +18,9 @@ namespace PasswordManager.ViewModels
         private static CredentialViewModel GetDesignTimeVM()
         {
             var additionalFields = new List<PassField>() { new PassField() { Name = "Design additional field", Value = "Test value" } };
-            var model = new Credential()
-            {
-                AdditionalFields = additionalFields
-            };
+            var model = Credential.CreateNew();
+            model.AdditionalFields = additionalFields;
+
             var vm = new CredentialViewModel(model);
             return vm;
         }
@@ -30,6 +31,7 @@ namespace PasswordManager.ViewModels
         public PassFieldViewModel LoginFieldVM { get; }
         public PassFieldViewModel PasswordFieldVM { get; }
         public PassFieldViewModel OtherFieldVM { get; }
+        public PassFieldViewModel SiteFieldVM { get; }
         public ObservableCollection<PassFieldViewModel> AdditionalFields { get; }
 
         public DateTime LastModifiedTime
@@ -51,6 +53,9 @@ namespace PasswordManager.ViewModels
             set => SetProperty(ref _passwordVisible, value);
         }
 
+        private ImageSource _favIcon;
+        public ImageSource FavIcon => _favIcon ??= FavIconServiceHolder.Service.GetImage(SiteFieldVM.Value);
+
         public CredentialViewModel(Credential credential)
         {
             Model = credential ?? throw new ArgumentNullException(nameof(credential));
@@ -58,6 +63,7 @@ namespace PasswordManager.ViewModels
             LoginFieldVM = new PassFieldViewModel(credential.LoginField);
             PasswordFieldVM = new PassFieldViewModel(credential.PasswordField);
             OtherFieldVM = new PassFieldViewModel(credential.OtherField);
+            SiteFieldVM = new PassFieldViewModel(credential.SiteField);
             AdditionalFields = new ObservableCollection<PassFieldViewModel>(credential.AdditionalFields.Select(f => new PassFieldViewModel(f)));
             LastModifiedTime = credential.LastModifiedTime;
             CreationTime = credential.CreationTime;

@@ -2,6 +2,7 @@
 using System;
 using System.Windows;
 using System.Windows.Controls.Primitives;
+using System.Windows.Interop;
 
 namespace PasswordManager.Views
 {
@@ -17,6 +18,23 @@ namespace PasswordManager.Views
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            // TODO: Split code parts - determine position before showing, but first implement hotkeys
+            // Obtain popup handle for placement
+            IntPtr handle = ((HwndSource)PresentationSource.FromVisual(Child)).Handle;
+            
+            // TODO: See ConsoleTest project
+            // Get position
+            //var hFore = GetForegroundWindow();
+            //var idAttach = GetWindowThreadProcessId(hFore, out uint id);
+            //var curThreadId = GetCurrentThreadId();
+            // To attach to current thread
+            //var sa = AttachThreadInput(idAttach, curThreadId, true);
+            //var caretPos = WindowsKeyboard.GetCaretPos(out POINT caretPoint);
+            //ClientToScreen(hFore, ref caretPoint);
+            // To dettach from current thread
+            //var sd = AttachThreadInput(idAttach, curThreadId, false);
+            //var data = string.Format("X={0}, Y={1}", caretPoint.X, caretPoint.Y);
+            
             var inputData = "pasted from popup";
 
             WindowsClipboard.SetText(inputData);
@@ -37,8 +55,10 @@ namespace PasswordManager.Views
             inputs[3].U.ki.wVk = WindowsKeyboard.VK_CONTROL;
             inputs[3].U.ki.dwFlags = WindowsKeyboard.KEYEVENTF_KEYUP;
 
+            // Send input simulate Ctrl + V
             var uSent = WindowsKeyboard.SendInput((uint)inputs.Length, inputs, INPUT.Size);
 
+            // Deprecated WinAPI methods
             //WindowsKeyboard.keybd_event(WindowsKeyboard.VK_CONTROL, 0, 0, UIntPtr.Zero);
             //WindowsKeyboard.keybd_event(WindowsKeyboard.VK_V, 0, 0, UIntPtr.Zero);
             //WindowsKeyboard.keybd_event(WindowsKeyboard.VK_V, 0, WindowsKeyboard.KEYEVENTF_KEYUP, UIntPtr.Zero);

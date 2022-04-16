@@ -18,7 +18,6 @@ namespace PasswordManager.Services
     {
         private readonly object _credentialsLock = new();
         private readonly ILogger<CredentialsCryptoService> _logger;
-        private readonly SyncService _syncService;
         private readonly CryptoService _cryptoService;
         private readonly string _pathToPasswordsFile = Constants.PasswordsFilePath;
 
@@ -45,11 +44,9 @@ namespace PasswordManager.Services
 
         public CredentialsCryptoService(
             ILogger<CredentialsCryptoService> logger,
-            SyncService syncService,
             CryptoService cryptoService)
         {
             _logger = logger;
-            _syncService = syncService;
             _cryptoService = cryptoService;
         }
 
@@ -61,6 +58,11 @@ namespace PasswordManager.Services
         public void SetPassword(string password)
         {
             PasswordSecure = SecureStringHelper.MakeSecureString(password);
+        }
+
+        public string GetPassword()
+        {
+            return SecureStringHelper.GetString(PasswordSecure);
         }
 
         public async Task<bool> LoadCredentialsAsync()
@@ -80,9 +82,9 @@ namespace PasswordManager.Services
                     // Just to ensure
                     fileStream.Seek(0, SeekOrigin.Begin);
 
-                    var password = SecureStringHelper.GetString(PasswordSecure);
-                    Credentials = _cryptoService.DecryptFromStream<List<Credential>>(fileStream, password);
+                    Credentials = _cryptoService.DecryptFromStream<List<Credential>>(fileStream, GetPassword());
                     success = true;
+                    _logger.LogInformation($"Credentials loaded from file, count: {Credentials.Count}");
                 }
                 catch (JsonException jex)
                 {
@@ -121,7 +123,7 @@ namespace PasswordManager.Services
                 _credentials.Add(credential);
             }
 
-            await SaveCredentialsAndSync();
+            await SaveCredentials();
         }
 
         public async Task EditCredential(Credential credential)
@@ -143,7 +145,7 @@ namespace PasswordManager.Services
                 _credentials[index] = credential;
             }
 
-            await SaveCredentialsAndSync();
+            await SaveCredentials();
         }
 
         public async Task DeleteCredential(Credential credential)
@@ -165,45 +167,47 @@ namespace PasswordManager.Services
                 _credentials.RemoveAt(index);
             }
 
-            await SaveCredentialsAndSync();
+            await SaveCredentials();
         }
 
-        public async Task Merge(List<Credential> newCredentials)
+        public async Task<CredentialsMergeResult> Merge(List<Credential> mergingCreds)
         {
-            var anyChanges = false;
+            var result = CredentialsMergeResult.SuccessMergeResult;
 
-            foreach (var newCredential in newCredentials)
+            foreach (var mergingCred in mergingCreds)
             {
-                var currentIndex = _credentials.IndexOf(newCredential);
-                if (currentIndex >= 0)
+                var existingIndex = _credentials.IndexOf(mergingCred);
+                if (existingIndex >= 0)
                 {
-                    // The same found
-                    var currentCredential = _credentials[currentIndex];
-                    if (currentCredential.LastModifiedTime < newCredential.LastModifiedTime)
+                    // Update
+                    var currentCred = _credentials[existingIndex];
+                    if (currentCred.LastModifiedTime < mergingCred.LastModifiedTime)
                     {
-                        _credentials[currentIndex] = newCredential;
-                        anyChanges = true;
+                        _credentials[existingIndex] = mergingCred;
+                        result.ChangedCredentials.Add(currentCred);
                     }
                 }
                 else
                 {
-                    // New add
-                    _credentials.Add(newCredential);
-                    anyChanges = true;
+                    // New
+                    _credentials.Add(mergingCred);
+                    result.NewCredentials.Add(mergingCred);
                 }
             }
 
-            if (anyChanges)
-                await SaveCredentialsAndSync();
+            if (result.AnyChanges)
+                await SaveCredentials();
+
+            return result;
         }
 
         public async Task Replace(List<Credential> newCredentials)
         {
             _credentials = newCredentials;
-            await SaveCredentialsAndSync();
+            await SaveCredentials();
         }
 
-        private async Task SaveCredentialsAndSync()
+        public async Task SaveCredentials()
         {
             await Task.Run(() =>
             {
@@ -215,16 +219,11 @@ namespace PasswordManager.Services
                 try
                 {
                     // Access to file
-                    using (var fileStream = File.Open(_pathToPasswordsFile, FileMode.Create, FileAccess.Write, FileShare.Read))
-                    {
-                        // Just to ensure
-                        fileStream.Seek(0, SeekOrigin.Begin);
+                    using var fileStream = File.Open(_pathToPasswordsFile, FileMode.Create, FileAccess.Write, FileShare.Read);
+                    // Just to ensure
+                    fileStream.Seek(0, SeekOrigin.Begin);
 
-                        var password = SecureStringHelper.GetString(PasswordSecure);
-                        _cryptoService.EncryptToStream(Credentials, fileStream, password);
-                    }
-
-                    _ = _syncService.Synchronize();
+                    _cryptoService.EncryptToStream(Credentials, fileStream, GetPassword());
                 }
                 catch (JsonException jsex)
                 {

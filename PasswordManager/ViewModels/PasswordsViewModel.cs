@@ -26,7 +26,7 @@ namespace PasswordManager.ViewModels
         private static PasswordsViewModel GetDesignTimeVM()
         {
             var vm = new PasswordsViewModel();
-            var cred = new Credential();
+            var cred = Credential.CreateNew();
             cred.NameField.Value = "Test";
             cred.LoginField.Value = "TestLogin";
             cred.PasswordField.Value = "TestPass";
@@ -40,7 +40,6 @@ namespace PasswordManager.ViewModels
         public event Action<CredentialViewModel> CredentialSelected;
 
         private readonly CredentialsCryptoService _credentialsCryptoService;
-        private readonly SyncService _syncService;
         private readonly ILogger<PasswordsViewModel> _logger;
         private readonly List<CredentialViewModel> _credentials = new();
         private CredentialViewModel _selectedCredential;
@@ -48,7 +47,6 @@ namespace PasswordManager.ViewModels
         private bool _searchTextFocused;
         private RelayCommand _addCredentialCommand;
         private RelayCommand<KeyEventArgs> _searchKeyEventCommand;
-        private bool _cloudSyncInProgress;
 
         public RelayCommand AddCredentialCommand => _addCredentialCommand ??= new RelayCommand(AddCredential);
         public RelayCommand<KeyEventArgs> SearchKeyEventCommand => _searchKeyEventCommand ??= new RelayCommand<KeyEventArgs>(HandleSearchKeyEvent);
@@ -88,28 +86,19 @@ namespace PasswordManager.ViewModels
 
         public PasswordsViewModel(
             CredentialsCryptoService credentialsCryptoService,
-            SyncService syncService,
             ILogger<PasswordsViewModel> logger,
             CredentialsDialogViewModel credentialsDialogViewModel)
         {
+            Name = "Credentials";
+            IconKind = PackIconKind.Password;
+
             _credentialsCryptoService = credentialsCryptoService;
-            _syncService = syncService;
             _logger = logger;
 
-            _syncService.SyncReport += SyncService_SyncReport;
-
-            Name = "Credentials";
-            ItemIndex = PasswordsNavigationItemIndex;
-            IconKind = PackIconKind.Password;
             ActiveCredentialDialogViewModel = credentialsDialogViewModel;
             ActiveCredentialDialogViewModel.Accept += ActiveCredentialDialogViewModel_Accept;
             ActiveCredentialDialogViewModel.Cancel += ActiveCredentialDialogViewModel_Cancel;
             ActiveCredentialDialogViewModel.Delete += ActiveCredentialDialogViewModel_Delete;
-        }
-
-        private void SyncService_SyncReport(bool obj)
-        {
-            Loading = obj;
         }
 
         private async void ActiveCredentialDialogViewModel_Delete(CredentialViewModel credVM)
@@ -144,42 +133,35 @@ namespace PasswordManager.ViewModels
 
         private async void ActiveCredentialDialogViewModel_Accept(CredentialViewModel newCredVM, CredentialsDialogMode mode)
         {
-            try
+            var dateTimeNow = DateTime.Now;
+            newCredVM.LastModifiedTime = dateTimeNow;
+            if (mode == CredentialsDialogMode.New)
             {
-                Loading = true;
-
-                var dateTimeNow = DateTime.Now;
-                newCredVM.LastModifiedTime = dateTimeNow;
-                if (mode == CredentialsDialogMode.New)
-                {
-                    newCredVM.CreationTime = dateTimeNow;
-                    await _credentialsCryptoService.AddCredential(newCredVM.Model);
-                    _credentials.Add(newCredVM);
-                    await FilterCredentialsAsync();
-                }
-                else if (mode == CredentialsDialogMode.Edit)
-                {
-                    await _credentialsCryptoService.EditCredential(newCredVM.Model);
-                    var staleCredVM = _credentials.FirstOrDefault(c => c.Model.Equals(newCredVM.Model));
-                    var staleIndex = _credentials.IndexOf(staleCredVM);
-                    _credentials.Remove(staleCredVM);
-                    _credentials.Insert(staleIndex, newCredVM);
-                    await FilterCredentialsAsync();
-                }
-
-                SelectedCredential = newCredVM;
+                newCredVM.CreationTime = dateTimeNow;
+                await _credentialsCryptoService.AddCredential(newCredVM.Model);
+                _credentials.Add(newCredVM);
+                await FilterCredentialsAsync();
             }
-            finally
+            else if (mode == CredentialsDialogMode.Edit)
             {
-                Loading = false;
+                await _credentialsCryptoService.EditCredential(newCredVM.Model);
+                var staleCredVM = _credentials.FirstOrDefault(c => c.Model.Equals(newCredVM.Model));
+                var staleIndex = _credentials.IndexOf(staleCredVM);
+                _credentials.Remove(staleCredVM);
+                _credentials.Insert(staleIndex, newCredVM);
+                await FilterCredentialsAsync();
             }
+
+            SelectedCredential = newCredVM;
         }
 
-        public void LoadCredentials()
+        public void ReloadCredentials()
         {
             try
             {
-                Loading = true;
+                DisplayedCredentials.Clear();
+                _credentials.Clear();
+
                 var credentials = _credentialsCryptoService.Credentials;
                 using var delayed = DisplayedCredentials.DelayNotifications();
                 foreach (var cred in credentials)
@@ -193,17 +175,12 @@ namespace PasswordManager.ViewModels
             {
                 _logger.LogError(ex, string.Empty);
             }
-            finally
-            {
-                Loading = false;
-            }
         }
 
         public async Task FilterCredentialsAsync()
         {
             try
             {
-                Loading = true;
                 List<CredentialViewModel> filteredCredentials = null;
                 var filterText = SearchText;
 
@@ -227,7 +204,14 @@ namespace PasswordManager.ViewModels
                         foreach (var cred in _credentials)
                         {
                             var nameValue = cred.NameFieldVM.Value;
+                            var loginValue = cred.LoginFieldVM.Value;
+                            var websiteValue = cred.SiteFieldVM.Value;
+                            var otherValue = cred.OtherFieldVM.Value;
+
                             if (nameValue.IndexOf(filterText, StringComparison.OrdinalIgnoreCase) != -1
+                                || (loginValue != null && loginValue.IndexOf(filterText, StringComparison.OrdinalIgnoreCase) != -1)
+                                || (websiteValue != null && websiteValue.IndexOf(filterText, StringComparison.OrdinalIgnoreCase) != -1)
+                                || (otherValue != null && otherValue.IndexOf(filterText, StringComparison.OrdinalIgnoreCase) != -1)
                                 || (translitCompare && nameValue.IndexOf(transliteratedText, StringComparison.OrdinalIgnoreCase) != -1))
                             {
                                 fCreds.Add(cred);
@@ -247,15 +231,11 @@ namespace PasswordManager.ViewModels
             {
                 _logger.LogError(ex, string.Empty);
             }
-            finally
-            {
-                Loading = false;
-            }
         }
 
         private void AddCredential()
         {
-            ActiveCredentialDialogViewModel.CredentialViewModel = new CredentialViewModel(new Credential());
+            ActiveCredentialDialogViewModel.CredentialViewModel = new CredentialViewModel(Credential.CreateNew());
             ActiveCredentialDialogViewModel.Mode = CredentialsDialogMode.New;
             ActiveCredentialDialogViewModel.IsPasswordVisible = true;
             ActiveCredentialDialogViewModel.SetFocus();

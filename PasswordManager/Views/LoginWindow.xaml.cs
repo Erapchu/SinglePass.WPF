@@ -36,5 +36,10 @@ namespace PasswordManager.Views
         {
             ViewModel.Accept -= LoginWindowViewModel_Accept;
         }
+
+        private void MaterialWindow_Activated(object sender, System.EventArgs e)
+        {
+            ViewModel.RefreshCapsLockCommand.Execute(null);
+        }
     }
 }

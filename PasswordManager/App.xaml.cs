@@ -82,7 +82,7 @@ namespace PasswordManager
                 _trayIcon = new TrayIcon();
 
                 // Set some static services
-                RemoteImagesServiceHolder.Service = _host.Services.GetService<RemoteImagesService>();
+                FavIconServiceHolder.Service = _host.Services.GetService<FavIconService>();
 
                 // Login
                 using (var loginScope = _host.Services.CreateScope())
@@ -147,7 +147,7 @@ namespace PasswordManager
                 services.AddSingleton<ThemeService>();
                 services.AddSingleton<AppSettingsService>();
                 services.AddSingleton<SyncService>();
-                services.AddSingleton<RemoteImagesService>();
+                services.AddSingleton<FavIconService>();
             });
 
         private void Application_Exit(object sender, ExitEventArgs e)

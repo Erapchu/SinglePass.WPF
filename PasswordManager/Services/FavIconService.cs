@@ -8,16 +8,16 @@ using System.Windows.Media.Imaging;
 
 namespace PasswordManager.Services
 {
-    public class RemoteImagesService
+    public class FavIconService
     {
         private const string _favIconService = "http://www.google.com/s2/favicons?domain_url={0}";
         private readonly ConcurrentDictionary<string, ImageSource> _images = new();
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ILogger<RemoteImagesService> _logger;
+        private readonly ILogger<FavIconService> _logger;
 
-        public RemoteImagesService(
+        public FavIconService(
             IHttpClientFactory httpClientFactory,
-            ILogger<RemoteImagesService> logger)
+            ILogger<FavIconService> logger)
         {
             _httpClientFactory = httpClientFactory;
             _logger = logger;

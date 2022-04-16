@@ -191,22 +191,11 @@ namespace PasswordManager.ViewModels
                 var cloudService = _cloudServiceProvider.GetCloudService(cloudType);
                 var userInfo = await cloudService.GetUserInfo(cancellationToken);
 
-                var client = _httpClientFactory.CreateClient();
-                var request = new HttpRequestMessage(HttpMethod.Get, userInfo.ProfileUrl);
-                using var response = await client.SendAsync(request, cancellationToken);
-                using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-                var bitmapImage = new BitmapImage();
-                bitmapImage.BeginInit();
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapImage.StreamSource = stream;
-                bitmapImage.EndInit();
-                bitmapImage.Freeze();
-
                 switch (cloudType)
                 {
                     case CloudType.GoogleDrive:
-                        GoogleProfileImage = bitmapImage;
                         GoogleUserName = userInfo.UserName;
+                        GoogleProfileImage = await GetImageAsync(userInfo.ProfileUrl, cancellationToken);
                         break;
                 }
             }
@@ -218,6 +207,21 @@ namespace PasswordManager.ViewModels
             {
                 FetchingUserInfo = false;
             }
+        }
+
+        private async Task<ImageSource> GetImageAsync(string imageUrl, CancellationToken cancellationToken)
+        {
+            var client = _httpClientFactory.CreateClient();
+            var request = new HttpRequestMessage(HttpMethod.Get, imageUrl);
+            using var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+            var bitmapImage = new BitmapImage();
+            bitmapImage.BeginInit();
+            bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+            bitmapImage.StreamSource = stream;
+            bitmapImage.EndInit();
+            bitmapImage.Freeze();
+            return bitmapImage;
         }
 
         private void ClearUserInfo(CloudType cloudType)

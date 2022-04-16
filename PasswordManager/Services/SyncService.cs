@@ -3,8 +3,6 @@ using PasswordManager.Cloud.Enums;
 using PasswordManager.Clouds.Services;
 using PasswordManager.Helpers;
 using PasswordManager.Models;
-using PasswordManager.Views.InputBox;
-using PasswordManager.Views.MessageBox;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -35,20 +33,20 @@ namespace PasswordManager.Services
             _cryptoService = cryptoService;
         }
 
-        public async Task Synchronize(CloudType cloudType)
+        public async Task<CredentialsMergeResult> Synchronize(CloudType cloudType, Func<Task<string>> userPasswordRequired)
         {
-            lock (_syncClouds)
-            {
-                if (!_syncClouds.Add(cloudType))
-                {
-                    _logger.LogInformation($"Sync for \'{cloudType}\' is in processing");
-                    return;
-                }
-            }
+            CredentialsMergeResult mergeResult = null;
 
             try
             {
-                var windowDialogName = MvvmHelper.MainWindowDialogName;
+                lock (_syncClouds)
+                {
+                    if (!_syncClouds.Add(cloudType))
+                    {
+                        throw new Exception($"Sync for \'{cloudType}\' is in processing");
+                    }
+                }
+
                 var token = _syncCTS.Token;
                 var cloudService = _cloudServiceProvider.GetCloudService(cloudType);
 
@@ -72,25 +70,15 @@ namespace PasswordManager.Services
 
                         if (cloudCredentials is null)
                         {
-                            password = await MaterialInputBox.ShowAsync(
-                                "Input password of cloud file",
-                                "Password",
-                                windowDialogName,
-                                true);
-
+                            password = await userPasswordRequired();
                             if (password is null)
-                                return; // Cancel operation
+                                throw new Exception("Merge operation cancelled by user"); // Cancel operation
                         }
                     }
                     while (cloudCredentials is null);
 
                     // Merge
-                    var mergeResult = await _credentialsCryptoService.Merge(cloudCredentials);
-                    await MaterialMessageBox.ShowAsync(
-                        "Credentials successfully merged",
-                        mergeResult.ToString(),
-                        MaterialMessageBoxButtons.OK,
-                        windowDialogName);
+                    mergeResult = await _credentialsCryptoService.Merge(cloudCredentials);
                 }
 
                 using var fileStream = File.Open(Constants.PasswordsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -101,10 +89,12 @@ namespace PasswordManager.Services
             catch (OperationCanceledException)
             {
                 _logger.LogWarning($"Synchronize for \'{cloudType}\' has been cancelled");
+                mergeResult = CredentialsMergeResult.FailureMergeResult;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, string.Empty);
+                mergeResult = CredentialsMergeResult.FailureMergeResult;
             }
             finally
             {
@@ -114,6 +104,8 @@ namespace PasswordManager.Services
                     _logger.LogInformation($"Synchronize for \'{cloudType}\' completed");
                 }
             }
+
+            return mergeResult;
         }
     }
 }

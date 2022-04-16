@@ -4,13 +4,11 @@ using Microsoft.Toolkit.Mvvm.Input;
 using PasswordManager.Cloud.Enums;
 using PasswordManager.Clouds.Services;
 using PasswordManager.Helpers;
-using PasswordManager.Models;
 using PasswordManager.Services;
 using PasswordManager.Views;
 using PasswordManager.Views.InputBox;
 using PasswordManager.Views.MessageBox;
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -243,8 +241,14 @@ namespace PasswordManager.ViewModels
             try
             {
                 SyncProcessing = true;
+                var windowDialogName = MvvmHelper.MainWindowDialogName;
+                var mergeResult = await _syncService.Synchronize(cloudType, SyncPasswordRequired);
 
-                await _syncService.Synchronize(cloudType);
+                await MaterialMessageBox.ShowAsync(
+                    mergeResult.Success ? "Credentials successfully merged" : "Credentials not merged",
+                    mergeResult.ToString(),
+                    MaterialMessageBoxButtons.OK,
+                    windowDialogName);
             }
             catch (Exception ex)
             {
@@ -255,6 +259,16 @@ namespace PasswordManager.ViewModels
                 SyncCompleted?.Invoke();
                 SyncProcessing = false;
             }
+        }
+
+        private async Task<string> SyncPasswordRequired()
+        {
+            var password = await MaterialInputBox.ShowAsync(
+                "Input password of cloud file",
+                "Password",
+                MvvmHelper.MainWindowDialogName,
+                true);
+            return password;
         }
     }
 }

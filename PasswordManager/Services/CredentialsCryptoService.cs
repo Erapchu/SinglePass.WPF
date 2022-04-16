@@ -172,7 +172,7 @@ namespace PasswordManager.Services
 
         public async Task<CredentialsMergeResult> Merge(List<Credential> mergingCreds)
         {
-            var result = new CredentialsMergeResult();
+            var result = CredentialsMergeResult.SuccessMergeResult;
 
             foreach (var mergingCred in mergingCreds)
             {

@@ -13,7 +13,7 @@
     xmlns:vm="clr-namespace:PasswordManager.ViewModels"
     Title="Password manager"
     Width="800"
-    Height="500"
+    Height="550"
     MinWidth="500"
     MinHeight="300"
     d:DataContext="{x:Static vm:MainWindowViewModel.DesignTimeInstance}"

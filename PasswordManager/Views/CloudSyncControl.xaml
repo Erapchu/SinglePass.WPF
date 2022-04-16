@@ -55,6 +55,10 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="auto" />
                         </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                        </Grid.RowDefinitions>
                         <StackPanel Width="120" Visibility="{Binding FetchingUserInfo, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <ProgressBar
                                 Width="64"
@@ -85,44 +89,60 @@
                                 TextTrimming="CharacterEllipsis" />
                         </StackPanel>
                         <StackPanel Grid.Column="1">
-                            <StackPanel>
-                                <Button
-                                    HorizontalAlignment="Center"
-                                    md:ButtonProgressAssist.IsIndeterminate="True"
-                                    md:ButtonProgressAssist.IsIndicatorVisible="{Binding SyncProcessing}"
-                                    Command="{Binding SyncCommand}"
-                                    CommandParameter="{x:Static cloudEnums:CloudType.GoogleDrive}"
-                                    Style="{StaticResource MaterialDesignFlatButton}"
-                                    ToolTip="Synchronize credentials with Google">
-                                    <StackPanel Orientation="Horizontal">
-                                        <md:PackIcon
-                                            Width="20"
-                                            Height="20"
-                                            VerticalAlignment="Center"
-                                            Kind="Merge" />
-                                        <TextBlock
-                                            Margin="8 0 0 0"
-                                            VerticalAlignment="Center"
-                                            Text="Merge" />
-                                    </StackPanel>
-                                </Button>
-                                <TextBlock
-                                    MaxWidth="300"
-                                    Margin="0 8 0 0"
-                                    HorizontalAlignment="Center"
-                                    Text="{Binding MergeStage}"
-                                    TextTrimming="CharacterEllipsis" />
-                            </StackPanel>
-
-                            <StackPanel>
-                                
-                            </StackPanel>
+                            <Button
+                                HorizontalAlignment="Center"
+                                md:ButtonProgressAssist.IsIndeterminate="True"
+                                md:ButtonProgressAssist.IsIndicatorVisible="{Binding MergeProcessing}"
+                                Command="{Binding SyncCommand}"
+                                CommandParameter="{x:Static cloudEnums:CloudType.GoogleDrive}"
+                                Style="{StaticResource MaterialDesignFlatButton}"
+                                ToolTip="Merge credentials">
+                                <StackPanel Orientation="Horizontal">
+                                    <md:PackIcon
+                                        Width="20"
+                                        Height="20"
+                                        VerticalAlignment="Center"
+                                        Kind="Merge" />
+                                    <TextBlock
+                                        Margin="8 0 0 0"
+                                        VerticalAlignment="Center"
+                                        Text="Merge" />
+                                </StackPanel>
+                            </Button>
+                            <Button
+                                Margin="0 8 0 0"
+                                HorizontalAlignment="Center"
+                                md:ButtonProgressAssist.IsIndeterminate="True"
+                                md:ButtonProgressAssist.IsIndicatorVisible="{Binding UploadProcessing}"
+                                Command="{Binding UploadCommand}"
+                                CommandParameter="{x:Static cloudEnums:CloudType.GoogleDrive}"
+                                Style="{StaticResource MaterialDesignFlatButton}"
+                                ToolTip="Upload credentials">
+                                <StackPanel Orientation="Horizontal">
+                                    <md:PackIcon
+                                        Width="20"
+                                        Height="20"
+                                        VerticalAlignment="Center"
+                                        Kind="Upload" />
+                                    <TextBlock
+                                        Margin="8 0 0 0"
+                                        VerticalAlignment="Center"
+                                        Text="Upload" />
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
+                        <TextBlock
+                            Grid.Row="1"
+                            MaxWidth="300"
+                            Margin="0 8 0 0"
+                            HorizontalAlignment="Center"
+                            Text="{Binding SyncState}"
+                            TextTrimming="CharacterEllipsis" />
                         <Button
                             Grid.Column="2"
                             Command="{Binding LoginCommand}"
                             CommandParameter="{x:Static cloudEnums:CloudType.GoogleDrive}"
-                            Content="SIGN OUT"
+                            Content="Sign out"
                             Style="{StaticResource MaterialDesignFlatAccentButton}" />
                     </Grid>
                 </Grid>

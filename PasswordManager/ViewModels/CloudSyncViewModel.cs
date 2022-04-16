@@ -36,14 +36,16 @@ namespace PasswordManager.ViewModels
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly SyncService _syncService;
 
-        private bool _syncProcessing;
+        private bool _mergeProcessing;
+        private bool _uploadProcessing;
         private bool _fetchingUserInfo;
         private ImageSource _googleProfileImage;
         private string _googleUserName;
-        private string _mergeStage;
+        private string _syncStage;
 
         private AsyncRelayCommand<CloudType> _syncCommand;
         private AsyncRelayCommand<CloudType> _loginCommand;
+        private AsyncRelayCommand<CloudType> _uploadCommand;
 
         public event Action SyncCompleted;
 
@@ -57,10 +59,16 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        public bool SyncProcessing
+        public bool MergeProcessing
         {
-            get => _syncProcessing;
-            set => SetProperty(ref _syncProcessing, value);
+            get => _mergeProcessing;
+            set => SetProperty(ref _mergeProcessing, value);
+        }
+
+        public bool UploadProcessing
+        {
+            get => _uploadProcessing;
+            set => SetProperty(ref _uploadProcessing, value);
         }
 
         public bool FetchingUserInfo
@@ -81,14 +89,15 @@ namespace PasswordManager.ViewModels
             set => SetProperty(ref _googleUserName, value);
         }
 
-        public string MergeStage
+        public string SyncState
         {
-            get => _mergeStage;
-            set => SetProperty(ref _mergeStage, value);
+            get => _syncStage;
+            set => SetProperty(ref _syncStage, value);
         }
 
         public AsyncRelayCommand<CloudType> LoginCommand => _loginCommand ??= new AsyncRelayCommand<CloudType>(Login);
         public AsyncRelayCommand<CloudType> SyncCommand => _syncCommand ??= new AsyncRelayCommand<CloudType>(SyncCredentials);
+        public AsyncRelayCommand<CloudType> UploadCommand => _uploadCommand ??= new AsyncRelayCommand<CloudType>(UploadCredentials);
 
         private CloudSyncViewModel() { }
 
@@ -108,12 +117,12 @@ namespace PasswordManager.ViewModels
             _syncService = syncService;
             _logger = logger;
 
-            _syncService.MergeStageChanged += SyncService_MergeStageChanged;
+            _syncService.SyncStateChanged += SyncService_SyncStateChanged;
         }
 
-        private void SyncService_MergeStageChanged(string stage)
+        private void SyncService_SyncStateChanged(string syncState)
         {
-            MergeStage = stage;
+            SyncState = syncState;
         }
 
         private async Task Login(CloudType cloudType)
@@ -249,12 +258,12 @@ namespace PasswordManager.ViewModels
 
         private async Task SyncCredentials(CloudType cloudType)
         {
-            if (SyncProcessing)
+            if (MergeProcessing)
                 return;
 
             try
             {
-                SyncProcessing = true;
+                MergeProcessing = true;
                 var windowDialogName = MvvmHelper.MainWindowDialogName;
                 var mergeResult = await _syncService.Synchronize(cloudType, SyncPasswordRequired);
 
@@ -271,7 +280,35 @@ namespace PasswordManager.ViewModels
             finally
             {
                 SyncCompleted?.Invoke();
-                SyncProcessing = false;
+                MergeProcessing = false;
+            }
+        }
+
+        private async Task UploadCredentials(CloudType cloudType)
+        {
+            if (UploadProcessing)
+                return;
+
+            try
+            {
+                UploadProcessing = true;
+                var windowDialogName = MvvmHelper.MainWindowDialogName;
+                var success = await _syncService.Upload(cloudType);
+
+                await MaterialMessageBox.ShowAsync(
+                    success ? "Success" : "Error",
+                    success ? "Credentials successfully uploaded" : "Failed to upload credentials",
+                    MaterialMessageBoxButtons.OK,
+                    windowDialogName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, string.Empty);
+            }
+            finally
+            {
+                SyncCompleted?.Invoke();
+                UploadProcessing = false;
             }
         }
 

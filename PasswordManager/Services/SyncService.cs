@@ -21,6 +21,8 @@ namespace PasswordManager.Services
         // TODO: implement IDisposable
         private readonly CancellationTokenSource _syncCTS = new();
 
+        public event Action<string> MergeStageChanged;
+
         public SyncService(
             CloudServiceProvider cloudServiceProvider,
             CredentialsCryptoService credentialsCryptoService,
@@ -50,6 +52,7 @@ namespace PasswordManager.Services
                 var token = _syncCTS.Token;
                 var cloudService = _cloudServiceProvider.GetCloudService(cloudType);
 
+                MergeStageChanged?.Invoke("Downloading file...");
                 using var cloudFileStream = await cloudService.Download(Constants.PasswordsFileName, token);
                 if (cloudFileStream != null)
                 {
@@ -61,6 +64,7 @@ namespace PasswordManager.Services
                     {
                         try
                         {
+                            MergeStageChanged?.Invoke("Decrypting passwords...");
                             cloudCredentials = _cryptoService.DecryptFromStream<List<Credential>>(cloudFileStream, password);
                         }
                         catch (Exception ex)
@@ -81,6 +85,7 @@ namespace PasswordManager.Services
                     mergeResult = await _credentialsCryptoService.Merge(cloudCredentials);
                 }
 
+                MergeStageChanged?.Invoke("Uploading...");
                 using var fileStream = File.Open(Constants.PasswordsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                 // Ensure begining
                 fileStream.Seek(0, SeekOrigin.Begin);
@@ -98,6 +103,7 @@ namespace PasswordManager.Services
             }
             finally
             {
+                MergeStageChanged?.Invoke(string.Empty);
                 lock (_syncClouds)
                 {
                     _syncClouds.Remove(cloudType);

@@ -3,16 +3,16 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cloudEnums="clr-namespace:PasswordManager.Cloud.Enums"
+    xmlns:conv="clr-namespace:PasswordManager.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:PasswordManager.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:vm="clr-namespace:PasswordManager.ViewModels"
-    xmlns:conv="clr-namespace:PasswordManager.Converters"
+    d:DataContext="{x:Static vm:CloudSyncViewModel.DesignTimeInstance}"
     d:DesignHeight="450"
     d:DesignWidth="800"
-    mc:Ignorable="d"
-    d:DataContext="{x:Static vm:CloudSyncViewModel.DesignTimeInstance}">
+    mc:Ignorable="d">
     <UserControl.Resources>
         <ResourceDictionary>
             <conv:BooleanToVisibilityConverter
@@ -84,15 +84,22 @@
                                 TextAlignment="Center"
                                 TextTrimming="CharacterEllipsis" />
                         </StackPanel>
-                        <Button
-                            Grid.Column="1"
-                            md:ButtonProgressAssist.IsIndeterminate="True"
-                            md:ButtonProgressAssist.IsIndicatorVisible="{Binding SyncProcessing}"
-                            Command="{Binding SyncCommand}"
-                            CommandParameter="{x:Static cloudEnums:CloudType.GoogleDrive}"
-                            Content="{md:PackIcon Kind=CloudSync, Size=24}"
-                            Style="{StaticResource MaterialDesignFloatingActionButton}"
-                            ToolTip="Synchronize credentials with Google" />
+                        <StackPanel Grid.Column="1">
+                            <Button
+                                md:ButtonProgressAssist.IsIndeterminate="True"
+                                md:ButtonProgressAssist.IsIndicatorVisible="{Binding SyncProcessing}"
+                                Command="{Binding SyncCommand}"
+                                CommandParameter="{x:Static cloudEnums:CloudType.GoogleDrive}"
+                                Content="{md:PackIcon Kind=CloudSync, Size=24}"
+                                Style="{StaticResource MaterialDesignFloatingActionButton}"
+                                ToolTip="Synchronize credentials with Google" />
+                            <TextBlock
+                                MaxWidth="300"
+                                HorizontalAlignment="Center"
+                                Margin="0 8 0 0"
+                                Text="{Binding MergeStage}"
+                                TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
                         <Button
                             Grid.Column="2"
                             Command="{Binding LoginCommand}"

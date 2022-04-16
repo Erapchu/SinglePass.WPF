@@ -40,6 +40,7 @@ namespace PasswordManager.ViewModels
         private bool _fetchingUserInfo;
         private ImageSource _googleProfileImage;
         private string _googleUserName;
+        private string _mergeStage;
 
         private AsyncRelayCommand<CloudType> _syncCommand;
         private AsyncRelayCommand<CloudType> _loginCommand;
@@ -80,6 +81,12 @@ namespace PasswordManager.ViewModels
             set => SetProperty(ref _googleUserName, value);
         }
 
+        public string MergeStage
+        {
+            get => _mergeStage;
+            set => SetProperty(ref _mergeStage, value);
+        }
+
         public AsyncRelayCommand<CloudType> LoginCommand => _loginCommand ??= new AsyncRelayCommand<CloudType>(Login);
         public AsyncRelayCommand<CloudType> SyncCommand => _syncCommand ??= new AsyncRelayCommand<CloudType>(SyncCredentials);
 
@@ -100,6 +107,13 @@ namespace PasswordManager.ViewModels
             _httpClientFactory = httpClientFactory;
             _syncService = syncService;
             _logger = logger;
+
+            _syncService.MergeStageChanged += SyncService_MergeStageChanged;
+        }
+
+        private void SyncService_MergeStageChanged(string stage)
+        {
+            MergeStage = stage;
         }
 
         private async Task Login(CloudType cloudType)

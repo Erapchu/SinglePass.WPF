@@ -1,5 +1,6 @@
 ﻿using PasswordManager.Helpers;
 using System;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Interop;
@@ -18,23 +19,6 @@ namespace PasswordManager.Views
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Split code parts - determine position before showing, but first implement hotkeys
-            // Obtain popup handle for placement
-            IntPtr handle = ((HwndSource)PresentationSource.FromVisual(Child)).Handle;
-            
-            // TODO: See ConsoleTest project
-            // Get position
-            //var hFore = GetForegroundWindow();
-            //var idAttach = GetWindowThreadProcessId(hFore, out uint id);
-            //var curThreadId = GetCurrentThreadId();
-            // To attach to current thread
-            //var sa = AttachThreadInput(idAttach, curThreadId, true);
-            //var caretPos = WindowsKeyboard.GetCaretPos(out POINT caretPoint);
-            //ClientToScreen(hFore, ref caretPoint);
-            // To dettach from current thread
-            //var sd = AttachThreadInput(idAttach, curThreadId, false);
-            //var data = string.Format("X={0}, Y={1}", caretPoint.X, caretPoint.Y);
-            
             var inputData = "pasted from popup";
 
             WindowsClipboard.SetText(inputData);

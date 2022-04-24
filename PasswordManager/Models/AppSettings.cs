@@ -11,7 +11,7 @@ namespace PasswordManager.Models
 
         public AppSettings()
         {
-
+            ShowPopupHotkey = Hotkey.Empty;
         }
     }
 }

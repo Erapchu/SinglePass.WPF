@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using PasswordManager.Helpers;
 using PasswordManager.Helpers.Threading;
+using PasswordManager.Hotkeys;
 using PasswordManager.Models;
 using System.IO;
 using System.Text.Json;
@@ -26,6 +27,12 @@ namespace PasswordManager.Services
         {
             get => Settings.GoogleDriveEnabled;
             set => Settings.GoogleDriveEnabled = value;
+        }
+
+        public Hotkey ShowPopupHotkey
+        {
+            get => Settings.ShowPopupHotkey;
+            set => Settings.ShowPopupHotkey = value;
         }
 
         public AppSettingsService(ILogger<AppSettingsService> logger)

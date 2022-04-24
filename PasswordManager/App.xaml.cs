@@ -9,6 +9,7 @@ using PasswordManager.Authorization.Holders;
 using PasswordManager.Clouds.Services;
 using PasswordManager.Controls;
 using PasswordManager.Helpers;
+using PasswordManager.Hotkeys;
 using PasswordManager.Services;
 using PasswordManager.ViewModels;
 using PasswordManager.Views;
@@ -148,6 +149,7 @@ namespace PasswordManager
                 services.AddSingleton<AppSettingsService>();
                 services.AddSingleton<SyncService>();
                 services.AddSingleton<FavIconService>();
+                services.AddSingleton<HotkeysService>();
             });
 
         private void Application_Exit(object sender, ExitEventArgs e)

@@ -74,7 +74,6 @@ namespace PasswordManager.Views
         static extern bool ClientToScreen(IntPtr hWnd, ref POINT lpPoint);
 
         [StructLayout(LayoutKind.Sequential)]
-
         public struct RECT
         {
             public int left;

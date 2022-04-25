@@ -47,5 +47,24 @@ namespace PasswordManager.Views
 
             IsOpen = false;
         }
+
+        private void Popup_Opened(object sender, System.EventArgs e)
+        {
+            CredListBox.SelectedIndex = 0;
+        }
+
+        private void Popup_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Up)
+            {
+                if (CredListBox.SelectedIndex != 0)
+                    CredListBox.SelectedIndex--;
+            }
+            else if (e.Key == System.Windows.Input.Key.Down)
+            {
+                if (CredListBox.SelectedIndex != CredListBox.Items.Count - 1)
+                    CredListBox.SelectedIndex++;
+            }
+        }
     }
 }

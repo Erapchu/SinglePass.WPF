@@ -144,7 +144,10 @@ namespace PasswordManager.ViewModels
         private void ChangeHelperPopupHotkey(System.Windows.Input.KeyEventArgs args)
         {
             if (_hotkeysService.GetHotkeyForKeyPress(args, out Hotkey hotkey))
+            {
+                _hotkeysService.UpdateKey(hotkey, nameof(_appSettingsService.ShowPopupHotkey), HotkeyDelegates.PopupHotkeyHandler);
                 ShowPopupHotkey = hotkey;
+            }
         }
 
         private void ClearShowPopupHotkey()

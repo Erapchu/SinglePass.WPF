@@ -1,12 +1,10 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
-using PasswordManager.Collections;
+using Microsoft.Toolkit.Mvvm.Input;
+using PasswordManager.Helpers;
 using PasswordManager.Services;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PasswordManager.ViewModels
 {
@@ -25,6 +23,8 @@ namespace PasswordManager.ViewModels
 
         private readonly CredentialsCryptoService _credentialsCryptoService;
 
+        public event Action Accept;
+
         public ObservableCollection<CredentialViewModel> DisplayedCredentials { get; private set; }
 
         private CredentialViewModel _selectedCredentialVM;
@@ -34,6 +34,9 @@ namespace PasswordManager.ViewModels
             set => SetProperty(ref _selectedCredentialVM, value);
         }
 
+        private RelayCommand<CredentialViewModel> _setLoginAndCloseCommand;
+        public RelayCommand<CredentialViewModel> SetLoginAndCloseCommand => _setLoginAndCloseCommand ??= new RelayCommand<CredentialViewModel>(SetLoginAndClose);
+
         private PopupViewModel() { }
 
         public PopupViewModel(CredentialsCryptoService credentialsCryptoService)
@@ -42,6 +45,34 @@ namespace PasswordManager.ViewModels
 
             var creds = _credentialsCryptoService.Credentials.Select(cr => new CredentialViewModel(cr)).ToList();
             DisplayedCredentials = new ObservableCollection<CredentialViewModel>(creds);
+        }
+
+        private void SetLoginAndClose(CredentialViewModel credentialViewModel)
+        {
+            var inputData = credentialViewModel.LoginFieldVM.Value;
+
+            WindowsClipboard.SetText(inputData);
+
+            INPUT[] inputs = new INPUT[4];
+
+            inputs[0].type = WindowsKeyboard.INPUT_KEYBOARD;
+            inputs[0].U.ki.wVk = WindowsKeyboard.VK_CONTROL;
+
+            inputs[1].type = WindowsKeyboard.INPUT_KEYBOARD;
+            inputs[1].U.ki.wVk = WindowsKeyboard.VK_V;
+
+            inputs[2].type = WindowsKeyboard.INPUT_KEYBOARD;
+            inputs[2].U.ki.wVk = WindowsKeyboard.VK_V;
+            inputs[2].U.ki.dwFlags = WindowsKeyboard.KEYEVENTF_KEYUP;
+
+            inputs[3].type = WindowsKeyboard.INPUT_KEYBOARD;
+            inputs[3].U.ki.wVk = WindowsKeyboard.VK_CONTROL;
+            inputs[3].U.ki.dwFlags = WindowsKeyboard.KEYEVENTF_KEYUP;
+
+            // Send input simulate Ctrl + V
+            var uSent = WindowsKeyboard.SendInput((uint)inputs.Length, inputs, INPUT.Size);
+
+            Accept?.Invoke();
         }
     }
 }

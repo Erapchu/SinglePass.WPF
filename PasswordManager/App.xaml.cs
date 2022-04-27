@@ -27,10 +27,10 @@ namespace PasswordManager
         private readonly Mutex _mutex;
         private static IConfiguration _configuration;
 
-        private IHost _host;
         private Logger _logger;
         private TrayIcon _trayIcon;
 
+        public IHost Host { get; private set; }
         private bool IsFirstInstance { get; }
 
         public App()
@@ -72,23 +72,23 @@ namespace PasswordManager
                     .LoadConfigurationFromSection(_configuration)
                     .GetCurrentClassLogger();
 
-                _host = CreateHostBuilder().Build();
+                Host = CreateHostBuilder().Build();
                 _logger.Info("Log session started!");
 
                 // Resolve theme
-                var themeService = _host.Services.GetService<ThemeService>();
+                var themeService = Host.Services.GetService<ThemeService>();
                 themeService.Init();
 
                 // Create tray icon
                 _trayIcon = new TrayIcon();
 
                 // Set some static services
-                FavIconServiceHolder.Service = _host.Services.GetService<FavIconService>();
+                FavIconServiceHolder.Service = Host.Services.GetService<FavIconService>();
 
                 // Login
-                using (var loginScope = _host.Services.CreateScope())
+                using (var loginScope = Host.Services.CreateScope())
                 {
-                    var loginWindow = _host.Services.GetService<LoginWindow>();
+                    var loginWindow = Host.Services.GetService<LoginWindow>();
                     welcomeWindow.Close();
                     bool? dialogResult = loginWindow.ShowDialog(); // Stop here
 
@@ -100,7 +100,7 @@ namespace PasswordManager
                 }
 
                 // Open main window
-                var mainWindow = _host.Services.GetService<MainWindow>();
+                var mainWindow = Host.Services.GetService<MainWindow>();
                 mainWindow.Show();
             }
             else
@@ -110,7 +110,7 @@ namespace PasswordManager
         }
 
         private IHostBuilder CreateHostBuilder() =>
-            Host.CreateDefaultBuilder()
+            Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
             .ConfigureServices(services =>
             {
                 // NLog
@@ -142,6 +142,9 @@ namespace PasswordManager
                 services.AddScoped<CloudSyncViewModel>();
                 services.AddScoped<SettingsViewModel>();
                 services.AddScoped<CredentialsDialogViewModel>();
+
+                services.AddTransient<PopupControl>();
+                services.AddTransient<PopupViewModel>();
 
                 // Main services
                 services.AddSingleton<CredentialsCryptoService>();

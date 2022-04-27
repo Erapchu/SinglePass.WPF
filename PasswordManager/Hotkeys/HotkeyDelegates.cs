@@ -19,10 +19,9 @@ namespace PasswordManager.Hotkeys
                 var hwndFocus = info.hwndFocus;
                 var caretRect = GetAccessibleCaretRect(hwndFocus);
 
-                var popup = new PopupControl
-                {
-                    IsOpen = true
-                };
+                var popup = (Application.Current as App).Host.Services.GetService(typeof(PopupControl)) as PopupControl;
+                popup.IsOpen = true;
+
                 // Obtain popup handle for placement
                 var popupHandle = ((HwndSource)PresentationSource.FromVisual(popup.Child)).Handle;
                 var popupRect = new WinApiProvider.RECT();

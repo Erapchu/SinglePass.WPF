@@ -1,6 +1,8 @@
 ﻿using PasswordManager.Helpers;
+using PasswordManager.ViewModels;
 using System.Windows;
 using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 
 namespace PasswordManager.Views
 {
@@ -9,43 +11,13 @@ namespace PasswordManager.Views
     /// </summary>
     public partial class PopupControl : Popup
     {
-        public PopupControl()
+        private PopupViewModel ViewModel => DataContext as PopupViewModel;
+
+        public PopupControl(PopupViewModel popupViewModel)
         {
             InitializeComponent();
-        }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            var inputData = "pasted from popup";
-
-            WindowsClipboard.SetText(inputData);
-
-            INPUT[] inputs = new INPUT[4];
-
-            inputs[0].type = WindowsKeyboard.INPUT_KEYBOARD;
-            inputs[0].U.ki.wVk = WindowsKeyboard.VK_CONTROL;
-
-            inputs[1].type = WindowsKeyboard.INPUT_KEYBOARD;
-            inputs[1].U.ki.wVk = WindowsKeyboard.VK_V;
-
-            inputs[2].type = WindowsKeyboard.INPUT_KEYBOARD;
-            inputs[2].U.ki.wVk = WindowsKeyboard.VK_V;
-            inputs[2].U.ki.dwFlags = WindowsKeyboard.KEYEVENTF_KEYUP;
-
-            inputs[3].type = WindowsKeyboard.INPUT_KEYBOARD;
-            inputs[3].U.ki.wVk = WindowsKeyboard.VK_CONTROL;
-            inputs[3].U.ki.dwFlags = WindowsKeyboard.KEYEVENTF_KEYUP;
-
-            // Send input simulate Ctrl + V
-            var uSent = WindowsKeyboard.SendInput((uint)inputs.Length, inputs, INPUT.Size);
-
-            // Deprecated WinAPI methods
-            //WindowsKeyboard.keybd_event(WindowsKeyboard.VK_CONTROL, 0, 0, UIntPtr.Zero);
-            //WindowsKeyboard.keybd_event(WindowsKeyboard.VK_V, 0, 0, UIntPtr.Zero);
-            //WindowsKeyboard.keybd_event(WindowsKeyboard.VK_V, 0, WindowsKeyboard.KEYEVENTF_KEYUP, UIntPtr.Zero);
-            //WindowsKeyboard.keybd_event(WindowsKeyboard.VK_CONTROL, 0, WindowsKeyboard.KEYEVENTF_KEYUP, UIntPtr.Zero);
-
-            IsOpen = false;
+            DataContext = popupViewModel;
         }
 
         private void Popup_Opened(object sender, System.EventArgs e)
@@ -53,17 +25,42 @@ namespace PasswordManager.Views
             CredListBox.SelectedIndex = 0;
         }
 
-        private void Popup_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        private void ListBoxItem_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (e.Key == System.Windows.Input.Key.Up)
+            if (e.ChangedButton == MouseButton.Left)
             {
-                if (CredListBox.SelectedIndex != 0)
-                    CredListBox.SelectedIndex--;
-            }
-            else if (e.Key == System.Windows.Input.Key.Down)
-            {
-                if (CredListBox.SelectedIndex != CredListBox.Items.Count - 1)
-                    CredListBox.SelectedIndex++;
+                var mousePosition = Mouse.GetPosition(Child);
+                var inputElement = CredListBox.InputHitTest(mousePosition);
+                if (inputElement is FrameworkElement element)
+                {
+                    if (element.DataContext is CredentialViewModel credVM)
+                    {
+                        var inputData = credVM.NameFieldVM.Value;
+
+                        WindowsClipboard.SetText(inputData);
+
+                        INPUT[] inputs = new INPUT[4];
+
+                        inputs[0].type = WindowsKeyboard.INPUT_KEYBOARD;
+                        inputs[0].U.ki.wVk = WindowsKeyboard.VK_CONTROL;
+
+                        inputs[1].type = WindowsKeyboard.INPUT_KEYBOARD;
+                        inputs[1].U.ki.wVk = WindowsKeyboard.VK_V;
+
+                        inputs[2].type = WindowsKeyboard.INPUT_KEYBOARD;
+                        inputs[2].U.ki.wVk = WindowsKeyboard.VK_V;
+                        inputs[2].U.ki.dwFlags = WindowsKeyboard.KEYEVENTF_KEYUP;
+
+                        inputs[3].type = WindowsKeyboard.INPUT_KEYBOARD;
+                        inputs[3].U.ki.wVk = WindowsKeyboard.VK_CONTROL;
+                        inputs[3].U.ki.dwFlags = WindowsKeyboard.KEYEVENTF_KEYUP;
+
+                        // Send input simulate Ctrl + V
+                        var uSent = WindowsKeyboard.SendInput((uint)inputs.Length, inputs, INPUT.Size);
+
+                        IsOpen = false;
+                    }
+                }
             }
         }
     }

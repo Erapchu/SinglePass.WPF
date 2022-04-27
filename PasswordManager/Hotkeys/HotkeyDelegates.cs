@@ -1,8 +1,11 @@
 ﻿using PasswordManager.Helpers;
 using PasswordManager.Views;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Controls.Primitives;
 using System.Windows.Interop;
 using UIAutomationClient;
 
@@ -12,6 +15,13 @@ namespace PasswordManager.Hotkeys
     {
         public static void PopupHotkeyHandler()
         {
+            // Prevent duplicates
+            var popups = GetOpenPopups();
+            if (popups != null && popups.Any(p => p is PopupControl))
+            {
+                return;
+            }
+
             var info = new WinApiProvider.GUITHREADINFO();
             info.cbSize = Marshal.SizeOf(info);
             if (WinApiProvider.GetGUIThreadInfo(0, ref info))
@@ -52,6 +62,16 @@ namespace PasswordManager.Hotkeys
                     popupRect.bottom - popupRect.top,
                     WinApiProvider.SWP_NOZORDER);
             }
+        }
+
+        private static IEnumerable<Popup> GetOpenPopups()
+        {
+            return PresentationSource.CurrentSources.OfType<HwndSource>()
+                .Select(h => h.RootVisual)
+                .OfType<FrameworkElement>()
+                .Select(f => f.Parent)
+                .OfType<Popup>()
+                .Where(p => p.IsOpen);
         }
 
         private static WinApiProvider.RECT GetAccessibleCaretRect(IntPtr hwnd)

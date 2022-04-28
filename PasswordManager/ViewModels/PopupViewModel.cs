@@ -1,4 +1,5 @@
-﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 using PasswordManager.Helpers;
 using PasswordManager.Services;
@@ -22,6 +23,7 @@ namespace PasswordManager.ViewModels
         #endregion
 
         private readonly CredentialsCryptoService _credentialsCryptoService;
+        private readonly ILogger<PopupViewModel> _logger;
 
         public event Action Accept;
 
@@ -34,45 +36,55 @@ namespace PasswordManager.ViewModels
             set => SetProperty(ref _selectedCredentialVM, value);
         }
 
-        private RelayCommand<CredentialViewModel> _setLoginAndCloseCommand;
-        public RelayCommand<CredentialViewModel> SetLoginAndCloseCommand => _setLoginAndCloseCommand ??= new RelayCommand<CredentialViewModel>(SetLoginAndClose);
+        private RelayCommand<PassFieldViewModel> _setAndCloseCommand;
+        public RelayCommand<PassFieldViewModel> SetAndCloseCommand => _setAndCloseCommand ??= new RelayCommand<PassFieldViewModel>(SetAndClose);
 
         private PopupViewModel() { }
 
-        public PopupViewModel(CredentialsCryptoService credentialsCryptoService)
+        public PopupViewModel(CredentialsCryptoService credentialsCryptoService, ILogger<PopupViewModel> logger)
         {
             _credentialsCryptoService = credentialsCryptoService;
+            _logger = logger;
 
             var creds = _credentialsCryptoService.Credentials.Select(cr => new CredentialViewModel(cr)).ToList();
             DisplayedCredentials = new ObservableCollection<CredentialViewModel>(creds);
         }
 
-        private void SetLoginAndClose(CredentialViewModel credentialViewModel)
+        private void SetAndClose(PassFieldViewModel passFieldViewModel)
         {
-            var inputData = credentialViewModel.LoginFieldVM.Value;
+            try
+            {
+                var inputData = passFieldViewModel.Value;
+                if (!string.IsNullOrWhiteSpace(inputData))
+                {
+                    WindowsClipboard.SetText(inputData);
 
-            WindowsClipboard.SetText(inputData);
+                    INPUT[] inputs = new INPUT[4];
 
-            INPUT[] inputs = new INPUT[4];
+                    inputs[0].type = WindowsKeyboard.INPUT_KEYBOARD;
+                    inputs[0].U.ki.wVk = WindowsKeyboard.VK_CONTROL;
 
-            inputs[0].type = WindowsKeyboard.INPUT_KEYBOARD;
-            inputs[0].U.ki.wVk = WindowsKeyboard.VK_CONTROL;
+                    inputs[1].type = WindowsKeyboard.INPUT_KEYBOARD;
+                    inputs[1].U.ki.wVk = WindowsKeyboard.VK_V;
 
-            inputs[1].type = WindowsKeyboard.INPUT_KEYBOARD;
-            inputs[1].U.ki.wVk = WindowsKeyboard.VK_V;
+                    inputs[2].type = WindowsKeyboard.INPUT_KEYBOARD;
+                    inputs[2].U.ki.wVk = WindowsKeyboard.VK_V;
+                    inputs[2].U.ki.dwFlags = WindowsKeyboard.KEYEVENTF_KEYUP;
 
-            inputs[2].type = WindowsKeyboard.INPUT_KEYBOARD;
-            inputs[2].U.ki.wVk = WindowsKeyboard.VK_V;
-            inputs[2].U.ki.dwFlags = WindowsKeyboard.KEYEVENTF_KEYUP;
+                    inputs[3].type = WindowsKeyboard.INPUT_KEYBOARD;
+                    inputs[3].U.ki.wVk = WindowsKeyboard.VK_CONTROL;
+                    inputs[3].U.ki.dwFlags = WindowsKeyboard.KEYEVENTF_KEYUP;
 
-            inputs[3].type = WindowsKeyboard.INPUT_KEYBOARD;
-            inputs[3].U.ki.wVk = WindowsKeyboard.VK_CONTROL;
-            inputs[3].U.ki.dwFlags = WindowsKeyboard.KEYEVENTF_KEYUP;
+                    // Send input simulate Ctrl + V
+                    var uSent = WindowsKeyboard.SendInput((uint)inputs.Length, inputs, INPUT.Size);
+                }
 
-            // Send input simulate Ctrl + V
-            var uSent = WindowsKeyboard.SendInput((uint)inputs.Length, inputs, INPUT.Size);
-
-            Accept?.Invoke();
+                Accept?.Invoke();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, null);
+            }
         }
     }
 }

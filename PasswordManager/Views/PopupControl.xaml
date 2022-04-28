@@ -50,8 +50,8 @@
                         Padding="0"
                         HorizontalContentAlignment="Center"
                         VerticalContentAlignment="Center"
-                        Command="{Binding Data.SetLoginAndCloseCommand, Source={StaticResource Proxy}}"
-                        CommandParameter="{Binding}"
+                        Command="{Binding Data.SetAndCloseCommand, Source={StaticResource Proxy}}"
+                        CommandParameter="{Binding LoginFieldVM}"
                         Content="{md:PackIcon Kind=User}"
                         Style="{StaticResource MaterialDesignFlatButton}" />
                     <Button
@@ -62,6 +62,8 @@
                         Padding="0"
                         HorizontalContentAlignment="Center"
                         VerticalContentAlignment="Center"
+                        Command="{Binding Data.SetAndCloseCommand, Source={StaticResource Proxy}}"
+                        CommandParameter="{Binding PasswordFieldVM}"
                         Content="{md:PackIcon Kind=Password}"
                         Style="{StaticResource MaterialDesignFlatButton}" />
                 </Grid>

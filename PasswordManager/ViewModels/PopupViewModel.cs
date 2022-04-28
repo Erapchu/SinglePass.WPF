@@ -39,6 +39,9 @@ namespace PasswordManager.ViewModels
         private RelayCommand<PassFieldViewModel> _setAndCloseCommand;
         public RelayCommand<PassFieldViewModel> SetAndCloseCommand => _setAndCloseCommand ??= new RelayCommand<PassFieldViewModel>(SetAndClose);
 
+        private RelayCommand _closeCommand;
+        public RelayCommand CloseCommand => _closeCommand ??= new RelayCommand(Close);
+
         private PopupViewModel() { }
 
         public PopupViewModel(CredentialsCryptoService credentialsCryptoService, ILogger<PopupViewModel> logger)
@@ -48,6 +51,11 @@ namespace PasswordManager.ViewModels
 
             var creds = _credentialsCryptoService.Credentials.Select(cr => new CredentialViewModel(cr)).ToList();
             DisplayedCredentials = new ObservableCollection<CredentialViewModel>(creds);
+        }
+
+        private void Close()
+        {
+            Accept?.Invoke();
         }
 
         private void SetAndClose(PassFieldViewModel passFieldViewModel)

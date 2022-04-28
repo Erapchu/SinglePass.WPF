@@ -86,7 +86,8 @@
             Padding="0"
             HorizontalAlignment="Right"
             Content="{md:PackIcon Kind=Close}"
-            Style="{StaticResource MaterialDesignFlatButton}" />
+            Style="{StaticResource MaterialDesignFlatButton}"
+            Command="{Binding CloseCommand}"/>
         <ListBox
             x:Name="CredListBox"
             Grid.Row="1"

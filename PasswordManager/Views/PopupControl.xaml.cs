@@ -1,5 +1,8 @@
 ﻿using PasswordManager.ViewModels;
+using System;
+using System.Windows;
 using System.Windows.Controls.Primitives;
+using System.Windows.Interop;
 
 namespace PasswordManager.Views
 {
@@ -9,6 +12,7 @@ namespace PasswordManager.Views
     public partial class PopupControl : Popup
     {
         private PopupViewModel ViewModel => DataContext as PopupViewModel;
+        public IntPtr Handle { get; private set; }
 
         public PopupControl(PopupViewModel popupViewModel)
         {
@@ -26,6 +30,18 @@ namespace PasswordManager.Views
         private void Popup_Opened(object sender, System.EventArgs e)
         {
             CredListBox.SelectedIndex = 0;
+            Handle = ((HwndSource)PresentationSource.FromVisual(Child)).Handle;
+        }
+
+        private void Popup_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            DraggableThumb.RaiseEvent(e);
+        }
+
+        private void DraggableThumb_DragDelta(object sender, DragDeltaEventArgs e)
+        {
+            HorizontalOffset += e.HorizontalChange;
+            VerticalOffset += e.VerticalChange;
         }
     }
 }

@@ -8,13 +8,14 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:vm="clr-namespace:PasswordManager.ViewModels"
-    Width="160"
+    Width="260"
     Height="300"
     d:DataContext="{x:Static vm:PopupViewModel.DesignTimeInstance}"
     d:DesignHeight="450"
     d:DesignWidth="800"
     FocusManager.IsFocusScope="False"
     Focusable="False"
+    MouseDown="Popup_MouseDown"
     Opened="Popup_Opened"
     mc:Ignorable="d">
     <Popup.Resources>
@@ -74,33 +75,40 @@
                 TargetType="{x:Type ListBoxItem}" />
         </ResourceDictionary>
     </Popup.Resources>
-    <Grid Background="{DynamicResource MaterialDesignPaper}">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-        <Button
-            Width="24"
-            Height="24"
-            Margin="4"
-            Padding="0"
-            HorizontalAlignment="Right"
-            Content="{md:PackIcon Kind=Close}"
-            Style="{StaticResource MaterialDesignFlatButton}"
-            Command="{Binding CloseCommand}"/>
-        <ListBox
-            x:Name="CredListBox"
-            Grid.Row="1"
-            HorizontalContentAlignment="Stretch"
-            md:ListBoxItemAssist.ShowSelection="False"
-            md:RippleAssist.IsDisabled="True"
-            ItemContainerStyle="{StaticResource CredentialPopupItemStyle}"
-            ItemTemplate="{StaticResource CredentialDataTemplate}"
-            ItemsSource="{Binding DisplayedCredentials}"
-            SelectedItem="{Binding SelectedCredentialVM}">
-            <ListBox.Resources>
-                <Style BasedOn="{StaticResource MaterialDesignScrollBarMinimal}" TargetType="ScrollBar" />
-            </ListBox.Resources>
-        </ListBox>
+    <Grid>
+        <Thumb x:Name="DraggableThumb" DragDelta="DraggableThumb_DragDelta" />
+        <Grid Background="{DynamicResource MaterialDesignPaper}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Border
+                Width="36"
+                Height="5"
+                Background="{DynamicResource MaterialDesignTextFieldBoxHoverBackground}"
+                CornerRadius="4" />
+            <Button
+                Width="24"
+                Height="24"
+                Margin="4"
+                Padding="0"
+                HorizontalAlignment="Right"
+                Command="{Binding CloseCommand}"
+                Content="{md:PackIcon Kind=Close}"
+                Style="{StaticResource MaterialDesignFlatButton}" />
+            <ListBox
+                x:Name="CredListBox"
+                Grid.Row="1"
+                HorizontalContentAlignment="Stretch"
+                md:RippleAssist.IsDisabled="True"
+                ItemContainerStyle="{StaticResource CredentialPopupItemStyle}"
+                ItemTemplate="{StaticResource CredentialDataTemplate}"
+                ItemsSource="{Binding DisplayedCredentials}"
+                SelectedItem="{Binding SelectedCredentialVM}">
+                <ListBox.Resources>
+                    <Style BasedOn="{StaticResource MaterialDesignScrollBarMinimal}" TargetType="ScrollBar" />
+                </ListBox.Resources>
+            </ListBox>
+        </Grid>
     </Grid>
 </Popup>

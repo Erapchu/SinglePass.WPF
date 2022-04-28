@@ -30,12 +30,10 @@ namespace PasswordManager.Hotkeys
                 var caretRect = GetAccessibleCaretRect(hwndFocus);
 
                 var popup = (Application.Current as App).Host.Services.GetService(typeof(PopupControl)) as PopupControl;
-                popup.IsOpen = true;
 
                 // Obtain popup handle for placement
-                var popupHandle = ((HwndSource)PresentationSource.FromVisual(popup.Child)).Handle;
-                var popupRect = new WinApiProvider.RECT();
-                WinApiProvider.GetWindowRect(popupHandle, ref popupRect);
+                //var popupRect = new WinApiProvider.RECT();
+                //WinApiProvider.GetWindowRect(popupHandle, ref popupRect);
                 if (!RectValid(caretRect))
                 {
                     // Can't accquire caret placement
@@ -44,22 +42,24 @@ namespace PasswordManager.Hotkeys
                     {
                         caretRect = new WinApiProvider.RECT()
                         {
-                            left = (int)SystemParameters.PrimaryScreenWidth - (popupRect.right - popupRect.left),
-                            top = (int)SystemParameters.PrimaryScreenHeight - (popupRect.bottom - popupRect.top),
+                            left = (int)(SystemParameters.PrimaryScreenWidth - popup.Width),
+                            top = (int)(SystemParameters.PrimaryScreenHeight - popup.Height),
                             right = (int)SystemParameters.PrimaryScreenWidth,
                             bottom = (int)SystemParameters.PrimaryScreenHeight
                         };
                     }
                 }
 
+                popup.IsOpen = true;
+
                 // OK caret placement
                 WinApiProvider.SetWindowPos(
-                    popupHandle,
+                    popup.Handle,
                     IntPtr.Zero,
                     caretRect.right,
                     caretRect.bottom,
-                    popupRect.right - popupRect.left,
-                    popupRect.bottom - popupRect.top,
+                    (int)popup.Width,
+                    (int)popup.Height,
                     WinApiProvider.SWP_NOZORDER);
             }
         }

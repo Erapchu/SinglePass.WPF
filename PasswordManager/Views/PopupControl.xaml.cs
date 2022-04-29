@@ -35,7 +35,8 @@ namespace PasswordManager.Views
 
         private void Popup_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            DraggableThumb.RaiseEvent(e);
+            if (e.ChangedButton == System.Windows.Input.MouseButton.Left)
+                DraggableThumb.RaiseEvent(e);
         }
 
         private void DraggableThumb_DragDelta(object sender, DragDeltaEventArgs e)

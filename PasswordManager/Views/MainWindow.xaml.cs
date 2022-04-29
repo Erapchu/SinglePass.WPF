@@ -1,7 +1,7 @@
 ﻿using PasswordManager.Controls;
+using PasswordManager.Hotkeys;
 using PasswordManager.ViewModels;
 using System;
-using System.Windows;
 using System.Windows.Input;
 
 namespace PasswordManager.Views
@@ -11,9 +11,13 @@ namespace PasswordManager.Views
     /// </summary>
     public partial class MainWindow : MaterialWindow
     {
-        public MainWindow(MainWindowViewModel mainViewModel)
+        private readonly HotkeysService _hotkeyService;
+
+        public MainWindow(MainWindowViewModel mainViewModel, HotkeysService hotkeysService)
         {
             InitializeComponent();
+
+            _hotkeyService = hotkeysService;
 
             mainViewModel.CredentialSelected += Vm_CredentialSelected;
             DataContext = mainViewModel;
@@ -40,6 +44,16 @@ namespace PasswordManager.Views
 
             if (anyCtrlPressed)
                 e.Handled = true;
+        }
+
+        private void MaterialWindow_Activated(object sender, EventArgs e)
+        {
+            _hotkeyService.IsEnabled = false;
+        }
+
+        private void MaterialWindow_Deactivated(object sender, EventArgs e)
+        {
+            _hotkeyService.IsEnabled = true;
         }
     }
 }

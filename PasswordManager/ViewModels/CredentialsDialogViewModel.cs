@@ -6,6 +6,7 @@ using PasswordManager.Helpers;
 using PasswordManager.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace PasswordManager.ViewModels
 {
@@ -39,6 +40,7 @@ namespace PasswordManager.ViewModels
         private RelayCommand _cancelCommand;
         private RelayCommand _editCommand;
         private RelayCommand _deleteCommand;
+        private RelayCommand _openInBrowserCommand;
         private RelayCommand<string> _copyToClipboardCommand;
         private CredentialViewModel _credentialViewModel;
         private CredentialsDialogMode _mode = CredentialsDialogMode.View;
@@ -50,6 +52,7 @@ namespace PasswordManager.ViewModels
         public RelayCommand EditCommand => _editCommand ??= new RelayCommand(EditExecute);
         public RelayCommand DeleteCommand => _deleteCommand ??= new RelayCommand(DeleteExecute);
         public RelayCommand<string> CopyToClipboardCommand => _copyToClipboardCommand ??= new RelayCommand<string>(CopyToClipboard);
+        public RelayCommand OpenInBrowserCommand => _openInBrowserCommand ??= new RelayCommand(OpenInBrowser);
 
         public CredentialViewModel CredentialViewModel
         {
@@ -149,6 +152,19 @@ namespace PasswordManager.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError(ex, string.Empty);
+            }
+        }
+
+        private void OpenInBrowser()
+        {
+            var uri = CredentialViewModel?.SiteFieldVM?.Value;
+            if (string.IsNullOrWhiteSpace(uri))
+                return;
+
+            uri = uri.Replace("&", "^&");
+            if (Uri.TryCreate(uri, UriKind.RelativeOrAbsolute, out var site))
+            {
+                Process.Start(new ProcessStartInfo("cmd", $"/c start {site}") { CreateNoWindow = true });
             }
         }
 

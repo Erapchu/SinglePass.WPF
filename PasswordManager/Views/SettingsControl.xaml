@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:conv="clr-namespace:PasswordManager.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:PasswordManager.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
@@ -75,7 +76,7 @@
                         </StackPanel>
                     </DataTemplate>
                 </GroupBox.HeaderTemplate>
-                <Grid Margin="16 8">
+                <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto" />
                         <ColumnDefinition Width="*" />
@@ -83,10 +84,10 @@
                     </Grid.ColumnDefinitions>
                     <PasswordBox
                         x:Name="NewPasswordBox"
+                        MinWidth="300"
                         md:HintAssist.HelperText="{Binding NewPasswordHelperText}"
                         md:HintAssist.Hint="New password"
                         md:HintAssist.IsFloating="True"
-                        MinWidth="200"
                         MaxLength="32"
                         PasswordChanged="PasswordBox_PasswordChanged" />
                     <Button
@@ -94,6 +95,49 @@
                         Command="{Binding ChangePasswordCommand}"
                         Content="Change"
                         Style="{StaticResource MaterialDesignFlatAccentButton}" />
+                </Grid>
+            </GroupBox>
+            <GroupBox Margin="16 8" Style="{StaticResource MaterialDesignCardGroupBox}">
+                <GroupBox.HeaderTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <md:PackIcon
+                                Width="24"
+                                Height="24"
+                                Margin="8 0 0 0"
+                                VerticalAlignment="Center"
+                                Kind="Hot" />
+                            <TextBlock
+                                Margin="16 0 0 0"
+                                VerticalAlignment="Center"
+                                Text="Hotkeys" />
+                        </StackPanel>
+                    </DataTemplate>
+                </GroupBox.HeaderTemplate>
+                <Grid Width="300" HorizontalAlignment="Left">
+                    <TextBox
+                        Width="300"
+                        HorizontalAlignment="Left"
+                        md:HintAssist.Hint="Popup"
+                        IsReadOnly="True"
+                        Style="{StaticResource MaterialDesignFilledTextBox}"
+                        Text="{Binding ShowPopupHotkey, Mode=OneWay}">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="PreviewKeyDown">
+                                <i:InvokeCommandAction Command="{Binding ChangeHelperPopupHotkeyCommand}" PassEventArgsToCommand="True" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </TextBox>
+                    <Button
+                        Width="24"
+                        Height="24"
+                        Margin="0 0 12 0"
+                        Padding="0"
+                        HorizontalAlignment="Right"
+                        Command="{Binding ClearShowPopupHotkeyCommand}"
+                        Content="{md:PackIcon Kind=Close}"
+                        Cursor="Arrow"
+                        Style="{StaticResource MaterialDesignFlatButton}" />
                 </Grid>
             </GroupBox>
         </StackPanel>

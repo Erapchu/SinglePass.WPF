@@ -2,8 +2,8 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Toolkit.Mvvm.Input;
 using PasswordManager.Helpers;
+using PasswordManager.Hotkeys;
 using PasswordManager.Services;
-using PasswordManager.Views;
 using PasswordManager.Views.MessageBox;
 using System;
 using System.Threading.Tasks;
@@ -27,9 +27,12 @@ namespace PasswordManager.ViewModels
         private readonly AppSettingsService _appSettingsService;
         private readonly CredentialsCryptoService _credentialsCryptoService;
         private readonly ILogger<SettingsViewModel> _logger;
-        private AsyncRelayCommand _changePasswordCommand;
+        private readonly HotkeysService _hotkeysService;
         private string _newPassword;
         private string _newPasswordHelperText;
+        private AsyncRelayCommand _changePasswordCommand;
+        private RelayCommand<System.Windows.Input.KeyEventArgs> _changeHelperPopupHotkeyCommand;
+        private RelayCommand _clearShowPopupHotkeyCommand;
 
         public BaseTheme ThemeMode
         {
@@ -59,9 +62,23 @@ namespace PasswordManager.ViewModels
             set => SetProperty(ref _newPasswordHelperText, value);
         }
 
+        public Hotkey ShowPopupHotkey
+        {
+            get => _appSettingsService.ShowPopupHotkey;
+            set
+            {
+                _appSettingsService.ShowPopupHotkey = value;
+                _appSettingsService.Save();
+                OnPropertyChanged();
+                ChangeHelperPopupHotkeyCommand.NotifyCanExecuteChanged();
+            }
+        }
+
         public event Action NewPasswordIsSet;
 
         public AsyncRelayCommand ChangePasswordCommand => _changePasswordCommand ??= new AsyncRelayCommand(ChangePasswordAsync, CanChangePassword);
+        public RelayCommand<System.Windows.Input.KeyEventArgs> ChangeHelperPopupHotkeyCommand => _changeHelperPopupHotkeyCommand ??= new RelayCommand<System.Windows.Input.KeyEventArgs>(ChangeHelperPopupHotkey);
+        public RelayCommand ClearShowPopupHotkeyCommand => _clearShowPopupHotkeyCommand ??= new RelayCommand(ClearShowPopupHotkey);
 
         private SettingsViewModel() { }
 
@@ -69,7 +86,8 @@ namespace PasswordManager.ViewModels
             ThemeService themeService,
             AppSettingsService appSettingsService,
             CredentialsCryptoService credentialsCryptoService,
-            ILogger<SettingsViewModel> logger)
+            ILogger<SettingsViewModel> logger,
+            HotkeysService hotkeysService)
         {
             Name = "Settings";
             IconKind = PackIconKind.Settings;
@@ -78,6 +96,7 @@ namespace PasswordManager.ViewModels
             _appSettingsService = appSettingsService;
             _credentialsCryptoService = credentialsCryptoService;
             _logger = logger;
+            _hotkeysService = hotkeysService;
         }
 
         private async Task ChangePasswordAsync()
@@ -120,6 +139,20 @@ namespace PasswordManager.ViewModels
                     dialogIdentifier,
                     PackIconKind.Tick);
             }
+        }
+
+        private void ChangeHelperPopupHotkey(System.Windows.Input.KeyEventArgs args)
+        {
+            if (_hotkeysService.GetHotkeyForKeyPress(args, out Hotkey hotkey))
+            {
+                _hotkeysService.UpdateKey(hotkey, nameof(_appSettingsService.ShowPopupHotkey), HotkeyDelegates.PopupHotkeyHandler);
+                ShowPopupHotkey = hotkey;
+            }
+        }
+
+        private void ClearShowPopupHotkey()
+        {
+            ShowPopupHotkey = Hotkey.Empty;
         }
 
         private bool CanChangePassword()

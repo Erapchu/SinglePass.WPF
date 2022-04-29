@@ -76,7 +76,15 @@
                             <Ellipse
                                 Width="64"
                                 Height="64"
-                                HorizontalAlignment="Center">
+                                HorizontalAlignment="Center"
+                                Stroke="White"
+                                StrokeThickness="2">
+                                <Ellipse.Effect>
+                                    <DropShadowEffect
+                                        BlurRadius="20"
+                                        Direction="270"
+                                        ShadowDepth="2" />
+                                </Ellipse.Effect>
                                 <Ellipse.Fill>
                                     <ImageBrush ImageSource="{Binding GoogleProfileImage}" Stretch="UniformToFill" />
                                 </Ellipse.Fill>

@@ -3,17 +3,113 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:helpers="clr-namespace:PasswordManager.Helpers"
     xmlns:local="clr-namespace:PasswordManager.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:vm="clr-namespace:PasswordManager.ViewModels"
+    Width="260"
+    Height="300"
+    d:DataContext="{x:Static vm:PopupViewModel.DesignTimeInstance}"
     d:DesignHeight="450"
     d:DesignWidth="800"
+    FocusManager.IsFocusScope="False"
+    Focusable="False"
+    StaysOpen="False"
+    MouseDown="Popup_MouseDown"
+    Opened="Popup_Opened"
     mc:Ignorable="d">
+    <Popup.Resources>
+        <ResourceDictionary>
+            <DataTemplate x:Key="CredentialPopupDataTemplate" DataType="{x:Type vm:CredentialViewModel}">
+                <TextBlock Text="{Binding NameFieldVM.Value}" />
+            </DataTemplate>
+            <helpers:BindingProxy x:Key="Proxy" Data="{Binding}" />
+            <DataTemplate x:Key="CredentialDataTemplate" DataType="{x:Type vm:CredentialViewModel}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <Image
+                        Width="16"
+                        Height="16"
+                        Source="{Binding FavIcon, IsAsync=True}" />
+                    <TextBlock
+                        Grid.Column="1"
+                        Margin="8 0 0 0"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Center"
+                        Text="{Binding NameFieldVM.Value}"
+                        TextTrimming="CharacterEllipsis" />
+                    <Button
+                        Grid.Column="2"
+                        Width="16"
+                        Height="16"
+                        Margin="0"
+                        Padding="0"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        Command="{Binding Data.SetAndCloseCommand, Source={StaticResource Proxy}}"
+                        CommandParameter="{Binding LoginFieldVM}"
+                        Content="{md:PackIcon Kind=User}"
+                        Style="{StaticResource MaterialDesignFlatButton}" />
+                    <Button
+                        Grid.Column="3"
+                        Width="16"
+                        Height="16"
+                        Margin="4 0 0 0"
+                        Padding="0"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        Command="{Binding Data.SetAndCloseCommand, Source={StaticResource Proxy}}"
+                        CommandParameter="{Binding PasswordFieldVM}"
+                        Content="{md:PackIcon Kind=Password}"
+                        Style="{StaticResource MaterialDesignFlatButton}" />
+                </Grid>
+            </DataTemplate>
+            <Style
+                x:Key="CredentialPopupItemStyle"
+                BasedOn="{StaticResource MaterialDesignListBoxItem}"
+                TargetType="{x:Type ListBoxItem}" />
+        </ResourceDictionary>
+    </Popup.Resources>
     <Grid>
-        <Button
-            Grid.Row="1"
-            Width="50"
-            Height="50"
-            Click="Button_Click"
-            Focusable="False" />
+        <Thumb x:Name="DraggableThumb" DragDelta="DraggableThumb_DragDelta" />
+        <Grid Background="{DynamicResource MaterialDesignPaper}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Border
+                Width="36"
+                Height="5"
+                Background="{DynamicResource MaterialDesignTextFieldBoxHoverBackground}"
+                CornerRadius="4" />
+            <Button
+                Width="24"
+                Height="24"
+                Margin="4"
+                Padding="0"
+                HorizontalAlignment="Right"
+                Command="{Binding CloseCommand}"
+                Content="{md:PackIcon Kind=Close}"
+                Style="{StaticResource MaterialDesignFlatButton}" />
+            <ListBox
+                x:Name="CredListBox"
+                Grid.Row="1"
+                HorizontalContentAlignment="Stretch"
+                md:RippleAssist.IsDisabled="True"
+                ItemContainerStyle="{StaticResource CredentialPopupItemStyle}"
+                ItemTemplate="{StaticResource CredentialDataTemplate}"
+                ItemsSource="{Binding DisplayedCredentials}"
+                SelectedItem="{Binding SelectedCredentialVM}">
+                <ListBox.Resources>
+                    <Style BasedOn="{StaticResource MaterialDesignScrollBarMinimal}" TargetType="ScrollBar" />
+                </ListBox.Resources>
+            </ListBox>
+        </Grid>
     </Grid>
 </Popup>

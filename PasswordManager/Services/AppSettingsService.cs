@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 using PasswordManager.Helpers;
 using PasswordManager.Helpers.Threading;
+using PasswordManager.Hotkeys;
 using PasswordManager.Models;
+using System;
 using System.IO;
 using System.Text.Json;
 using System.Threading;
@@ -28,21 +30,34 @@ namespace PasswordManager.Services
             set => Settings.GoogleDriveEnabled = value;
         }
 
+        public Hotkey ShowPopupHotkey
+        {
+            get => Settings.ShowPopupHotkey;
+            set => Settings.ShowPopupHotkey = value;
+        }
+
         public AppSettingsService(ILogger<AppSettingsService> logger)
         {
+            _logger = logger;
+
             if (File.Exists(_commonSettingsFilePath))
             {
                 // Read existing
-                using var fileStream = new FileStream(_commonSettingsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                Settings = JsonSerializer.Deserialize<AppSettings>(fileStream);
+                try
+                {
+                    using var fileStream = new FileStream(_commonSettingsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    Settings = JsonSerializer.Deserialize<AppSettings>(fileStream);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, null);
+                }
             }
             else
             {
                 // First save
                 Save();
             }
-
-            _logger = logger;
         }
 
         public Task Save()

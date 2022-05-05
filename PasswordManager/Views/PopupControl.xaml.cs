@@ -29,7 +29,6 @@ namespace PasswordManager.Views
 
         private void Popup_Opened(object sender, System.EventArgs e)
         {
-            CredListBox.SelectedIndex = 0;
             Handle = ((HwndSource)PresentationSource.FromVisual(Child)).Handle;
         }
 

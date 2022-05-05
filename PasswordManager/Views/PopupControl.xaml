@@ -15,9 +15,10 @@
     d:DesignWidth="800"
     FocusManager.IsFocusScope="False"
     Focusable="False"
-    StaysOpen="False"
     MouseDown="Popup_MouseDown"
     Opened="Popup_Opened"
+    Placement="AbsolutePoint"
+    StaysOpen="False"
     mc:Ignorable="d">
     <Popup.Resources>
         <ResourceDictionary>

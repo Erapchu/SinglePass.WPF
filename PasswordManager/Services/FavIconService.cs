@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using PasswordManager.Helpers;
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Net.Http;
 using System.Threading;
 using System.Windows.Media;
@@ -11,8 +11,8 @@ namespace PasswordManager.Services
 {
     public class FavIconService
     {
-        private const string _favIconService = "http://www.google.com/s2/favicons?domain_url={0}";
-        private readonly Dictionary<string, ImageSource> _imagesDict = new();
+        private const string _favIconServiceUrl = "http://www.google.com/s2/favicons?domain_url={0}";
+        private readonly ConcurrentDictionary<string, ImageSource> _imagesDict = new();
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<FavIconService> _logger;
 
@@ -37,7 +37,7 @@ namespace PasswordManager.Services
                     return image;
 
                 var client = _httpClientFactory.CreateClient();
-                var request = new HttpRequestMessage(HttpMethod.Get, string.Format(_favIconService, host));
+                var request = new HttpRequestMessage(HttpMethod.Get, string.Format(_favIconServiceUrl, host));
                 using var response = client.SendAsync(request, CancellationToken.None).Result;
                 using var stream = response.Content.ReadAsStreamAsync(CancellationToken.None).Result;
                 var bitmapImage = new BitmapImage();

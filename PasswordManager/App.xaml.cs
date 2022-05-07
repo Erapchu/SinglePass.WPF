@@ -55,6 +55,9 @@ namespace PasswordManager
         {
             InitializeComponent();
 
+            // Override culture
+            //PasswordManager.Language.Properties.Resources.Culture = new System.Globalization.CultureInfo("en-US");
+
             if (IsFirstInstance)
             {
                 // Welcome window

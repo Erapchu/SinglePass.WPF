@@ -7,7 +7,6 @@ using NLog.Extensions.Logging;
 using PasswordManager.Authorization.Brokers;
 using PasswordManager.Authorization.Holders;
 using PasswordManager.Clouds.Services;
-using PasswordManager.Controls;
 using PasswordManager.Helpers;
 using PasswordManager.Hotkeys;
 using PasswordManager.Services;

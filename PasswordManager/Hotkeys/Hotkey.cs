@@ -92,7 +92,7 @@ namespace PasswordManager.Hotkeys
                 hotkeyString += (hotkeyString.Length == 0 ? "" : " + ") + KeyToString(Key);
                 return hotkeyString;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return base.ToString();
             }
@@ -104,19 +104,14 @@ namespace PasswordManager.Hotkeys
 
         public override bool Equals(object obj)
         {
-            if (obj is null || !(obj is Hotkey other))
-                return false;
-
-            return Key == other.Key
+            return obj is not null && obj is Hotkey other 
+                && Key == other.Key
                 && Modifiers == other.Modifiers;
         }
 
         public override int GetHashCode()
         {
-            int hashCode = 628607405;
-            hashCode = (hashCode * -1521134295) + Modifiers.GetHashCode();
-            hashCode = (hashCode * -1521134295) + Key.GetHashCode();
-            return hashCode;
+            return HashCode.Combine(Modifiers, Key);
         }
 
         #endregion

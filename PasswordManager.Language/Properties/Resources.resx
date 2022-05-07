@@ -172,4 +172,82 @@
   <data name="Enter" xml:space="preserve">
     <value>Enter</value>
   </data>
+  <data name="CreatedFormatted" xml:space="preserve">
+    <value>Created:{0: dd-MM-yyyy, HH:mm:ss}</value>
+  </data>
+  <data name="NewItem" xml:space="preserve">
+    <value>New item</value>
+  </data>
+  <data name="DeleteItem" xml:space="preserve">
+    <value>Delete item?</value>
+  </data>
+  <data name="Name0" xml:space="preserve">
+    <value>Name: {0}</value>
+  </data>
+  <data name="Abort" xml:space="preserve">
+    <value>Abort</value>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Retry" xml:space="preserve">
+    <value>Retry</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="Ignore" xml:space="preserve">
+    <value>Ignore</value>
+  </data>
+  <data name="Personalize" xml:space="preserve">
+    <value>Personalize</value>
+  </data>
+  <data name="System" xml:space="preserve">
+    <value>System</value>
+  </data>
+  <data name="Dark" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+  <data name="Light" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="ChangePassword" xml:space="preserve">
+    <value>Change password</value>
+  </data>
+  <data name="Change" xml:space="preserve">
+    <value>Change</value>
+  </data>
+  <data name="Hotkeys" xml:space="preserve">
+    <value>Hotkeys</value>
+  </data>
+  <data name="Popup" xml:space="preserve">
+    <value>Popup</value>
+  </data>
+  <data name="SignIn" xml:space="preserve">
+    <value>Sign in</value>
+  </data>
+  <data name="SignOut" xml:space="preserve">
+    <value>Sign out</value>
+  </data>
+  <data name="Merge" xml:space="preserve">
+    <value>Merge</value>
+  </data>
+  <data name="MergePasswords" xml:space="preserve">
+    <value>Merge passwords</value>
+  </data>
+  <data name="UploadPasswords" xml:space="preserve">
+    <value>Upload credentials</value>
+  </data>
+  <data name="Upload" xml:space="preserve">
+    <value>Upload</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Loading...</value>
+  </data>
 </root>

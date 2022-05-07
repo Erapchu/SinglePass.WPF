@@ -7,6 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:PasswordManager.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:properties="clr-namespace:PasswordManager.Language.Properties;assembly=PasswordManager.Language"
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:vm="clr-namespace:PasswordManager.ViewModels"
     d:DataContext="{x:Static vm:CloudSyncViewModel.DesignTimeInstance}"
@@ -46,7 +47,7 @@
                         HorizontalAlignment="Center"
                         Command="{Binding LoginCommand}"
                         CommandParameter="{x:Static cloudEnums:CloudType.GoogleDrive}"
-                        Content="SIGN IN"
+                        Content="{x:Static properties:Resources.SignIn}"
                         Style="{StaticResource MaterialDesignFlatAccentButton}"
                         Visibility="{Binding GoogleDriveEnabled, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                     <Grid Visibility="{Binding GoogleDriveEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -68,7 +69,7 @@
                             <TextBlock
                                 Margin="0 8 0 0"
                                 HorizontalAlignment="Center"
-                                Text="Loading..."
+                                Text="{x:Static properties:Resources.Loading}"
                                 TextAlignment="Center"
                                 TextTrimming="CharacterEllipsis" />
                         </StackPanel>
@@ -104,7 +105,7 @@
                                 Command="{Binding SyncCommand}"
                                 CommandParameter="{x:Static cloudEnums:CloudType.GoogleDrive}"
                                 Style="{StaticResource MaterialDesignFlatButton}"
-                                ToolTip="Merge credentials">
+                                ToolTip="{x:Static properties:Resources.MergePasswords}">
                                 <StackPanel Orientation="Horizontal">
                                     <md:PackIcon
                                         Width="20"
@@ -114,7 +115,7 @@
                                     <TextBlock
                                         Margin="8 0 0 0"
                                         VerticalAlignment="Center"
-                                        Text="Merge" />
+                                        Text="{x:Static properties:Resources.Merge}" />
                                 </StackPanel>
                             </Button>
                             <Button
@@ -125,7 +126,7 @@
                                 Command="{Binding UploadCommand}"
                                 CommandParameter="{x:Static cloudEnums:CloudType.GoogleDrive}"
                                 Style="{StaticResource MaterialDesignFlatButton}"
-                                ToolTip="Upload credentials">
+                                ToolTip="{x:Static properties:Resources.UploadPasswords}">
                                 <StackPanel Orientation="Horizontal">
                                     <md:PackIcon
                                         Width="20"
@@ -135,7 +136,7 @@
                                     <TextBlock
                                         Margin="8 0 0 0"
                                         VerticalAlignment="Center"
-                                        Text="Upload" />
+                                        Text="{x:Static properties:Resources.Upload}" />
                                 </StackPanel>
                             </Button>
                         </StackPanel>
@@ -150,7 +151,7 @@
                             Grid.Column="2"
                             Command="{Binding LoginCommand}"
                             CommandParameter="{x:Static cloudEnums:CloudType.GoogleDrive}"
-                            Content="Sign out"
+                            Content="{x:Static properties:Resources.SignOut}"
                             Style="{StaticResource MaterialDesignFlatAccentButton}" />
                     </Grid>
                 </Grid>

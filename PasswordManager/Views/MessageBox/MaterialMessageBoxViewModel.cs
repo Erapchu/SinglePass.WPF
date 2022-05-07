@@ -80,15 +80,15 @@ namespace PasswordManager.Views.MessageBox
                 switch (_materialMessageBoxButtons)
                 {
                     case MaterialMessageBoxButtons.AbortRetryIgnore:
-                        return "Abort";
+                        return PasswordManager.Language.Properties.Resources.Abort;
                     case MaterialMessageBoxButtons.OK:
                     case MaterialMessageBoxButtons.OKCancel:
-                        return "OK";
+                        return PasswordManager.Language.Properties.Resources.OK;
                     case MaterialMessageBoxButtons.RetryCancel:
-                        return "Retry";
+                        return PasswordManager.Language.Properties.Resources.Retry;
                     case MaterialMessageBoxButtons.YesNo:
                     case MaterialMessageBoxButtons.YesNoCancel:
-                        return "Yes";
+                        return PasswordManager.Language.Properties.Resources.Yes;
                     default:
                         return string.Empty;
                 }
@@ -104,13 +104,13 @@ namespace PasswordManager.Views.MessageBox
                 switch (_materialMessageBoxButtons)
                 {
                     case MaterialMessageBoxButtons.AbortRetryIgnore:
-                        return "Retry";
+                        return PasswordManager.Language.Properties.Resources.Retry;
                     case MaterialMessageBoxButtons.OKCancel:
                     case MaterialMessageBoxButtons.RetryCancel:
-                        return "Cancel";
+                        return PasswordManager.Language.Properties.Resources.Cancel;
                     case MaterialMessageBoxButtons.YesNo:
                     case MaterialMessageBoxButtons.YesNoCancel:
-                        return "No";
+                        return PasswordManager.Language.Properties.Resources.No;
                     case MaterialMessageBoxButtons.OK:
                     default:
                         return string.Empty;
@@ -161,9 +161,9 @@ namespace PasswordManager.Views.MessageBox
                 switch (_materialMessageBoxButtons)
                 {
                     case MaterialMessageBoxButtons.AbortRetryIgnore:
-                        return "Ignore";
+                        return PasswordManager.Language.Properties.Resources.Ignore;
                     case MaterialMessageBoxButtons.YesNoCancel:
-                        return "Cancel";
+                        return PasswordManager.Language.Properties.Resources.Cancel;
                     case MaterialMessageBoxButtons.OK:
                     case MaterialMessageBoxButtons.OKCancel:
                     case MaterialMessageBoxButtons.RetryCancel:

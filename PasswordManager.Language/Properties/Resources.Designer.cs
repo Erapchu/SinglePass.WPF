@@ -61,6 +61,15 @@ namespace PasswordManager.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Abort.
+        /// </summary>
+        public static string Abort {
+            get {
+                return ResourceManager.GetString("Abort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Authorize.
         /// </summary>
         public static string Authorize {
@@ -70,11 +79,38 @@ namespace PasswordManager.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cancel.
+        /// </summary>
+        public static string Cancel {
+            get {
+                return ResourceManager.GetString("Cancel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CAPS LOCK enabled.
         /// </summary>
         public static string CAPSLOCKEnabled {
             get {
                 return ResourceManager.GetString("CAPSLOCKEnabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Change.
+        /// </summary>
+        public static string Change {
+            get {
+                return ResourceManager.GetString("Change", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Change password.
+        /// </summary>
+        public static string ChangePassword {
+            get {
+                return ResourceManager.GetString("ChangePassword", resourceCulture);
             }
         }
         
@@ -102,6 +138,33 @@ namespace PasswordManager.Language.Properties {
         public static string CopyPassword {
             get {
                 return ResourceManager.GetString("CopyPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Created:{0: dd-MM-yyyy, HH:mm:ss}.
+        /// </summary>
+        public static string CreatedFormatted {
+            get {
+                return ResourceManager.GetString("CreatedFormatted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Dark.
+        /// </summary>
+        public static string Dark {
+            get {
+                return ResourceManager.GetString("Dark", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete item?.
+        /// </summary>
+        public static string DeleteItem {
+            get {
+                return ResourceManager.GetString("DeleteItem", resourceCulture);
             }
         }
         
@@ -142,11 +205,65 @@ namespace PasswordManager.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hotkeys.
+        /// </summary>
+        public static string Hotkeys {
+            get {
+                return ResourceManager.GetString("Hotkeys", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ignore.
+        /// </summary>
+        public static string Ignore {
+            get {
+                return ResourceManager.GetString("Ignore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Light.
+        /// </summary>
+        public static string Light {
+            get {
+                return ResourceManager.GetString("Light", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Loading....
+        /// </summary>
+        public static string Loading {
+            get {
+                return ResourceManager.GetString("Loading", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Login.
         /// </summary>
         public static string Login {
             get {
                 return ResourceManager.GetString("Login", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Merge.
+        /// </summary>
+        public static string Merge {
+            get {
+                return ResourceManager.GetString("Merge", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Merge passwords.
+        /// </summary>
+        public static string MergePasswords {
+            get {
+                return ResourceManager.GetString("MergePasswords", resourceCulture);
             }
         }
         
@@ -178,6 +295,15 @@ namespace PasswordManager.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Name: {0}.
+        /// </summary>
+        public static string Name0 {
+            get {
+                return ResourceManager.GetString("Name0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to New.
         /// </summary>
         public static string New {
@@ -187,11 +313,38 @@ namespace PasswordManager.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to New item.
+        /// </summary>
+        public static string NewItem {
+            get {
+                return ResourceManager.GetString("NewItem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to New password.
         /// </summary>
         public static string NewPassword {
             get {
                 return ResourceManager.GetString("NewPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No.
+        /// </summary>
+        public static string No {
+            get {
+                return ResourceManager.GetString("No", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to OK.
+        /// </summary>
+        public static string OK {
+            get {
+                return ResourceManager.GetString("OK", resourceCulture);
             }
         }
         
@@ -241,11 +394,38 @@ namespace PasswordManager.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Personalize.
+        /// </summary>
+        public static string Personalize {
+            get {
+                return ResourceManager.GetString("Personalize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Popup.
+        /// </summary>
+        public static string Popup {
+            get {
+                return ResourceManager.GetString("Popup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Remove.
         /// </summary>
         public static string Remove {
             get {
                 return ResourceManager.GetString("Remove", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Retry.
+        /// </summary>
+        public static string Retry {
+            get {
+                return ResourceManager.GetString("Retry", resourceCulture);
             }
         }
         
@@ -277,11 +457,65 @@ namespace PasswordManager.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Sign in.
+        /// </summary>
+        public static string SignIn {
+            get {
+                return ResourceManager.GetString("SignIn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sign out.
+        /// </summary>
+        public static string SignOut {
+            get {
+                return ResourceManager.GetString("SignOut", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to System.
+        /// </summary>
+        public static string System {
+            get {
+                return ResourceManager.GetString("System", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Upload.
+        /// </summary>
+        public static string Upload {
+            get {
+                return ResourceManager.GetString("Upload", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Upload credentials.
+        /// </summary>
+        public static string UploadPasswords {
+            get {
+                return ResourceManager.GetString("UploadPasswords", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Website.
         /// </summary>
         public static string Website {
             get {
                 return ResourceManager.GetString("Website", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Yes.
+        /// </summary>
+        public static string Yes {
+            get {
+                return ResourceManager.GetString("Yes", resourceCulture);
             }
         }
     }

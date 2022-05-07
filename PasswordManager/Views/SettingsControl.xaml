@@ -7,6 +7,7 @@
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:PasswordManager.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:properties="clr-namespace:PasswordManager.Language.Properties;assembly=PasswordManager.Language"
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:vm="clr-namespace:PasswordManager.ViewModels"
     d:DataContext="{x:Static vm:SettingsViewModel.DesignTimeInstance}"
@@ -34,7 +35,7 @@
                             <TextBlock
                                 Margin="16 0 0 0"
                                 VerticalAlignment="Center"
-                                Text="Personalize" />
+                                Text="{x:Static properties:Resources.Personalize}" />
                         </StackPanel>
                     </DataTemplate>
                 </GroupBox.HeaderTemplate>
@@ -46,15 +47,15 @@
                     <StackPanel Grid.Row="1" Margin="16 8">
                         <RadioButton
                             Margin="0 8"
-                            Content="Inherit"
+                            Content="{x:Static properties:Resources.System}"
                             IsChecked="{Binding ThemeMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static md:BaseTheme.Inherit}}" />
                         <RadioButton
                             Margin="0 8"
-                            Content="Dark"
+                            Content="{x:Static properties:Resources.Dark}"
                             IsChecked="{Binding ThemeMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static md:BaseTheme.Dark}}" />
                         <RadioButton
                             Margin="0 8"
-                            Content="Light"
+                            Content="{x:Static properties:Resources.Light}"
                             IsChecked="{Binding ThemeMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static md:BaseTheme.Light}}" />
                     </StackPanel>
                 </Grid>
@@ -72,7 +73,7 @@
                             <TextBlock
                                 Margin="16 0 0 0"
                                 VerticalAlignment="Center"
-                                Text="Change password" />
+                                Text="{x:Static properties:Resources.ChangePassword}" />
                         </StackPanel>
                     </DataTemplate>
                 </GroupBox.HeaderTemplate>
@@ -86,14 +87,14 @@
                         x:Name="NewPasswordBox"
                         MinWidth="300"
                         md:HintAssist.HelperText="{Binding NewPasswordHelperText}"
-                        md:HintAssist.Hint="New password"
+                        md:HintAssist.Hint="{x:Static properties:Resources.NewPassword}"
                         md:HintAssist.IsFloating="True"
                         MaxLength="32"
                         PasswordChanged="PasswordBox_PasswordChanged" />
                     <Button
                         Grid.Column="2"
                         Command="{Binding ChangePasswordCommand}"
-                        Content="Change"
+                        Content="{x:Static properties:Resources.Change}"
                         Style="{StaticResource MaterialDesignFlatAccentButton}" />
                 </Grid>
             </GroupBox>
@@ -110,7 +111,7 @@
                             <TextBlock
                                 Margin="16 0 0 0"
                                 VerticalAlignment="Center"
-                                Text="Hotkeys" />
+                                Text="{x:Static properties:Resources.Hotkeys}" />
                         </StackPanel>
                     </DataTemplate>
                 </GroupBox.HeaderTemplate>
@@ -118,7 +119,7 @@
                     <TextBox
                         Width="300"
                         HorizontalAlignment="Left"
-                        md:HintAssist.Hint="Popup"
+                        md:HintAssist.Hint="{x:Static properties:Resources.Popup}"
                         IsReadOnly="True"
                         Style="{StaticResource MaterialDesignFilledTextBox}"
                         Text="{Binding ShowPopupHotkey, Mode=OneWay}">

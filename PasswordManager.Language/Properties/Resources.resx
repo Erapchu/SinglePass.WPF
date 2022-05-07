@@ -118,4 +118,58 @@
   <data name="CAPSLOCKEnabled" xml:space="preserve">
     <value>CAPS LOCK enabled</value>
   </data>
+  <data name="Passwords" xml:space="preserve">
+    <value>Passwords</value>
+  </data>
+  <data name="CloudSync" xml:space="preserve">
+    <value>Cloud sync</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="New" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="CopyLogin" xml:space="preserve">
+    <value>Copy login</value>
+  </data>
+  <data name="ShowHidePassword" xml:space="preserve">
+    <value>Show/hide password</value>
+  </data>
+  <data name="CopyPassword" xml:space="preserve">
+    <value>Copy password</value>
+  </data>
+  <data name="Website" xml:space="preserve">
+    <value>Website</value>
+  </data>
+  <data name="OpenInBrowser" xml:space="preserve">
+    <value>Open in browser</value>
+  </data>
+  <data name="Other" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="ModifiedFormatted" xml:space="preserve">
+    <value>Modified: {0: dd-MM-yyyy, HH:mm:ss}</value>
+  </data>
+  <data name="Authorize" xml:space="preserve">
+    <value>Authorize</value>
+  </data>
+  <data name="Enter" xml:space="preserve">
+    <value>Enter</value>
+  </data>
 </root>

@@ -24,29 +24,31 @@ namespace PasswordManager.ViewModels
         private readonly ILogger<LoginWindowViewModel> _logger;
         private CancellationTokenSource _cancellationTokenSource;
         private bool _credentialsFileExist;
-        private AsyncRelayCommand _loadCredentialsCommand;
-        private AsyncRelayCommand _loadingCommand;
-        private bool _loading;
-        private string _helperText;
-        private string _hintText = "Password";
-        private RelayCommand<KeyEventArgs> _refreshCapsLockCommand;
 
+        private AsyncRelayCommand _loadCredentialsCommand;
         public AsyncRelayCommand LoadCredentialsCommand => _loadCredentialsCommand ??= new AsyncRelayCommand(LoadCredentialsAsync);
+
+        private AsyncRelayCommand _loadingCommand;
         public AsyncRelayCommand LoadingCommand => _loadingCommand ??= new AsyncRelayCommand(LoadingAsync);
+
+        private RelayCommand<KeyEventArgs> _refreshCapsLockCommand;
         public RelayCommand<KeyEventArgs> RefreshCapsLockCommand => _refreshCapsLockCommand ??= new RelayCommand<KeyEventArgs>(RefreshCapsLock);
 
+        private bool _loading;
         public bool Loading
         {
             get => _loading;
             set => SetProperty(ref _loading, value);
         }
 
+        private string _helperText;
         public string HelperText
         {
             get => _helperText;
             set => SetProperty(ref _helperText, value);
         }
 
+        private string _hintText = PasswordManager.Language.Properties.Resources.Password;
         public string HintText
         {
             get => _hintText;
@@ -69,7 +71,7 @@ namespace PasswordManager.ViewModels
         {
             if (string.IsNullOrWhiteSpace(Password) || Password.Length < 8)
             {
-                HelperText = "Minimum 8 characters";
+                HelperText = PasswordManager.Language.Properties.Resources.Minimum8Characters;
                 return;
             }
             else
@@ -96,7 +98,7 @@ namespace PasswordManager.ViewModels
                     cancellationToken.ThrowIfCancellationRequested();
                     if (!loadingResult)
                     {
-                        HelperText = "Password is incorrect";
+                        HelperText = PasswordManager.Language.Properties.Resources.PasswordIsIncorrect;
                     }
                     else
                     {
@@ -120,7 +122,7 @@ namespace PasswordManager.ViewModels
             _credentialsFileExist = await _credentialsCryptoService.IsCredentialsFileExistAsync();
             if (!_credentialsFileExist)
             {
-                HintText = "New password";
+                HintText = PasswordManager.Language.Properties.Resources.NewPassword;
             }
         }
 

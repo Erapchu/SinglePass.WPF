@@ -108,7 +108,7 @@ namespace PasswordManager.ViewModels
             SyncService syncService,
             ILogger<CloudSyncViewModel> logger)
         {
-            Name = "Cloud sync";
+            Name = PasswordManager.Language.Properties.Resources.CloudSync;
             IconKind = PackIconKind.Cloud;
 
             _appSettingsService = appSettingsService;

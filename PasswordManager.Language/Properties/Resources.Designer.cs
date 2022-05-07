@@ -61,11 +61,74 @@ namespace PasswordManager.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Authorize.
+        /// </summary>
+        public static string Authorize {
+            get {
+                return ResourceManager.GetString("Authorize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CAPS LOCK enabled.
         /// </summary>
         public static string CAPSLOCKEnabled {
             get {
                 return ResourceManager.GetString("CAPSLOCKEnabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cloud sync.
+        /// </summary>
+        public static string CloudSync {
+            get {
+                return ResourceManager.GetString("CloudSync", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy login.
+        /// </summary>
+        public static string CopyLogin {
+            get {
+                return ResourceManager.GetString("CopyLogin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy password.
+        /// </summary>
+        public static string CopyPassword {
+            get {
+                return ResourceManager.GetString("CopyPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Details.
+        /// </summary>
+        public static string Details {
+            get {
+                return ResourceManager.GetString("Details", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Edit.
+        /// </summary>
+        public static string Edit {
+            get {
+                return ResourceManager.GetString("Edit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter.
+        /// </summary>
+        public static string Enter {
+            get {
+                return ResourceManager.GetString("Enter", resourceCulture);
             }
         }
         
@@ -97,11 +160,56 @@ namespace PasswordManager.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Modified: {0: dd-MM-yyyy, HH:mm:ss}.
+        /// </summary>
+        public static string ModifiedFormatted {
+            get {
+                return ResourceManager.GetString("ModifiedFormatted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Name.
+        /// </summary>
+        public static string Name {
+            get {
+                return ResourceManager.GetString("Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to New.
+        /// </summary>
+        public static string New {
+            get {
+                return ResourceManager.GetString("New", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to New password.
         /// </summary>
         public static string NewPassword {
             get {
                 return ResourceManager.GetString("NewPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open in browser.
+        /// </summary>
+        public static string OpenInBrowser {
+            get {
+                return ResourceManager.GetString("OpenInBrowser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Other.
+        /// </summary>
+        public static string Other {
+            get {
+                return ResourceManager.GetString("Other", resourceCulture);
             }
         }
         
@@ -120,6 +228,60 @@ namespace PasswordManager.Language.Properties {
         public static string PasswordIsIncorrect {
             get {
                 return ResourceManager.GetString("PasswordIsIncorrect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Passwords.
+        /// </summary>
+        public static string Passwords {
+            get {
+                return ResourceManager.GetString("Passwords", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remove.
+        /// </summary>
+        public static string Remove {
+            get {
+                return ResourceManager.GetString("Remove", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search.
+        /// </summary>
+        public static string Search {
+            get {
+                return ResourceManager.GetString("Search", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Settings.
+        /// </summary>
+        public static string Settings {
+            get {
+                return ResourceManager.GetString("Settings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show/hide password.
+        /// </summary>
+        public static string ShowHidePassword {
+            get {
+                return ResourceManager.GetString("ShowHidePassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Website.
+        /// </summary>
+        public static string Website {
+            get {
+                return ResourceManager.GetString("Website", resourceCulture);
             }
         }
     }

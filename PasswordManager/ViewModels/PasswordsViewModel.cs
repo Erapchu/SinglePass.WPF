@@ -89,7 +89,7 @@ namespace PasswordManager.ViewModels
             ILogger<PasswordsViewModel> logger,
             CredentialsDialogViewModel credentialsDialogViewModel)
         {
-            Name = "Credentials";
+            Name = PasswordManager.Language.Properties.Resources.Passwords;
             IconKind = PackIconKind.Password;
 
             _credentialsCryptoService = credentialsCryptoService;

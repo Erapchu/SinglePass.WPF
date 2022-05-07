@@ -2,6 +2,7 @@
 using PasswordManager.Hotkeys;
 using PasswordManager.ViewModels;
 using System;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace PasswordManager.Views
@@ -12,6 +13,8 @@ namespace PasswordManager.Views
     public partial class MainWindow : MaterialWindow
     {
         private readonly HotkeysService _hotkeyService;
+
+        private MainWindowViewModel ViewModel => DataContext as MainWindowViewModel;
 
         public MainWindow(MainWindowViewModel mainViewModel, HotkeysService hotkeysService)
         {
@@ -54,6 +57,15 @@ namespace PasswordManager.Views
         private void MaterialWindow_Deactivated(object sender, EventArgs e)
         {
             _hotkeyService.IsEnabled = true;
+        }
+
+        private async void MaterialWindow_IsVisibleChanged(object sender, System.Windows.DependencyPropertyChangedEventArgs e)
+        {
+            if (e.NewValue is bool visibility && visibility && ViewModel.SelectedNavigationItem is PasswordsViewModel)
+            {
+                await Task.Delay(10);
+                PasswordsControl.SearchTextBox.Focus();
+            }
         }
     }
 }

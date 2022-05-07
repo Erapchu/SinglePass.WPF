@@ -32,12 +32,14 @@ namespace PasswordManager.Models
                     newCreds = true;
                     sb.AppendLine("New credentials added:");
                     sb.Append(string.Join(Environment.NewLine, NewCredentials.Select(c => c.NameField.Value)));
+                    sb.AppendLine();
                 }
                 if (ChangedCredentials.Count > 0)
                 {
                     changedCreds = true;
                     sb.AppendLine("Credentials changed:");
                     sb.Append(string.Join(Environment.NewLine, ChangedCredentials.Select(c => c.NameField.Value)));
+                    sb.AppendLine();
                 }
                 if (!newCreds && !changedCreds)
                 {

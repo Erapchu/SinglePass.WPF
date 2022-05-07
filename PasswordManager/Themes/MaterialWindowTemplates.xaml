@@ -149,7 +149,7 @@
                                     <TextBlock
                                         Grid.Column="1"
                                         Margin="7 0 0 0"
-                                        HorizontalAlignment="Stretch"
+                                        HorizontalAlignment="Left"
                                         VerticalAlignment="Center"
                                         Text="{TemplateBinding Title}"
                                         TextTrimming="CharacterEllipsis" />

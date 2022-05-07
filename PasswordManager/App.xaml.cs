@@ -7,7 +7,6 @@ using NLog.Extensions.Logging;
 using PasswordManager.Authorization.Brokers;
 using PasswordManager.Authorization.Holders;
 using PasswordManager.Clouds.Services;
-using PasswordManager.Controls;
 using PasswordManager.Helpers;
 using PasswordManager.Hotkeys;
 using PasswordManager.Services;
@@ -55,6 +54,9 @@ namespace PasswordManager
         private void Application_Startup(object sender, StartupEventArgs e)
         {
             InitializeComponent();
+
+            // Override culture
+            //PasswordManager.Language.Properties.Resources.Culture = new System.Globalization.CultureInfo("en-US");
 
             if (IsFirstInstance)
             {

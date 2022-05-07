@@ -8,8 +8,9 @@
     xmlns:local="clr-namespace:PasswordManager.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:properties="clr-namespace:PasswordManager.Language.Properties;assembly=PasswordManager.Language"
     xmlns:vm="clr-namespace:PasswordManager.ViewModels"
-    Title="Login"
+    Title="{x:Static properties:Resources.Authorize}"
     Width="400"
     Height="300"
     MinWidth="300"
@@ -56,7 +57,7 @@
             HorizontalAlignment="Left"
             VerticalAlignment="Bottom"
             Opacity="0.5"
-            Text="CAPS LOCK enabled"
+            Text="{x:Static properties:Resources.CAPSLOCKEnabled}"
             TextAlignment="Right"
             Visibility="{Binding IsCapsLockEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
         <StackPanel
@@ -69,12 +70,12 @@
                 md:ButtonProgressAssist.IsIndicatorVisible="{Binding Loading}"
                 md:ShadowAssist.ShadowDepth="Depth3"
                 Command="{Binding LoadCredentialsCommand}"
-                Content="Login"
+                Content="{x:Static properties:Resources.Enter}"
                 IsDefault="True" />
             <Button
                 Margin="8 0 0 0"
                 md:ShadowAssist.ShadowDepth="Depth3"
-                Content="Exit"
+                Content="{x:Static properties:Resources.Exit}"
                 IsCancel="True"
                 Style="{StaticResource MaterialDesignPaperButton}" />
         </StackPanel>

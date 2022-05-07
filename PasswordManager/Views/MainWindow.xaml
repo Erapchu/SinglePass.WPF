@@ -18,6 +18,7 @@
     MinHeight="300"
     d:DataContext="{x:Static vm:MainWindowViewModel.DesignTimeInstance}"
     Closing="MaterialWindow_Closing"
+    IsVisibleChanged="MaterialWindow_IsVisibleChanged"
     Activated="MaterialWindow_Activated"
     Deactivated="MaterialWindow_Deactivated"
     UseLayoutRounding="True"

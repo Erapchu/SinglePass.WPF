@@ -89,7 +89,7 @@ namespace PasswordManager.ViewModels
             ILogger<SettingsViewModel> logger,
             HotkeysService hotkeysService)
         {
-            Name = "Settings";
+            Name = PasswordManager.Language.Properties.Resources.Settings;
             IconKind = PackIconKind.Settings;
 
             _themeService = themeService;

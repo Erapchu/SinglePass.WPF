@@ -67,11 +67,11 @@ namespace PasswordManager.ViewModels
                 switch (_mode)
                 {
                     case CredentialsDialogMode.Edit:
-                        return "Edit";
+                        return PasswordManager.Language.Properties.Resources.Edit;
                     case CredentialsDialogMode.New:
-                        return "New";
+                        return PasswordManager.Language.Properties.Resources.New;
                     case CredentialsDialogMode.View:
-                        return "Details";
+                        return PasswordManager.Language.Properties.Resources.Details;
                     default:
                         break;
                 }

@@ -89,7 +89,7 @@ namespace PasswordManager.ViewModels
             ILogger<PasswordsViewModel> logger,
             CredentialsDialogViewModel credentialsDialogViewModel)
         {
-            Name = "Credentials";
+            Name = PasswordManager.Language.Properties.Resources.Passwords;
             IconKind = PackIconKind.Password;
 
             _credentialsCryptoService = credentialsCryptoService;
@@ -104,8 +104,8 @@ namespace PasswordManager.ViewModels
         private async void ActiveCredentialDialogViewModel_Delete(CredentialViewModel credVM)
         {
             var result = await MaterialMessageBox.ShowAsync(
-                "Delete credential?",
-                $"Name: {credVM.NameFieldVM.Value}",
+                PasswordManager.Language.Properties.Resources.DeleteItem,
+                string.Format(PasswordManager.Language.Properties.Resources.Name0, credVM.NameFieldVM.Value),
                 MaterialMessageBoxButtons.YesNo,
                 MvvmHelper.MainWindowDialogName,
                 PackIconKind.Delete);

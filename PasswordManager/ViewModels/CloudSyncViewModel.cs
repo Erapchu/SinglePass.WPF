@@ -5,15 +5,14 @@ using PasswordManager.Cloud.Enums;
 using PasswordManager.Clouds.Services;
 using PasswordManager.Helpers;
 using PasswordManager.Services;
+using PasswordManager.Settings;
 using PasswordManager.Views;
 using PasswordManager.Views.InputBox;
 using PasswordManager.Views.MessageBox;
 using System;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace PasswordManager.ViewModels
 {

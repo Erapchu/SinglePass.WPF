@@ -1,4 +1,5 @@
 ﻿using MaterialDesignThemes.Wpf;
+using PasswordManager.Settings;
 using System;
 using System.Linq;
 using System.Windows;

@@ -4,6 +4,7 @@ using Microsoft.Toolkit.Mvvm.Input;
 using PasswordManager.Helpers;
 using PasswordManager.Hotkeys;
 using PasswordManager.Services;
+using PasswordManager.Settings;
 using PasswordManager.Views.MessageBox;
 using System;
 using System.Threading.Tasks;

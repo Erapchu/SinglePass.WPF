@@ -9,7 +9,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PasswordManager.Services
+namespace PasswordManager.Settings
 {
     public class AppSettingsService
     {

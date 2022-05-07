@@ -1,7 +1,6 @@
-﻿using PasswordManager.Cloud.Enums;
-using PasswordManager.Hotkeys;
+﻿using PasswordManager.Hotkeys;
 
-namespace PasswordManager.Models
+namespace PasswordManager.Settings
 {
     public class AppSettings
     {

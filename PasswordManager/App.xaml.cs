@@ -155,6 +155,7 @@ namespace PasswordManager
                 services.AddSingleton<SyncService>();
                 services.AddSingleton<FavIconService>();
                 services.AddSingleton<HotkeysService>();
+                services.AddSingleton<ImageService>();
             });
 
         private void Application_Exit(object sender, ExitEventArgs e)

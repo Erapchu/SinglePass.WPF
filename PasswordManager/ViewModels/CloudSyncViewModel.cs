@@ -33,7 +33,7 @@ namespace PasswordManager.ViewModels
         private readonly AppSettingsService _appSettingsService;
         private readonly CloudServiceProvider _cloudServiceProvider;
         private readonly ILogger<CloudSyncViewModel> _logger;
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ImageService _imageService;
         private readonly SyncService _syncService;
 
         private bool _mergeProcessing;
@@ -104,7 +104,7 @@ namespace PasswordManager.ViewModels
         public CloudSyncViewModel(
             AppSettingsService appSettingsService,
             CloudServiceProvider cloudServiceProvider,
-            IHttpClientFactory httpClientFactory,
+            ImageService imageService,
             SyncService syncService,
             ILogger<CloudSyncViewModel> logger)
         {
@@ -113,7 +113,7 @@ namespace PasswordManager.ViewModels
 
             _appSettingsService = appSettingsService;
             _cloudServiceProvider = cloudServiceProvider;
-            _httpClientFactory = httpClientFactory;
+            _imageService = imageService;
             _syncService = syncService;
             _logger = logger;
 
@@ -216,7 +216,7 @@ namespace PasswordManager.ViewModels
                 {
                     case CloudType.GoogleDrive:
                         GoogleUserName = userInfo.UserName;
-                        GoogleProfileImage = await GetImageAsync(userInfo.ProfileUrl, cancellationToken);
+                        GoogleProfileImage = await _imageService.GetImageAsync(userInfo.ProfileUrl, cancellationToken);
                         break;
                 }
             }
@@ -228,21 +228,6 @@ namespace PasswordManager.ViewModels
             {
                 FetchingUserInfo = false;
             }
-        }
-
-        private async Task<ImageSource> GetImageAsync(string imageUrl, CancellationToken cancellationToken)
-        {
-            var client = _httpClientFactory.CreateClient();
-            var request = new HttpRequestMessage(HttpMethod.Get, imageUrl);
-            using var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
-            using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-            var bitmapImage = new BitmapImage();
-            bitmapImage.BeginInit();
-            bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-            bitmapImage.StreamSource = stream;
-            bitmapImage.EndInit();
-            bitmapImage.Freeze();
-            return bitmapImage;
         }
 
         private void ClearUserInfo(CloudType cloudType)

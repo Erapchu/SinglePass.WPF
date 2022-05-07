@@ -2,7 +2,6 @@
 using PasswordManager.Helpers;
 using PasswordManager.Helpers.Threading;
 using PasswordManager.Hotkeys;
-using PasswordManager.Models;
 using System;
 using System.IO;
 using System.Text.Json;
@@ -11,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace PasswordManager.Settings
 {
-    public class AppSettingsService
+    public class AppSettingsService : IAppSettings
     {
         private readonly string _commonSettingsFilePath = Constants.CommonSettingsFilePath;
         private readonly ILogger<AppSettingsService> _logger;
@@ -34,6 +33,12 @@ namespace PasswordManager.Settings
         {
             get => Settings.ShowPopupHotkey;
             set => Settings.ShowPopupHotkey = value;
+        }
+
+        public WindowSettings MainWindowSettings
+        {
+            get => Settings.MainWindowSettings;
+            set => Settings.MainWindowSettings = value;
         }
 
         public AppSettingsService(ILogger<AppSettingsService> logger)

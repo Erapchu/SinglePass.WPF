@@ -1,8 +1,11 @@
 ﻿using PasswordManager.Controls;
+using PasswordManager.Helpers;
 using PasswordManager.Hotkeys;
+using PasswordManager.Settings;
 using PasswordManager.ViewModels;
 using System;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace PasswordManager.Views
@@ -13,14 +16,33 @@ namespace PasswordManager.Views
     public partial class MainWindow : MaterialWindow
     {
         private readonly HotkeysService _hotkeyService;
+        private readonly AppSettingsService _appSettingsService;
 
         private MainWindowViewModel ViewModel => DataContext as MainWindowViewModel;
 
-        public MainWindow(MainWindowViewModel mainViewModel, HotkeysService hotkeysService)
+        public MainWindow(
+            MainWindowViewModel mainViewModel,
+            HotkeysService hotkeysService,
+            AppSettingsService appSettingsService)
         {
             InitializeComponent();
 
             _hotkeyService = hotkeysService;
+            _appSettingsService = appSettingsService;
+
+            var windowSettings = _appSettingsService.MainWindowSettings;
+            if (windowSettings is not null)
+            {
+                var windowRect = new Rect(windowSettings.Left, windowSettings.Top, windowSettings.Width, windowSettings.Height);
+                if (WindowPositionHelper.IsOnPrimaryScreen(windowRect))
+                {
+                    Left = windowSettings.Left;
+                    Top = windowSettings.Top;
+                    Width = windowSettings.Width;
+                    Height = windowSettings.Height;
+                    WindowState = windowSettings.WindowState;
+                }
+            }
 
             mainViewModel.CredentialSelected += Vm_CredentialSelected;
             DataContext = mainViewModel;
@@ -59,12 +81,30 @@ namespace PasswordManager.Views
             _hotkeyService.IsEnabled = true;
         }
 
-        private async void MaterialWindow_IsVisibleChanged(object sender, System.Windows.DependencyPropertyChangedEventArgs e)
+        private async void MaterialWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (e.NewValue is bool visibility && visibility && ViewModel.SelectedNavigationItem is PasswordsViewModel)
             {
                 await Task.Delay(10);
                 PasswordsControl.SearchTextBox.Focus();
+            }
+        }
+
+        private void MaterialWindow_Closed(object sender, EventArgs e)
+        {
+            // Avoid minimized state
+            if (WindowState != WindowState.Minimized)
+            {
+                _appSettingsService.MainWindowSettings = new WindowSettings()
+                {
+                    Left = Left,
+                    Top = Top,
+                    Width = Width,
+                    Height = Height,
+                    WindowState = WindowState
+                };
+                // Save settings and wait to avoid file corruptions
+                _appSettingsService.Save().Wait();
             }
         }
     }

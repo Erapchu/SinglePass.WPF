@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 
 namespace PasswordManager.Controls
@@ -19,7 +14,10 @@ namespace PasswordManager.Controls
         private Button _closeButton;
 
         public static readonly DependencyProperty CaptionVisibilityProperty = DependencyProperty.Register(
-                "CaptionVisibility", typeof(Visibility), typeof(MaterialWindow), new FrameworkPropertyMetadata(Visibility.Visible));
+            "CaptionVisibility",
+            typeof(Visibility),
+            typeof(MaterialWindow),
+            new FrameworkPropertyMetadata(Visibility.Visible));
 
         public Visibility CaptionVisibility
         {

@@ -13,9 +13,6 @@ namespace PasswordManager.Hotkeys
 {
     internal static class HotkeyDelegates
     {
-        private const float _defaultDpiX = 96;
-        private const float _defaultDpiY = 96;
-
         public static void PopupHotkeyHandler()
         {
             // Prevent duplicates
@@ -56,8 +53,8 @@ namespace PasswordManager.Hotkeys
                 // https://stackoverflow.com/questions/1918877/how-can-i-get-the-dpi-in-wpf
                 // VisualTreeHelper.GetDpi(Visual visual)
                 var dpiAtPoint = DpiUtilities.GetDpiForNearestMonitor(caretRect.right, caretRect.bottom);
-                popup.HorizontalOffset = caretRect.right * _defaultDpiX / dpiAtPoint;
-                popup.VerticalOffset = caretRect.bottom * _defaultDpiY / dpiAtPoint;
+                popup.HorizontalOffset = caretRect.right * DpiUtilities.DefaultDpiX / dpiAtPoint;
+                popup.VerticalOffset = caretRect.bottom * DpiUtilities.DefaultDpiY / dpiAtPoint;
                 popup.IsOpen = true;
 
                 // OK caret placement

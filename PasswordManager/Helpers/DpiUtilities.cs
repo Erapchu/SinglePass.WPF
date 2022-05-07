@@ -6,6 +6,9 @@ namespace PasswordManager.Helpers
     // https://stackoverflow.com/questions/1918877/how-can-i-get-the-dpi-in-wpf
     public static class DpiUtilities
     {
+        public const float DefaultDpiX = 96;
+        public const float DefaultDpiY = 96;
+
         // you should always use this one and it will fallback if necessary
         // https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getdpiforwindow
         public static int GetDpiForWindow(IntPtr hwnd)

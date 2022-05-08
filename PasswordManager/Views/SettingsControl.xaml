@@ -7,8 +7,8 @@
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:PasswordManager.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:properties="clr-namespace:PasswordManager.Language.Properties;assembly=PasswordManager.Language"
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:properties="clr-namespace:PasswordManager.Language.Properties;assembly=PasswordManager.Language"
     xmlns:vm="clr-namespace:PasswordManager.ViewModels"
     d:DataContext="{x:Static vm:SettingsViewModel.DesignTimeInstance}"
     d:DesignHeight="450"
@@ -44,17 +44,20 @@
                         <RowDefinition Height="auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <StackPanel Grid.Row="1" Margin="16 8">
+                    <StackPanel Grid.Row="1">
                         <RadioButton
-                            Margin="0 8"
+                            Margin="12 6"
+                            Padding="12 0"
                             Content="{x:Static properties:Resources.System}"
                             IsChecked="{Binding ThemeMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static md:BaseTheme.Inherit}}" />
                         <RadioButton
-                            Margin="0 8"
+                            Margin="12 6"
+                            Padding="12 0"
                             Content="{x:Static properties:Resources.Dark}"
                             IsChecked="{Binding ThemeMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static md:BaseTheme.Dark}}" />
                         <RadioButton
-                            Margin="0 8"
+                            Margin="12 6"
+                            Padding="12 0"
                             Content="{x:Static properties:Resources.Light}"
                             IsChecked="{Binding ThemeMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static md:BaseTheme.Light}}" />
                     </StackPanel>

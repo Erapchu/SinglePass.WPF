@@ -93,6 +93,18 @@ namespace PasswordManager.Views
         private void MaterialWindow_Closed(object sender, EventArgs e)
         {
             var saveRequired = false;
+            if (ViewModel.SettingsVM.ThemeMode != _appSettingsService.ThemeMode)
+            {
+                _appSettingsService.ThemeMode = ViewModel.SettingsVM.ThemeMode;
+                saveRequired = true;
+            }
+
+            if (!ViewModel.SettingsVM.ShowPopupHotkey.Equals(_appSettingsService.ShowPopupHotkey))
+            {
+                _appSettingsService.ShowPopupHotkey = ViewModel.SettingsVM.ShowPopupHotkey;
+                saveRequired = true;
+            }
+
             if (ViewModel.PasswordsVM.Sort != _appSettingsService.Sort)
             {
                 _appSettingsService.Sort = ViewModel.PasswordsVM.Sort;

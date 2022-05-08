@@ -35,14 +35,13 @@ namespace PasswordManager.ViewModels
         private RelayCommand<System.Windows.Input.KeyEventArgs> _changeHelperPopupHotkeyCommand;
         private RelayCommand _clearShowPopupHotkeyCommand;
 
+        private BaseTheme _themeMode;
         public BaseTheme ThemeMode
         {
-            get => _appSettingsService.ThemeMode;
+            get => _themeMode;
             set
             {
-                _appSettingsService.ThemeMode = value;
-                _appSettingsService.Save();
-                OnPropertyChanged();
+                SetProperty(ref _themeMode, value);
                 _themeService.ThemeMode = value;
             }
         }
@@ -63,14 +62,13 @@ namespace PasswordManager.ViewModels
             set => SetProperty(ref _newPasswordHelperText, value);
         }
 
+        private Hotkey _showPopupHotkey;
         public Hotkey ShowPopupHotkey
         {
-            get => _appSettingsService.ShowPopupHotkey;
+            get => _showPopupHotkey;
             set
             {
-                _appSettingsService.ShowPopupHotkey = value;
-                _appSettingsService.Save();
-                OnPropertyChanged();
+                SetProperty(ref _showPopupHotkey, value);
                 ChangeHelperPopupHotkeyCommand.NotifyCanExecuteChanged();
             }
         }
@@ -98,6 +96,9 @@ namespace PasswordManager.ViewModels
             _credentialsCryptoService = credentialsCryptoService;
             _logger = logger;
             _hotkeysService = hotkeysService;
+
+            _themeMode = _appSettingsService.ThemeMode;
+            _showPopupHotkey = _appSettingsService.ShowPopupHotkey;
         }
 
         private async Task ChangePasswordAsync()

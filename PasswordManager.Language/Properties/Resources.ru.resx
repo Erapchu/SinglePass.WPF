@@ -172,7 +172,7 @@
     <value>Подробности</value>
   </data>
   <data name="ModifiedFormatted" xml:space="preserve">
-    <value>Изменен:{0: dd-MM-yyyy, HH:mm:ss}</value>
+    <value>Изменён:{0: dd-MM-yyyy, HH:mm:ss}</value>
   </data>
   <data name="Name" xml:space="preserve">
     <value>Имя</value>
@@ -269,5 +269,23 @@
   </data>
   <data name="UploadPasswords" xml:space="preserve">
     <value>Отгрузить пароли</value>
+  </data>
+  <data name="Created" xml:space="preserve">
+    <value>Создан</value>
+  </data>
+  <data name="Modified" xml:space="preserve">
+    <value>Изменён</value>
+  </data>
+  <data name="Ascending" xml:space="preserve">
+    <value>Возрастание</value>
+  </data>
+  <data name="Descending" xml:space="preserve">
+    <value>Убывание</value>
+  </data>
+  <data name="OrderBy" xml:space="preserve">
+    <value>Упорядочить по</value>
+  </data>
+  <data name="SortBy" xml:space="preserve">
+    <value>Сортировать по</value>
   </data>
 </root>

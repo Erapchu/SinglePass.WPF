@@ -12,7 +12,6 @@ namespace PasswordManager.Settings
 {
     public class AppSettingsService : IAppSettings
     {
-        private readonly string _commonSettingsFilePath = Constants.CommonSettingsFilePath;
         private readonly ILogger<AppSettingsService> _logger;
 
         public AppSettings Settings { get; } = new();
@@ -57,12 +56,12 @@ namespace PasswordManager.Settings
         {
             _logger = logger;
 
-            if (File.Exists(_commonSettingsFilePath))
+            if (File.Exists(Constants.CommonSettingsFilePath))
             {
                 // Read existing
                 try
                 {
-                    using var fileStream = new FileStream(_commonSettingsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    using var fileStream = new FileStream(Constants.CommonSettingsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                     Settings = JsonSerializer.Deserialize<AppSettings>(fileStream);
                 }
                 catch (Exception ex)
@@ -70,20 +69,15 @@ namespace PasswordManager.Settings
                     _logger.LogError(ex, null);
                 }
             }
-            else
-            {
-                // First save
-                Save();
-            }
         }
 
         public Task Save()
         {
             return Task.Run(() =>
             {
-                var hashedPath = HashHelper.GetHash(_commonSettingsFilePath);
+                var hashedPath = HashHelper.GetHash(Constants.CommonSettingsFilePath);
                 using var waitHandleLocker = EventWaitHandleLocker.MakeWithEventHandle(true, EventResetMode.AutoReset, hashedPath);
-                using var fileStream = new FileStream(_commonSettingsFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
+                using var fileStream = new FileStream(Constants.CommonSettingsFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
                 JsonSerializer.Serialize(fileStream, Settings);
                 _logger.LogInformation("Settings saved to file");
             });

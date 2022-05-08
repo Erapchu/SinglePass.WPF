@@ -92,10 +92,23 @@ namespace PasswordManager.Views
 
         private void MaterialWindow_Closed(object sender, EventArgs e)
         {
+            var saveRequired = false;
+            if (ViewModel.PasswordsVM.Sort != _appSettingsService.Sort)
+            {
+                _appSettingsService.Sort = ViewModel.PasswordsVM.Sort;
+                saveRequired = true;
+            }
+
+            if (ViewModel.PasswordsVM.Order != _appSettingsService.Order)
+            {
+                _appSettingsService.Order = ViewModel.PasswordsVM.Order;
+                saveRequired = true;
+            }
+
             // Avoid minimized state
             if (WindowState != WindowState.Minimized)
             {
-                _appSettingsService.MainWindowSettings = new WindowSettings()
+                var currentWindowSettings = new WindowSettings()
                 {
                     Left = Left,
                     Top = Top,
@@ -103,6 +116,15 @@ namespace PasswordManager.Views
                     Height = Height,
                     WindowState = WindowState
                 };
+                if (!currentWindowSettings.Equals(_appSettingsService.MainWindowSettings))
+                {
+                    _appSettingsService.MainWindowSettings = currentWindowSettings;
+                    saveRequired = true;
+                }
+            }
+
+            if (saveRequired)
+            {
                 // Save settings and wait to avoid file corruptions
                 _appSettingsService.Save().Wait();
             }

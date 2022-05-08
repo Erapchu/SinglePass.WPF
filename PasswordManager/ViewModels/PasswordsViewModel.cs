@@ -6,6 +6,7 @@ using PasswordManager.Enums;
 using PasswordManager.Helpers;
 using PasswordManager.Models;
 using PasswordManager.Services;
+using PasswordManager.Settings;
 using PasswordManager.Views.MessageBox;
 using System;
 using System.Collections.Generic;
@@ -42,6 +43,8 @@ namespace PasswordManager.ViewModels
         private readonly CredentialsCryptoService _credentialsCryptoService;
         private readonly ILogger<PasswordsViewModel> _logger;
         private readonly List<CredentialViewModel> _credentials = new();
+        private readonly AppSettingsService _appSettingsService;
+
         private CredentialViewModel _selectedCredential;
         private string _searchText;
         private bool _searchTextFocused;
@@ -72,7 +75,7 @@ namespace PasswordManager.ViewModels
             set
             {
                 SetProperty(ref _searchText, value);
-                _ = FilterCredentialsAsync();
+                _ = DisplayCredentialsAsync();
             }
         }
 
@@ -82,18 +85,45 @@ namespace PasswordManager.ViewModels
             set => SetProperty(ref _searchTextFocused, value);
         }
 
+        private SortType _sort;
+        public SortType Sort
+        {
+            get => _sort;
+            set
+            {
+                SetProperty(ref _sort, value);
+                _ = DisplayCredentialsAsync();
+            }
+        }
+
+        private OrderType _order;
+        public OrderType Order
+        {
+            get => _order;
+            set
+            {
+                SetProperty(ref _order, value);
+                _ = DisplayCredentialsAsync();
+            }
+        }
+
         private PasswordsViewModel() { }
 
         public PasswordsViewModel(
             CredentialsCryptoService credentialsCryptoService,
             ILogger<PasswordsViewModel> logger,
-            CredentialsDialogViewModel credentialsDialogViewModel)
+            CredentialsDialogViewModel credentialsDialogViewModel,
+            AppSettingsService appSettingsService)
         {
             Name = PasswordManager.Language.Properties.Resources.Passwords;
             IconKind = PackIconKind.Password;
 
             _credentialsCryptoService = credentialsCryptoService;
             _logger = logger;
+            _appSettingsService = appSettingsService;
+
+            _sort = _appSettingsService.Sort;
+            _order = _appSettingsService.Order;
 
             ActiveCredentialDialogViewModel = credentialsDialogViewModel;
             ActiveCredentialDialogViewModel.Accept += ActiveCredentialDialogViewModel_Accept;
@@ -116,7 +146,7 @@ namespace PasswordManager.ViewModels
                 var dIndex = DisplayedCredentials.IndexOf(credVM);
                 var countAfterDeletion = DisplayedCredentials.Count - 1;
                 var sIndex = dIndex >= countAfterDeletion ? countAfterDeletion - 1 : dIndex;
-                await FilterCredentialsAsync();
+                await DisplayCredentialsAsync();
                 if (sIndex >= 0)
                 {
                     SelectedCredential = DisplayedCredentials.ElementAt(sIndex);
@@ -140,7 +170,7 @@ namespace PasswordManager.ViewModels
                 newCredVM.CreationTime = dateTimeNow;
                 await _credentialsCryptoService.AddCredential(newCredVM.Model);
                 _credentials.Add(newCredVM);
-                await FilterCredentialsAsync();
+                await DisplayCredentialsAsync();
             }
             else if (mode == CredentialsDialogMode.Edit)
             {
@@ -149,7 +179,7 @@ namespace PasswordManager.ViewModels
                 var staleIndex = _credentials.IndexOf(staleCredVM);
                 _credentials.Remove(staleCredVM);
                 _credentials.Insert(staleIndex, newCredVM);
-                await FilterCredentialsAsync();
+                await DisplayCredentialsAsync();
             }
 
             SelectedCredential = newCredVM;
@@ -159,17 +189,16 @@ namespace PasswordManager.ViewModels
         {
             try
             {
-                DisplayedCredentials.Clear();
                 _credentials.Clear();
 
                 var credentials = _credentialsCryptoService.Credentials;
-                using var delayed = DisplayedCredentials.DelayNotifications();
                 foreach (var cred in credentials)
                 {
                     var credVM = new CredentialViewModel(cred);
                     _credentials.Add(credVM);
-                    delayed.Add(credVM);
                 }
+
+                _ = DisplayCredentialsAsync();
             }
             catch (Exception ex)
             {
@@ -177,7 +206,7 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        public async Task FilterCredentialsAsync()
+        private async Task DisplayCredentialsAsync()
         {
             try
             {
@@ -186,7 +215,13 @@ namespace PasswordManager.ViewModels
 
                 if (string.IsNullOrEmpty(filterText))
                 {
-                    filteredCredentials = _credentials;
+                    List<CredentialViewModel> tempList = null;
+                    await Task.Run(() =>
+                    {
+                        tempList = _credentials.ToList();
+                        SortAndOrder(tempList);
+                    });
+                    filteredCredentials = tempList;
                 }
                 else
                 {
@@ -217,6 +252,8 @@ namespace PasswordManager.ViewModels
                                 fCreds.Add(cred);
                             }
                         }
+
+                        SortAndOrder(fCreds);
                         return fCreds;
                     });
                 }
@@ -264,6 +301,45 @@ namespace PasswordManager.ViewModels
                 {
                     SelectedCredential = DisplayedCredentials[selectedIndex + 1];
                 }
+            }
+        }
+
+        private void SortAndOrder(List<CredentialViewModel> creds)
+        {
+            switch (Order)
+            {
+                case OrderType.Ascending:
+                    {
+                        switch (Sort)
+                        {
+                            case SortType.Name:
+                                creds.Sort((a, b) => a.NameFieldVM.Value.CompareTo(b.NameFieldVM.Value));
+                                break;
+                            case SortType.Created:
+                                creds.Sort((a, b) => a.CreationTime.CompareTo(b.CreationTime));
+                                break;
+                            case SortType.Modified:
+                                creds.Sort((a, b) => a.LastModifiedTime.CompareTo(b.LastModifiedTime));
+                                break;
+                        }
+                    }
+                    break;
+                case OrderType.Descending:
+                    {
+                        switch (Sort)
+                        {
+                            case SortType.Name:
+                                creds.Sort((a, b) => b.NameFieldVM.Value.CompareTo(a.NameFieldVM.Value));
+                                break;
+                            case SortType.Created:
+                                creds.Sort((a, b) => b.CreationTime.CompareTo(a.CreationTime));
+                                break;
+                            case SortType.Modified:
+                                creds.Sort((a, b) => b.LastModifiedTime.CompareTo(a.LastModifiedTime));
+                                break;
+                        }
+                    }
+                    break;
             }
         }
     }

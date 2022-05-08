@@ -41,6 +41,18 @@ namespace PasswordManager.Settings
             set => Settings.MainWindowSettings = value;
         }
 
+        public SortType Sort
+        {
+            get => Settings.Sort;
+            set => Settings.Sort = value;
+        }
+
+        public OrderType Order
+        {
+            get => Settings.Order;
+            set => Settings.Order = value;
+        }
+
         public AppSettingsService(ILogger<AppSettingsService> logger)
         {
             _logger = logger;

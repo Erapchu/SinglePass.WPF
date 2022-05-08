@@ -2,9 +2,11 @@
 using PasswordManager.Models;
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 
 namespace PasswordManager.ViewModels
 {
+    [DebuggerDisplay("{Model}")]
     public class PassFieldViewModel : ObservableValidator
     {
         public PassField Model { get; }

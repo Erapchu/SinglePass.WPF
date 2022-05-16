@@ -1,5 +1,6 @@
 ﻿using PasswordManager.Controls;
 using PasswordManager.Helpers;
+using PasswordManager.Hotkeys;
 using PasswordManager.Settings;
 using PasswordManager.ViewModels;
 using System;
@@ -14,16 +15,19 @@ namespace PasswordManager.Views
     /// </summary>
     public partial class MainWindow : MaterialWindow
     {
+        private readonly HotkeysService _hotkeyService;
         private readonly AppSettingsService _appSettingsService;
 
         private MainWindowViewModel ViewModel => DataContext as MainWindowViewModel;
 
         public MainWindow(
             MainWindowViewModel mainViewModel,
+            HotkeysService hotkeysService,
             AppSettingsService appSettingsService)
         {
             InitializeComponent();
 
+            _hotkeyService = hotkeysService;
             _appSettingsService = appSettingsService;
 
             var windowSettings = _appSettingsService.MainWindowSettings;
@@ -65,6 +69,16 @@ namespace PasswordManager.Views
 
             if (anyCtrlPressed)
                 e.Handled = true;
+        }
+
+        private void MaterialWindow_Activated(object sender, EventArgs e)
+        {
+            _hotkeyService.IsEnabled = false;
+        }
+
+        private void MaterialWindow_Deactivated(object sender, EventArgs e)
+        {
+            _hotkeyService.IsEnabled = true;
         }
 
         private async void MaterialWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)

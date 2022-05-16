@@ -19,6 +19,8 @@
     d:DataContext="{x:Static vm:MainWindowViewModel.DesignTimeInstance}"
     Closing="MaterialWindow_Closing"
     IsVisibleChanged="MaterialWindow_IsVisibleChanged"
+    Activated="MaterialWindow_Activated"
+    Deactivated="MaterialWindow_Deactivated"
     Closed="MaterialWindow_Closed"
     UseLayoutRounding="True"
     mc:Ignorable="d">

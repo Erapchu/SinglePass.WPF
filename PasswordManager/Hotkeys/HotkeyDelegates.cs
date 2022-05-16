@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Interop;
-//using UIAutomationClient;
+using UIAutomationClient;
 
 namespace PasswordManager.Hotkeys
 {
@@ -27,37 +27,34 @@ namespace PasswordManager.Hotkeys
             if (WinApiProvider.GetGUIThreadInfo(0, ref info))
             {
                 var hwndFocus = info.hwndFocus;
-                //var caretRect = GetAccessibleCaretRect(hwndFocus);
-                var windowRect = new WinApiProvider.RECT();
+                var caretRect = GetAccessibleCaretRect(hwndFocus);
 
                 var popup = (Application.Current as App).Host.Services.GetService(typeof(PopupControl)) as PopupControl;
-                var s = WinApiProvider.GetWindowRect(hwndFocus, ref windowRect);
 
                 // Obtain popup handle for placement
                 //var popupRect = new WinApiProvider.RECT();
                 //WinApiProvider.GetWindowRect(popupHandle, ref popupRect);
-                //if (!RectValid(caretRect))
-                //{
-                //    // Can't accquire caret placement
-                //    caretRect = GetWinApiCaretRect(hwndFocus);
-                //    if (!RectValid(caretRect))
-                //    {
-                //        caretRect = new WinApiProvider.RECT()
-                //        {
-                //            left = (int)(SystemParameters.PrimaryScreenWidth - popup.Width),
-                //            top = (int)(SystemParameters.PrimaryScreenHeight - popup.Height),
-                //            right = (int)SystemParameters.PrimaryScreenWidth,
-                //            bottom = (int)SystemParameters.PrimaryScreenHeight
-                //        };
-                //    }
-                //}
+                if (!RectValid(caretRect))
+                {
+                    // Can't accquire caret placement
+                    caretRect = GetWinApiCaretRect(hwndFocus);
+                    if (!RectValid(caretRect))
+                    {
+                        caretRect = new WinApiProvider.RECT()
+                        {
+                            left = (int)(SystemParameters.PrimaryScreenWidth - popup.Width),
+                            top = (int)(SystemParameters.PrimaryScreenHeight - popup.Height),
+                            right = (int)SystemParameters.PrimaryScreenWidth,
+                            bottom = (int)SystemParameters.PrimaryScreenHeight
+                        };
+                    }
+                }
 
                 // https://stackoverflow.com/questions/1918877/how-can-i-get-the-dpi-in-wpf
                 // VisualTreeHelper.GetDpi(Visual visual)
-                var dpiAtPoint = DpiUtilities.GetDpiForNearestMonitor(windowRect.right, windowRect.bottom);
-                var dpiMultiplier = DpiUtilities.DefaultDpiX / dpiAtPoint;
-                popup.HorizontalOffset = windowRect.right * dpiMultiplier - popup.Width;
-                popup.VerticalOffset = windowRect.bottom * dpiMultiplier - popup.Height;
+                var dpiAtPoint = DpiUtilities.GetDpiForNearestMonitor(caretRect.right, caretRect.bottom);
+                popup.HorizontalOffset = caretRect.right * DpiUtilities.DefaultDpiX / dpiAtPoint;
+                popup.VerticalOffset = caretRect.bottom * DpiUtilities.DefaultDpiY / dpiAtPoint;
                 popup.IsOpen = true;
 
                 // OK caret placement
@@ -82,7 +79,7 @@ namespace PasswordManager.Hotkeys
                 .Where(p => p.IsOpen);
         }
 
-        /*private static WinApiProvider.RECT GetAccessibleCaretRect(IntPtr hwnd)
+        private static WinApiProvider.RECT GetAccessibleCaretRect(IntPtr hwnd)
         {
             var guid = typeof(IAccessible).GUID;
             object accessibleObject = null;
@@ -90,7 +87,7 @@ namespace PasswordManager.Hotkeys
             var accessible = accessibleObject as IAccessible;
             accessible.accLocation(out int left, out int top, out int width, out int height, WinApiProvider.CHILDID_SELF);
             return new WinApiProvider.RECT() { bottom = top + height, left = left, right = left + width, top = top };
-        }*/
+        }
 
         private static WinApiProvider.RECT GetWinApiCaretRect(IntPtr hwnd)
         {

@@ -35,8 +35,7 @@ namespace PasswordManager.ViewModels
         private readonly ImageService _imageService;
         private readonly SyncService _syncService;
 
-        private bool _mergeProcessing;
-        private bool _uploadProcessing;
+        private bool _syncProcessing;
         private bool _fetchingUserInfo;
         private ImageSource _googleProfileImage;
         private string _googleUserName;
@@ -44,7 +43,6 @@ namespace PasswordManager.ViewModels
 
         private AsyncRelayCommand<CloudType> _syncCommand;
         private AsyncRelayCommand<CloudType> _loginCommand;
-        private AsyncRelayCommand<CloudType> _uploadCommand;
 
         public event Action SyncCompleted;
 
@@ -58,16 +56,10 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        public bool MergeProcessing
+        public bool SyncProcessing
         {
-            get => _mergeProcessing;
-            set => SetProperty(ref _mergeProcessing, value);
-        }
-
-        public bool UploadProcessing
-        {
-            get => _uploadProcessing;
-            set => SetProperty(ref _uploadProcessing, value);
+            get => _syncProcessing;
+            set => SetProperty(ref _syncProcessing, value);
         }
 
         public bool FetchingUserInfo
@@ -96,7 +88,6 @@ namespace PasswordManager.ViewModels
 
         public AsyncRelayCommand<CloudType> LoginCommand => _loginCommand ??= new AsyncRelayCommand<CloudType>(Login);
         public AsyncRelayCommand<CloudType> SyncCommand => _syncCommand ??= new AsyncRelayCommand<CloudType>(SyncCredentials);
-        public AsyncRelayCommand<CloudType> UploadCommand => _uploadCommand ??= new AsyncRelayCommand<CloudType>(UploadCredentials);
 
         private CloudSyncViewModel() { }
 
@@ -242,18 +233,38 @@ namespace PasswordManager.ViewModels
 
         private async Task SyncCredentials(CloudType cloudType)
         {
-            if (MergeProcessing)
+            if (SyncProcessing)
                 return;
 
             try
             {
-                MergeProcessing = true;
+                SyncProcessing = true;
                 var windowDialogName = MvvmHelper.MainWindowDialogName;
-                var mergeResult = await _syncService.Synchronize(cloudType, SyncPasswordRequired);
+                var syncResult = await _syncService.Synchronize(cloudType, SyncPasswordRequired);
+                if (syncResult is null || syncResult.Success == false)
+                {
+                    await MaterialMessageBox.ShowAsync(
+                        "Credentials not merged",
+                        syncResult.ToString(),
+                        MaterialMessageBoxButtons.OK,
+                        windowDialogName);
+                    return;
+                }
+                
+                var uploadResult = await _syncService.Upload(cloudType);
+                if (!uploadResult)
+                {
+                    await MaterialMessageBox.ShowAsync(
+                        "Error",
+                        "Failed to upload credentials",
+                        MaterialMessageBoxButtons.OK,
+                        windowDialogName);
+                    return;
+                }
 
                 await MaterialMessageBox.ShowAsync(
-                    mergeResult.Success ? "Credentials successfully merged" : "Credentials not merged",
-                    mergeResult.ToString(),
+                    "Credentials successfully merged and uploaded",
+                    syncResult.ToString(),
                     MaterialMessageBoxButtons.OK,
                     windowDialogName);
             }
@@ -264,35 +275,7 @@ namespace PasswordManager.ViewModels
             finally
             {
                 SyncCompleted?.Invoke();
-                MergeProcessing = false;
-            }
-        }
-
-        private async Task UploadCredentials(CloudType cloudType)
-        {
-            if (UploadProcessing)
-                return;
-
-            try
-            {
-                UploadProcessing = true;
-                var windowDialogName = MvvmHelper.MainWindowDialogName;
-                var success = await _syncService.Upload(cloudType);
-
-                await MaterialMessageBox.ShowAsync(
-                    success ? "Success" : "Error",
-                    success ? "Credentials successfully uploaded" : "Failed to upload credentials",
-                    MaterialMessageBoxButtons.OK,
-                    windowDialogName);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, string.Empty);
-            }
-            finally
-            {
-                SyncCompleted?.Invoke();
-                UploadProcessing = false;
+                SyncProcessing = false;
             }
         }
 

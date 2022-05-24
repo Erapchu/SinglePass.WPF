@@ -1,5 +1,4 @@
-﻿using HttpMultipartParser;
-using PasswordManager.Authorization.Brokers;
+﻿using PasswordManager.Authorization.Brokers;
 using PasswordManager.Authorization.Interfaces;
 using PasswordManager.Clouds.Interfaces;
 using PasswordManager.Clouds.Models;
@@ -70,9 +69,7 @@ namespace PasswordManager.Clouds.Services
             var targetFile = fileList.Files.Find(f => f.Name == fileName);
 
             // Prepare request
-            var metaContent = JsonContent.Create(new { name = fileName });
             var streamContent = new StreamContent(stream);
-            var multipart = new MultipartContent { metaContent, streamContent };
             streamContent.Headers.ContentType = new MediaTypeHeaderValue(MediaTypeNames.Application.Octet);
             streamContent.Headers.ContentLength = stream.Length;
 
@@ -81,8 +78,8 @@ namespace PasswordManager.Clouds.Services
                 // Update
                 using var updateFileRM = GetAuthHttpRequestMessage();
                 updateFileRM.Method = HttpMethod.Patch;
-                updateFileRM.RequestUri = new System.Uri($"https://www.googleapis.com/upload/drive/v3/files/{targetFile.Id}?uploadtype=multipart");
-                updateFileRM.Content = multipart;
+                updateFileRM.RequestUri = new System.Uri($"https://www.googleapis.com/upload/drive/v3/files/{targetFile.Id}?uploadType=media");
+                updateFileRM.Content = streamContent;
                 var r = await client.SendAsync(updateFileRM, cancellationToken).ConfigureAwait(false);
             }
             else
@@ -90,8 +87,8 @@ namespace PasswordManager.Clouds.Services
                 // Create
                 using var createFileRM = GetAuthHttpRequestMessage();
                 createFileRM.Method = HttpMethod.Post;
-                createFileRM.RequestUri = new System.Uri("https://www.googleapis.com/upload/drive/v3/files?uploadtype=multipart");
-                createFileRM.Content = multipart;
+                createFileRM.RequestUri = new System.Uri("https://www.googleapis.com/upload/drive/v3/files?uploadType=media");
+                createFileRM.Content = streamContent;
                 var r = await client.SendAsync(createFileRM, cancellationToken).ConfigureAwait(false);
             }
         }
@@ -112,18 +109,7 @@ namespace PasswordManager.Clouds.Services
             getFileStreamRM.RequestUri = new System.Uri($"https://www.googleapis.com/drive/v3/files/{targetFile.Id}?alt=media");
             var fileResponse = await client.SendAsync(getFileStreamRM, cancellationToken).ConfigureAwait(false);
             var fileContent = fileResponse.Content;
-            using var fullStream = await fileContent.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-
-            var multipart = await MultipartFormDataParser.ParseAsync(fullStream).ConfigureAwait(false);
-            foreach (var file in multipart.Files)
-            {
-                if (file.ContentType == MediaTypeNames.Application.Octet)
-                {
-                    return file.Data;
-                }
-            }
-
-            return null;
+            return await fileContent.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<BaseUserInfo> GetUserInfo(CancellationToken cancellationToken)

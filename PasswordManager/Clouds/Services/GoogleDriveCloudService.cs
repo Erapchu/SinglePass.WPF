@@ -80,7 +80,7 @@ namespace PasswordManager.Clouds.Services
                 updateFileRM.Method = HttpMethod.Patch;
                 updateFileRM.RequestUri = new System.Uri($"https://www.googleapis.com/upload/drive/v3/files/{targetFile.Id}?uploadType=media");
                 updateFileRM.Content = streamContent;
-                var updateResponse = await client.SendAsync(updateFileRM, cancellationToken).ConfigureAwait(false);
+                using var updateResponse = await client.SendAsync(updateFileRM, cancellationToken).ConfigureAwait(false);
             }
             else
             {
@@ -89,17 +89,18 @@ namespace PasswordManager.Clouds.Services
                 createFileRM.Method = HttpMethod.Post;
                 createFileRM.RequestUri = new System.Uri("https://www.googleapis.com/upload/drive/v3/files?uploadType=media");
                 createFileRM.Content = streamContent;
-                var createResponse = await client.SendAsync(createFileRM, cancellationToken).ConfigureAwait(false);
+                using var createResponse = await client.SendAsync(createFileRM, cancellationToken).ConfigureAwait(false);
 
                 // Rename
-                var createResponseContent = await createResponse.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-                var file = JsonSerializer.Deserialize<GoogleDriveFile>(createResponseContent);
-                var jsonMetaContent = JsonContent.Create(new { name = fileName });
+                using var createContent = createResponse.Content;
+                var createContentString = await createContent.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+                var file = JsonSerializer.Deserialize<GoogleDriveFile>(createContentString);
+                using var jsonMetaContent = JsonContent.Create(new { name = fileName });
                 using var renameFileRM = GetAuthHttpRequestMessage();
                 renameFileRM.Method = HttpMethod.Patch;
                 renameFileRM.RequestUri = new System.Uri($"https://www.googleapis.com/drive/v3/files/{file.Id}");
                 renameFileRM.Content = jsonMetaContent;
-                var renameResponse = await client.SendAsync(renameFileRM, cancellationToken).ConfigureAwait(false);
+                using var renameResponse = await client.SendAsync(renameFileRM, cancellationToken).ConfigureAwait(false);
             }
         }
 

@@ -268,4 +268,25 @@
   <data name="Descending" xml:space="preserve">
     <value>Descending</value>
   </data>
+  <data name="Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="FailedToUpload" xml:space="preserve">
+    <value>Failed to upload</value>
+  </data>
+  <data name="SyncSuccess" xml:space="preserve">
+    <value>Sync succeed</value>
+  </data>
+  <data name="DownloadingFile" xml:space="preserve">
+    <value>Downloading file...</value>
+  </data>
+  <data name="Decrypting" xml:space="preserve">
+    <value>Decrypting...</value>
+  </data>
+  <data name="Uploading" xml:space="preserve">
+    <value>Uploading...</value>
+  </data>
+  <data name="InputPasswordOfFile" xml:space="preserve">
+    <value>Input password of file</value>
+  </data>
 </root>

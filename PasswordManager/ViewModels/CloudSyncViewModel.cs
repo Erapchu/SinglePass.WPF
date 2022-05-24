@@ -244,7 +244,7 @@ namespace PasswordManager.ViewModels
                 if (syncResult is null || syncResult.Success == false)
                 {
                     await MaterialMessageBox.ShowAsync(
-                        "Credentials not merged",
+                        PasswordManager.Language.Properties.Resources.Error,
                         syncResult.ToString(),
                         MaterialMessageBoxButtons.OK,
                         windowDialogName);
@@ -255,15 +255,15 @@ namespace PasswordManager.ViewModels
                 if (!uploadResult)
                 {
                     await MaterialMessageBox.ShowAsync(
-                        "Error",
-                        "Failed to upload credentials",
+                        PasswordManager.Language.Properties.Resources.Error,
+                        PasswordManager.Language.Properties.Resources.FailedToUpload,
                         MaterialMessageBoxButtons.OK,
                         windowDialogName);
                     return;
                 }
 
                 await MaterialMessageBox.ShowAsync(
-                    "Credentials successfully merged and uploaded",
+                    PasswordManager.Language.Properties.Resources.SyncSuccess,
                     syncResult.ToString(),
                     MaterialMessageBoxButtons.OK,
                     windowDialogName);
@@ -282,8 +282,8 @@ namespace PasswordManager.ViewModels
         private async Task<string> SyncPasswordRequired()
         {
             var password = await MaterialInputBox.ShowAsync(
-                "Input password of cloud file",
-                "Password",
+                PasswordManager.Language.Properties.Resources.InputPasswordOfFile,
+                PasswordManager.Language.Properties.Resources.Password,
                 MvvmHelper.MainWindowDialogName,
                 true);
             return password;

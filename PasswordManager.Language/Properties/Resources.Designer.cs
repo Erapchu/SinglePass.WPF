@@ -178,6 +178,15 @@ namespace PasswordManager.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Decrypting....
+        /// </summary>
+        public static string Decrypting {
+            get {
+                return ResourceManager.GetString("Decrypting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete item?.
         /// </summary>
         public static string DeleteItem {
@@ -205,6 +214,15 @@ namespace PasswordManager.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Downloading file....
+        /// </summary>
+        public static string DownloadingFile {
+            get {
+                return ResourceManager.GetString("DownloadingFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Edit.
         /// </summary>
         public static string Edit {
@@ -223,11 +241,29 @@ namespace PasswordManager.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error.
+        /// </summary>
+        public static string Error {
+            get {
+                return ResourceManager.GetString("Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Exit.
         /// </summary>
         public static string Exit {
             get {
                 return ResourceManager.GetString("Exit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to upload.
+        /// </summary>
+        public static string FailedToUpload {
+            get {
+                return ResourceManager.GetString("FailedToUpload", resourceCulture);
             }
         }
         
@@ -246,6 +282,15 @@ namespace PasswordManager.Language.Properties {
         public static string Ignore {
             get {
                 return ResourceManager.GetString("Ignore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Input password of file.
+        /// </summary>
+        public static string InputPasswordOfFile {
+            get {
+                return ResourceManager.GetString("InputPasswordOfFile", resourceCulture);
             }
         }
         
@@ -529,6 +574,15 @@ namespace PasswordManager.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Sync succeed.
+        /// </summary>
+        public static string SyncSuccess {
+            get {
+                return ResourceManager.GetString("SyncSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to System.
         /// </summary>
         public static string System {
@@ -543,6 +597,15 @@ namespace PasswordManager.Language.Properties {
         public static string Upload {
             get {
                 return ResourceManager.GetString("Upload", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Uploading....
+        /// </summary>
+        public static string Uploading {
+            get {
+                return ResourceManager.GetString("Uploading", resourceCulture);
             }
         }
         

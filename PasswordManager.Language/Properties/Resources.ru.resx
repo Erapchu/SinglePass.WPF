@@ -288,4 +288,25 @@
   <data name="SortBy" xml:space="preserve">
     <value>Сортировать по</value>
   </data>
+  <data name="SyncSuccess" xml:space="preserve">
+    <value>Синхронизация выполнена успешно</value>
+  </data>
+  <data name="Decrypting" xml:space="preserve">
+    <value>Расшифровка...</value>
+  </data>
+  <data name="DownloadingFile" xml:space="preserve">
+    <value>Загрузка файла...</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Ошибка</value>
+  </data>
+  <data name="FailedToUpload" xml:space="preserve">
+    <value>Не удалось отгрузить</value>
+  </data>
+  <data name="Uploading" xml:space="preserve">
+    <value>Отгрузка...</value>
+  </data>
+  <data name="InputPasswordOfFile" xml:space="preserve">
+    <value>Введите пароль от файла</value>
+  </data>
 </root>

@@ -241,7 +241,7 @@ namespace PasswordManager.ViewModels
                 SyncProcessing = true;
                 var windowDialogName = MvvmHelper.MainWindowDialogName;
                 var syncResult = await _syncService.Synchronize(cloudType, SyncPasswordRequired);
-                if (syncResult is null || syncResult.Success == false)
+                if (syncResult is null || !syncResult.Success)
                 {
                     await MaterialMessageBox.ShowAsync(
                         PasswordManager.Language.Properties.Resources.Error,

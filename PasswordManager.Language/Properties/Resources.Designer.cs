@@ -259,15 +259,6 @@ namespace PasswordManager.Language.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to upload.
-        /// </summary>
-        public static string FailedToUpload {
-            get {
-                return ResourceManager.GetString("FailedToUpload", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Hotkeys.
         /// </summary>
         public static string Hotkeys {
@@ -327,15 +318,6 @@ namespace PasswordManager.Language.Properties {
         public static string Merge {
             get {
                 return ResourceManager.GetString("Merge", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Merge passwords.
-        /// </summary>
-        public static string MergePasswords {
-            get {
-                return ResourceManager.GetString("MergePasswords", resourceCulture);
             }
         }
         
@@ -574,6 +556,33 @@ namespace PasswordManager.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Success.
+        /// </summary>
+        public static string Success {
+            get {
+                return ResourceManager.GetString("Success", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sync.
+        /// </summary>
+        public static string Sync {
+            get {
+                return ResourceManager.GetString("Sync", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sync failed.
+        /// </summary>
+        public static string SyncFailed {
+            get {
+                return ResourceManager.GetString("SyncFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Sync succeed.
         /// </summary>
         public static string SyncSuccess {
@@ -601,6 +610,15 @@ namespace PasswordManager.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Upload failed.
+        /// </summary>
+        public static string UploadFailed {
+            get {
+                return ResourceManager.GetString("UploadFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Uploading....
         /// </summary>
         public static string Uploading {
@@ -610,11 +628,11 @@ namespace PasswordManager.Language.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Upload credentials.
+        ///   Looks up a localized string similar to Upload success.
         /// </summary>
-        public static string UploadPasswords {
+        public static string UploadSuccess {
             get {
-                return ResourceManager.GetString("UploadPasswords", resourceCulture);
+                return ResourceManager.GetString("UploadSuccess", resourceCulture);
             }
         }
         

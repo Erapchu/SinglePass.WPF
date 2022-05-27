@@ -105,17 +105,17 @@
                                 Command="{Binding SyncCommand}"
                                 CommandParameter="{x:Static cloudEnums:CloudType.GoogleDrive}"
                                 Style="{StaticResource MaterialDesignFlatButton}"
-                                ToolTip="{x:Static properties:Resources.MergePasswords}">
+                                ToolTip="{x:Static properties:Resources.Sync}">
                                 <StackPanel Orientation="Horizontal">
                                     <md:PackIcon
                                         Width="20"
                                         Height="20"
                                         VerticalAlignment="Center"
-                                        Kind="Merge" />
+                                        Kind="Sync" />
                                     <TextBlock
                                         Margin="8 0 0 0"
                                         VerticalAlignment="Center"
-                                        Text="{x:Static properties:Resources.Merge}" />
+                                        Text="{x:Static properties:Resources.Sync}" />
                                 </StackPanel>
                             </Button>
                             <Button
@@ -126,7 +126,7 @@
                                 Command="{Binding UploadCommand}"
                                 CommandParameter="{x:Static cloudEnums:CloudType.GoogleDrive}"
                                 Style="{StaticResource MaterialDesignFlatButton}"
-                                ToolTip="{x:Static properties:Resources.UploadPasswords}">
+                                ToolTip="{x:Static properties:Resources.Upload}">
                                 <StackPanel Orientation="Horizontal">
                                     <md:PackIcon
                                         Width="20"

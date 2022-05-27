@@ -255,8 +255,8 @@
   <data name="Merge" xml:space="preserve">
     <value>Слить</value>
   </data>
-  <data name="MergePasswords" xml:space="preserve">
-    <value>Слить пароли</value>
+  <data name="Sync" xml:space="preserve">
+    <value>Синхронизация</value>
   </data>
   <data name="SignIn" xml:space="preserve">
     <value>Войти</value>
@@ -266,9 +266,6 @@
   </data>
   <data name="Upload" xml:space="preserve">
     <value>Отгрузка</value>
-  </data>
-  <data name="UploadPasswords" xml:space="preserve">
-    <value>Отгрузить пароли</value>
   </data>
   <data name="Created" xml:space="preserve">
     <value>Создан</value>
@@ -300,13 +297,22 @@
   <data name="Error" xml:space="preserve">
     <value>Ошибка</value>
   </data>
-  <data name="FailedToUpload" xml:space="preserve">
-    <value>Не удалось отгрузить</value>
+  <data name="UploadFailed" xml:space="preserve">
+    <value>Отгрузка не выполнена</value>
   </data>
   <data name="Uploading" xml:space="preserve">
     <value>Отгрузка...</value>
   </data>
   <data name="InputPasswordOfFile" xml:space="preserve">
     <value>Введите пароль от файла</value>
+  </data>
+  <data name="Success" xml:space="preserve">
+    <value>Успешно</value>
+  </data>
+  <data name="SyncFailed" xml:space="preserve">
+    <value>Синхронизация не выполнена</value>
+  </data>
+  <data name="UploadSuccess" xml:space="preserve">
+    <value>Отгрузка завершена успешно</value>
   </data>
 </root>

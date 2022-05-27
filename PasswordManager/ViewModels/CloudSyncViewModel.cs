@@ -252,7 +252,9 @@ namespace PasswordManager.ViewModels
                 var mergeResult = await _syncService.Synchronize(cloudType, SyncPasswordRequired);
 
                 await MaterialMessageBox.ShowAsync(
-                    mergeResult.Success ? "Credentials successfully merged" : "Credentials not merged",
+                    mergeResult.Success
+                    ? PasswordManager.Language.Properties.Resources.SyncSuccess
+                    : PasswordManager.Language.Properties.Resources.SyncFailed,
                     mergeResult.ToString(),
                     MaterialMessageBoxButtons.OK,
                     windowDialogName);
@@ -280,8 +282,12 @@ namespace PasswordManager.ViewModels
                 var success = await _syncService.Upload(cloudType);
 
                 await MaterialMessageBox.ShowAsync(
-                    success ? "Success" : "Error",
-                    success ? "Credentials successfully uploaded" : "Failed to upload credentials",
+                    success
+                    ? PasswordManager.Language.Properties.Resources.Success
+                    : PasswordManager.Language.Properties.Resources.Error,
+                    success
+                    ? PasswordManager.Language.Properties.Resources.UploadSuccess
+                    : PasswordManager.Language.Properties.Resources.UploadFailed,
                     MaterialMessageBoxButtons.OK,
                     windowDialogName);
             }

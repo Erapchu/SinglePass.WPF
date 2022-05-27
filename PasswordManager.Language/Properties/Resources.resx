@@ -238,11 +238,8 @@
   <data name="Merge" xml:space="preserve">
     <value>Merge</value>
   </data>
-  <data name="MergePasswords" xml:space="preserve">
-    <value>Merge passwords</value>
-  </data>
-  <data name="UploadPasswords" xml:space="preserve">
-    <value>Upload credentials</value>
+  <data name="Sync" xml:space="preserve">
+    <value>Sync</value>
   </data>
   <data name="Upload" xml:space="preserve">
     <value>Upload</value>
@@ -271,8 +268,8 @@
   <data name="Error" xml:space="preserve">
     <value>Error</value>
   </data>
-  <data name="FailedToUpload" xml:space="preserve">
-    <value>Failed to upload</value>
+  <data name="UploadFailed" xml:space="preserve">
+    <value>Upload failed</value>
   </data>
   <data name="SyncSuccess" xml:space="preserve">
     <value>Sync succeed</value>
@@ -288,5 +285,14 @@
   </data>
   <data name="InputPasswordOfFile" xml:space="preserve">
     <value>Input password of file</value>
+  </data>
+  <data name="SyncFailed" xml:space="preserve">
+    <value>Sync failed</value>
+  </data>
+  <data name="Success" xml:space="preserve">
+    <value>Success</value>
+  </data>
+  <data name="UploadSuccess" xml:space="preserve">
+    <value>Upload success</value>
   </data>
 </root>

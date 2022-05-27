@@ -7,8 +7,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:PasswordManager.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:properties="clr-namespace:PasswordManager.Language.Properties;assembly=PasswordManager.Language"
+    xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:vm="clr-namespace:PasswordManager.ViewModels"
     d:DataContext="{x:Static vm:CloudSyncViewModel.DesignTimeInstance}"
     d:DesignHeight="450"
@@ -97,16 +97,49 @@
                                 TextAlignment="Center"
                                 TextTrimming="CharacterEllipsis" />
                         </StackPanel>
-                        <Button
-                            Grid.Column="1"
-                            HorizontalAlignment="Center"
-                            md:ButtonProgressAssist.IsIndeterminate="True"
-                            md:ButtonProgressAssist.IsIndicatorVisible="{Binding SyncProcessing}"
-                            Command="{Binding SyncCommand}"
-                            CommandParameter="{x:Static cloudEnums:CloudType.GoogleDrive}"
-                            Style="{StaticResource MaterialDesignFloatingActionButton}"
-                            Content="{md:PackIcon Kind=Sync,Size=24}"
-                            ToolTip="Sync passwords" />
+                        <StackPanel Grid.Column="1">
+                            <Button
+                                HorizontalAlignment="Center"
+                                md:ButtonProgressAssist.IsIndeterminate="True"
+                                md:ButtonProgressAssist.IsIndicatorVisible="{Binding MergeProcessing}"
+                                Command="{Binding SyncCommand}"
+                                CommandParameter="{x:Static cloudEnums:CloudType.GoogleDrive}"
+                                Style="{StaticResource MaterialDesignFlatButton}"
+                                ToolTip="{x:Static properties:Resources.MergePasswords}">
+                                <StackPanel Orientation="Horizontal">
+                                    <md:PackIcon
+                                        Width="20"
+                                        Height="20"
+                                        VerticalAlignment="Center"
+                                        Kind="Merge" />
+                                    <TextBlock
+                                        Margin="8 0 0 0"
+                                        VerticalAlignment="Center"
+                                        Text="{x:Static properties:Resources.Merge}" />
+                                </StackPanel>
+                            </Button>
+                            <Button
+                                Margin="0 8 0 0"
+                                HorizontalAlignment="Center"
+                                md:ButtonProgressAssist.IsIndeterminate="True"
+                                md:ButtonProgressAssist.IsIndicatorVisible="{Binding UploadProcessing}"
+                                Command="{Binding UploadCommand}"
+                                CommandParameter="{x:Static cloudEnums:CloudType.GoogleDrive}"
+                                Style="{StaticResource MaterialDesignFlatButton}"
+                                ToolTip="{x:Static properties:Resources.UploadPasswords}">
+                                <StackPanel Orientation="Horizontal">
+                                    <md:PackIcon
+                                        Width="20"
+                                        Height="20"
+                                        VerticalAlignment="Center"
+                                        Kind="Upload" />
+                                    <TextBlock
+                                        Margin="8 0 0 0"
+                                        VerticalAlignment="Center"
+                                        Text="{x:Static properties:Resources.Upload}" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
                         <TextBlock
                             Grid.Row="1"
                             MaxWidth="300"

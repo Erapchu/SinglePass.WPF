@@ -24,7 +24,7 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        [Required(ErrorMessage = "Value shouldn't be empty.")]
+        [Required(ErrorMessage = "Field shouldn't be empty.")]
         public string Value
         {
             get => Model.Value;

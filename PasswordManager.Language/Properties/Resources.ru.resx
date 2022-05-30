@@ -169,7 +169,7 @@
     <value>Скопировать пароль</value>
   </data>
   <data name="Details" xml:space="preserve">
-    <value>Подробности</value>
+    <value>Подробно</value>
   </data>
   <data name="ModifiedFormatted" xml:space="preserve">
     <value>Изменён:{0: dd-MM-yyyy, HH:mm:ss}</value>
@@ -202,7 +202,7 @@
     <value>Имя: {0}</value>
   </data>
   <data name="NewItem" xml:space="preserve">
-    <value>Новый элемент</value>
+    <value>Добавить</value>
   </data>
   <data name="Abort" xml:space="preserve">
     <value>Прекратить</value>

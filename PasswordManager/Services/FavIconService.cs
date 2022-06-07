@@ -1,8 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
-using PasswordManager.Helpers;
+using PasswordManager.Helpers.Threading;
 using System;
 using System.Collections.Concurrent;
-using System.Net.Http;
 using System.Threading;
 using System.Windows.Media;
 
@@ -12,16 +11,13 @@ namespace PasswordManager.Services
     {
         private const string _favIconServiceUrl = "http://www.google.com/s2/favicons?domain_url={0}";
         private readonly ConcurrentDictionary<string, ImageSource> _imagesDict = new();
-        private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<FavIconService> _logger;
         private readonly ImageService _imageService;
 
         public FavIconService(
-            IHttpClientFactory httpClientFactory,
             ILogger<FavIconService> logger,
             ImageService imageService)
         {
-            _httpClientFactory = httpClientFactory;
             _imageService = imageService;
             _logger = logger;
         }
@@ -34,13 +30,19 @@ namespace PasswordManager.Services
                     return null;
 
                 var host = imageUrl.Host;
-                using var disposableLocker = new DisposableLocker(host);
+                ImageSource bitmapImage;
+
+                using var locker = AsyncDuplicateLock.Lock(host);
                 if (_imagesDict.TryGetValue(host, out ImageSource image))
-                    return image;
+                {
+                    bitmapImage = image;
+                }
+                else
+                {
+                    bitmapImage = _imageService.GetImageAsync(string.Format(_favIconServiceUrl, host), CancellationToken.None).Result;
+                    _imagesDict.TryAdd(host, bitmapImage);
+                }
 
-                var bitmapImage = _imageService.GetImageAsync(string.Format(_favIconServiceUrl, host), CancellationToken.None).Result;
-
-                _imagesDict.TryAdd(host, bitmapImage);
                 return bitmapImage;
             }
             catch (Exception ex)

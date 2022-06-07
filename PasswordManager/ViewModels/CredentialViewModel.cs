@@ -1,6 +1,7 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using PasswordManager.Helpers;
 using PasswordManager.Models;
+using PasswordManager.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -16,17 +17,18 @@ namespace PasswordManager.ViewModels
         #region Design time instance
         private static readonly Lazy<CredentialViewModel> _lazy = new(GetDesignTimeVM);
         public static CredentialViewModel DesignTimeInstance => _lazy.Value;
-
         private static CredentialViewModel GetDesignTimeVM()
         {
             var additionalFields = new List<PassField>() { new PassField() { Name = "Design additional field", Value = "Test value" } };
             var model = Credential.CreateNew();
             model.AdditionalFields = additionalFields;
 
-            var vm = new CredentialViewModel(model);
+            var vm = new CredentialViewModel(model, null);
             return vm;
         }
         #endregion
+
+        private readonly FavIconService _favIconService;
 
         public Credential Model { get; }
         public PassFieldViewModel NameFieldVM { get; }
@@ -56,11 +58,13 @@ namespace PasswordManager.ViewModels
         }
 
         private ImageSource _favIcon;
-        public ImageSource FavIcon => _favIcon ??= FavIconServiceHolder.Service.GetImage(SiteFieldVM.Value);
+        public ImageSource FavIcon => _favIcon ??= _favIconService.GetImage(SiteFieldVM.Value);
 
-        public CredentialViewModel(Credential credential)
+        public CredentialViewModel(Credential credential, FavIconService favIconService)
         {
             Model = credential ?? throw new ArgumentNullException(nameof(credential));
+            _favIconService = favIconService;
+
             NameFieldVM = new PassFieldViewModel(credential.NameField);
             LoginFieldVM = new PassFieldViewModel(credential.LoginField);
             PasswordFieldVM = new PassFieldViewModel(credential.PasswordField);
@@ -74,7 +78,7 @@ namespace PasswordManager.ViewModels
         internal CredentialViewModel Clone()
         {
             var cloneModel = Model.Clone();
-            var cloneVM = new CredentialViewModel(cloneModel)
+            var cloneVM = new CredentialViewModel(cloneModel, _favIconService)
             {
                 _passwordVisible = _passwordVisible,
             };

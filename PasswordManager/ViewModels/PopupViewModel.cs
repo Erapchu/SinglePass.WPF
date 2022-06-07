@@ -24,6 +24,7 @@ namespace PasswordManager.ViewModels
 
         private readonly CredentialsCryptoService _credentialsCryptoService;
         private readonly ILogger<PopupViewModel> _logger;
+        private readonly CredentialViewModelFactory _credentialViewModelFactory;
 
         public event Action Accept;
 
@@ -44,12 +45,16 @@ namespace PasswordManager.ViewModels
 
         private PopupViewModel() { }
 
-        public PopupViewModel(CredentialsCryptoService credentialsCryptoService, ILogger<PopupViewModel> logger)
+        public PopupViewModel(
+            CredentialsCryptoService credentialsCryptoService,
+            ILogger<PopupViewModel> logger,
+            CredentialViewModelFactory credentialViewModelFactory)
         {
             _credentialsCryptoService = credentialsCryptoService;
             _logger = logger;
+            _credentialViewModelFactory = credentialViewModelFactory;
 
-            var creds = _credentialsCryptoService.Credentials.Select(cr => new CredentialViewModel(cr)).ToList();
+            var creds = _credentialsCryptoService.Credentials.Select(cr => _credentialViewModelFactory.ProvideNew(cr)).ToList();
             DisplayedCredentials = new ObservableCollection<CredentialViewModel>(creds);
         }
 

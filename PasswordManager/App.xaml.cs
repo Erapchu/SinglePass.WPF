@@ -7,7 +7,6 @@ using NLog.Extensions.Logging;
 using PasswordManager.Authorization.Brokers;
 using PasswordManager.Authorization.Holders;
 using PasswordManager.Clouds.Services;
-using PasswordManager.Helpers;
 using PasswordManager.Hotkeys;
 using PasswordManager.Services;
 using PasswordManager.Settings;
@@ -85,9 +84,6 @@ namespace PasswordManager
                 // Create tray icon
                 _trayIcon = new TrayIcon();
 
-                // Set some static services
-                FavIconServiceHolder.Service = Host.Services.GetService<FavIconService>();
-
                 // Login
                 using (var loginScope = Host.Services.CreateScope())
                 {
@@ -157,6 +153,7 @@ namespace PasswordManager
                 services.AddSingleton<FavIconService>();
                 services.AddSingleton<HotkeysService>();
                 services.AddSingleton<ImageService>();
+                services.AddSingleton<CredentialViewModelFactory>();
             });
 
         private void Application_Exit(object sender, ExitEventArgs e)

@@ -23,7 +23,6 @@ namespace PasswordManager.ViewModels
         #region Design time instance
         private static readonly Lazy<PasswordsViewModel> _lazy = new(GetDesignTimeVM);
         public static PasswordsViewModel DesignTimeInstance => _lazy.Value;
-
         private static PasswordsViewModel GetDesignTimeVM()
         {
             var vm = new PasswordsViewModel();
@@ -32,7 +31,7 @@ namespace PasswordManager.ViewModels
             cred.LoginField.Value = "TestLogin";
             cred.PasswordField.Value = "TestPass";
             cred.OtherField.Value = "TestOther";
-            var credVm = new CredentialViewModel(cred);
+            var credVm = new CredentialViewModel(cred, null);
             vm.DisplayedCredentials.Add(credVm);
             return vm;
         }
@@ -44,6 +43,7 @@ namespace PasswordManager.ViewModels
         private readonly ILogger<PasswordsViewModel> _logger;
         private readonly List<CredentialViewModel> _credentials = new();
         private readonly AppSettingsService _appSettingsService;
+        private readonly CredentialViewModelFactory _credentialViewModelFactory;
 
         private CredentialViewModel _selectedCredential;
         private string _searchText;
@@ -113,7 +113,8 @@ namespace PasswordManager.ViewModels
             CredentialsCryptoService credentialsCryptoService,
             ILogger<PasswordsViewModel> logger,
             CredentialsDialogViewModel credentialsDialogViewModel,
-            AppSettingsService appSettingsService)
+            AppSettingsService appSettingsService,
+            CredentialViewModelFactory credentialViewModelFactory)
         {
             Name = PasswordManager.Language.Properties.Resources.Passwords;
             IconKind = PackIconKind.Password;
@@ -121,6 +122,7 @@ namespace PasswordManager.ViewModels
             _credentialsCryptoService = credentialsCryptoService;
             _logger = logger;
             _appSettingsService = appSettingsService;
+            _credentialViewModelFactory = credentialViewModelFactory;
 
             _sort = _appSettingsService.Sort;
             _order = _appSettingsService.Order;
@@ -194,7 +196,7 @@ namespace PasswordManager.ViewModels
                 var credentials = _credentialsCryptoService.Credentials;
                 foreach (var cred in credentials)
                 {
-                    var credVM = new CredentialViewModel(cred);
+                    var credVM = _credentialViewModelFactory.ProvideNew(cred);
                     _credentials.Add(credVM);
                 }
 
@@ -272,7 +274,7 @@ namespace PasswordManager.ViewModels
 
         private void AddCredential()
         {
-            ActiveCredentialDialogViewModel.CredentialViewModel = new CredentialViewModel(Credential.CreateNew());
+            ActiveCredentialDialogViewModel.CredentialViewModel = _credentialViewModelFactory.ProvideNew(Credential.CreateNew());
             ActiveCredentialDialogViewModel.Mode = CredentialsDialogMode.New;
             ActiveCredentialDialogViewModel.IsPasswordVisible = true;
             ActiveCredentialDialogViewModel.SetFocus();

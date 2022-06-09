@@ -147,9 +147,6 @@
   <data name="Passwords" xml:space="preserve">
     <value>Пароли</value>
   </data>
-  <data name="Remove" xml:space="preserve">
-    <value>Удалить</value>
-  </data>
   <data name="Search" xml:space="preserve">
     <value>Поиск</value>
   </data>
@@ -314,5 +311,8 @@
   </data>
   <data name="UploadSuccess" xml:space="preserve">
     <value>Отгрузка завершена успешно</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Удалить</value>
   </data>
 </root>

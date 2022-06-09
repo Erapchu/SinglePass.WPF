@@ -133,9 +133,6 @@
   <data name="Edit" xml:space="preserve">
     <value>Edit</value>
   </data>
-  <data name="Remove" xml:space="preserve">
-    <value>Remove</value>
-  </data>
   <data name="Details" xml:space="preserve">
     <value>Details</value>
   </data>
@@ -294,5 +291,8 @@
   </data>
   <data name="UploadSuccess" xml:space="preserve">
     <value>Upload success</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
   </data>
 </root>

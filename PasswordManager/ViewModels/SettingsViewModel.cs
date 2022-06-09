@@ -1,5 +1,6 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Microsoft.Extensions.Logging;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 using PasswordManager.Helpers;
 using PasswordManager.Hotkeys;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace PasswordManager.ViewModels
 {
-    public class SettingsViewModel : NavigationItemViewModel
+    public class SettingsViewModel : ObservableRecipient
     {
         #region Design time instance
         private static readonly Lazy<SettingsViewModel> _lazy = new(GetDesignTimeVM);
@@ -88,9 +89,6 @@ namespace PasswordManager.ViewModels
             ILogger<SettingsViewModel> logger,
             HotkeysService hotkeysService)
         {
-            Name = PasswordManager.Language.Properties.Resources.Settings;
-            IconKind = PackIconKind.Settings;
-
             _themeService = themeService;
             _appSettingsService = appSettingsService;
             _credentialsCryptoService = credentialsCryptoService;
@@ -103,7 +101,7 @@ namespace PasswordManager.ViewModels
 
         private async Task ChangePasswordAsync()
         {
-            if (Loading || string.IsNullOrWhiteSpace(NewPassword) || NewPassword.Length < 8)
+            if (string.IsNullOrWhiteSpace(NewPassword) || NewPassword.Length < 8)
             {
                 NewPasswordHelperText = "Minimum symbols count is 8";
                 return;
@@ -115,8 +113,6 @@ namespace PasswordManager.ViewModels
 
             try
             {
-                Loading = true;
-
                 _credentialsCryptoService.SetPassword(NewPassword);
                 await _credentialsCryptoService.SaveCredentials();
 
@@ -126,10 +122,6 @@ namespace PasswordManager.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError(ex, null);
-            }
-            finally
-            {
-                Loading = false;
             }
 
             if (success)

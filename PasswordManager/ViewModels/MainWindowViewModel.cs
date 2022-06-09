@@ -1,8 +1,11 @@
-﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using MaterialDesignThemes.Wpf;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 using PasswordManager.Collections;
+using PasswordManager.Views;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PasswordManager.ViewModels
@@ -36,22 +39,22 @@ namespace PasswordManager.ViewModels
             get => _selectedNavigationItem;
             set
             {
-                if (_selectedNavigationItem != null)
-                    _selectedNavigationItem.IsVisible = false;
+                // Prevent unselect item
+                if (value is null)
+                    return;
 
                 SetProperty(ref _selectedNavigationItem, value);
-                _selectedNavigationItem.IsVisible = true;
 
-                if (_selectedNavigationItem is CloudSyncViewModel cloudSyncViewModel)
-                {
-                    _ = cloudSyncViewModel.FetchUserInfoIfRequired();
-                }
+                //if (_selectedNavigationItem is CloudSyncViewModel cloudSyncViewModel)
+                //{
+                //    _ = cloudSyncViewModel.FetchUserInfoIfRequired();
+                //}
 
-                if (_selectedNavigationItem is PasswordsViewModel passwordsViewModel)
-                {
-                    passwordsViewModel.SearchTextFocused = false;
-                    passwordsViewModel.SearchTextFocused = true;
-                }
+                //if (_selectedNavigationItem is PasswordsViewModel passwordsViewModel)
+                //{
+                //    passwordsViewModel.SearchTextFocused = false;
+                //    passwordsViewModel.SearchTextFocused = true;
+                //}
             }
         }
 
@@ -65,16 +68,24 @@ namespace PasswordManager.ViewModels
             PasswordsVM = passwordsViewModel;
             CloudSyncVM = cloudsViewModel;
             SettingsVM = settingsViewModel;
-            SelectedNavigationItem = PasswordsVM;
 
             PasswordsVM.CredentialSelected += PasswordsViewModel_CredentialSelected;
             CloudSyncVM.SyncCompleted += SettingsViewModel_SyncCompleted;
 
             NavigationItems = new ObservableCollectionDelayed<NavigationItemViewModel>(new List<NavigationItemViewModel>()
             {
-                PasswordsVM,
-                CloudSyncVM,
-                SettingsVM,
+                new NavigationItemViewModel(
+                    PasswordManager.Language.Properties.Resources.Passwords,
+                    PackIconKind.Password,
+                    () => new PasswordsControl() { DataContext = PasswordsVM }),
+                new NavigationItemViewModel(
+                    PasswordManager.Language.Properties.Resources.CloudSync,
+                    PackIconKind.Cloud,
+                    () => new CloudSyncControl() { DataContext = CloudSyncVM }),
+                new NavigationItemViewModel(
+                    PasswordManager.Language.Properties.Resources.Settings,
+                    PackIconKind.Settings,
+                    () => new SettingsControl() { DataContext = SettingsVM }),
             });
         }
 
@@ -90,10 +101,11 @@ namespace PasswordManager.ViewModels
 
         private async Task LoadingAsync()
         {
-            PasswordsVM.ReloadCredentials();
-
-            // Delay only for focus
+            // Delay to boost loading of the window
             await Task.Delay(1);
+
+            SelectedNavigationItem = NavigationItems.FirstOrDefault();
+            PasswordsVM.ReloadCredentials();
             PasswordsVM.SearchTextFocused = true;
         }
     }

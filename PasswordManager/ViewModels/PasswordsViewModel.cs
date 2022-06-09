@@ -1,5 +1,6 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Microsoft.Extensions.Logging;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 using PasswordManager.Collections;
 using PasswordManager.Enums;
@@ -18,7 +19,7 @@ using Unidecode.NET;
 
 namespace PasswordManager.ViewModels
 {
-    public class PasswordsViewModel : NavigationItemViewModel
+    public class PasswordsViewModel : ObservableRecipient
     {
         #region Design time instance
         private static readonly Lazy<PasswordsViewModel> _lazy = new(GetDesignTimeVM);
@@ -116,9 +117,6 @@ namespace PasswordManager.ViewModels
             AppSettingsService appSettingsService,
             CredentialViewModelFactory credentialViewModelFactory)
         {
-            Name = PasswordManager.Language.Properties.Resources.Passwords;
-            IconKind = PackIconKind.Password;
-
             _credentialsCryptoService = credentialsCryptoService;
             _logger = logger;
             _appSettingsService = appSettingsService;

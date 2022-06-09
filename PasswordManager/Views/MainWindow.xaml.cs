@@ -51,8 +51,11 @@ namespace PasswordManager.Views
         private void Vm_CredentialSelected(CredentialViewModel credVM)
         {
             var passStringLength = credVM?.PasswordFieldVM?.Value?.Length ?? 0;
-            PasswordsControl.CredentialsDialog.PasswordFieldBox.Password = new string('*', passStringLength);
-            PasswordsControl.CredentialsListBox.ScrollIntoView(credVM);
+            if (ViewModel.SelectedNavigationItem?.Content is PasswordsControl passwordsControl)
+            {
+                passwordsControl.CredentialsDialog.PasswordFieldBox.Password = new string('*', passStringLength);
+                passwordsControl.CredentialsListBox.ScrollIntoView(credVM);
+            }
         }
 
         private void MaterialWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -83,10 +86,10 @@ namespace PasswordManager.Views
 
         private async void MaterialWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (e.NewValue is bool visibility && visibility && ViewModel.SelectedNavigationItem is PasswordsViewModel)
+            if (e.NewValue is bool visibility && visibility && ViewModel.SelectedNavigationItem?.Content is PasswordsControl passwordsControl)
             {
-                await Task.Delay(10);
-                PasswordsControl.SearchTextBox.Focus();
+                await Task.Delay(1);
+                passwordsControl.SearchTextBox.Focus();
             }
         }
 

@@ -1,5 +1,6 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Microsoft.Extensions.Logging;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 using PasswordManager.Cloud.Enums;
 using PasswordManager.Clouds.Services;
@@ -16,7 +17,7 @@ using System.Windows.Media;
 
 namespace PasswordManager.ViewModels
 {
-    public class CloudSyncViewModel : NavigationItemViewModel
+    public class CloudSyncViewModel : ObservableRecipient
     {
         #region Design time instance
         private static readonly Lazy<CloudSyncViewModel> _lazy = new(GetDesignTimeVM);
@@ -107,9 +108,6 @@ namespace PasswordManager.ViewModels
             SyncService syncService,
             ILogger<CloudSyncViewModel> logger)
         {
-            Name = PasswordManager.Language.Properties.Resources.CloudSync;
-            IconKind = PackIconKind.Cloud;
-
             _appSettingsService = appSettingsService;
             _cloudServiceProvider = cloudServiceProvider;
             _imageService = imageService;

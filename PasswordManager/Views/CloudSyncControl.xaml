@@ -7,8 +7,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:PasswordManager.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:properties="clr-namespace:PasswordManager.Language.Properties;assembly=PasswordManager.Language"
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:properties="clr-namespace:PasswordManager.Language.Properties;assembly=PasswordManager.Language"
     xmlns:vm="clr-namespace:PasswordManager.ViewModels"
     d:DataContext="{x:Static vm:CloudSyncViewModel.DesignTimeInstance}"
     d:DesignHeight="450"
@@ -77,15 +77,7 @@
                             <Ellipse
                                 Width="64"
                                 Height="64"
-                                HorizontalAlignment="Center"
-                                Stroke="White"
-                                StrokeThickness="2">
-                                <Ellipse.Effect>
-                                    <DropShadowEffect
-                                        BlurRadius="20"
-                                        Direction="270"
-                                        ShadowDepth="2" />
-                                </Ellipse.Effect>
+                                HorizontalAlignment="Center">
                                 <Ellipse.Fill>
                                     <ImageBrush ImageSource="{Binding GoogleProfileImage}" Stretch="UniformToFill" />
                                 </Ellipse.Fill>

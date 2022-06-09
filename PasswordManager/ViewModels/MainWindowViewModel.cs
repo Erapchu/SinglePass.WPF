@@ -44,17 +44,6 @@ namespace PasswordManager.ViewModels
                     return;
 
                 SetProperty(ref _selectedNavigationItem, value);
-
-                //if (_selectedNavigationItem is CloudSyncViewModel cloudSyncViewModel)
-                //{
-                //    _ = cloudSyncViewModel.FetchUserInfoIfRequired();
-                //}
-
-                //if (_selectedNavigationItem is PasswordsViewModel passwordsViewModel)
-                //{
-                //    passwordsViewModel.SearchTextFocused = false;
-                //    passwordsViewModel.SearchTextFocused = true;
-                //}
             }
         }
 
@@ -106,7 +95,6 @@ namespace PasswordManager.ViewModels
 
             SelectedNavigationItem = NavigationItems.FirstOrDefault();
             PasswordsVM.ReloadCredentials();
-            PasswordsVM.SearchTextFocused = true;
         }
     }
 }

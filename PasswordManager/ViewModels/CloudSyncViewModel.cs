@@ -46,6 +46,7 @@ namespace PasswordManager.ViewModels
         private AsyncRelayCommand<CloudType> _syncCommand;
         private AsyncRelayCommand<CloudType> _loginCommand;
         private AsyncRelayCommand<CloudType> _uploadCommand;
+        private AsyncRelayCommand _loadingCommand;
 
         public event Action SyncCompleted;
 
@@ -98,6 +99,7 @@ namespace PasswordManager.ViewModels
         public AsyncRelayCommand<CloudType> LoginCommand => _loginCommand ??= new AsyncRelayCommand<CloudType>(Login);
         public AsyncRelayCommand<CloudType> SyncCommand => _syncCommand ??= new AsyncRelayCommand<CloudType>(SyncCredentials);
         public AsyncRelayCommand<CloudType> UploadCommand => _uploadCommand ??= new AsyncRelayCommand<CloudType>(UploadCredentials);
+        public AsyncRelayCommand LoadingCommand => _loadingCommand ??= new AsyncRelayCommand(LoadingAsync);
 
         private CloudSyncViewModel() { }
 
@@ -311,6 +313,11 @@ namespace PasswordManager.ViewModels
                 MvvmHelper.MainWindowDialogName,
                 true);
             return password;
+        }
+
+        private Task LoadingAsync()
+        {
+            return FetchUserInfoIfRequired();
         }
     }
 }

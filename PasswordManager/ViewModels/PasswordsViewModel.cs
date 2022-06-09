@@ -48,12 +48,12 @@ namespace PasswordManager.ViewModels
 
         private CredentialViewModel _selectedCredential;
         private string _searchText;
-        private bool _searchTextFocused;
         private RelayCommand _addCredentialCommand;
         private RelayCommand<KeyEventArgs> _searchKeyEventCommand;
 
         public RelayCommand AddCredentialCommand => _addCredentialCommand ??= new RelayCommand(AddCredential);
         public RelayCommand<KeyEventArgs> SearchKeyEventCommand => _searchKeyEventCommand ??= new RelayCommand<KeyEventArgs>(HandleSearchKeyEvent);
+
         public ObservableCollectionDelayed<CredentialViewModel> DisplayedCredentials { get; private set; } = new();
         public CredentialsDialogViewModel ActiveCredentialDialogViewModel { get; }
 
@@ -78,12 +78,6 @@ namespace PasswordManager.ViewModels
                 SetProperty(ref _searchText, value);
                 _ = DisplayCredentialsAsync();
             }
-        }
-
-        public bool SearchTextFocused
-        {
-            get => _searchTextFocused;
-            set => SetProperty(ref _searchTextFocused, value);
         }
 
         private SortType _sort;

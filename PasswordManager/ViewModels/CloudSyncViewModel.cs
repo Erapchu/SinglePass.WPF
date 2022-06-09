@@ -180,7 +180,7 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        internal async Task FetchUserInfoIfRequired()
+        internal Task FetchUserInfoIfRequired()
         {
             try
             {
@@ -189,12 +189,15 @@ namespace PasswordManager.ViewModels
                     && GoogleProfileImage is null
                     && string.IsNullOrWhiteSpace(GoogleUserName))
                 {
-                    await FetchUserInfoFromCloud(CloudType.GoogleDrive, CancellationToken.None);
+                    return FetchUserInfoFromCloud(CloudType.GoogleDrive, CancellationToken.None);
                 }
+
+                return Task.CompletedTask;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, string.Empty);
+                return Task.CompletedTask;
             }
         }
 

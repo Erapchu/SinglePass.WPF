@@ -2,9 +2,11 @@
 using PasswordManager.Models;
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 
 namespace PasswordManager.ViewModels
 {
+    [DebuggerDisplay("{Model}")]
     public class PassFieldViewModel : ObservableValidator
     {
         public PassField Model { get; }
@@ -22,7 +24,7 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        [Required(ErrorMessage = "Value shouldn't be empty.")]
+        [Required(ErrorMessage = "Field shouldn't be empty.")]
         public string Value
         {
             get => Model.Value;

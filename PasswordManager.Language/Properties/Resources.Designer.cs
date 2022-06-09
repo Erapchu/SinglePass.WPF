@@ -70,6 +70,15 @@ namespace PasswordManager.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Ascending.
+        /// </summary>
+        public static string Ascending {
+            get {
+                return ResourceManager.GetString("Ascending", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Authorize.
         /// </summary>
         public static string Authorize {
@@ -142,6 +151,15 @@ namespace PasswordManager.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Created.
+        /// </summary>
+        public static string Created {
+            get {
+                return ResourceManager.GetString("Created", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Created:{0: dd-MM-yyyy, HH:mm:ss}.
         /// </summary>
         public static string CreatedFormatted {
@@ -160,6 +178,24 @@ namespace PasswordManager.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Decrypting....
+        /// </summary>
+        public static string Decrypting {
+            get {
+                return ResourceManager.GetString("Decrypting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete.
+        /// </summary>
+        public static string Delete {
+            get {
+                return ResourceManager.GetString("Delete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete item?.
         /// </summary>
         public static string DeleteItem {
@@ -169,11 +205,29 @@ namespace PasswordManager.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Descending.
+        /// </summary>
+        public static string Descending {
+            get {
+                return ResourceManager.GetString("Descending", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Details.
         /// </summary>
         public static string Details {
             get {
                 return ResourceManager.GetString("Details", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Downloading file....
+        /// </summary>
+        public static string DownloadingFile {
+            get {
+                return ResourceManager.GetString("DownloadingFile", resourceCulture);
             }
         }
         
@@ -192,6 +246,15 @@ namespace PasswordManager.Language.Properties {
         public static string Enter {
             get {
                 return ResourceManager.GetString("Enter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error.
+        /// </summary>
+        public static string Error {
+            get {
+                return ResourceManager.GetString("Error", resourceCulture);
             }
         }
         
@@ -219,6 +282,15 @@ namespace PasswordManager.Language.Properties {
         public static string Ignore {
             get {
                 return ResourceManager.GetString("Ignore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Input password of file.
+        /// </summary>
+        public static string InputPasswordOfFile {
+            get {
+                return ResourceManager.GetString("InputPasswordOfFile", resourceCulture);
             }
         }
         
@@ -259,20 +331,20 @@ namespace PasswordManager.Language.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Merge passwords.
-        /// </summary>
-        public static string MergePasswords {
-            get {
-                return ResourceManager.GetString("MergePasswords", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Minimum 8 characters.
         /// </summary>
         public static string Minimum8Characters {
             get {
                 return ResourceManager.GetString("Minimum8Characters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Modified.
+        /// </summary>
+        public static string Modified {
+            get {
+                return ResourceManager.GetString("Modified", resourceCulture);
             }
         }
         
@@ -358,6 +430,15 @@ namespace PasswordManager.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Order by.
+        /// </summary>
+        public static string OrderBy {
+            get {
+                return ResourceManager.GetString("OrderBy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Other.
         /// </summary>
         public static string Other {
@@ -412,20 +493,20 @@ namespace PasswordManager.Language.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Remove.
-        /// </summary>
-        public static string Remove {
-            get {
-                return ResourceManager.GetString("Remove", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Retry.
         /// </summary>
         public static string Retry {
             get {
                 return ResourceManager.GetString("Retry", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Save.
+        /// </summary>
+        public static string Save {
+            get {
+                return ResourceManager.GetString("Save", resourceCulture);
             }
         }
         
@@ -475,6 +556,51 @@ namespace PasswordManager.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Sort by.
+        /// </summary>
+        public static string SortBy {
+            get {
+                return ResourceManager.GetString("SortBy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Success.
+        /// </summary>
+        public static string Success {
+            get {
+                return ResourceManager.GetString("Success", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sync.
+        /// </summary>
+        public static string Sync {
+            get {
+                return ResourceManager.GetString("Sync", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sync failed.
+        /// </summary>
+        public static string SyncFailed {
+            get {
+                return ResourceManager.GetString("SyncFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sync succeed.
+        /// </summary>
+        public static string SyncSuccess {
+            get {
+                return ResourceManager.GetString("SyncSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to System.
         /// </summary>
         public static string System {
@@ -493,11 +619,29 @@ namespace PasswordManager.Language.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Upload credentials.
+        ///   Looks up a localized string similar to Upload failed.
         /// </summary>
-        public static string UploadPasswords {
+        public static string UploadFailed {
             get {
-                return ResourceManager.GetString("UploadPasswords", resourceCulture);
+                return ResourceManager.GetString("UploadFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Uploading....
+        /// </summary>
+        public static string Uploading {
+            get {
+                return ResourceManager.GetString("Uploading", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Upload success.
+        /// </summary>
+        public static string UploadSuccess {
+            get {
+                return ResourceManager.GetString("UploadSuccess", resourceCulture);
             }
         }
         

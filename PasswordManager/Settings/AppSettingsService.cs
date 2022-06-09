@@ -2,18 +2,16 @@
 using PasswordManager.Helpers;
 using PasswordManager.Helpers.Threading;
 using PasswordManager.Hotkeys;
-using PasswordManager.Models;
 using System;
 using System.IO;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PasswordManager.Services
+namespace PasswordManager.Settings
 {
-    public class AppSettingsService
+    public class AppSettingsService : IAppSettings
     {
-        private readonly string _commonSettingsFilePath = Constants.CommonSettingsFilePath;
         private readonly ILogger<AppSettingsService> _logger;
 
         public AppSettings Settings { get; } = new();
@@ -36,16 +34,34 @@ namespace PasswordManager.Services
             set => Settings.ShowPopupHotkey = value;
         }
 
+        public WindowSettings MainWindowSettings
+        {
+            get => Settings.MainWindowSettings;
+            set => Settings.MainWindowSettings = value;
+        }
+
+        public SortType Sort
+        {
+            get => Settings.Sort;
+            set => Settings.Sort = value;
+        }
+
+        public OrderType Order
+        {
+            get => Settings.Order;
+            set => Settings.Order = value;
+        }
+
         public AppSettingsService(ILogger<AppSettingsService> logger)
         {
             _logger = logger;
 
-            if (File.Exists(_commonSettingsFilePath))
+            if (File.Exists(Constants.CommonSettingsFilePath))
             {
                 // Read existing
                 try
                 {
-                    using var fileStream = new FileStream(_commonSettingsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    using var fileStream = new FileStream(Constants.CommonSettingsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                     Settings = JsonSerializer.Deserialize<AppSettings>(fileStream);
                 }
                 catch (Exception ex)
@@ -53,20 +69,15 @@ namespace PasswordManager.Services
                     _logger.LogError(ex, null);
                 }
             }
-            else
-            {
-                // First save
-                Save();
-            }
         }
 
         public Task Save()
         {
             return Task.Run(() =>
             {
-                var hashedPath = HashHelper.GetHash(_commonSettingsFilePath);
+                var hashedPath = HashHelper.GetHash(Constants.CommonSettingsFilePath);
                 using var waitHandleLocker = EventWaitHandleLocker.MakeWithEventHandle(true, EventResetMode.AutoReset, hashedPath);
-                using var fileStream = new FileStream(_commonSettingsFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
+                using var fileStream = new FileStream(Constants.CommonSettingsFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
                 JsonSerializer.Serialize(fileStream, Settings);
                 _logger.LogInformation("Settings saved to file");
             });

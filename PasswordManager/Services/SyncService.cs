@@ -52,7 +52,7 @@ namespace PasswordManager.Services
                 var token = _syncCTS.Token;
                 var cloudService = _cloudServiceProvider.GetCloudService(cloudType);
 
-                SyncStateChanged?.Invoke("Downloading file...");
+                SyncStateChanged?.Invoke(PasswordManager.Language.Properties.Resources.DownloadingFile);
                 using var cloudFileStream = await cloudService.Download(Constants.PasswordsFileName, token);
                 if (cloudFileStream is null)
                 {
@@ -67,7 +67,7 @@ namespace PasswordManager.Services
                 {
                     try
                     {
-                        SyncStateChanged?.Invoke("Decrypting passwords...");
+                        SyncStateChanged?.Invoke(PasswordManager.Language.Properties.Resources.Decrypting);
                         cloudCredentials = _cryptoService.DecryptFromStream<List<Credential>>(cloudFileStream, password);
                     }
                     catch (Exception ex)
@@ -124,7 +124,7 @@ namespace PasswordManager.Services
 
                 var token = _syncCTS.Token;
                 var cloudService = _cloudServiceProvider.GetCloudService(cloudType);
-                SyncStateChanged?.Invoke("Uploading...");
+                SyncStateChanged?.Invoke(PasswordManager.Language.Properties.Resources.Uploading);
                 using var fileStream = File.Open(Constants.PasswordsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                 // Ensure begining
                 fileStream.Seek(0, SeekOrigin.Begin);

@@ -147,9 +147,6 @@
   <data name="Passwords" xml:space="preserve">
     <value>Пароли</value>
   </data>
-  <data name="Remove" xml:space="preserve">
-    <value>Удалить</value>
-  </data>
   <data name="Search" xml:space="preserve">
     <value>Поиск</value>
   </data>
@@ -169,10 +166,10 @@
     <value>Скопировать пароль</value>
   </data>
   <data name="Details" xml:space="preserve">
-    <value>Подробности</value>
+    <value>Подробно</value>
   </data>
   <data name="ModifiedFormatted" xml:space="preserve">
-    <value>Изменен:{0: dd-MM-yyyy, HH:mm:ss}</value>
+    <value>Изменён:{0: dd-MM-yyyy, HH:mm:ss}</value>
   </data>
   <data name="Name" xml:space="preserve">
     <value>Имя</value>
@@ -202,7 +199,7 @@
     <value>Имя: {0}</value>
   </data>
   <data name="NewItem" xml:space="preserve">
-    <value>Новый элемент</value>
+    <value>Добавить</value>
   </data>
   <data name="Abort" xml:space="preserve">
     <value>Прекратить</value>
@@ -255,8 +252,8 @@
   <data name="Merge" xml:space="preserve">
     <value>Слить</value>
   </data>
-  <data name="MergePasswords" xml:space="preserve">
-    <value>Слить пароли</value>
+  <data name="Sync" xml:space="preserve">
+    <value>Синхронизация</value>
   </data>
   <data name="SignIn" xml:space="preserve">
     <value>Войти</value>
@@ -267,7 +264,58 @@
   <data name="Upload" xml:space="preserve">
     <value>Отгрузка</value>
   </data>
-  <data name="UploadPasswords" xml:space="preserve">
-    <value>Отгрузить пароли</value>
+  <data name="Created" xml:space="preserve">
+    <value>Создан</value>
+  </data>
+  <data name="Modified" xml:space="preserve">
+    <value>Изменён</value>
+  </data>
+  <data name="Ascending" xml:space="preserve">
+    <value>Возрастание</value>
+  </data>
+  <data name="Descending" xml:space="preserve">
+    <value>Убывание</value>
+  </data>
+  <data name="OrderBy" xml:space="preserve">
+    <value>Упорядочить по</value>
+  </data>
+  <data name="SortBy" xml:space="preserve">
+    <value>Сортировать по</value>
+  </data>
+  <data name="SyncSuccess" xml:space="preserve">
+    <value>Синхронизация выполнена успешно</value>
+  </data>
+  <data name="Decrypting" xml:space="preserve">
+    <value>Расшифровка...</value>
+  </data>
+  <data name="DownloadingFile" xml:space="preserve">
+    <value>Загрузка файла...</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Ошибка</value>
+  </data>
+  <data name="UploadFailed" xml:space="preserve">
+    <value>Отгрузка не выполнена</value>
+  </data>
+  <data name="Uploading" xml:space="preserve">
+    <value>Отгрузка...</value>
+  </data>
+  <data name="InputPasswordOfFile" xml:space="preserve">
+    <value>Введите пароль от файла</value>
+  </data>
+  <data name="Success" xml:space="preserve">
+    <value>Успешно</value>
+  </data>
+  <data name="SyncFailed" xml:space="preserve">
+    <value>Синхронизация не выполнена</value>
+  </data>
+  <data name="UploadSuccess" xml:space="preserve">
+    <value>Отгрузка завершена успешно</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Удалить</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Сохранить</value>
   </data>
 </root>

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using NHotkey;
 using NHotkey.Wpf;
-using PasswordManager.Services;
+using PasswordManager.Settings;
 using System;
 using System.Media;
 using System.Windows.Input;

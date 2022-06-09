@@ -17,10 +17,11 @@
     MinWidth="500"
     MinHeight="300"
     d:DataContext="{x:Static vm:MainWindowViewModel.DesignTimeInstance}"
-    Closing="MaterialWindow_Closing"
-    IsVisibleChanged="MaterialWindow_IsVisibleChanged"
     Activated="MaterialWindow_Activated"
+    Closed="MaterialWindow_Closed"
+    Closing="MaterialWindow_Closing"
     Deactivated="MaterialWindow_Deactivated"
+    IsVisibleChanged="MaterialWindow_IsVisibleChanged"
     UseLayoutRounding="True"
     mc:Ignorable="d">
     <Window.Resources>
@@ -103,27 +104,7 @@
                 </ListBox>
                 <Separator Grid.Column="1" Style="{StaticResource MaterialDesignVerticalSeparator}" />
                 <AdornerDecorator Grid.Column="2">
-                    <Grid>
-                        <Grid DataContext="{Binding PasswordsVM}" Visibility="{Binding IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <local:PasswordsControl x:Name="PasswordsControl" />
-                        </Grid>
-                        <ScrollViewer
-                            Margin="0 32 0 0"
-                            DataContext="{Binding SettingsVM}"
-                            HorizontalScrollBarVisibility="Disabled"
-                            VerticalScrollBarVisibility="Auto"
-                            Visibility="{Binding IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <local:SettingsControl />
-                        </ScrollViewer>
-                        <ScrollViewer
-                            Margin="0 32 0 0"
-                            DataContext="{Binding CloudSyncVM}"
-                            HorizontalScrollBarVisibility="Disabled"
-                            VerticalScrollBarVisibility="Auto"
-                            Visibility="{Binding IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <local:CloudSyncControl />
-                        </ScrollViewer>
-                    </Grid>
+                    <ContentControl Content="{Binding Content, UpdateSourceTrigger=PropertyChanged}" DataContext="{Binding SelectedNavigationItem}" />
                 </AdornerDecorator>
             </Grid>
         </Grid>

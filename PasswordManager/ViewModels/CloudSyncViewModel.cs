@@ -1,23 +1,23 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Microsoft.Extensions.Logging;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 using PasswordManager.Cloud.Enums;
 using PasswordManager.Clouds.Services;
 using PasswordManager.Helpers;
 using PasswordManager.Services;
+using PasswordManager.Settings;
 using PasswordManager.Views;
 using PasswordManager.Views.InputBox;
 using PasswordManager.Views.MessageBox;
 using System;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace PasswordManager.ViewModels
 {
-    public class CloudSyncViewModel : NavigationItemViewModel
+    public class CloudSyncViewModel : ObservableRecipient
     {
         #region Design time instance
         private static readonly Lazy<CloudSyncViewModel> _lazy = new(GetDesignTimeVM);
@@ -33,7 +33,7 @@ namespace PasswordManager.ViewModels
         private readonly AppSettingsService _appSettingsService;
         private readonly CloudServiceProvider _cloudServiceProvider;
         private readonly ILogger<CloudSyncViewModel> _logger;
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ImageService _imageService;
         private readonly SyncService _syncService;
 
         private bool _mergeProcessing;
@@ -46,6 +46,7 @@ namespace PasswordManager.ViewModels
         private AsyncRelayCommand<CloudType> _syncCommand;
         private AsyncRelayCommand<CloudType> _loginCommand;
         private AsyncRelayCommand<CloudType> _uploadCommand;
+        private AsyncRelayCommand _loadingCommand;
 
         public event Action SyncCompleted;
 
@@ -98,22 +99,20 @@ namespace PasswordManager.ViewModels
         public AsyncRelayCommand<CloudType> LoginCommand => _loginCommand ??= new AsyncRelayCommand<CloudType>(Login);
         public AsyncRelayCommand<CloudType> SyncCommand => _syncCommand ??= new AsyncRelayCommand<CloudType>(SyncCredentials);
         public AsyncRelayCommand<CloudType> UploadCommand => _uploadCommand ??= new AsyncRelayCommand<CloudType>(UploadCredentials);
+        public AsyncRelayCommand LoadingCommand => _loadingCommand ??= new AsyncRelayCommand(LoadingAsync);
 
         private CloudSyncViewModel() { }
 
         public CloudSyncViewModel(
             AppSettingsService appSettingsService,
             CloudServiceProvider cloudServiceProvider,
-            IHttpClientFactory httpClientFactory,
+            ImageService imageService,
             SyncService syncService,
             ILogger<CloudSyncViewModel> logger)
         {
-            Name = PasswordManager.Language.Properties.Resources.CloudSync;
-            IconKind = PackIconKind.Cloud;
-
             _appSettingsService = appSettingsService;
             _cloudServiceProvider = cloudServiceProvider;
-            _httpClientFactory = httpClientFactory;
+            _imageService = imageService;
             _syncService = syncService;
             _logger = logger;
 
@@ -183,7 +182,7 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        internal async Task FetchUserInfoIfRequired()
+        internal Task FetchUserInfoIfRequired()
         {
             try
             {
@@ -192,12 +191,15 @@ namespace PasswordManager.ViewModels
                     && GoogleProfileImage is null
                     && string.IsNullOrWhiteSpace(GoogleUserName))
                 {
-                    await FetchUserInfoFromCloud(CloudType.GoogleDrive, CancellationToken.None);
+                    return FetchUserInfoFromCloud(CloudType.GoogleDrive, CancellationToken.None);
                 }
+
+                return Task.CompletedTask;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, string.Empty);
+                return Task.CompletedTask;
             }
         }
 
@@ -216,7 +218,7 @@ namespace PasswordManager.ViewModels
                 {
                     case CloudType.GoogleDrive:
                         GoogleUserName = userInfo.UserName;
-                        GoogleProfileImage = await GetImageAsync(userInfo.ProfileUrl, cancellationToken);
+                        GoogleProfileImage = await _imageService.GetImageAsync(userInfo.ProfileUrl, cancellationToken);
                         break;
                 }
             }
@@ -228,21 +230,6 @@ namespace PasswordManager.ViewModels
             {
                 FetchingUserInfo = false;
             }
-        }
-
-        private async Task<ImageSource> GetImageAsync(string imageUrl, CancellationToken cancellationToken)
-        {
-            var client = _httpClientFactory.CreateClient();
-            var request = new HttpRequestMessage(HttpMethod.Get, imageUrl);
-            using var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
-            using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-            var bitmapImage = new BitmapImage();
-            bitmapImage.BeginInit();
-            bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-            bitmapImage.StreamSource = stream;
-            bitmapImage.EndInit();
-            bitmapImage.Freeze();
-            return bitmapImage;
         }
 
         private void ClearUserInfo(CloudType cloudType)
@@ -268,7 +255,9 @@ namespace PasswordManager.ViewModels
                 var mergeResult = await _syncService.Synchronize(cloudType, SyncPasswordRequired);
 
                 await MaterialMessageBox.ShowAsync(
-                    mergeResult.Success ? "Credentials successfully merged" : "Credentials not merged",
+                    mergeResult.Success
+                    ? PasswordManager.Language.Properties.Resources.SyncSuccess
+                    : PasswordManager.Language.Properties.Resources.SyncFailed,
                     mergeResult.ToString(),
                     MaterialMessageBoxButtons.OK,
                     windowDialogName);
@@ -296,8 +285,12 @@ namespace PasswordManager.ViewModels
                 var success = await _syncService.Upload(cloudType);
 
                 await MaterialMessageBox.ShowAsync(
-                    success ? "Success" : "Error",
-                    success ? "Credentials successfully uploaded" : "Failed to upload credentials",
+                    success
+                    ? PasswordManager.Language.Properties.Resources.Success
+                    : PasswordManager.Language.Properties.Resources.Error,
+                    success
+                    ? PasswordManager.Language.Properties.Resources.UploadSuccess
+                    : PasswordManager.Language.Properties.Resources.UploadFailed,
                     MaterialMessageBoxButtons.OK,
                     windowDialogName);
             }
@@ -315,11 +308,16 @@ namespace PasswordManager.ViewModels
         private async Task<string> SyncPasswordRequired()
         {
             var password = await MaterialInputBox.ShowAsync(
-                "Input password of cloud file",
-                "Password",
+                PasswordManager.Language.Properties.Resources.InputPasswordOfFile,
+                PasswordManager.Language.Properties.Resources.Password,
                 MvvmHelper.MainWindowDialogName,
                 true);
             return password;
+        }
+
+        private Task LoadingAsync()
+        {
+            return FetchUserInfoIfRequired();
         }
     }
 }

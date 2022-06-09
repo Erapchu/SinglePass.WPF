@@ -1,16 +1,18 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Microsoft.Extensions.Logging;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 using PasswordManager.Helpers;
 using PasswordManager.Hotkeys;
 using PasswordManager.Services;
+using PasswordManager.Settings;
 using PasswordManager.Views.MessageBox;
 using System;
 using System.Threading.Tasks;
 
 namespace PasswordManager.ViewModels
 {
-    public class SettingsViewModel : NavigationItemViewModel
+    public class SettingsViewModel : ObservableRecipient
     {
         #region Design time instance
         private static readonly Lazy<SettingsViewModel> _lazy = new(GetDesignTimeVM);
@@ -34,14 +36,13 @@ namespace PasswordManager.ViewModels
         private RelayCommand<System.Windows.Input.KeyEventArgs> _changeHelperPopupHotkeyCommand;
         private RelayCommand _clearShowPopupHotkeyCommand;
 
+        private BaseTheme _themeMode;
         public BaseTheme ThemeMode
         {
-            get => _appSettingsService.ThemeMode;
+            get => _themeMode;
             set
             {
-                _appSettingsService.ThemeMode = value;
-                _appSettingsService.Save();
-                OnPropertyChanged();
+                SetProperty(ref _themeMode, value);
                 _themeService.ThemeMode = value;
             }
         }
@@ -62,14 +63,13 @@ namespace PasswordManager.ViewModels
             set => SetProperty(ref _newPasswordHelperText, value);
         }
 
+        private Hotkey _showPopupHotkey;
         public Hotkey ShowPopupHotkey
         {
-            get => _appSettingsService.ShowPopupHotkey;
+            get => _showPopupHotkey;
             set
             {
-                _appSettingsService.ShowPopupHotkey = value;
-                _appSettingsService.Save();
-                OnPropertyChanged();
+                SetProperty(ref _showPopupHotkey, value);
                 ChangeHelperPopupHotkeyCommand.NotifyCanExecuteChanged();
             }
         }
@@ -89,19 +89,19 @@ namespace PasswordManager.ViewModels
             ILogger<SettingsViewModel> logger,
             HotkeysService hotkeysService)
         {
-            Name = PasswordManager.Language.Properties.Resources.Settings;
-            IconKind = PackIconKind.Settings;
-
             _themeService = themeService;
             _appSettingsService = appSettingsService;
             _credentialsCryptoService = credentialsCryptoService;
             _logger = logger;
             _hotkeysService = hotkeysService;
+
+            _themeMode = _appSettingsService.ThemeMode;
+            _showPopupHotkey = _appSettingsService.ShowPopupHotkey;
         }
 
         private async Task ChangePasswordAsync()
         {
-            if (Loading || string.IsNullOrWhiteSpace(NewPassword) || NewPassword.Length < 8)
+            if (string.IsNullOrWhiteSpace(NewPassword) || NewPassword.Length < 8)
             {
                 NewPasswordHelperText = "Minimum symbols count is 8";
                 return;
@@ -113,8 +113,6 @@ namespace PasswordManager.ViewModels
 
             try
             {
-                Loading = true;
-
                 _credentialsCryptoService.SetPassword(NewPassword);
                 await _credentialsCryptoService.SaveCredentials();
 
@@ -124,10 +122,6 @@ namespace PasswordManager.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError(ex, null);
-            }
-            finally
-            {
-                Loading = false;
             }
 
             if (success)

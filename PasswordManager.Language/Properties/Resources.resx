@@ -133,9 +133,6 @@
   <data name="Edit" xml:space="preserve">
     <value>Edit</value>
   </data>
-  <data name="Remove" xml:space="preserve">
-    <value>Remove</value>
-  </data>
   <data name="Details" xml:space="preserve">
     <value>Details</value>
   </data>
@@ -238,16 +235,67 @@
   <data name="Merge" xml:space="preserve">
     <value>Merge</value>
   </data>
-  <data name="MergePasswords" xml:space="preserve">
-    <value>Merge passwords</value>
-  </data>
-  <data name="UploadPasswords" xml:space="preserve">
-    <value>Upload credentials</value>
+  <data name="Sync" xml:space="preserve">
+    <value>Sync</value>
   </data>
   <data name="Upload" xml:space="preserve">
     <value>Upload</value>
   </data>
   <data name="Loading" xml:space="preserve">
     <value>Loading...</value>
+  </data>
+  <data name="Modified" xml:space="preserve">
+    <value>Modified</value>
+  </data>
+  <data name="Created" xml:space="preserve">
+    <value>Created</value>
+  </data>
+  <data name="SortBy" xml:space="preserve">
+    <value>Sort by</value>
+  </data>
+  <data name="OrderBy" xml:space="preserve">
+    <value>Order by</value>
+  </data>
+  <data name="Ascending" xml:space="preserve">
+    <value>Ascending</value>
+  </data>
+  <data name="Descending" xml:space="preserve">
+    <value>Descending</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="UploadFailed" xml:space="preserve">
+    <value>Upload failed</value>
+  </data>
+  <data name="SyncSuccess" xml:space="preserve">
+    <value>Sync succeed</value>
+  </data>
+  <data name="DownloadingFile" xml:space="preserve">
+    <value>Downloading file...</value>
+  </data>
+  <data name="Decrypting" xml:space="preserve">
+    <value>Decrypting...</value>
+  </data>
+  <data name="Uploading" xml:space="preserve">
+    <value>Uploading...</value>
+  </data>
+  <data name="InputPasswordOfFile" xml:space="preserve">
+    <value>Input password of file</value>
+  </data>
+  <data name="SyncFailed" xml:space="preserve">
+    <value>Sync failed</value>
+  </data>
+  <data name="Success" xml:space="preserve">
+    <value>Success</value>
+  </data>
+  <data name="UploadSuccess" xml:space="preserve">
+    <value>Upload success</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Save</value>
   </data>
 </root>

@@ -14,23 +14,22 @@ namespace PasswordManager.ViewModels
     {
         #region Design time instance
         private static readonly Lazy<CredentialsDialogViewModel> _lazy = new(GetDesignTimeVM);
-        private readonly ILogger<CredentialsDialogViewModel> _logger;
-
         public static CredentialsDialogViewModel DesignTimeInstance => _lazy.Value;
-
         private static CredentialsDialogViewModel GetDesignTimeVM()
         {
             var additionalFields = new List<PassField>() { new PassField() { Name = "Design additional field", Value = "Test value" } };
             var model = Credential.CreateNew();
             model.AdditionalFields = additionalFields;
 
-            var credVm = new CredentialViewModel(model);
+            var credVm = new CredentialViewModel(model, null);
             var vm = new CredentialsDialogViewModel(null);
             vm._credentialViewModel = credVm;
             vm.Mode = CredentialsDialogMode.View;
             return vm;
         }
         #endregion
+
+        private readonly ILogger<CredentialsDialogViewModel> _logger;
 
         public event Action<CredentialViewModel, CredentialsDialogMode> Accept;
         public event Action<CredentialViewModel> Delete;

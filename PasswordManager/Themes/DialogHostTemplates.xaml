@@ -17,7 +17,6 @@
                             ContentStringFormat="{TemplateBinding ContentControl.ContentStringFormat}"
                             ContentTemplate="{TemplateBinding ContentControl.ContentTemplate}"
                             Opacity="1" />
-
                         <Grid
                             x:Name="PART_ContentCoverGrid"
                             Background="{Binding OverlayBackground, RelativeSource={RelativeSource TemplatedParent}}"
@@ -34,7 +33,6 @@
                                 </Style>
                             </Grid.Style>
                         </Grid>
-
                         <Grid
                             x:Name="PART_Popup"
                             HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
@@ -57,11 +55,11 @@
                                 Tag="{TemplateBinding DialogBackground}"
                                 TextElement.Foreground="{DynamicResource MaterialDesignBody}"
                                 UniformCornerRadius="4">
-                                <wpf:Card.RenderTransform>
+                                <!--<wpf:Card.RenderTransform>
                                     <TransformGroup>
                                         <ScaleTransform x:Name="CardScaleTransform" ScaleX="0" ScaleY="0" />
                                     </TransformGroup>
-                                </wpf:Card.RenderTransform>
+                                </wpf:Card.RenderTransform>-->
                                 <wpf:Card.Style>
                                     <Style BasedOn="{StaticResource {x:Type wpf:Card}}" TargetType="wpf:Card">
                                         <Setter Property="Background" Value="{Binding Tag, RelativeSource={RelativeSource Self}}" />
@@ -98,7 +96,7 @@
                                                     </EasingDoubleKeyFrame.EasingFunction>
                                                 </EasingDoubleKeyFrame>
                                             </DoubleAnimationUsingKeyFrames>
-                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="CardScaleTransform" Storyboard.TargetProperty="ScaleX">
+                                            <!--<DoubleAnimationUsingKeyFrames Storyboard.TargetName="CardScaleTransform" Storyboard.TargetProperty="ScaleX">
                                                 <EasingDoubleKeyFrame KeyTime="0" Value="0" />
                                                 <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="1">
                                                     <EasingDoubleKeyFrame.EasingFunction>
@@ -113,7 +111,7 @@
                                                         <SineEase EasingMode="EaseInOut" />
                                                     </EasingDoubleKeyFrame.EasingFunction>
                                                 </EasingDoubleKeyFrame>
-                                            </DoubleAnimationUsingKeyFrames>
+                                            </DoubleAnimationUsingKeyFrames>-->
                                         </Storyboard>
                                     </VisualTransition>
                                     <VisualTransition From="Open" To="Closed">
@@ -137,7 +135,7 @@
                                                     </EasingDoubleKeyFrame.EasingFunction>
                                                 </EasingDoubleKeyFrame>
                                             </DoubleAnimationUsingKeyFrames>
-                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="CardScaleTransform" Storyboard.TargetProperty="ScaleX">
+                                            <!--<DoubleAnimationUsingKeyFrames Storyboard.TargetName="CardScaleTransform" Storyboard.TargetProperty="ScaleX">
                                                 <EasingDoubleKeyFrame KeyTime="0" Value="1" />
                                                 <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="0.5">
                                                     <EasingDoubleKeyFrame.EasingFunction>
@@ -152,7 +150,7 @@
                                                         <SineEase EasingMode="EaseInOut" />
                                                     </EasingDoubleKeyFrame.EasingFunction>
                                                 </EasingDoubleKeyFrame>
-                                            </DoubleAnimationUsingKeyFrames>
+                                            </DoubleAnimationUsingKeyFrames>-->
                                         </Storyboard>
                                     </VisualTransition>
                                 </VisualStateGroup.Transitions>
@@ -174,7 +172,7 @@
                                             Storyboard.TargetProperty="(UIElement.Opacity)"
                                             To="1"
                                             Duration="0" />
-                                        <DoubleAnimation
+                                        <!--<DoubleAnimation
                                             Storyboard.TargetName="CardScaleTransform"
                                             Storyboard.TargetProperty="ScaleX"
                                             To="1"
@@ -183,7 +181,7 @@
                                             Storyboard.TargetName="CardScaleTransform"
                                             Storyboard.TargetProperty="ScaleY"
                                             To="1"
-                                            Duration="0" />
+                                            Duration="0" />-->
                                     </Storyboard>
                                 </VisualState>
                                 <VisualState x:Name="Closed">

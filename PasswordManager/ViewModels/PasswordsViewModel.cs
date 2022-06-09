@@ -1,11 +1,13 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Microsoft.Extensions.Logging;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 using PasswordManager.Collections;
 using PasswordManager.Enums;
 using PasswordManager.Helpers;
 using PasswordManager.Models;
 using PasswordManager.Services;
+using PasswordManager.Settings;
 using PasswordManager.Views.MessageBox;
 using System;
 using System.Collections.Generic;
@@ -17,12 +19,11 @@ using Unidecode.NET;
 
 namespace PasswordManager.ViewModels
 {
-    public class PasswordsViewModel : NavigationItemViewModel
+    public class PasswordsViewModel : ObservableRecipient
     {
         #region Design time instance
         private static readonly Lazy<PasswordsViewModel> _lazy = new(GetDesignTimeVM);
         public static PasswordsViewModel DesignTimeInstance => _lazy.Value;
-
         private static PasswordsViewModel GetDesignTimeVM()
         {
             var vm = new PasswordsViewModel();
@@ -31,7 +32,7 @@ namespace PasswordManager.ViewModels
             cred.LoginField.Value = "TestLogin";
             cred.PasswordField.Value = "TestPass";
             cred.OtherField.Value = "TestOther";
-            var credVm = new CredentialViewModel(cred);
+            var credVm = new CredentialViewModel(cred, null);
             vm.DisplayedCredentials.Add(credVm);
             return vm;
         }
@@ -42,14 +43,17 @@ namespace PasswordManager.ViewModels
         private readonly CredentialsCryptoService _credentialsCryptoService;
         private readonly ILogger<PasswordsViewModel> _logger;
         private readonly List<CredentialViewModel> _credentials = new();
+        private readonly AppSettingsService _appSettingsService;
+        private readonly CredentialViewModelFactory _credentialViewModelFactory;
+
         private CredentialViewModel _selectedCredential;
         private string _searchText;
-        private bool _searchTextFocused;
         private RelayCommand _addCredentialCommand;
         private RelayCommand<KeyEventArgs> _searchKeyEventCommand;
 
         public RelayCommand AddCredentialCommand => _addCredentialCommand ??= new RelayCommand(AddCredential);
         public RelayCommand<KeyEventArgs> SearchKeyEventCommand => _searchKeyEventCommand ??= new RelayCommand<KeyEventArgs>(HandleSearchKeyEvent);
+
         public ObservableCollectionDelayed<CredentialViewModel> DisplayedCredentials { get; private set; } = new();
         public CredentialsDialogViewModel ActiveCredentialDialogViewModel { get; }
 
@@ -72,14 +76,30 @@ namespace PasswordManager.ViewModels
             set
             {
                 SetProperty(ref _searchText, value);
-                _ = FilterCredentialsAsync();
+                _ = DisplayCredentialsAsync();
             }
         }
 
-        public bool SearchTextFocused
+        private SortType _sort;
+        public SortType Sort
         {
-            get => _searchTextFocused;
-            set => SetProperty(ref _searchTextFocused, value);
+            get => _sort;
+            set
+            {
+                SetProperty(ref _sort, value);
+                _ = DisplayCredentialsAsync();
+            }
+        }
+
+        private OrderType _order;
+        public OrderType Order
+        {
+            get => _order;
+            set
+            {
+                SetProperty(ref _order, value);
+                _ = DisplayCredentialsAsync();
+            }
         }
 
         private PasswordsViewModel() { }
@@ -87,13 +107,17 @@ namespace PasswordManager.ViewModels
         public PasswordsViewModel(
             CredentialsCryptoService credentialsCryptoService,
             ILogger<PasswordsViewModel> logger,
-            CredentialsDialogViewModel credentialsDialogViewModel)
+            CredentialsDialogViewModel credentialsDialogViewModel,
+            AppSettingsService appSettingsService,
+            CredentialViewModelFactory credentialViewModelFactory)
         {
-            Name = PasswordManager.Language.Properties.Resources.Passwords;
-            IconKind = PackIconKind.Password;
-
             _credentialsCryptoService = credentialsCryptoService;
             _logger = logger;
+            _appSettingsService = appSettingsService;
+            _credentialViewModelFactory = credentialViewModelFactory;
+
+            _sort = _appSettingsService.Sort;
+            _order = _appSettingsService.Order;
 
             ActiveCredentialDialogViewModel = credentialsDialogViewModel;
             ActiveCredentialDialogViewModel.Accept += ActiveCredentialDialogViewModel_Accept;
@@ -116,7 +140,7 @@ namespace PasswordManager.ViewModels
                 var dIndex = DisplayedCredentials.IndexOf(credVM);
                 var countAfterDeletion = DisplayedCredentials.Count - 1;
                 var sIndex = dIndex >= countAfterDeletion ? countAfterDeletion - 1 : dIndex;
-                await FilterCredentialsAsync();
+                await DisplayCredentialsAsync();
                 if (sIndex >= 0)
                 {
                     SelectedCredential = DisplayedCredentials.ElementAt(sIndex);
@@ -140,7 +164,7 @@ namespace PasswordManager.ViewModels
                 newCredVM.CreationTime = dateTimeNow;
                 await _credentialsCryptoService.AddCredential(newCredVM.Model);
                 _credentials.Add(newCredVM);
-                await FilterCredentialsAsync();
+                await DisplayCredentialsAsync();
             }
             else if (mode == CredentialsDialogMode.Edit)
             {
@@ -149,7 +173,7 @@ namespace PasswordManager.ViewModels
                 var staleIndex = _credentials.IndexOf(staleCredVM);
                 _credentials.Remove(staleCredVM);
                 _credentials.Insert(staleIndex, newCredVM);
-                await FilterCredentialsAsync();
+                await DisplayCredentialsAsync();
             }
 
             SelectedCredential = newCredVM;
@@ -159,17 +183,16 @@ namespace PasswordManager.ViewModels
         {
             try
             {
-                DisplayedCredentials.Clear();
                 _credentials.Clear();
 
                 var credentials = _credentialsCryptoService.Credentials;
-                using var delayed = DisplayedCredentials.DelayNotifications();
                 foreach (var cred in credentials)
                 {
-                    var credVM = new CredentialViewModel(cred);
+                    var credVM = _credentialViewModelFactory.ProvideNew(cred);
                     _credentials.Add(credVM);
-                    delayed.Add(credVM);
                 }
+
+                _ = DisplayCredentialsAsync();
             }
             catch (Exception ex)
             {
@@ -177,7 +200,7 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        public async Task FilterCredentialsAsync()
+        private async Task DisplayCredentialsAsync()
         {
             try
             {
@@ -186,7 +209,13 @@ namespace PasswordManager.ViewModels
 
                 if (string.IsNullOrEmpty(filterText))
                 {
-                    filteredCredentials = _credentials;
+                    List<CredentialViewModel> tempList = null;
+                    await Task.Run(() =>
+                    {
+                        tempList = _credentials.ToList();
+                        SortAndOrder(tempList);
+                    });
+                    filteredCredentials = tempList;
                 }
                 else
                 {
@@ -217,6 +246,8 @@ namespace PasswordManager.ViewModels
                                 fCreds.Add(cred);
                             }
                         }
+
+                        SortAndOrder(fCreds);
                         return fCreds;
                     });
                 }
@@ -235,7 +266,7 @@ namespace PasswordManager.ViewModels
 
         private void AddCredential()
         {
-            ActiveCredentialDialogViewModel.CredentialViewModel = new CredentialViewModel(Credential.CreateNew());
+            ActiveCredentialDialogViewModel.CredentialViewModel = _credentialViewModelFactory.ProvideNew(Credential.CreateNew());
             ActiveCredentialDialogViewModel.Mode = CredentialsDialogMode.New;
             ActiveCredentialDialogViewModel.IsPasswordVisible = true;
             ActiveCredentialDialogViewModel.SetFocus();
@@ -264,6 +295,45 @@ namespace PasswordManager.ViewModels
                 {
                     SelectedCredential = DisplayedCredentials[selectedIndex + 1];
                 }
+            }
+        }
+
+        private void SortAndOrder(List<CredentialViewModel> creds)
+        {
+            switch (Order)
+            {
+                case OrderType.Ascending:
+                    {
+                        switch (Sort)
+                        {
+                            case SortType.Name:
+                                creds.Sort((a, b) => a.NameFieldVM.Value.CompareTo(b.NameFieldVM.Value));
+                                break;
+                            case SortType.Created:
+                                creds.Sort((a, b) => a.CreationTime.CompareTo(b.CreationTime));
+                                break;
+                            case SortType.Modified:
+                                creds.Sort((a, b) => a.LastModifiedTime.CompareTo(b.LastModifiedTime));
+                                break;
+                        }
+                    }
+                    break;
+                case OrderType.Descending:
+                    {
+                        switch (Sort)
+                        {
+                            case SortType.Name:
+                                creds.Sort((a, b) => b.NameFieldVM.Value.CompareTo(a.NameFieldVM.Value));
+                                break;
+                            case SortType.Created:
+                                creds.Sort((a, b) => b.CreationTime.CompareTo(a.CreationTime));
+                                break;
+                            case SortType.Modified:
+                                creds.Sort((a, b) => b.LastModifiedTime.CompareTo(a.LastModifiedTime));
+                                break;
+                        }
+                    }
+                    break;
             }
         }
     }

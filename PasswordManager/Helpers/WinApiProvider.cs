@@ -49,12 +49,23 @@ namespace PasswordManager.Helpers
         [DllImport("user32.dll", SetLastError = true)]
         public static extern bool GetCaretPos(out POINT lpPoint);
 
+        [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool GetCursorPos(out POINT lpPoint);
+
+        [DllImport("user32", ExactSpelling = true, SetLastError = true)]
+        public static extern int MapWindowPoints(IntPtr hWndFrom, IntPtr hWndTo, [In, Out] ref RECT rect, [MarshalAs(UnmanagedType.U4)] int cPoints);
+
         [DllImport("user32.dll")]
         public static extern bool ClientToScreen(IntPtr hWnd, ref POINT lpPoint);
 
         public const int GWL_STYLE = -16;
         public const int GWL_EXSTYLE = -20;
         public const uint WS_EX_NOACTIVATE = 0x08000000;
+
+        public const int WM_NCHITTEST = 0x0084;
+        public const int WM_NCLBUTTONUP = 0x00A2;
+        public const int HTMAXBUTTON = 9;
 
         [DllImport("user32.dll")]
         public static extern uint GetWindowLong(IntPtr hWnd, int nIndex);

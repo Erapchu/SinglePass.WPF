@@ -13,8 +13,8 @@
       { "assembly": "NLog.Extensions.Logging" }
     ],
     "variables": {
-      "logName": "Purple",
-      "logDir": "${specialfolder:folder=LocalApplicationData}/Purple/Logs",
+      "logName": "SinglePass",
+      "logDir": "${specialfolder:folder=LocalApplicationData}/SinglePass/Logs",
       "logDirArchive": "${var:logDir}/Archive",
       "logLayout": "${date} | ${level:padding=-5:fixedLength=true} | TID:${threadid:padding=-2} | ${callsite:includeNamespace=False:cleanNamesOfAnonymousDelegates=True:cleanNamesOfAsyncContinuations=True}> ${message} ${exception:format=toString:innerFormat=toString}"
     },

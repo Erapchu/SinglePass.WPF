@@ -34,7 +34,7 @@ namespace PasswordManager
 
         public App()
         {
-            _mutex = new Mutex(true, "PurplePassword_CBD9AADE-1A82-48A2-9F7F-4F0EAAABEA30", out bool isFirstInstance);
+            _mutex = new Mutex(true, "SinglePass_CBD9AADE-1A82-48A2-9F7F-4F0EAAABEA30", out bool isFirstInstance);
             IsFirstInstance = isFirstInstance;
 
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;

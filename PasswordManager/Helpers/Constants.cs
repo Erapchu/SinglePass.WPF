@@ -5,8 +5,8 @@ namespace PasswordManager.Helpers
 {
     public static class Constants
     {
-        public const string AppName = "Purple";
-        public const string PasswordsFileName = "purple.dat";
+        public const string AppName = "SinglePass";
+        public const string PasswordsFileName = "singlePass.dat";
         public const string CommonSettingsFileName = "commonSettings.json";
         public const string GoogleDriveFileName = "googleDrive.json";
 

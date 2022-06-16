@@ -28,7 +28,7 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 FontSize="24"
-                Text="Purple" />
+                Text="SinglePass" />
         </Border>
     </Grid>
 </Window>

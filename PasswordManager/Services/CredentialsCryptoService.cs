@@ -9,7 +9,6 @@ using System.Linq;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace PasswordManager.Services
@@ -19,7 +18,6 @@ namespace PasswordManager.Services
         private readonly object _credentialsLock = new();
         private readonly ILogger<CredentialsCryptoService> _logger;
         private readonly CryptoService _cryptoService;
-        private readonly string _pathToPasswordsFile = Constants.PasswordsFilePath;
 
         private List<Credential> _credentials = new();
         public List<Credential> Credentials
@@ -52,7 +50,7 @@ namespace PasswordManager.Services
 
         public Task<bool> IsCredentialsFileExistAsync()
         {
-            return Task.FromResult(File.Exists(_pathToPasswordsFile));
+            return Task.FromResult(File.Exists(Constants.PasswordsFilePath));
         }
 
         public void SetPassword(string password)
@@ -65,20 +63,17 @@ namespace PasswordManager.Services
             return SecureStringHelper.GetString(PasswordSecure);
         }
 
-        public async Task<bool> LoadCredentialsAsync()
+        public Task<bool> LoadCredentialsAsync()
         {
-            return await Task.Run(() =>
+            return Task.Run(() =>
             {
                 _logger.LogInformation("Loading credentials from file...");
                 bool success = false;
                 try
                 {
-                    // Lock access to file for multithreading environment
-                    var hashedPath = HashHelper.GetHash(_pathToPasswordsFile);
-                    using var waitHandleLocker = EventWaitHandleLocker.MakeWithEventHandle(true, EventResetMode.AutoReset, hashedPath);
-
                     // Access to file
-                    using var fileStream = new FileStream(_pathToPasswordsFile, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    using var locker = AsyncDuplicateLock.Lock(Constants.PasswordsFilePath);
+                    using var fileStream = new FileStream(Constants.PasswordsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                     // Just to ensure
                     fileStream.Seek(0, SeekOrigin.Begin);
 
@@ -207,19 +202,15 @@ namespace PasswordManager.Services
             await SaveCredentials();
         }
 
-        public async Task SaveCredentials()
+        public Task SaveCredentials()
         {
-            await Task.Run(() =>
+            return Task.Run(() =>
             {
-                // Lock access to file for multithreading environment
-                var hashedPath = HashHelper.GetHash(_pathToPasswordsFile);
-
-                using var waitHandleLocker = EventWaitHandleLocker.MakeWithEventHandle(true, EventResetMode.AutoReset, hashedPath);
-
                 try
                 {
                     // Access to file
-                    using var fileStream = File.Open(_pathToPasswordsFile, FileMode.Create, FileAccess.Write, FileShare.Read);
+                    using var locker = AsyncDuplicateLock.Lock(Constants.PasswordsFilePath);
+                    using var fileStream = new FileStream(Constants.PasswordsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                     // Just to ensure
                     fileStream.Seek(0, SeekOrigin.Begin);
 

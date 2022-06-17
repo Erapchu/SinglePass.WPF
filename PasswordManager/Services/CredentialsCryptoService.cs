@@ -210,7 +210,7 @@ namespace PasswordManager.Services
                 {
                     // Access to file
                     using var locker = AsyncDuplicateLock.Lock(Constants.PasswordsFilePath);
-                    using var fileStream = new FileStream(Constants.PasswordsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    using var fileStream = new FileStream(Constants.PasswordsFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
                     // Just to ensure
                     fileStream.Seek(0, SeekOrigin.Begin);
 

@@ -107,6 +107,7 @@
                     <ContentControl Content="{Binding Content, UpdateSourceTrigger=PropertyChanged}" DataContext="{Binding SelectedNavigationItem}" />
                 </AdornerDecorator>
             </Grid>
+            <md:Snackbar x:Name="SnackbarMain" MessageQueue="{md:MessageQueue}" />
         </Grid>
     </md:DialogHost>
 </controls:MaterialWindow>

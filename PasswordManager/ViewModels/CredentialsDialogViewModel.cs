@@ -34,6 +34,7 @@ namespace PasswordManager.ViewModels
         public event Action<CredentialViewModel, CredentialsDialogMode> Accept;
         public event Action<CredentialViewModel> Delete;
         public event Action Cancel;
+        public event Action<string> EnqueueSnackbarMessage;
 
         private RelayCommand _okCommand;
         private RelayCommand _cancelCommand;
@@ -147,6 +148,7 @@ namespace PasswordManager.ViewModels
             try
             {
                 WindowsClipboard.SetText(data);
+                EnqueueSnackbarMessage?.Invoke(PasswordManager.Language.Properties.Resources.TextCopied);
             }
             catch (Exception ex)
             {

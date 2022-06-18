@@ -298,4 +298,7 @@
   <data name="Save" xml:space="preserve">
     <value>Save</value>
   </data>
+  <data name="TextCopied" xml:space="preserve">
+    <value>Text copied!</value>
+  </data>
 </root>

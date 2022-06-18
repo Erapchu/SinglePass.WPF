@@ -45,7 +45,16 @@ namespace PasswordManager.Views
             }
 
             mainViewModel.CredentialSelected += Vm_CredentialSelected;
+            mainViewModel.PasswordsVM.ActiveCredentialDialogVM.EnqueueSnackbarMessage += ActiveCredentialDialogVM_EnqueueSnackbarMessage;
             DataContext = mainViewModel;
+        }
+
+        private void ActiveCredentialDialogVM_EnqueueSnackbarMessage(string message)
+        {
+            if (SnackbarMain.MessageQueue is { } messageQueue)
+            {
+                messageQueue.Enqueue(message);
+            }
         }
 
         private void Vm_CredentialSelected(CredentialViewModel credVM)

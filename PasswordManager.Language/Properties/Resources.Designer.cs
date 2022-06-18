@@ -610,6 +610,15 @@ namespace PasswordManager.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Text copied!.
+        /// </summary>
+        public static string TextCopied {
+            get {
+                return ResourceManager.GetString("TextCopied", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Upload.
         /// </summary>
         public static string Upload {

@@ -318,4 +318,7 @@
   <data name="Save" xml:space="preserve">
     <value>Сохранить</value>
   </data>
+  <data name="TextCopied" xml:space="preserve">
+    <value>Текст скопирован!</value>
+  </data>
 </root>

@@ -55,6 +55,7 @@ namespace PasswordManager.Hotkeys
                 var dpiAtPoint = DpiUtilities.GetDpiForNearestMonitor(caretRect.right, caretRect.bottom);
                 popup.HorizontalOffset = caretRect.right * DpiUtilities.DefaultDpiX / dpiAtPoint;
                 popup.VerticalOffset = caretRect.bottom * DpiUtilities.DefaultDpiY / dpiAtPoint;
+                popup.ForegroundHWND = hwndFocus;
                 popup.IsOpen = true;
 
                 // OK caret placement

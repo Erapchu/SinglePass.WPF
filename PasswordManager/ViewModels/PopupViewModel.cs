@@ -1,11 +1,15 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
+using PasswordManager.Collections;
 using PasswordManager.Helpers;
 using PasswordManager.Services;
 using System;
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Automation;
 
 namespace PasswordManager.ViewModels
 {
@@ -25,10 +29,11 @@ namespace PasswordManager.ViewModels
         private readonly CredentialsCryptoService _credentialsCryptoService;
         private readonly ILogger<PopupViewModel> _logger;
         private readonly CredentialViewModelFactory _credentialViewModelFactory;
+        private readonly List<CredentialViewModel> _credentials = new();
 
         public event Action Accept;
 
-        public ObservableCollection<CredentialViewModel> DisplayedCredentials { get; private set; }
+        public ObservableCollectionDelayed<CredentialViewModel> DisplayedCredentials { get; private set; } = new();
 
         private CredentialViewModel _selectedCredentialVM;
         public CredentialViewModel SelectedCredentialVM
@@ -43,6 +48,11 @@ namespace PasswordManager.ViewModels
         private RelayCommand _closeCommand;
         public RelayCommand CloseCommand => _closeCommand ??= new RelayCommand(Close);
 
+        private AsyncRelayCommand _loadedCommand;
+        public AsyncRelayCommand LoadedCommand => _loadedCommand ??= new AsyncRelayCommand(Loaded);
+
+        public IntPtr ForegroundHWND { get; set; }
+
         private PopupViewModel() { }
 
         public PopupViewModel(
@@ -53,9 +63,6 @@ namespace PasswordManager.ViewModels
             _credentialsCryptoService = credentialsCryptoService;
             _logger = logger;
             _credentialViewModelFactory = credentialViewModelFactory;
-
-            var creds = _credentialsCryptoService.Credentials.Select(cr => _credentialViewModelFactory.ProvideNew(cr)).ToList();
-            DisplayedCredentials = new ObservableCollection<CredentialViewModel>(creds);
         }
 
         private void Close()
@@ -98,6 +105,67 @@ namespace PasswordManager.ViewModels
             {
                 _logger.LogError(ex, null);
             }
+        }
+
+        private Task Loaded()
+        {
+            return Task.Run(() =>
+            {
+                _credentials.Clear();
+                _credentials.AddRange(_credentialsCryptoService.Credentials
+                    .Select(cr => _credentialViewModelFactory.ProvideNew(cr))
+                    .ToList());
+                var tempList = new List<CredentialViewModel>(_credentials);
+
+                // Extract browsers address bar string
+                try
+                {
+                    // https://stackoverflow.com/questions/18897070/getting-the-current-tabs-url-from-google-chrome-using-c-sharp
+
+                    _ = WinApiProvider.GetWindowThreadProcessId(ForegroundHWND, out uint processId);
+                    var process = Process.GetProcessById((int)processId);
+                    var mwh = process.MainWindowHandle;
+                    if (mwh == IntPtr.Zero)
+                        return;
+
+                    AutomationElement element = AutomationElement.FromHandle(mwh);
+                    if (element is null)
+                        return;
+
+                    Condition conditions = new AndCondition(
+                        new PropertyCondition(AutomationElement.ProcessIdProperty, process.Id),
+                        new PropertyCondition(AutomationElement.IsControlElementProperty, true),
+                        new PropertyCondition(AutomationElement.IsContentElementProperty, true),
+                        new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Edit));
+
+                    AutomationElement elementx = element.FindFirst(TreeScope.Descendants, conditions);
+                    var addressBarString = ((ValuePattern)elementx.GetCurrentPattern(ValuePattern.Pattern)).Current.Value;
+
+                    if (!addressBarString.StartsWith("http"))
+                        addressBarString = "http://" + addressBarString;
+
+                    if (Uri.TryCreate(addressBarString, UriKind.Absolute, out Uri addressBarUri))
+                    {
+                        var host = addressBarUri.Host;
+                        var domains = host.Split('.', StringSplitOptions.RemoveEmptyEntries);
+                        // Take last 2 levels of domains
+                        var domainsString = string.Join('.', domains.TakeLast(2));
+
+                        tempList = tempList
+                            .OrderByDescending(c => c.SiteFieldVM.Value is null ? -1 : c.SiteFieldVM.Value.Contains(domainsString) ? 1 : -1)
+                            .ToList();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(null, ex);
+                }
+                finally
+                {
+                    DisplayedCredentials = new ObservableCollectionDelayed<CredentialViewModel>(tempList);
+                    OnPropertyChanged(nameof(DisplayedCredentials));
+                }
+            });
         }
     }
 }

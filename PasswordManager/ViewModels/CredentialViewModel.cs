@@ -58,7 +58,16 @@ namespace PasswordManager.ViewModels
         }
 
         private ImageSource _favIcon;
-        public ImageSource FavIcon => _favIcon ??= _favIconService.GetImage(SiteFieldVM.Value);
+        public ImageSource FavIcon
+        {
+            get
+            {
+                if (_favIcon is null)
+                    _favIconService.ScheduleGetImage(SiteFieldVM.Value, (image) => SetProperty(ref _favIcon, image, nameof(FavIcon)));
+
+                return _favIcon;
+            }
+        }
 
         public CredentialViewModel(Credential credential, FavIconService favIconService)
         {

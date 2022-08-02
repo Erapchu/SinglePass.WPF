@@ -6,10 +6,8 @@ using PasswordManager.Helpers;
 using PasswordManager.Services;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Automation;
 
 namespace PasswordManager.ViewModels
 {
@@ -29,7 +27,7 @@ namespace PasswordManager.ViewModels
         private readonly CredentialsCryptoService _credentialsCryptoService;
         private readonly ILogger<PopupViewModel> _logger;
         private readonly CredentialViewModelFactory _credentialViewModelFactory;
-        private readonly List<CredentialViewModel> _credentials = new();
+        private readonly AddressBarExtractor _addressBarExtractor;
 
         public event Action Accept;
 
@@ -58,11 +56,13 @@ namespace PasswordManager.ViewModels
         public PopupViewModel(
             CredentialsCryptoService credentialsCryptoService,
             ILogger<PopupViewModel> logger,
-            CredentialViewModelFactory credentialViewModelFactory)
+            CredentialViewModelFactory credentialViewModelFactory,
+            AddressBarExtractor addressBarExtractor)
         {
             _credentialsCryptoService = credentialsCryptoService;
             _logger = logger;
             _credentialViewModelFactory = credentialViewModelFactory;
+            _addressBarExtractor = addressBarExtractor;
         }
 
         private void Close()
@@ -111,36 +111,14 @@ namespace PasswordManager.ViewModels
         {
             return Task.Run(() =>
             {
-                _credentials.Clear();
-                _credentials.AddRange(_credentialsCryptoService.Credentials
+                var tempCredentialsVM = new List<CredentialViewModel>();
+                tempCredentialsVM.AddRange(_credentialsCryptoService.Credentials
                     .Select(cr => _credentialViewModelFactory.ProvideNew(cr))
                     .ToList());
-                var tempList = new List<CredentialViewModel>(_credentials);
 
-                // Extract browsers address bar string
                 try
                 {
-                    // https://stackoverflow.com/questions/18897070/getting-the-current-tabs-url-from-google-chrome-using-c-sharp
-
-                    _ = WinApiProvider.GetWindowThreadProcessId(ForegroundHWND, out uint processId);
-                    var process = Process.GetProcessById((int)processId);
-                    var mwh = process.MainWindowHandle;
-                    if (mwh == IntPtr.Zero)
-                        return;
-
-                    AutomationElement element = AutomationElement.FromHandle(mwh);
-                    if (element is null)
-                        return;
-
-                    Condition conditions = new AndCondition(
-                        new PropertyCondition(AutomationElement.ProcessIdProperty, process.Id),
-                        new PropertyCondition(AutomationElement.IsControlElementProperty, true),
-                        new PropertyCondition(AutomationElement.IsContentElementProperty, true),
-                        new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Edit));
-
-                    AutomationElement elementx = element.FindFirst(TreeScope.Descendants, conditions);
-                    var addressBarString = ((ValuePattern)elementx.GetCurrentPattern(ValuePattern.Pattern)).Current.Value;
-
+                    var addressBarString = _addressBarExtractor.ExtractAddressBar(ForegroundHWND);
                     if (!addressBarString.StartsWith("http"))
                         addressBarString = "http://" + addressBarString;
 
@@ -151,18 +129,18 @@ namespace PasswordManager.ViewModels
                         // Take last 2 levels of domains
                         var domainsString = string.Join('.', domains.TakeLast(2));
 
-                        tempList = tempList
+                        tempCredentialsVM = tempCredentialsVM
                             .OrderByDescending(c => c.SiteFieldVM.Value is null ? -1 : c.SiteFieldVM.Value.Contains(domainsString) ? 1 : -1)
                             .ToList();
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(null, ex);
+                    _logger.LogError(ex, null);
                 }
                 finally
                 {
-                    DisplayedCredentials = new ObservableCollectionDelayed<CredentialViewModel>(tempList);
+                    DisplayedCredentials = new ObservableCollectionDelayed<CredentialViewModel>(tempCredentialsVM);
                     OnPropertyChanged(nameof(DisplayedCredentials));
                 }
             });

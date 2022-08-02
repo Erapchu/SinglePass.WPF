@@ -154,6 +154,7 @@ namespace PasswordManager
                 services.AddSingleton<HotkeysService>();
                 services.AddSingleton<ImageService>();
                 services.AddSingleton<CredentialViewModelFactory>();
+                services.AddSingleton<AddressBarExtractor>();
             });
 
         private void Application_Exit(object sender, ExitEventArgs e)

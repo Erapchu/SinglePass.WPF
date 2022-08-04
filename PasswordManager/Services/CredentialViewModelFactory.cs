@@ -5,16 +5,16 @@ namespace PasswordManager.Services
 {
     public class CredentialViewModelFactory
     {
-        private readonly FavIconService _favIconService;
+        private readonly FavIconCollector _favIconCollector;
 
-        public CredentialViewModelFactory(FavIconService favIconService)
+        public CredentialViewModelFactory(FavIconCollector favIconCollector)
         {
-            _favIconService = favIconService;
+            _favIconCollector = favIconCollector;
         }
 
         public CredentialViewModel ProvideNew(Credential credential)
         {
-            return new CredentialViewModel(credential, _favIconService);
+            return new CredentialViewModel(credential, _favIconCollector);
         }
     }
 }

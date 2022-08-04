@@ -1,29 +1,32 @@
 ﻿using Microsoft.Extensions.Logging;
+using PasswordManager.Application;
 using PasswordManager.Utilities;
 using System;
-using System.Collections.Concurrent;
 using System.Threading;
 using System.Windows.Media;
 
 namespace PasswordManager.Services
 {
-    public class FavIconService
+    public class FavIconCollector
     {
         private const int _processingTimeout = 200;
         private const string _favIconServiceUrl = "http://www.google.com/s2/favicons?domain_url={0}";
-        
-        private readonly ConcurrentDictionary<string, ImageSource> _imagesCache = new();
+
         private readonly RegeneratedList<ProcessingImageWrapper> _processingImages = new();
-        private readonly ILogger<FavIconService> _logger;
+        private readonly ILogger<FavIconCollector> _logger;
         private readonly ImageService _imageService;
+        private readonly FavIconCacheService _favIconCacheService;
         private readonly Thread _getImagesThread;
 
-        public FavIconService(
-            ILogger<FavIconService> logger,
-            ImageService imageService)
+        public FavIconCollector(
+            ILogger<FavIconCollector> logger,
+            ImageService imageService,
+            FavIconCacheService favIconCacheService)
         {
             _imageService = imageService;
+            _favIconCacheService = favIconCacheService;
             _logger = logger;
+
             _getImagesThread = new Thread(ImageProcessing);
             _getImagesThread.IsBackground = true;
             _getImagesThread.Start();
@@ -39,10 +42,10 @@ namespace PasswordManager.Services
                     return;
 
                 var host = imageUrl.Host;
-
-                if (_imagesCache.TryGetValue(host, out ImageSource image))
+                var cachedImage = _favIconCacheService.GetCachedImage(host).Result;
+                if (cachedImage is not null)
                 {
-                    setPropertyAction.Invoke(image);
+                    setPropertyAction.Invoke(cachedImage);
                 }
                 else
                 {
@@ -68,14 +71,15 @@ namespace PasswordManager.Services
                     {
                         foreach (var imageProcWrapper in imagesProcWrappers)
                         {
-                            if (_imagesCache.TryGetValue(imageProcWrapper.Host, out ImageSource cachedImage))
+                            var cachedImage = _favIconCacheService.GetCachedImage(imageProcWrapper.Host).Result;
+                            if (cachedImage is not null)
                             {
                                 imageProcWrapper.SetPropertyAction.Invoke(cachedImage);
                             }
                             else
                             {
                                 var bitmapImage = _imageService.GetImageAsync(string.Format(_favIconServiceUrl, imageProcWrapper.Host), CancellationToken.None).Result;
-                                _imagesCache.TryAdd(imageProcWrapper.Host, bitmapImage);
+                                _favIconCacheService.SetCachedImage(imageProcWrapper.Host, bitmapImage);
                                 imageProcWrapper.SetPropertyAction.Invoke(bitmapImage);
                             }
                         }

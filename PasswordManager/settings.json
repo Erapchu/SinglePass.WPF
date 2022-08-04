@@ -45,5 +45,8 @@
         "writeTo": "file"
       }
     ]
+  },
+  "FavIconCacheOptions": {
+    "ConnectionString": "Data Source=%localappdata%\\SinglePass\\Cache\\FavIcon.db"
   }
 }

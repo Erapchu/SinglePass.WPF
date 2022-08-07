@@ -47,6 +47,6 @@
     ]
   },
   "FavIconCacheOptions": {
-    "ConnectionString": "Data Source=%localappdata%\\SinglePass\\Cache\\FavIcon.db"
+    "ConnectionString": "Data Source=%localappdata%/SinglePass/Cache/FavIcon.db"
   }
 }

@@ -14,7 +14,7 @@ namespace PasswordManager.Options
             init
             {
                 var expanded = Environment.ExpandEnvironmentVariables(value);
-                _connectionString = expanded;
+                _connectionString = expanded.Replace('\\', '/');
             }
         }
     }

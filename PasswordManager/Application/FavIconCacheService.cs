@@ -14,6 +14,11 @@ namespace PasswordManager.Application
             _favIconRepository = favIconRepository;
         }
 
+        public void EnsureCreated()
+        {
+            _favIconRepository.EnsureCreated();
+        }
+
         public async Task<ImageSource> GetCachedImage(string host)
         {
             if (string.IsNullOrWhiteSpace(host))

@@ -6,5 +6,6 @@ namespace PasswordManager.Application
     {
         public Task Add(FavIcon favIcon);
         public Task<FavIcon> Get(string host);
+        public void EnsureCreated();
     }
 }

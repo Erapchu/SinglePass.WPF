@@ -11,13 +11,17 @@ namespace PasswordManager.Repository
         public FavIconRepository(FavIconDbContext favIconDbContext)
         {
             _favIconDbContext = favIconDbContext;
-            _favIconDbContext.Database.EnsureCreated();
         }
 
         public Task Add(FavIcon favIcon)
         {
             _favIconDbContext.FavIcons.Add(favIcon);
             return _favIconDbContext.SaveChangesAsync();
+        }
+
+        public void EnsureCreated()
+        {
+            _favIconDbContext.Database.EnsureCreated();
         }
 
         public Task<FavIcon> Get(string host)

@@ -2,6 +2,7 @@
 using PasswordManager.Cloud.Enums;
 using PasswordManager.Clouds.Services;
 using PasswordManager.Helpers;
+using PasswordManager.Helpers.Threading;
 using PasswordManager.Models;
 using System;
 using System.Collections.Generic;
@@ -125,6 +126,9 @@ namespace PasswordManager.Services
                 var token = _syncCTS.Token;
                 var cloudService = _cloudServiceProvider.GetCloudService(cloudType);
                 SyncStateChanged?.Invoke(PasswordManager.Language.Properties.Resources.Uploading);
+
+                // Additional lock to ensure file not used by other thread
+                using var locker = AsyncDuplicateLock.Lock(Constants.PasswordsFilePath);
                 using var fileStream = File.Open(Constants.PasswordsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                 // Ensure begining
                 fileStream.Seek(0, SeekOrigin.Begin);

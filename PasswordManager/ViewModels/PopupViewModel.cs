@@ -1,11 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
+using PasswordManager.Collections;
 using PasswordManager.Helpers;
 using PasswordManager.Services;
 using System;
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace PasswordManager.ViewModels
 {
@@ -25,10 +27,11 @@ namespace PasswordManager.ViewModels
         private readonly CredentialsCryptoService _credentialsCryptoService;
         private readonly ILogger<PopupViewModel> _logger;
         private readonly CredentialViewModelFactory _credentialViewModelFactory;
+        private readonly AddressBarExtractor _addressBarExtractor;
 
         public event Action Accept;
 
-        public ObservableCollection<CredentialViewModel> DisplayedCredentials { get; private set; }
+        public ObservableCollectionDelayed<CredentialViewModel> DisplayedCredentials { get; private set; } = new();
 
         private CredentialViewModel _selectedCredentialVM;
         public CredentialViewModel SelectedCredentialVM
@@ -43,19 +46,23 @@ namespace PasswordManager.ViewModels
         private RelayCommand _closeCommand;
         public RelayCommand CloseCommand => _closeCommand ??= new RelayCommand(Close);
 
+        private AsyncRelayCommand _loadedCommand;
+        public AsyncRelayCommand LoadedCommand => _loadedCommand ??= new AsyncRelayCommand(Loaded);
+
+        public IntPtr ForegroundHWND { get; set; }
+
         private PopupViewModel() { }
 
         public PopupViewModel(
             CredentialsCryptoService credentialsCryptoService,
             ILogger<PopupViewModel> logger,
-            CredentialViewModelFactory credentialViewModelFactory)
+            CredentialViewModelFactory credentialViewModelFactory,
+            AddressBarExtractor addressBarExtractor)
         {
             _credentialsCryptoService = credentialsCryptoService;
             _logger = logger;
             _credentialViewModelFactory = credentialViewModelFactory;
-
-            var creds = _credentialsCryptoService.Credentials.Select(cr => _credentialViewModelFactory.ProvideNew(cr)).ToList();
-            DisplayedCredentials = new ObservableCollection<CredentialViewModel>(creds);
+            _addressBarExtractor = addressBarExtractor;
         }
 
         private void Close()
@@ -98,6 +105,45 @@ namespace PasswordManager.ViewModels
             {
                 _logger.LogError(ex, null);
             }
+        }
+
+        private Task Loaded()
+        {
+            return Task.Run(() =>
+            {
+                var tempCredentialsVM = new List<CredentialViewModel>();
+                tempCredentialsVM.AddRange(_credentialsCryptoService.Credentials
+                    .Select(cr => _credentialViewModelFactory.ProvideNew(cr))
+                    .ToList());
+
+                try
+                {
+                    var addressBarString = _addressBarExtractor.ExtractAddressBar(ForegroundHWND);
+                    if (!addressBarString.StartsWith("http"))
+                        addressBarString = "http://" + addressBarString;
+
+                    if (Uri.TryCreate(addressBarString, UriKind.Absolute, out Uri addressBarUri))
+                    {
+                        var host = addressBarUri.Host;
+                        var domains = host.Split('.', StringSplitOptions.RemoveEmptyEntries);
+                        // Take last 2 levels of domains
+                        var domainsString = string.Join('.', domains.TakeLast(2));
+
+                        tempCredentialsVM = tempCredentialsVM
+                            .OrderByDescending(c => c.SiteFieldVM.Value is null ? -1 : c.SiteFieldVM.Value.Contains(domainsString) ? 1 : -1)
+                            .ToList();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, null);
+                }
+                finally
+                {
+                    DisplayedCredentials = new ObservableCollectionDelayed<CredentialViewModel>(tempCredentialsVM);
+                    OnPropertyChanged(nameof(DisplayedCredentials));
+                }
+            });
         }
     }
 }

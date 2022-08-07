@@ -55,7 +55,7 @@ namespace PasswordManager.ViewModels
         public RelayCommand<KeyEventArgs> SearchKeyEventCommand => _searchKeyEventCommand ??= new RelayCommand<KeyEventArgs>(HandleSearchKeyEvent);
 
         public ObservableCollectionDelayed<CredentialViewModel> DisplayedCredentials { get; private set; } = new();
-        public CredentialsDialogViewModel ActiveCredentialDialogViewModel { get; }
+        public CredentialsDialogViewModel ActiveCredentialDialogVM { get; }
 
         public CredentialViewModel SelectedCredential
         {
@@ -63,9 +63,9 @@ namespace PasswordManager.ViewModels
             set
             {
                 SetProperty(ref _selectedCredential, value);
-                ActiveCredentialDialogViewModel.Mode = CredentialsDialogMode.View;
-                ActiveCredentialDialogViewModel.CredentialViewModel = value;
-                ActiveCredentialDialogViewModel.IsPasswordVisible = false;
+                ActiveCredentialDialogVM.Mode = CredentialsDialogMode.View;
+                ActiveCredentialDialogVM.CredentialViewModel = value;
+                ActiveCredentialDialogVM.IsPasswordVisible = false;
                 CredentialSelected?.Invoke(value);
             }
         }
@@ -119,13 +119,13 @@ namespace PasswordManager.ViewModels
             _sort = _appSettingsService.Sort;
             _order = _appSettingsService.Order;
 
-            ActiveCredentialDialogViewModel = credentialsDialogViewModel;
-            ActiveCredentialDialogViewModel.Accept += ActiveCredentialDialogViewModel_Accept;
-            ActiveCredentialDialogViewModel.Cancel += ActiveCredentialDialogViewModel_Cancel;
-            ActiveCredentialDialogViewModel.Delete += ActiveCredentialDialogViewModel_Delete;
+            ActiveCredentialDialogVM = credentialsDialogViewModel;
+            ActiveCredentialDialogVM.Accept += ActiveCredentialDialogVM_Accept;
+            ActiveCredentialDialogVM.Cancel += ActiveCredentialDialogVM_Cancel;
+            ActiveCredentialDialogVM.Delete += ActiveCredentialDialogVM_Delete;
         }
 
-        private async void ActiveCredentialDialogViewModel_Delete(CredentialViewModel credVM)
+        private async void ActiveCredentialDialogVM_Delete(CredentialViewModel credVM)
         {
             var result = await MaterialMessageBox.ShowAsync(
                 PasswordManager.Language.Properties.Resources.DeleteItem,
@@ -137,6 +137,7 @@ namespace PasswordManager.ViewModels
             {
                 await _credentialsCryptoService.DeleteCredential(credVM.Model);
                 _credentials.Remove(credVM);
+                _credentialViewModelFactory.RemoveCached(credVM.Model.Id);
                 var dIndex = DisplayedCredentials.IndexOf(credVM);
                 var countAfterDeletion = DisplayedCredentials.Count - 1;
                 var sIndex = dIndex >= countAfterDeletion ? countAfterDeletion - 1 : dIndex;
@@ -148,14 +149,14 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        private void ActiveCredentialDialogViewModel_Cancel()
+        private void ActiveCredentialDialogVM_Cancel()
         {
-            ActiveCredentialDialogViewModel.IsPasswordVisible = false;
-            ActiveCredentialDialogViewModel.Mode = CredentialsDialogMode.View;
-            ActiveCredentialDialogViewModel.CredentialViewModel = SelectedCredential;
+            ActiveCredentialDialogVM.IsPasswordVisible = false;
+            ActiveCredentialDialogVM.Mode = CredentialsDialogMode.View;
+            ActiveCredentialDialogVM.CredentialViewModel = SelectedCredential;
         }
 
-        private async void ActiveCredentialDialogViewModel_Accept(CredentialViewModel newCredVM, CredentialsDialogMode mode)
+        private async void ActiveCredentialDialogVM_Accept(CredentialViewModel newCredVM, CredentialsDialogMode mode)
         {
             var dateTimeNow = DateTime.Now;
             newCredVM.LastModifiedTime = dateTimeNow;
@@ -184,13 +185,9 @@ namespace PasswordManager.ViewModels
             try
             {
                 _credentials.Clear();
-
-                var credentials = _credentialsCryptoService.Credentials;
-                foreach (var cred in credentials)
-                {
-                    var credVM = _credentialViewModelFactory.ProvideNew(cred);
-                    _credentials.Add(credVM);
-                }
+                _credentials.AddRange(_credentialsCryptoService.Credentials
+                    .Select(cr => _credentialViewModelFactory.ProvideNew(cr))
+                    .ToList());
 
                 _ = DisplayCredentialsAsync();
             }
@@ -266,10 +263,10 @@ namespace PasswordManager.ViewModels
 
         private void AddCredential()
         {
-            ActiveCredentialDialogViewModel.CredentialViewModel = _credentialViewModelFactory.ProvideNew(Credential.CreateNew());
-            ActiveCredentialDialogViewModel.Mode = CredentialsDialogMode.New;
-            ActiveCredentialDialogViewModel.IsPasswordVisible = true;
-            ActiveCredentialDialogViewModel.SetFocus();
+            ActiveCredentialDialogVM.CredentialViewModel = _credentialViewModelFactory.ProvideNew(Credential.CreateNew());
+            ActiveCredentialDialogVM.Mode = CredentialsDialogMode.New;
+            ActiveCredentialDialogVM.IsPasswordVisible = true;
+            ActiveCredentialDialogVM.SetFocus();
         }
 
         private void HandleSearchKeyEvent(KeyEventArgs args)

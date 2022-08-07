@@ -5,7 +5,6 @@ using PasswordManager.Hotkeys;
 using System;
 using System.IO;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace PasswordManager.Settings
@@ -75,8 +74,8 @@ namespace PasswordManager.Settings
         {
             return Task.Run(() =>
             {
-                var hashedPath = HashHelper.GetHash(Constants.CommonSettingsFilePath);
-                using var waitHandleLocker = EventWaitHandleLocker.MakeWithEventHandle(true, EventResetMode.AutoReset, hashedPath);
+                // Use local lock instead of interprocess lock - only one instance of app will work with this file
+                using var locker = AsyncDuplicateLock.Lock(Constants.CommonSettingsFilePath);
                 using var fileStream = new FileStream(Constants.CommonSettingsFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
                 JsonSerializer.Serialize(fileStream, Settings);
                 _logger.LogInformation("Settings saved to file");

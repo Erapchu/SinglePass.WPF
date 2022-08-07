@@ -13,6 +13,11 @@ namespace PasswordManager.Views
     {
         private PopupViewModel ViewModel => DataContext as PopupViewModel;
         public IntPtr Handle { get; private set; }
+        public IntPtr ForegroundHWND
+        {
+            get => ViewModel.ForegroundHWND;
+            set => ViewModel.ForegroundHWND = value;
+        }
 
         public PopupControl(PopupViewModel popupViewModel)
         {
@@ -30,6 +35,7 @@ namespace PasswordManager.Views
         private void Popup_Opened(object sender, System.EventArgs e)
         {
             Handle = ((HwndSource)PresentationSource.FromVisual(Child)).Handle;
+            ViewModel.LoadedCommand.Execute(null);
         }
 
         private void Popup_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)

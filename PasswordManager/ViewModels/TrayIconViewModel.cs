@@ -24,13 +24,13 @@ namespace PasswordManager.ViewModels
 
         private void OpenMainWindow()
         {
-            var mainWindow = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
+            var mainWindow = System.Windows.Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
             mainWindow?.BringToFrontAndActivate();
         }
 
         private void ExitApp()
         {
-            Application.Current.Shutdown();
+            System.Windows.Application.Current.Shutdown();
         }
     }
 }

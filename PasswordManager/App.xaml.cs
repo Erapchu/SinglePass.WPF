@@ -158,17 +158,17 @@ namespace PasswordManager
                 services.AddSingleton<ThemeService>();
                 services.AddSingleton<AppSettingsService>();
                 services.AddSingleton<SyncService>();
-                services.AddSingleton<FavIconCollector>();
                 services.AddSingleton<HotkeysService>();
                 services.AddSingleton<ImageService>();
                 services.AddSingleton<CredentialViewModelFactory>();
                 services.AddSingleton<AddressBarExtractor>();
-                services.AddSingleton<FavIconCacheService>();
 
-                // Db
+                // favicons
+                services.AddSingleton<FavIconCollector>();
+                services.AddScoped<FavIconCacheService>();
+                services.AddScoped<IFavIconRepository, FavIconRepository>();
                 services.Configure<FavIconCacheOptions>(_configuration.GetSection("FavIconCacheOptions"));
                 services.AddDbContext<FavIconDbContext>((sp, options) => options.UseSqlite(sp.GetService<IOptions<FavIconCacheOptions>>().Value.ConnectionString));
-                services.AddScoped<IFavIconRepository, FavIconRepository>();
             });
 
         private void Application_Exit(object sender, ExitEventArgs e)

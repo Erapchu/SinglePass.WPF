@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using PasswordManager.Application;
 using PasswordManager.Utilities;
 using System;
@@ -15,16 +16,16 @@ namespace PasswordManager.Services
         private readonly RegeneratedList<ProcessingImageWrapper> _processingImages = new();
         private readonly ILogger<FavIconCollector> _logger;
         private readonly ImageService _imageService;
-        private readonly FavIconCacheService _favIconCacheService;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly Thread _getImagesThread;
 
         public FavIconCollector(
             ILogger<FavIconCollector> logger,
             ImageService imageService,
-            FavIconCacheService favIconCacheService)
+            IServiceScopeFactory serviceScopeFactory)
         {
             _imageService = imageService;
-            _favIconCacheService = favIconCacheService;
+            _serviceScopeFactory = serviceScopeFactory;
             _logger = logger;
 
             _getImagesThread = new Thread(ImageProcessing);
@@ -36,21 +37,10 @@ namespace PasswordManager.Services
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(imageUrlString)
-                    || !Uri.TryCreate(imageUrlString, UriKind.RelativeOrAbsolute, out Uri imageUrl)
-                    || setPropertyAction is null)
+                if (string.IsNullOrWhiteSpace(imageUrlString) || setPropertyAction is null)
                     return;
 
-                var host = imageUrl.Host;
-                var cachedImage = _favIconCacheService.GetCachedImage(host).Result;
-                if (cachedImage is not null)
-                {
-                    setPropertyAction.Invoke(cachedImage);
-                }
-                else
-                {
-                    _processingImages.Add(new ProcessingImageWrapper(host, setPropertyAction));
-                }
+                _processingImages.Add(new ProcessingImageWrapper(imageUrlString, setPropertyAction));
             }
             catch (Exception ex)
             {
@@ -60,18 +50,29 @@ namespace PasswordManager.Services
 
         private void ImageProcessing()
         {
+            try
+            {
+                using var scope = _serviceScopeFactory.CreateScope();
+                var favIconCacheService = scope.ServiceProvider.GetService<FavIconCacheService>();
+                favIconCacheService.EnsureCreated();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, null);
+            }
+
             while (true)
             {
                 try
                 {
-                    Thread.Sleep(_processingTimeout);
-
                     var imagesProcWrappers = _processingImages.PopAll();
                     if (imagesProcWrappers != null)
                     {
+                        using var scope = _serviceScopeFactory.CreateScope();
+                        var favIconCacheService = scope.ServiceProvider.GetService<FavIconCacheService>();
                         foreach (var imageProcWrapper in imagesProcWrappers)
                         {
-                            var cachedImage = _favIconCacheService.GetCachedImage(imageProcWrapper.Host).Result;
+                            var cachedImage = favIconCacheService.GetCachedImage(imageProcWrapper.Host).Result;
                             if (cachedImage is not null)
                             {
                                 imageProcWrapper.SetPropertyAction.Invoke(cachedImage);
@@ -79,11 +80,13 @@ namespace PasswordManager.Services
                             else
                             {
                                 var bitmapImage = _imageService.GetImageAsync(string.Format(_favIconServiceUrl, imageProcWrapper.Host), CancellationToken.None).Result;
-                                _favIconCacheService.SetCachedImage(imageProcWrapper.Host, bitmapImage);
+                                favIconCacheService.SetCachedImage(imageProcWrapper.Host, bitmapImage);
                                 imageProcWrapper.SetPropertyAction.Invoke(bitmapImage);
                             }
                         }
                     }
+
+                    Thread.Sleep(_processingTimeout);
                 }
                 catch (ThreadAbortException)
                 {
@@ -98,13 +101,32 @@ namespace PasswordManager.Services
 
         private class ProcessingImageWrapper
         {
-            public string Host { get; }
+            public string OriginalString { get; }
             public Action<ImageSource> SetPropertyAction { get; }
 
-            public ProcessingImageWrapper(string host, Action<ImageSource> setPropertyAction)
+            private string _host;
+            public string Host
             {
-                Host = host;
-                SetPropertyAction = setPropertyAction;
+                get
+                {
+                    if (Uri.TryCreate(OriginalString, UriKind.RelativeOrAbsolute, out Uri imageUrl))
+                    {
+                        _host = imageUrl.Host;
+                    }
+
+                    return _host;
+                }
+            }
+
+            public ProcessingImageWrapper(string originalString, Action<ImageSource> setPropertyAction)
+            {
+                if (string.IsNullOrWhiteSpace(originalString))
+                {
+                    throw new ArgumentException($"'{nameof(originalString)}' cannot be null or empty.", nameof(originalString));
+                }
+
+                OriginalString = originalString;
+                SetPropertyAction = setPropertyAction ?? throw new ArgumentNullException(nameof(setPropertyAction));
             }
         }
     }

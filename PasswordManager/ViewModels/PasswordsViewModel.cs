@@ -137,6 +137,7 @@ namespace PasswordManager.ViewModels
             {
                 await _credentialsCryptoService.DeleteCredential(credVM.Model);
                 _credentials.Remove(credVM);
+                _credentialViewModelFactory.RemoveCached(credVM.Model.Id);
                 var dIndex = DisplayedCredentials.IndexOf(credVM);
                 var countAfterDeletion = DisplayedCredentials.Count - 1;
                 var sIndex = dIndex >= countAfterDeletion ? countAfterDeletion - 1 : dIndex;

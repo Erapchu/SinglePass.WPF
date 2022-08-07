@@ -1,13 +1,19 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NLog;
 using NLog.Extensions.Logging;
+using PasswordManager.Application;
 using PasswordManager.Authorization.Brokers;
 using PasswordManager.Authorization.Holders;
 using PasswordManager.Clouds.Services;
+using PasswordManager.Helpers;
 using PasswordManager.Hotkeys;
+using PasswordManager.Options;
+using PasswordManager.Repository;
 using PasswordManager.Services;
 using PasswordManager.Settings;
 using PasswordManager.ViewModels;
@@ -21,7 +27,7 @@ namespace PasswordManager
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-    public partial class App : Application
+    public partial class App : System.Windows.Application
     {
         private readonly Mutex _mutex;
         private static IConfiguration _configuration;
@@ -76,6 +82,8 @@ namespace PasswordManager
 
                 Host = CreateHostBuilder().Build();
                 _logger.Info("Log session started!");
+
+                Constants.EnsurePaths();
 
                 // Resolve theme
                 var themeService = Host.Services.GetService<ThemeService>();
@@ -150,11 +158,17 @@ namespace PasswordManager
                 services.AddSingleton<ThemeService>();
                 services.AddSingleton<AppSettingsService>();
                 services.AddSingleton<SyncService>();
-                services.AddSingleton<FavIconService>();
                 services.AddSingleton<HotkeysService>();
                 services.AddSingleton<ImageService>();
                 services.AddSingleton<CredentialViewModelFactory>();
                 services.AddSingleton<AddressBarExtractor>();
+
+                // favicons
+                services.AddSingleton<FavIconCollector>();
+                services.AddScoped<FavIconCacheService>();
+                services.AddScoped<IFavIconRepository, FavIconRepository>();
+                services.Configure<FavIconCacheOptions>(_configuration.GetSection("FavIconCacheOptions"));
+                services.AddDbContext<FavIconDbContext>((sp, options) => options.UseSqlite(sp.GetService<IOptions<FavIconCacheOptions>>().Value.ConnectionString));
             });
 
         private void Application_Exit(object sender, ExitEventArgs e)

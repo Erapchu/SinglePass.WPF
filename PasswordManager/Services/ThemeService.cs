@@ -46,7 +46,7 @@ namespace PasswordManager.Services
 
         public void Init()
         {
-            var app = Application.Current;
+            var app = System.Windows.Application.Current;
             if (app is null)
                 return;
 

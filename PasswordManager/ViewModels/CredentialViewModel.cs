@@ -1,5 +1,4 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
-using PasswordManager.Helpers;
 using PasswordManager.Models;
 using PasswordManager.Services;
 using System;
@@ -28,7 +27,7 @@ namespace PasswordManager.ViewModels
         }
         #endregion
 
-        private readonly FavIconService _favIconService;
+        private readonly FavIconCollector _favIconCollector;
 
         public Credential Model { get; }
         public PassFieldViewModel NameFieldVM { get; }
@@ -63,16 +62,16 @@ namespace PasswordManager.ViewModels
             get
             {
                 if (_favIcon is null)
-                    _favIconService.ScheduleGetImage(SiteFieldVM.Value, (image) => SetProperty(ref _favIcon, image, nameof(FavIcon)));
+                    _favIconCollector.ScheduleGetImage(SiteFieldVM.Value, (image) => SetProperty(ref _favIcon, image, nameof(FavIcon)));
 
                 return _favIcon;
             }
         }
 
-        public CredentialViewModel(Credential credential, FavIconService favIconService)
+        public CredentialViewModel(Credential credential, FavIconCollector favIconCollector)
         {
             Model = credential ?? throw new ArgumentNullException(nameof(credential));
-            _favIconService = favIconService;
+            _favIconCollector = favIconCollector;
 
             NameFieldVM = new PassFieldViewModel(credential.NameField);
             LoginFieldVM = new PassFieldViewModel(credential.LoginField);
@@ -87,7 +86,7 @@ namespace PasswordManager.ViewModels
         internal CredentialViewModel Clone()
         {
             var cloneModel = Model.Clone();
-            var cloneVM = new CredentialViewModel(cloneModel, _favIconService)
+            var cloneVM = new CredentialViewModel(cloneModel, _favIconCollector)
             {
                 _passwordVisible = _passwordVisible,
             };

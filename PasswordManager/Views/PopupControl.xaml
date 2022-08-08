@@ -19,7 +19,7 @@
     MouseDown="Popup_MouseDown"
     Opened="Popup_Opened"
     Placement="AbsolutePoint"
-    PopupAnimation="Fade"
+    PopupAnimation="None"
     StaysOpen="False"
     mc:Ignorable="d">
     <Popup.Resources>

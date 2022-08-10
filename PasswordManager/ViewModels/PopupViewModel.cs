@@ -130,8 +130,9 @@ namespace PasswordManager.ViewModels
                         var domainsString = string.Join('.', domains.TakeLast(2));
 
                         tempCredentialsVM = tempCredentialsVM
-                            .OrderByDescending(c => c.SiteFieldVM.Value is null ? -1 : c.SiteFieldVM.Value.Contains(domainsString) ? 1 : -1)
-                            .ToList();
+                        .Where(c => c.SiteFieldVM.Value != null && c.SiteFieldVM.Value.Contains(domainsString))
+                        .OrderByDescending(c => c.LastModifiedTime)
+                        .ToList();
                     }
                 }
                 catch (Exception ex)

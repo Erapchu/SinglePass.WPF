@@ -174,6 +174,7 @@ namespace PasswordManager.ViewModels
                 var staleIndex = _credentials.IndexOf(staleCredVM);
                 _credentials.Remove(staleCredVM);
                 _credentials.Insert(staleIndex, newCredVM);
+                _credentialViewModelFactory.RemoveCached(staleCredVM.Model.Id);
                 await DisplayCredentialsAsync();
             }
 

@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -14,12 +16,12 @@ namespace PasswordManager.Application
             _favIconRepository = favIconRepository;
         }
 
-        public void EnsureCreated()
+        public Task EnsureCreated()
         {
-            _favIconRepository.EnsureCreated();
+            return _favIconRepository.EnsureCreated();
         }
 
-        public async Task<ImageSource> GetCachedImage(string host)
+        public async Task<FavIconWrapper> GetCachedImage(string host)
         {
             if (string.IsNullOrWhiteSpace(host))
                 return null;
@@ -27,36 +29,62 @@ namespace PasswordManager.Application
             var favIcon = await _favIconRepository.Get(host);
             if (favIcon is not null)
             {
-                var image = new BitmapImage();
-                image.BeginInit();
-                image.CacheOption = BitmapCacheOption.OnLoad;
-                image.StreamSource = new MemoryStream(favIcon.Bytes);
-                image.EndInit();
-                image.Freeze();
-                return image;
+                return new FavIconWrapper(ToImageSource(favIcon.Bytes), favIcon.Host);
             }
 
             return null;
         }
 
-        public void SetCachedImage(string host, ImageSource image)
+        public async Task<IReadOnlyCollection<FavIconWrapper>> GetManyCachedImages(List<string> hosts)
         {
-            if (string.IsNullOrWhiteSpace(host))
-                return;
+            if (hosts is null)
+                return null;
 
-            if (image is BitmapImage bitmapImage)
+            var favIcons = await _favIconRepository.GetMany(hosts);
+            if (favIcons is not null)
             {
-                var encoder = new PngBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create(bitmapImage));
-                using var imageFileStream = new MemoryStream();
-                encoder.Save(imageFileStream);
-                var favIcon = new FavIcon()
+                var images = new List<FavIconWrapper>();
+                foreach (var favIcon in favIcons)
                 {
-                    Bytes = imageFileStream.ToArray(),
-                    Host = host
-                };
-                _favIconRepository.Add(favIcon).Wait();
+                    images.Add(new FavIconWrapper(ToImageSource(favIcon.Bytes), favIcon.Host));
+                }
+                return images;
             }
+
+            return null;
+        }
+
+        public Task SetCachedImage(FavIconWrapper favIconWrapper)
+        {
+            if (favIconWrapper is null)
+                throw new ArgumentNullException(nameof(favIconWrapper));
+
+            var favIcon = new FavIcon()
+            {
+                Bytes = ToBytes(favIconWrapper.ImageSource),
+                Host = favIconWrapper.Host
+            };
+            return _favIconRepository.Add(favIcon);
+        }
+
+        private static byte[] ToBytes(ImageSource imageSource)
+        {
+            var encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create((BitmapSource)imageSource));
+            using var imageFileStream = new MemoryStream();
+            encoder.Save(imageFileStream);
+            return imageFileStream.ToArray();
+        }
+
+        private static ImageSource ToImageSource(byte[] bytes)
+        {
+            var image = new BitmapImage();
+            image.BeginInit();
+            image.CacheOption = BitmapCacheOption.OnLoad;
+            image.StreamSource = new MemoryStream(bytes);
+            image.EndInit();
+            image.Freeze();
+            return image;
         }
     }
 }

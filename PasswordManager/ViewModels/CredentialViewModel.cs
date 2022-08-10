@@ -27,7 +27,7 @@ namespace PasswordManager.ViewModels
         }
         #endregion
 
-        private readonly FavIconCollector _favIconCollector;
+        private readonly IFavIconCollector _favIconCollector;
 
         public Credential Model { get; }
         public PassFieldViewModel NameFieldVM { get; }
@@ -68,7 +68,7 @@ namespace PasswordManager.ViewModels
             }
         }
 
-        public CredentialViewModel(Credential credential, FavIconCollector favIconCollector)
+        public CredentialViewModel(Credential credential, IFavIconCollector favIconCollector)
         {
             Model = credential ?? throw new ArgumentNullException(nameof(credential));
             _favIconCollector = favIconCollector;

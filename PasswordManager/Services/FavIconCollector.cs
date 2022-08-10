@@ -1,14 +1,22 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PasswordManager.Application;
 using PasswordManager.Utilities;
 using System;
+using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Media;
 
 namespace PasswordManager.Services
 {
-    public class FavIconCollector
+    public interface IFavIconCollector
+    {
+        void ScheduleGetImage(string imageUrlString, Action<ImageSource> setPropertyAction);
+    }
+
+    public class FavIconCollector : IFavIconCollector
     {
         private const int _processingTimeout = 200;
         private const string _favIconServiceUrl = "http://www.google.com/s2/favicons?domain_url={0}";
@@ -17,7 +25,7 @@ namespace PasswordManager.Services
         private readonly ILogger<FavIconCollector> _logger;
         private readonly ImageService _imageService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
-        private readonly Thread _getImagesThread;
+        private readonly CancellationTokenSource _processingCTS = new();
 
         public FavIconCollector(
             ILogger<FavIconCollector> logger,
@@ -28,9 +36,7 @@ namespace PasswordManager.Services
             _serviceScopeFactory = serviceScopeFactory;
             _logger = logger;
 
-            _getImagesThread = new Thread(ImageProcessing);
-            _getImagesThread.IsBackground = true;
-            _getImagesThread.Start();
+            _ = Task.Run(() => ImageProcessing(_processingCTS.Token));
         }
 
         public void ScheduleGetImage(string imageUrlString, Action<ImageSource> setPropertyAction)
@@ -48,13 +54,13 @@ namespace PasswordManager.Services
             }
         }
 
-        private void ImageProcessing()
+        private async Task ImageProcessing(CancellationToken cancellationToken)
         {
             try
             {
                 using var scope = _serviceScopeFactory.CreateScope();
                 var favIconCacheService = scope.ServiceProvider.GetService<FavIconCacheService>();
-                favIconCacheService.EnsureCreated();
+                await favIconCacheService.EnsureCreated();
             }
             catch (Exception ex)
             {
@@ -65,30 +71,48 @@ namespace PasswordManager.Services
             {
                 try
                 {
-                    var imagesProcWrappers = _processingImages.PopAll();
-                    if (imagesProcWrappers != null)
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    var processingWrappers = _processingImages.PopAll();
+                    if (processingWrappers != null)
                     {
                         using var scope = _serviceScopeFactory.CreateScope();
                         var favIconCacheService = scope.ServiceProvider.GetService<FavIconCacheService>();
-                        foreach (var imageProcWrapper in imagesProcWrappers)
+
+                        var uniqueProcessingImages = processingWrappers.Distinct().ToList();
+                        var hosts = uniqueProcessingImages.Select(ipw => ipw.Host).ToList();
+                        var favIconsDB = await favIconCacheService.GetManyCachedImages(hosts);
+
+                        // Set existing to UI
+                        foreach (var processingImage in processingWrappers)
                         {
-                            var cachedImage = favIconCacheService.GetCachedImage(imageProcWrapper.Host).Result;
-                            if (cachedImage is not null)
+                            var favIcon = favIconsDB.FirstOrDefault(f => f.Host.Equals(processingImage.Host, StringComparison.OrdinalIgnoreCase));
+                            if (favIcon is not null)
                             {
-                                imageProcWrapper.SetPropertyAction.Invoke(cachedImage);
+                                processingImage.SetPropertyAction.Invoke(favIcon.ImageSource);
                             }
-                            else
+                        }
+
+                        // Download and set to UI only unique images
+                        foreach (var processingImage in uniqueProcessingImages)
+                        {
+                            var favIcon = favIconsDB.FirstOrDefault(f => f.Host.Equals(processingImage.Host, StringComparison.OrdinalIgnoreCase));
+                            if (favIcon is null)
                             {
-                                var bitmapImage = _imageService.GetImageAsync(string.Format(_favIconServiceUrl, imageProcWrapper.Host), CancellationToken.None).Result;
-                                favIconCacheService.SetCachedImage(imageProcWrapper.Host, bitmapImage);
-                                imageProcWrapper.SetPropertyAction.Invoke(bitmapImage);
+                                var bitmapImage = await _imageService.GetImageAsync(string.Format(_favIconServiceUrl, processingImage.Host), cancellationToken);
+                                await favIconCacheService.SetCachedImage(new FavIconWrapper(bitmapImage, processingImage.Host));
+                                var images = processingWrappers.Where(p => p.Host.Equals(processingImage.Host, StringComparison.OrdinalIgnoreCase));
+                                foreach (var image in images)
+                                {
+                                    image.SetPropertyAction.Invoke(bitmapImage);
+                                }
                             }
                         }
                     }
 
-                    Thread.Sleep(_processingTimeout);
+                    await Task.Delay(_processingTimeout, cancellationToken);
                 }
-                catch (ThreadAbortException)
+                catch (OperationCanceledException)
                 {
                     break;
                 }
@@ -127,6 +151,17 @@ namespace PasswordManager.Services
 
                 OriginalString = originalString;
                 SetPropertyAction = setPropertyAction ?? throw new ArgumentNullException(nameof(setPropertyAction));
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj is ProcessingImageWrapper wrapper &&
+                       OriginalString == wrapper.OriginalString;
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(OriginalString);
             }
         }
     }

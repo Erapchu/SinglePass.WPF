@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace PasswordManager.Application
 {
@@ -6,6 +7,7 @@ namespace PasswordManager.Application
     {
         public Task Add(FavIcon favIcon);
         public Task<FavIcon> Get(string host);
-        public void EnsureCreated();
+        public Task<List<FavIcon>> GetMany(List<string> hosts);
+        public Task EnsureCreated();
     }
 }

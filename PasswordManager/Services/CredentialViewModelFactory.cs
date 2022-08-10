@@ -7,10 +7,10 @@ namespace PasswordManager.Services
 {
     public class CredentialViewModelFactory
     {
-        private readonly FavIconCollector _favIconCollector;
+        private readonly IFavIconCollector _favIconCollector;
         private readonly ConcurrentDictionary<Guid, CredentialViewModel> _credentialVMs;
 
-        public CredentialViewModelFactory(FavIconCollector favIconCollector)
+        public CredentialViewModelFactory(IFavIconCollector favIconCollector)
         {
             _favIconCollector = favIconCollector;
             _credentialVMs = new ConcurrentDictionary<Guid, CredentialViewModel>();

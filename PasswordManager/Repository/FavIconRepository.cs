@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PasswordManager.Application;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PasswordManager.Repository
@@ -19,14 +21,19 @@ namespace PasswordManager.Repository
             return _favIconDbContext.SaveChangesAsync();
         }
 
-        public void EnsureCreated()
+        public Task EnsureCreated()
         {
-            _favIconDbContext.Database.EnsureCreated();
+            return _favIconDbContext.Database.EnsureCreatedAsync();
         }
 
         public Task<FavIcon> Get(string host)
         {
             return _favIconDbContext.FavIcons.FirstOrDefaultAsync(f => f.Host == host);
+        }
+
+        public Task<List<FavIcon>> GetMany(List<string> hosts)
+        {
+            return _favIconDbContext.FavIcons.Where(fi => hosts.Contains(fi.Host)).ToListAsync();
         }
     }
 }

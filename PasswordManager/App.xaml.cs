@@ -120,6 +120,8 @@ namespace PasswordManager
             Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
             .ConfigureServices(services =>
             {
+                services.AddOptions();
+
                 // NLog
                 services.AddLogging(lb =>
                 {
@@ -164,7 +166,7 @@ namespace PasswordManager
                 services.AddSingleton<AddressBarExtractor>();
 
                 // favicons
-                services.AddSingleton<FavIconCollector>();
+                services.AddSingleton<IFavIconCollector, FavIconCollector>();
                 services.AddScoped<FavIconCacheService>();
                 services.AddScoped<IFavIconRepository, FavIconRepository>();
                 services.Configure<FavIconCacheOptions>(_configuration.GetSection("FavIconCacheOptions"));

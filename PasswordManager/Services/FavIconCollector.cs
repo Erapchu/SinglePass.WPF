@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using PasswordManager.Application;
 using PasswordManager.Utilities;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -81,31 +82,24 @@ namespace PasswordManager.Services
 
                         var uniqueProcessingImages = processingWrappers.Distinct().ToList();
                         var hosts = uniqueProcessingImages.Select(ipw => ipw.Host).ToList();
-                        var favIconsDB = await favIconCacheService.GetManyCachedImages(hosts);
+                        var favIconsFromDB = await favIconCacheService.GetManyCachedImages(hosts);
+                        var tempFavIconCache = favIconsFromDB.ToDictionary(fi => fi.Host);
 
                         // Set existing to UI
                         foreach (var processingImage in processingWrappers)
                         {
-                            var favIcon = favIconsDB.FirstOrDefault(f => f.Host.Equals(processingImage.Host, StringComparison.OrdinalIgnoreCase));
-                            if (favIcon is not null)
+                            if (tempFavIconCache.TryGetValue(processingImage.Host, out FavIconWrapper favIcon))
                             {
                                 processingImage.SetPropertyAction.Invoke(favIcon.ImageSource);
                             }
-                        }
-
-                        // Download and set to UI only unique images
-                        foreach (var processingImage in uniqueProcessingImages)
-                        {
-                            var favIcon = favIconsDB.FirstOrDefault(f => f.Host.Equals(processingImage.Host, StringComparison.OrdinalIgnoreCase));
-                            if (favIcon is null)
+                            else
                             {
+                                // Download, set to DB, set to UI and save to temp local cache
                                 var bitmapImage = await _imageService.GetImageAsync(string.Format(_favIconServiceUrl, processingImage.Host), cancellationToken);
-                                await favIconCacheService.SetCachedImage(new FavIconWrapper(bitmapImage, processingImage.Host));
-                                var images = processingWrappers.Where(p => p.Host.Equals(processingImage.Host, StringComparison.OrdinalIgnoreCase));
-                                foreach (var image in images)
-                                {
-                                    image.SetPropertyAction.Invoke(bitmapImage);
-                                }
+                                var freshFavIcon = new FavIconWrapper(bitmapImage, processingImage.Host);
+                                await favIconCacheService.SetCachedImage(freshFavIcon);
+                                processingImage.SetPropertyAction.Invoke(freshFavIcon.ImageSource);
+                                tempFavIconCache.TryAdd(processingImage.Host, freshFavIcon);
                             }
                         }
                     }
@@ -125,7 +119,8 @@ namespace PasswordManager.Services
 
         private class ProcessingImageWrapper
         {
-            public string OriginalString { get; }
+            private readonly string _originalString;
+
             public Action<ImageSource> SetPropertyAction { get; }
 
             private string _host;
@@ -133,9 +128,12 @@ namespace PasswordManager.Services
             {
                 get
                 {
-                    if (Uri.TryCreate(OriginalString, UriKind.RelativeOrAbsolute, out Uri imageUrl))
+                    if (_host is null)
                     {
-                        _host = imageUrl.Host;
+                        if (Uri.TryCreate(_originalString, UriKind.RelativeOrAbsolute, out Uri imageUrl))
+                        {
+                            _host = imageUrl.Host;
+                        }
                     }
 
                     return _host;
@@ -149,19 +147,19 @@ namespace PasswordManager.Services
                     throw new ArgumentException($"'{nameof(originalString)}' cannot be null or empty.", nameof(originalString));
                 }
 
-                OriginalString = originalString;
+                _originalString = originalString;
                 SetPropertyAction = setPropertyAction ?? throw new ArgumentNullException(nameof(setPropertyAction));
             }
 
             public override bool Equals(object obj)
             {
                 return obj is ProcessingImageWrapper wrapper &&
-                       OriginalString == wrapper.OriginalString;
+                       Host == wrapper.Host;
             }
 
             public override int GetHashCode()
             {
-                return HashCode.Combine(OriginalString);
+                return HashCode.Combine(Host);
             }
         }
     }

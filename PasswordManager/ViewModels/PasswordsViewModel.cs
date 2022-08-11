@@ -184,9 +184,7 @@ namespace PasswordManager.ViewModels
             try
             {
                 _credentialVMs.Clear();
-                _credentialVMs.AddRange(_credentialsCryptoService.Credentials
-                    .Select(cr => _credentialViewModelFactory.ProvideNew(cr))
-                    .ToList());
+                _credentialVMs.AddRange(_credentialViewModelFactory.ProvideAllNew());
 
                 _ = DisplayCredentialsAsync();
             }

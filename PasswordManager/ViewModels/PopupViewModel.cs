@@ -112,9 +112,7 @@ namespace PasswordManager.ViewModels
             return Task.Run(() =>
             {
                 var tempCredentialsVM = new List<CredentialViewModel>();
-                tempCredentialsVM.AddRange(_credentialsCryptoService.Credentials
-                    .Select(cr => _credentialViewModelFactory.ProvideNew(cr))
-                    .ToList());
+                tempCredentialsVM.AddRange(_credentialViewModelFactory.ProvideAllNew());
 
                 try
                 {

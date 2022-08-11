@@ -42,7 +42,7 @@ namespace PasswordManager.ViewModels
 
         private readonly CredentialsCryptoService _credentialsCryptoService;
         private readonly ILogger<PasswordsViewModel> _logger;
-        private readonly List<CredentialViewModel> _credentials = new();
+        private readonly List<CredentialViewModel> _credentialVMs = new();
         private readonly AppSettingsService _appSettingsService;
         private readonly CredentialViewModelFactory _credentialViewModelFactory;
 
@@ -136,8 +136,7 @@ namespace PasswordManager.ViewModels
             if (result == MaterialDialogResult.Yes)
             {
                 await _credentialsCryptoService.DeleteCredential(credVM.Model);
-                _credentials.Remove(credVM);
-                _credentialViewModelFactory.RemoveCached(credVM.Model.Id);
+                _credentialVMs.Remove(credVM);
                 var dIndex = DisplayedCredentials.IndexOf(credVM);
                 var countAfterDeletion = DisplayedCredentials.Count - 1;
                 var sIndex = dIndex >= countAfterDeletion ? countAfterDeletion - 1 : dIndex;
@@ -164,17 +163,16 @@ namespace PasswordManager.ViewModels
             {
                 newCredVM.CreationTime = dateTimeNow;
                 await _credentialsCryptoService.AddCredential(newCredVM.Model);
-                _credentials.Add(newCredVM);
+                _credentialVMs.Add(newCredVM);
                 await DisplayCredentialsAsync();
             }
             else if (mode == CredentialsDialogMode.Edit)
             {
                 await _credentialsCryptoService.EditCredential(newCredVM.Model);
-                var staleCredVM = _credentials.FirstOrDefault(c => c.Model.Equals(newCredVM.Model));
-                var staleIndex = _credentials.IndexOf(staleCredVM);
-                _credentials.Remove(staleCredVM);
-                _credentials.Insert(staleIndex, newCredVM);
-                _credentialViewModelFactory.RemoveCached(staleCredVM.Model.Id);
+                var staleCredVM = _credentialVMs.FirstOrDefault(c => c.Model.Equals(newCredVM.Model));
+                var staleIndex = _credentialVMs.IndexOf(staleCredVM);
+                _credentialVMs.Remove(staleCredVM);
+                _credentialVMs.Insert(staleIndex, newCredVM);
                 await DisplayCredentialsAsync();
             }
 
@@ -185,8 +183,8 @@ namespace PasswordManager.ViewModels
         {
             try
             {
-                _credentials.Clear();
-                _credentials.AddRange(_credentialsCryptoService.Credentials
+                _credentialVMs.Clear();
+                _credentialVMs.AddRange(_credentialsCryptoService.Credentials
                     .Select(cr => _credentialViewModelFactory.ProvideNew(cr))
                     .ToList());
 
@@ -210,7 +208,7 @@ namespace PasswordManager.ViewModels
                     List<CredentialViewModel> tempList = null;
                     await Task.Run(() =>
                     {
-                        tempList = _credentials.ToList();
+                        tempList = _credentialVMs.ToList();
                         SortAndOrder(tempList);
                     });
                     filteredCredentials = tempList;
@@ -228,7 +226,7 @@ namespace PasswordManager.ViewModels
                         var translitCompare = !string.IsNullOrWhiteSpace(transliteratedText);
 
                         var fCreds = new List<CredentialViewModel>();
-                        foreach (var cred in _credentials)
+                        foreach (var cred in _credentialVMs)
                         {
                             var nameValue = cred.NameFieldVM.Value;
                             var loginValue = cred.LoginFieldVM.Value;

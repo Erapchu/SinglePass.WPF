@@ -38,25 +38,24 @@ namespace PasswordManager.ViewModels
         }
         #endregion
 
-        public event Action<CredentialViewModel> CredentialSelected;
-
         private readonly CredentialsCryptoService _credentialsCryptoService;
         private readonly ILogger<PasswordsViewModel> _logger;
         private readonly List<CredentialViewModel> _credentialVMs = new();
         private readonly AppSettingsService _appSettingsService;
         private readonly CredentialViewModelFactory _credentialViewModelFactory;
 
-        private CredentialViewModel _selectedCredential;
-        private string _searchText;
-        private RelayCommand _addCredentialCommand;
-        private RelayCommand<KeyEventArgs> _searchKeyEventCommand;
+        public event Action<CredentialViewModel> CredentialSelected;
 
+        private RelayCommand _addCredentialCommand;
         public RelayCommand AddCredentialCommand => _addCredentialCommand ??= new RelayCommand(AddCredential);
+
+        private RelayCommand<KeyEventArgs> _searchKeyEventCommand;
         public RelayCommand<KeyEventArgs> SearchKeyEventCommand => _searchKeyEventCommand ??= new RelayCommand<KeyEventArgs>(HandleSearchKeyEvent);
 
         public ObservableCollectionDelayed<CredentialViewModel> DisplayedCredentials { get; private set; } = new();
         public CredentialsDialogViewModel ActiveCredentialDialogVM { get; }
 
+        private CredentialViewModel _selectedCredential;
         public CredentialViewModel SelectedCredential
         {
             get => _selectedCredential;
@@ -70,6 +69,7 @@ namespace PasswordManager.ViewModels
             }
         }
 
+        private string _searchText;
         public string SearchText
         {
             get => _searchText;

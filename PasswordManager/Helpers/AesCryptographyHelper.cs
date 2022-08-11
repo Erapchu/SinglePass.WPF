@@ -47,7 +47,7 @@ namespace PasswordManager.Helpers
                         swEncrypt.Write(plainText);
                     }
                     encrypted = msEncrypt.ToArray();
-                } 
+                }
             }
 
             // Return the encrypted bytes from the memory stream.

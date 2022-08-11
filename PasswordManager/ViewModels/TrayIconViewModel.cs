@@ -1,11 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 using PasswordManager.Extensions;
 using PasswordManager.Views;
-using System;
 using System.Linq;
-using System.Windows;
 
 namespace PasswordManager.ViewModels
 {
@@ -19,7 +16,7 @@ namespace PasswordManager.ViewModels
 
         public TrayIconViewModel()
         {
-            
+
         }
 
         private void OpenMainWindow()

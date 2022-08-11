@@ -104,7 +104,7 @@ namespace PasswordManager.Hotkeys
 
         public override bool Equals(object obj)
         {
-            return obj is not null && obj is Hotkey other 
+            return obj is not null && obj is Hotkey other
                 && Key == other.Key
                 && Modifiers == other.Modifiers;
         }

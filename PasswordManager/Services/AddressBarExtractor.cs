@@ -1,7 +1,6 @@
 ﻿using PasswordManager.Helpers;
 using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Windows.Automation;
 
 namespace PasswordManager.Services

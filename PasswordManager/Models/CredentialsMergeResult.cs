@@ -50,7 +50,7 @@ namespace PasswordManager.Models
             {
                 sb.AppendLine("Can't merge credentials");
             }
-            
+
             return sb.ToString();
         }
     }

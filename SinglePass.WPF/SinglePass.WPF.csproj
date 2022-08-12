@@ -37,9 +37,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PasswordManager.Language\SinglePass.Language.csproj" />
-    <ProjectReference Include="..\SinglePass.Application.FavIcons\SinglePass.FavIcons.Application.csproj" />
-    <ProjectReference Include="..\SinglePass.Repository.FavIcons\SinglePass.FavIcons.Repository.csproj" />
+    <ProjectReference Include="..\SinglePass.Language\SinglePass.Language.csproj" />
+    <ProjectReference Include="..\SinglePass.FavIcons.Application\SinglePass.FavIcons.Application.csproj" />
+    <ProjectReference Include="..\SinglePass.FavIcons.Repository\SinglePass.FavIcons.Repository.csproj" />
   </ItemGroup>
 
   <ItemGroup>

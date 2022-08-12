@@ -1,15 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PasswordManager.Application;
+using SinglePass.FavIcons.Application;
 
-namespace PasswordManager.Repository
+namespace SinglePass.FavIcons.Repository
 {
-    internal class FavIconDbContext : DbContext
+    public class FavIconDbContext : DbContext
     {
         public DbSet<FavIcon> FavIcons { get; set; }
 
         public FavIconDbContext(DbContextOptions<FavIconDbContext> options) : base(options)
         {
-
+            
         }
     }
 }

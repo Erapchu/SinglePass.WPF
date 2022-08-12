@@ -1,12 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PasswordManager.Application;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using SinglePass.FavIcons.Application;
 
-namespace PasswordManager.Repository
+namespace SinglePass.FavIcons.Repository
 {
-    internal class FavIconRepository : IFavIconRepository
+    public class FavIconRepository : IFavIconRepository
     {
         private readonly FavIconDbContext _favIconDbContext;
 
@@ -26,7 +23,7 @@ namespace PasswordManager.Repository
             return _favIconDbContext.Database.EnsureCreatedAsync();
         }
 
-        public Task<FavIcon> Get(string host)
+        public Task<FavIcon?> Get(string host)
         {
             return _favIconDbContext.FavIcons.FirstOrDefaultAsync(f => f.Host == host);
         }

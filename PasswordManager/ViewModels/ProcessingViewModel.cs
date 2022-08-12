@@ -4,7 +4,7 @@ using MaterialDesignThemes.Wpf;
 using System;
 using System.Threading;
 
-namespace PasswordManager.ViewModels
+namespace SinglePass.WPF.ViewModels
 {
     public class ProcessingViewModel : ObservableObject
     {

@@ -1,7 +1,7 @@
-﻿using PasswordManager.Authorization.Brokers;
-using PasswordManager.Authorization.Interfaces;
-using PasswordManager.Clouds.Interfaces;
-using PasswordManager.Clouds.Models;
+﻿using SinglePass.WPF.Authorization.Brokers;
+using SinglePass.WPF.Authorization.Interfaces;
+using SinglePass.WPF.Clouds.Interfaces;
+using SinglePass.WPF.Clouds.Models;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -11,7 +11,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PasswordManager.Clouds.Services
+namespace SinglePass.WPF.Clouds.Services
 {
     public class GoogleDriveCloudService : ICloudService
     {

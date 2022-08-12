@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace PasswordManager.Models
+namespace SinglePass.WPF.Models
 {
     [DebuggerDisplay("{Name} - {Value}")]
     public class PassField

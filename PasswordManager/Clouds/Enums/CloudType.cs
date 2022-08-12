@@ -1,4 +1,4 @@
-﻿namespace PasswordManager.Cloud.Enums
+﻿namespace SinglePass.WPF.Cloud.Enums
 {
     public enum CloudType
     {

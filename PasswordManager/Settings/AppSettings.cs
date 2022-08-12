@@ -1,6 +1,6 @@
-﻿using PasswordManager.Hotkeys;
+﻿using SinglePass.WPF.Hotkeys;
 
-namespace PasswordManager.Settings
+namespace SinglePass.WPF.Settings
 {
     public class AppSettings : IAppSettings
     {

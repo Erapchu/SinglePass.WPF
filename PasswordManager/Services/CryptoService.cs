@@ -1,11 +1,11 @@
-﻿using PasswordManager.Helpers;
+﻿using SinglePass.WPF.Helpers;
 using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
-namespace PasswordManager.Services
+namespace SinglePass.WPF.Services
 {
     public class CryptoService
     {

@@ -1,4 +1,4 @@
-﻿namespace PasswordManager.Enums
+﻿namespace SinglePass.WPF.Enums
 {
     public enum CredentialsDialogMode
     {

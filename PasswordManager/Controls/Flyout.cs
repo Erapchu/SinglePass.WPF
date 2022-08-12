@@ -6,7 +6,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 
-namespace PasswordManager.Controls
+namespace SinglePass.WPF.Controls
 {
     public class Flyout : ContentControl
     {

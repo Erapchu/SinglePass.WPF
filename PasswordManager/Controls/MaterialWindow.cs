@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 
-namespace PasswordManager.Controls
+namespace SinglePass.WPF.Controls
 {
     public class MaterialWindow : Window
     {

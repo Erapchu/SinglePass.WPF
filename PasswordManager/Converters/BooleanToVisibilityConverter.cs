@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace PasswordManager.Converters
+namespace SinglePass.WPF.Converters
 {
     public sealed class BooleanToVisibilityConverter : BooleanConverter<Visibility>
     {

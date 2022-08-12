@@ -1,15 +1,15 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
-using PasswordManager.Collections;
-using PasswordManager.Helpers;
-using PasswordManager.Services;
+using SinglePass.WPF.Collections;
+using SinglePass.WPF.Helpers;
+using SinglePass.WPF.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PasswordManager.ViewModels
+namespace SinglePass.WPF.ViewModels
 {
     public class PopupViewModel : ObservableObject
     {

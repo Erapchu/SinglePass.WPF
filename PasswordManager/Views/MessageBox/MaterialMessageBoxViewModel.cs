@@ -4,7 +4,7 @@ using MaterialDesignThemes.Wpf;
 using System;
 using System.Windows;
 
-namespace PasswordManager.Views.MessageBox
+namespace SinglePass.WPF.Views.MessageBox
 {
     internal class MaterialMessageBoxViewModel : ObservableRecipient
     {
@@ -80,15 +80,15 @@ namespace PasswordManager.Views.MessageBox
                 switch (_materialMessageBoxButtons)
                 {
                     case MaterialMessageBoxButtons.AbortRetryIgnore:
-                        return PasswordManager.Language.Properties.Resources.Abort;
+                        return SinglePass.Language.Properties.Resources.Abort;
                     case MaterialMessageBoxButtons.OK:
                     case MaterialMessageBoxButtons.OKCancel:
-                        return PasswordManager.Language.Properties.Resources.OK;
+                        return SinglePass.Language.Properties.Resources.OK;
                     case MaterialMessageBoxButtons.RetryCancel:
-                        return PasswordManager.Language.Properties.Resources.Retry;
+                        return SinglePass.Language.Properties.Resources.Retry;
                     case MaterialMessageBoxButtons.YesNo:
                     case MaterialMessageBoxButtons.YesNoCancel:
-                        return PasswordManager.Language.Properties.Resources.Yes;
+                        return SinglePass.Language.Properties.Resources.Yes;
                     default:
                         return string.Empty;
                 }
@@ -104,13 +104,13 @@ namespace PasswordManager.Views.MessageBox
                 switch (_materialMessageBoxButtons)
                 {
                     case MaterialMessageBoxButtons.AbortRetryIgnore:
-                        return PasswordManager.Language.Properties.Resources.Retry;
+                        return SinglePass.Language.Properties.Resources.Retry;
                     case MaterialMessageBoxButtons.OKCancel:
                     case MaterialMessageBoxButtons.RetryCancel:
-                        return PasswordManager.Language.Properties.Resources.Cancel;
+                        return SinglePass.Language.Properties.Resources.Cancel;
                     case MaterialMessageBoxButtons.YesNo:
                     case MaterialMessageBoxButtons.YesNoCancel:
-                        return PasswordManager.Language.Properties.Resources.No;
+                        return SinglePass.Language.Properties.Resources.No;
                     case MaterialMessageBoxButtons.OK:
                     default:
                         return string.Empty;
@@ -161,9 +161,9 @@ namespace PasswordManager.Views.MessageBox
                 switch (_materialMessageBoxButtons)
                 {
                     case MaterialMessageBoxButtons.AbortRetryIgnore:
-                        return PasswordManager.Language.Properties.Resources.Ignore;
+                        return SinglePass.Language.Properties.Resources.Ignore;
                     case MaterialMessageBoxButtons.YesNoCancel:
-                        return PasswordManager.Language.Properties.Resources.Cancel;
+                        return SinglePass.Language.Properties.Resources.Cancel;
                     case MaterialMessageBoxButtons.OK:
                     case MaterialMessageBoxButtons.OKCancel:
                     case MaterialMessageBoxButtons.RetryCancel:

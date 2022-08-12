@@ -1,4 +1,4 @@
-﻿namespace PasswordManager.Views.MessageBox
+﻿namespace SinglePass.WPF.Views.MessageBox
 {
     public enum MaterialDialogResult
     {

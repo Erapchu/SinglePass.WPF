@@ -1,9 +1,9 @@
-﻿using PasswordManager.Helpers;
+﻿using SinglePass.WPF.Helpers;
 using System;
 using System.Collections.Concurrent;
 using System.Windows.Automation;
 
-namespace PasswordManager.Services
+namespace SinglePass.WPF.Services
 {
     public class AddressBarExtractor
     {

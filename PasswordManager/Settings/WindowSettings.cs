@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Windows;
 
-namespace PasswordManager.Settings
+namespace SinglePass.WPF.Settings
 {
     [DebuggerDisplay("Left: {Left}, Top: {Top}, Width: {Width}, Height: {Height}, State: {WindowState}")]
     public class WindowSettings

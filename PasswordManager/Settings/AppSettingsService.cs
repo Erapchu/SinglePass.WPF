@@ -1,13 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
-using PasswordManager.Helpers;
-using PasswordManager.Helpers.Threading;
-using PasswordManager.Hotkeys;
+using SinglePass.WPF.Helpers;
+using SinglePass.WPF.Helpers.Threading;
+using SinglePass.WPF.Hotkeys;
 using System;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace PasswordManager.Settings
+namespace SinglePass.WPF.Settings
 {
     public class AppSettingsService : IAppSettings
     {

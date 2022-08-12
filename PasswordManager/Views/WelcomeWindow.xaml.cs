@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace PasswordManager.Views
+namespace SinglePass.WPF.Views
 {
     /// <summary>
     /// Interaction logic for WelcomeWindow.xaml

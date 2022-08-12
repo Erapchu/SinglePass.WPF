@@ -2,15 +2,15 @@
 using CommunityToolkit.Mvvm.Input;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Extensions.Logging;
-using PasswordManager.Helpers;
-using PasswordManager.Hotkeys;
-using PasswordManager.Services;
-using PasswordManager.Settings;
-using PasswordManager.Views.MessageBox;
+using SinglePass.WPF.Helpers;
+using SinglePass.WPF.Hotkeys;
+using SinglePass.WPF.Services;
+using SinglePass.WPF.Settings;
+using SinglePass.WPF.Views.MessageBox;
 using System;
 using System.Threading.Tasks;
 
-namespace PasswordManager.ViewModels
+namespace SinglePass.WPF.ViewModels
 {
     public class SettingsViewModel : ObservableRecipient
     {

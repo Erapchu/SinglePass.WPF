@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Windows.Data;
 
-namespace PasswordManager.Converters
+namespace SinglePass.WPF.Converters
 {
     public class BooleanConverter<T> : IValueConverter
     {

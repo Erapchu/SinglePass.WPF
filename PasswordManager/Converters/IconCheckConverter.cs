@@ -1,4 +1,4 @@
-﻿using PasswordManager.Extensions;
+﻿using SinglePass.WPF.Extensions;
 using System;
 using System.ComponentModel;
 using System.Drawing;
@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Windows.Data;
 using System.Windows.Media;
 
-namespace PasswordManager.Converters
+namespace SinglePass.WPF.Converters
 {
     [ValueConversion(typeof(ImageSource), typeof(ImageSource))]
     public class IconCheckConverter : IValueConverter

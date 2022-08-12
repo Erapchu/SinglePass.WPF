@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 
-namespace PasswordManager.Helpers
+namespace SinglePass.WPF.Helpers
 {
     internal class HashHelper
     {

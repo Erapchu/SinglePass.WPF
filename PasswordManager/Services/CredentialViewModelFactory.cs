@@ -1,9 +1,9 @@
-﻿using PasswordManager.Models;
-using PasswordManager.ViewModels;
+﻿using SinglePass.WPF.Models;
+using SinglePass.WPF.ViewModels;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace PasswordManager.Services
+namespace SinglePass.WPF.Services
 {
     public class CredentialViewModelFactory
     {

@@ -1,7 +1,7 @@
-﻿using PasswordManager.ViewModels;
+﻿using SinglePass.WPF.ViewModels;
 using System.Windows.Controls;
 
-namespace PasswordManager.Views
+namespace SinglePass.WPF.Views
 {
     /// <summary>
     /// Interaction logic for ProcessingControl.xaml

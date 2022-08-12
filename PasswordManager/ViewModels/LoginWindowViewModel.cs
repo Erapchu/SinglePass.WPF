@@ -1,13 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
-using PasswordManager.Services;
+using SinglePass.WPF.Services;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace PasswordManager.ViewModels
+namespace SinglePass.WPF.ViewModels
 {
     public class LoginWindowViewModel : ObservableRecipient
     {
@@ -46,7 +46,7 @@ namespace PasswordManager.ViewModels
             set => SetProperty(ref _helperText, value);
         }
 
-        private string _hintText = PasswordManager.Language.Properties.Resources.Password;
+        private string _hintText = SinglePass.Language.Properties.Resources.Password;
         public string HintText
         {
             get => _hintText;
@@ -69,7 +69,7 @@ namespace PasswordManager.ViewModels
         {
             if (string.IsNullOrWhiteSpace(Password) || Password.Length < 8)
             {
-                HelperText = PasswordManager.Language.Properties.Resources.Minimum8Characters;
+                HelperText = SinglePass.Language.Properties.Resources.Minimum8Characters;
                 return;
             }
             else
@@ -96,7 +96,7 @@ namespace PasswordManager.ViewModels
                     cancellationToken.ThrowIfCancellationRequested();
                     if (!loadingResult)
                     {
-                        HelperText = PasswordManager.Language.Properties.Resources.PasswordIsIncorrect;
+                        HelperText = SinglePass.Language.Properties.Resources.PasswordIsIncorrect;
                     }
                     else
                     {
@@ -120,7 +120,7 @@ namespace PasswordManager.ViewModels
             _credentialsFileExist = await _credentialsCryptoService.IsCredentialsFileExistAsync();
             if (!_credentialsFileExist)
             {
-                HintText = PasswordManager.Language.Properties.Resources.NewPassword;
+                HintText = SinglePass.Language.Properties.Resources.NewPassword;
             }
         }
 

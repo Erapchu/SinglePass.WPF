@@ -1,4 +1,4 @@
-﻿namespace PasswordManager.Settings
+﻿namespace SinglePass.WPF.Settings
 {
     public enum SortType
     {

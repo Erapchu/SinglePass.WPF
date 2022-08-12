@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace PasswordManager.Helpers
+namespace SinglePass.WPF.Helpers
 {
     // https://stackoverflow.com/questions/1918877/how-can-i-get-the-dpi-in-wpf
     public static class DpiUtilities

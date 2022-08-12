@@ -1,14 +1,14 @@
-﻿using PasswordManager.Controls;
-using PasswordManager.Helpers;
-using PasswordManager.Hotkeys;
-using PasswordManager.Settings;
-using PasswordManager.ViewModels;
+﻿using SinglePass.WPF.Controls;
+using SinglePass.WPF.Helpers;
+using SinglePass.WPF.Hotkeys;
+using SinglePass.WPF.Settings;
+using SinglePass.WPF.ViewModels;
 using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
-namespace PasswordManager.Views
+namespace SinglePass.WPF.Views
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

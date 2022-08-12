@@ -2,13 +2,13 @@
 using CommunityToolkit.Mvvm.Input;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Extensions.Logging;
-using PasswordManager.Collections;
-using PasswordManager.Enums;
-using PasswordManager.Helpers;
-using PasswordManager.Models;
-using PasswordManager.Services;
-using PasswordManager.Settings;
-using PasswordManager.Views.MessageBox;
+using SinglePass.WPF.Collections;
+using SinglePass.WPF.Enums;
+using SinglePass.WPF.Helpers;
+using SinglePass.WPF.Models;
+using SinglePass.WPF.Services;
+using SinglePass.WPF.Settings;
+using SinglePass.WPF.Views.MessageBox;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Unidecode.NET;
 
-namespace PasswordManager.ViewModels
+namespace SinglePass.WPF.ViewModels
 {
     public class PasswordsViewModel : ObservableRecipient
     {
@@ -128,8 +128,8 @@ namespace PasswordManager.ViewModels
         private async void ActiveCredentialDialogVM_Delete(CredentialViewModel credVM)
         {
             var result = await MaterialMessageBox.ShowAsync(
-                PasswordManager.Language.Properties.Resources.DeleteItem,
-                string.Format(PasswordManager.Language.Properties.Resources.Name0, credVM.NameFieldVM.Value),
+                SinglePass.Language.Properties.Resources.DeleteItem,
+                string.Format(SinglePass.Language.Properties.Resources.Name0, credVM.NameFieldVM.Value),
                 MaterialMessageBoxButtons.YesNo,
                 MvvmHelper.MainWindowDialogName,
                 PackIconKind.Delete);

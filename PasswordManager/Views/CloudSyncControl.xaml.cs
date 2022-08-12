@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace PasswordManager.Views
+namespace SinglePass.WPF.Views
 {
     /// <summary>
     /// Interaction logic for CloudSyncControl.xaml

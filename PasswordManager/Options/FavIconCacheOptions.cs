@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PasswordManager.Options
+namespace SinglePass.WPF.Options
 {
     public class FavIconCacheOptions
     {

@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 
-namespace PasswordManager.Converters
+namespace SinglePass.WPF.Converters
 {
     public class CaptionVisibilityConverter : IMultiValueConverter
     {

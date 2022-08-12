@@ -2,20 +2,20 @@
 using CommunityToolkit.Mvvm.Input;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Extensions.Logging;
-using PasswordManager.Cloud.Enums;
-using PasswordManager.Clouds.Services;
-using PasswordManager.Helpers;
-using PasswordManager.Services;
-using PasswordManager.Settings;
-using PasswordManager.Views;
-using PasswordManager.Views.InputBox;
-using PasswordManager.Views.MessageBox;
+using SinglePass.WPF.Cloud.Enums;
+using SinglePass.WPF.Clouds.Services;
+using SinglePass.WPF.Helpers;
+using SinglePass.WPF.Services;
+using SinglePass.WPF.Settings;
+using SinglePass.WPF.Views;
+using SinglePass.WPF.Views.InputBox;
+using SinglePass.WPF.Views.MessageBox;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media;
 
-namespace PasswordManager.ViewModels
+namespace SinglePass.WPF.ViewModels
 {
     public class CloudSyncViewModel : ObservableRecipient
     {
@@ -256,8 +256,8 @@ namespace PasswordManager.ViewModels
 
                 await MaterialMessageBox.ShowAsync(
                     mergeResult.Success
-                    ? PasswordManager.Language.Properties.Resources.SyncSuccess
-                    : PasswordManager.Language.Properties.Resources.SyncFailed,
+                    ? SinglePass.Language.Properties.Resources.SyncSuccess
+                    : SinglePass.Language.Properties.Resources.SyncFailed,
                     mergeResult.ToString(),
                     MaterialMessageBoxButtons.OK,
                     windowDialogName);
@@ -286,11 +286,11 @@ namespace PasswordManager.ViewModels
 
                 await MaterialMessageBox.ShowAsync(
                     success
-                    ? PasswordManager.Language.Properties.Resources.Success
-                    : PasswordManager.Language.Properties.Resources.Error,
+                    ? SinglePass.Language.Properties.Resources.Success
+                    : SinglePass.Language.Properties.Resources.Error,
                     success
-                    ? PasswordManager.Language.Properties.Resources.UploadSuccess
-                    : PasswordManager.Language.Properties.Resources.UploadFailed,
+                    ? SinglePass.Language.Properties.Resources.UploadSuccess
+                    : SinglePass.Language.Properties.Resources.UploadFailed,
                     MaterialMessageBoxButtons.OK,
                     windowDialogName);
             }
@@ -308,8 +308,8 @@ namespace PasswordManager.ViewModels
         private async Task<string> SyncPasswordRequired()
         {
             var password = await MaterialInputBox.ShowAsync(
-                PasswordManager.Language.Properties.Resources.InputPasswordOfFile,
-                PasswordManager.Language.Properties.Resources.Password,
+                SinglePass.Language.Properties.Resources.InputPasswordOfFile,
+                SinglePass.Language.Properties.Resources.Password,
                 MvvmHelper.MainWindowDialogName,
                 true);
             return password;

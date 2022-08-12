@@ -1,10 +1,10 @@
-﻿using PasswordManager.ViewModels;
+﻿using SinglePass.WPF.ViewModels;
 using System;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Interop;
 
-namespace PasswordManager.Views
+namespace SinglePass.WPF.Views
 {
     /// <summary>
     /// Interaction logic for PopupControl.xaml

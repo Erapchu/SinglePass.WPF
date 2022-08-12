@@ -1,10 +1,10 @@
-﻿using PasswordManager.Authorization.Interfaces;
-using PasswordManager.Clouds.Models;
+﻿using SinglePass.WPF.Authorization.Interfaces;
+using SinglePass.WPF.Clouds.Models;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PasswordManager.Clouds.Interfaces
+namespace SinglePass.WPF.Clouds.Interfaces
 {
     public interface ICloudService
     {

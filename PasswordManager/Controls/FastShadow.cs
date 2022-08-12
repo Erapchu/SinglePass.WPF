@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace PasswordManager.Controls
+namespace SinglePass.WPF.Controls
 {
     /// <summary>
     /// Emulates the System.Windows.Media.Effects.DropShadowEffect using

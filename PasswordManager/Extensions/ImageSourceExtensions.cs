@@ -1,4 +1,4 @@
-﻿using PasswordManager.Helpers;
+﻿using SinglePass.WPF.Helpers;
 using System;
 using System.Drawing;
 using System.Windows;
@@ -6,7 +6,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace PasswordManager.Extensions
+namespace SinglePass.WPF.Extensions
 {
     public static class ImageSourceExtensions
     {

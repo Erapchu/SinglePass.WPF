@@ -7,7 +7,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
 
-namespace PasswordManager.Collections
+namespace SinglePass.WPF.Collections
 {
     /// Observable collection with ability to delay or suspend CollectionChanged notifications
     /// </summary>

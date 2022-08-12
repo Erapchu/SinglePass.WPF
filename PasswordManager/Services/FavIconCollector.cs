@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using PasswordManager.Helpers;
-using PasswordManager.Utilities;
+using SinglePass.WPF.Helpers;
+using SinglePass.WPF.Utilities;
 using SinglePass.FavIcons.Application;
 using System;
 using System.Linq;
@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media;
 
-namespace PasswordManager.Services
+namespace SinglePass.WPF.Services
 {
     public interface IFavIconCollector
     {

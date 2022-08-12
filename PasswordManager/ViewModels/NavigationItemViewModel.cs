@@ -3,7 +3,7 @@ using MaterialDesignThemes.Wpf;
 using System;
 using System.Windows.Controls;
 
-namespace PasswordManager.ViewModels
+namespace SinglePass.WPF.ViewModels
 {
     public class NavigationItemViewModel : ObservableRecipient
     {

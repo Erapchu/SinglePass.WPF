@@ -2,7 +2,7 @@
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace PasswordManager.Helpers
+namespace SinglePass.WPF.Helpers
 {
     internal static class ImageSourceHelper
     {

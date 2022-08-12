@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace PasswordManager.Clouds.Models
+namespace SinglePass.WPF.Clouds.Models
 {
     public class GoogleDriveFileList
     {

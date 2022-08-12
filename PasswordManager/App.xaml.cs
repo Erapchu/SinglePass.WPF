@@ -6,23 +6,23 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NLog;
 using NLog.Extensions.Logging;
-using PasswordManager.Authorization.Brokers;
-using PasswordManager.Authorization.Holders;
-using PasswordManager.Clouds.Services;
-using PasswordManager.Helpers;
-using PasswordManager.Hotkeys;
-using PasswordManager.Options;
-using PasswordManager.Services;
-using PasswordManager.Settings;
-using PasswordManager.ViewModels;
-using PasswordManager.Views;
+using SinglePass.WPF.Authorization.Brokers;
+using SinglePass.WPF.Authorization.Holders;
+using SinglePass.WPF.Clouds.Services;
+using SinglePass.WPF.Helpers;
+using SinglePass.WPF.Hotkeys;
+using SinglePass.WPF.Options;
+using SinglePass.WPF.Services;
+using SinglePass.WPF.Settings;
+using SinglePass.WPF.ViewModels;
+using SinglePass.WPF.Views;
 using SinglePass.FavIcons.Application;
 using SinglePass.FavIcons.Repository;
 using System;
 using System.Threading;
 using System.Windows;
 
-namespace PasswordManager
+namespace SinglePass.WPF
 {
     /// <summary>
     /// Interaction logic for App.xaml
@@ -62,7 +62,7 @@ namespace PasswordManager
             InitializeComponent();
 
             // Override culture
-            //PasswordManager.Language.Properties.Resources.Culture = new System.Globalization.CultureInfo("en-US");
+            //SinglePass.Language.Properties.Resources.Culture = new System.Globalization.CultureInfo("en-US");
 
             if (IsFirstInstance)
             {

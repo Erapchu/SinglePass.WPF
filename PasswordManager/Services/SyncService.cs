@@ -1,16 +1,16 @@
 ﻿using Microsoft.Extensions.Logging;
-using PasswordManager.Cloud.Enums;
-using PasswordManager.Clouds.Services;
-using PasswordManager.Helpers;
-using PasswordManager.Helpers.Threading;
-using PasswordManager.Models;
+using SinglePass.WPF.Cloud.Enums;
+using SinglePass.WPF.Clouds.Services;
+using SinglePass.WPF.Helpers;
+using SinglePass.WPF.Helpers.Threading;
+using SinglePass.WPF.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PasswordManager.Services
+namespace SinglePass.WPF.Services
 {
     public class SyncService
     {
@@ -53,7 +53,7 @@ namespace PasswordManager.Services
                 var token = _syncCTS.Token;
                 var cloudService = _cloudServiceProvider.GetCloudService(cloudType);
 
-                SyncStateChanged?.Invoke(PasswordManager.Language.Properties.Resources.DownloadingFile);
+                SyncStateChanged?.Invoke(SinglePass.Language.Properties.Resources.DownloadingFile);
                 using var cloudFileStream = await cloudService.Download(Constants.PasswordsFileName, token);
                 if (cloudFileStream is null)
                 {
@@ -68,7 +68,7 @@ namespace PasswordManager.Services
                 {
                     try
                     {
-                        SyncStateChanged?.Invoke(PasswordManager.Language.Properties.Resources.Decrypting);
+                        SyncStateChanged?.Invoke(SinglePass.Language.Properties.Resources.Decrypting);
                         cloudCredentials = _cryptoService.DecryptFromStream<List<Credential>>(cloudFileStream, password);
                     }
                     catch (Exception ex)
@@ -125,7 +125,7 @@ namespace PasswordManager.Services
 
                 var token = _syncCTS.Token;
                 var cloudService = _cloudServiceProvider.GetCloudService(cloudType);
-                SyncStateChanged?.Invoke(PasswordManager.Language.Properties.Resources.Uploading);
+                SyncStateChanged?.Invoke(SinglePass.Language.Properties.Resources.Uploading);
 
                 // Additional lock to ensure file not used by other thread
                 using var locker = AsyncDuplicateLock.Lock(Constants.PasswordsFilePath);

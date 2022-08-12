@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Windows.Data;
 
-namespace PasswordManager.Converters
+namespace SinglePass.WPF.Converters
 {
     [ValueConversion(typeof(int), typeof(bool))]
     public class EnumToBooleanConverter : IValueConverter

@@ -1,14 +1,14 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
-using PasswordManager.Enums;
-using PasswordManager.Helpers;
-using PasswordManager.Models;
+using SinglePass.WPF.Enums;
+using SinglePass.WPF.Helpers;
+using SinglePass.WPF.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace PasswordManager.ViewModels
+namespace SinglePass.WPF.ViewModels
 {
     public class CredentialsDialogViewModel : ObservableRecipient
     {
@@ -67,11 +67,11 @@ namespace PasswordManager.ViewModels
                 switch (_mode)
                 {
                     case CredentialsDialogMode.Edit:
-                        return PasswordManager.Language.Properties.Resources.Edit;
+                        return SinglePass.Language.Properties.Resources.Edit;
                     case CredentialsDialogMode.New:
-                        return PasswordManager.Language.Properties.Resources.New;
+                        return SinglePass.Language.Properties.Resources.New;
                     case CredentialsDialogMode.View:
-                        return PasswordManager.Language.Properties.Resources.Details;
+                        return SinglePass.Language.Properties.Resources.Details;
                     default:
                         break;
                 }
@@ -148,7 +148,7 @@ namespace PasswordManager.ViewModels
             try
             {
                 WindowsClipboard.SetText(data);
-                EnqueueSnackbarMessage?.Invoke(PasswordManager.Language.Properties.Resources.TextCopied);
+                EnqueueSnackbarMessage?.Invoke(SinglePass.Language.Properties.Resources.TextCopied);
             }
             catch (Exception ex)
             {

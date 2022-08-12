@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace PasswordManager.Utilities
+namespace SinglePass.WPF.Utilities
 {
     [DebuggerDisplay("Count = {_list.Count}")]
     public class RegeneratedList<T>

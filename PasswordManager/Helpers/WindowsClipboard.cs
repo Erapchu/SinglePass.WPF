@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PasswordManager.Helpers
+namespace SinglePass.WPF.Helpers
 {
     // Source: https://github.com/CopyText/TextCopy/blob/main/src/TextCopy/WindowsClipboard.cs
     // so: https://stackoverflow.com/questions/44205260/net-core-copy-to-clipboard

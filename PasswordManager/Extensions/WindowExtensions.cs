@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace PasswordManager.Extensions
+namespace SinglePass.WPF.Extensions
 {
     public static class WindowExtensions
     {

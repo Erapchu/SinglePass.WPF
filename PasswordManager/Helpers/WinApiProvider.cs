@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace PasswordManager.Helpers
+namespace SinglePass.WPF.Helpers
 {
     internal static class WinApiProvider
     {

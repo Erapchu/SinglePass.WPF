@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace PasswordManager.Authorization.Interfaces
+namespace SinglePass.WPF.Authorization.Interfaces
 {
     public interface IAuthorizationBroker
     {

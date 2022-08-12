@@ -2,13 +2,13 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=PresentationFramework"
-    xmlns:controls="clr-namespace:PasswordManager.Controls"
-    xmlns:converters="clr-namespace:PasswordManager.Converters"
-    xmlns:helpers="clr-namespace:PasswordManager.Helpers"
+    xmlns:controls="clr-namespace:SinglePass.WPF.Controls"
+    xmlns:converters="clr-namespace:SinglePass.WPF.Converters"
+    xmlns:helpers="clr-namespace:SinglePass.WPF.Helpers"
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
 
     <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="pack://application:,,,/PasswordManager;component/Themes/IconControlStyle.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/SinglePass.WPF;component/Themes/IconControlStyle.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 
     <converters:CaptionVisibilityConverter x:Key="CaptionVisibilityConverter" />

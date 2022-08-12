@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PasswordManager.Helpers.Threading
+namespace SinglePass.WPF.Helpers.Threading
 {
     internal static class AsyncDuplicateLock
     {

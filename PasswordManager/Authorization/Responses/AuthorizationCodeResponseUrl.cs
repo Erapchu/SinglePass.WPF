@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace PasswordManager.Authorization.Responses
+namespace SinglePass.WPF.Authorization.Responses
 {
     /// <summary>
     /// Authorization Code response for the redirect URL after end user grants or denies authorization as specified 

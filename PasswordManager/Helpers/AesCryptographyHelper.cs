@@ -2,7 +2,7 @@
 using System.IO;
 using System.Security.Cryptography;
 
-namespace PasswordManager.Helpers
+namespace SinglePass.WPF.Helpers
 {
     public static class AesCryptographyHelper
     {

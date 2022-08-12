@@ -1,10 +1,10 @@
-﻿using PasswordManager.Enums;
+﻿using SinglePass.WPF.Enums;
 using System;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 
-namespace PasswordManager.Converters
+namespace SinglePass.WPF.Converters
 {
     [ValueConversion(typeof(CredentialsDialogMode), typeof(Visibility))]
     internal class ModeToVisibilityConverter : IValueConverter

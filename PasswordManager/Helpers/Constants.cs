@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace PasswordManager.Helpers
+namespace SinglePass.WPF.Helpers
 {
     public static class Constants
     {

@@ -1,7 +1,7 @@
 ﻿using MaterialDesignThemes.Wpf;
 using System.Threading.Tasks;
 
-namespace PasswordManager.Views.InputBox
+namespace SinglePass.WPF.Views.InputBox
 {
     public static class MaterialInputBox
     {

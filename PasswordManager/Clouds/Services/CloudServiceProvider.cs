@@ -1,8 +1,8 @@
-﻿using PasswordManager.Cloud.Enums;
-using PasswordManager.Clouds.Interfaces;
+﻿using SinglePass.WPF.Cloud.Enums;
+using SinglePass.WPF.Clouds.Interfaces;
 using System;
 
-namespace PasswordManager.Clouds.Services
+namespace SinglePass.WPF.Clouds.Services
 {
     public class CloudServiceProvider
     {

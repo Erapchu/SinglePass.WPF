@@ -1,8 +1,8 @@
-﻿using PasswordManager.Controls;
-using PasswordManager.ViewModels;
+﻿using SinglePass.WPF.Controls;
+using SinglePass.WPF.ViewModels;
 using System.Windows.Controls;
 
-namespace PasswordManager.Views
+namespace SinglePass.WPF.Views
 {
     /// <summary>
     /// Interaction logic for LoginWindow.xaml

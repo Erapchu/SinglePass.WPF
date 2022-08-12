@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.Options;
-using PasswordManager.Authorization.Helpers;
-using PasswordManager.Authorization.Holders;
+using SinglePass.WPF.Authorization.Helpers;
+using SinglePass.WPF.Authorization.Holders;
 using System.Net.Http;
 using System.Web;
 
-namespace PasswordManager.Authorization.Brokers
+namespace SinglePass.WPF.Authorization.Brokers
 {
     public class GoogleDriveConfig
     {

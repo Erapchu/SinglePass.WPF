@@ -1,10 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using PasswordManager.Extensions;
-using PasswordManager.Views;
+using SinglePass.WPF.Extensions;
+using SinglePass.WPF.Views;
 using System.Linq;
 
-namespace PasswordManager.ViewModels
+namespace SinglePass.WPF.ViewModels
 {
     internal class TrayIconViewModel : ObservableRecipient
     {

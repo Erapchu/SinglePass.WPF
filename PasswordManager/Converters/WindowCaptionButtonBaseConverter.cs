@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Windows.Data;
 
-namespace PasswordManager.Converters
+namespace SinglePass.WPF.Converters
 {
     /// <summary>
     /// Base class for the converters controlling the visibility and enabled state of window caption buttons.

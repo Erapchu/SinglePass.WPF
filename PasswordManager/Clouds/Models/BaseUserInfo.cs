@@ -1,4 +1,4 @@
-﻿namespace PasswordManager.Clouds.Models
+﻿namespace SinglePass.WPF.Clouds.Models
 {
     public class BaseUserInfo
     {

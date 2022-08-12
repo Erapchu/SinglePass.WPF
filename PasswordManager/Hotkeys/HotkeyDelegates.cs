@@ -1,5 +1,5 @@
-﻿using PasswordManager.Helpers;
-using PasswordManager.Views;
+﻿using SinglePass.WPF.Helpers;
+using SinglePass.WPF.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Interop;
 using UIAutomationClient;
 
-namespace PasswordManager.Hotkeys
+namespace SinglePass.WPF.Hotkeys
 {
     internal static class HotkeyDelegates
     {

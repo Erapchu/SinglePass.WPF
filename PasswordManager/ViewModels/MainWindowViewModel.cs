@@ -1,14 +1,14 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MaterialDesignThemes.Wpf;
-using PasswordManager.Collections;
-using PasswordManager.Views;
+using SinglePass.WPF.Collections;
+using SinglePass.WPF.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PasswordManager.ViewModels
+namespace SinglePass.WPF.ViewModels
 {
     public class MainWindowViewModel : ObservableRecipient
     {
@@ -64,15 +64,15 @@ namespace PasswordManager.ViewModels
             NavigationItems = new ObservableCollectionDelayed<NavigationItemViewModel>(new List<NavigationItemViewModel>()
             {
                 new NavigationItemViewModel(
-                    PasswordManager.Language.Properties.Resources.Passwords,
+                    SinglePass.Language.Properties.Resources.Passwords,
                     PackIconKind.Password,
                     () => new PasswordsControl() { DataContext = PasswordsVM }),
                 new NavigationItemViewModel(
-                    PasswordManager.Language.Properties.Resources.CloudSync,
+                    SinglePass.Language.Properties.Resources.CloudSync,
                     PackIconKind.Cloud,
                     () => new CloudSyncControl() { DataContext = CloudSyncVM }),
                 new NavigationItemViewModel(
-                    PasswordManager.Language.Properties.Resources.Settings,
+                    SinglePass.Language.Properties.Resources.Settings,
                     PackIconKind.Settings,
                     () => new SettingsControl() { DataContext = SettingsVM }),
             });

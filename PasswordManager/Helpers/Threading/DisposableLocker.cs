@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace PasswordManager.Helpers.Threading
+namespace SinglePass.WPF.Helpers.Threading
 {
     internal class DisposableLocker : IDisposable
     {

@@ -1,4 +1,4 @@
-﻿namespace PasswordManager.Converters
+﻿namespace SinglePass.WPF.Converters
 {
     public sealed class BooleanTFConverter : BooleanConverter<bool>
     {

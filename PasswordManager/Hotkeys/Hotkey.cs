@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
 
-namespace PasswordManager.Hotkeys
+namespace SinglePass.WPF.Hotkeys
 {
     public class Hotkey : ICloneable
     {

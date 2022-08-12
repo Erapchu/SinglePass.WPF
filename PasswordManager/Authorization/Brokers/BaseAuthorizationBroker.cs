@@ -1,6 +1,6 @@
-﻿using PasswordManager.Authorization.Helpers;
-using PasswordManager.Authorization.Interfaces;
-using PasswordManager.Authorization.Responses;
+﻿using SinglePass.WPF.Authorization.Helpers;
+using SinglePass.WPF.Authorization.Interfaces;
+using SinglePass.WPF.Authorization.Responses;
 using System;
 using System.Collections.Specialized;
 using System.Linq;
@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PasswordManager.Authorization.Brokers
+namespace SinglePass.WPF.Authorization.Brokers
 {
     public abstract class BaseAuthorizationBroker : IAuthorizationBroker
     {

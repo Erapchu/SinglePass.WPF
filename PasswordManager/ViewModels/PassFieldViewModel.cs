@@ -1,10 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using PasswordManager.Models;
+using SinglePass.WPF.Models;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 
-namespace PasswordManager.ViewModels
+namespace SinglePass.WPF.ViewModels
 {
     [DebuggerDisplay("{Model}")]
     public class PassFieldViewModel : ObservableValidator

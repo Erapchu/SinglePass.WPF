@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32421.90
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PasswordManager", "PasswordManager\PasswordManager.csproj", "{0A18A596-DFB1-4959-8204-3FBB81BEE945}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SinglePass.WPF", "PasswordManager\SinglePass.WPF.csproj", "{0A18A596-DFB1-4959-8204-3FBB81BEE945}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PasswordManager.Language", "PasswordManager.Language\PasswordManager.Language.csproj", "{44C8C637-E0B7-4B67-AB88-C038CB8FFBA1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SinglePass.Language", "PasswordManager.Language\SinglePass.Language.csproj", "{44C8C637-E0B7-4B67-AB88-C038CB8FFBA1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SinglePass.FavIcons.Repository", "SinglePass.Repository.FavIcons\SinglePass.FavIcons.Repository.csproj", "{C61F05DA-1735-4535-AB3E-754A88CADC3A}"
 EndProject

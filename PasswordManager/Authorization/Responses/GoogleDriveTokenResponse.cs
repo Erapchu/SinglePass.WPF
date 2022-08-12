@@ -1,8 +1,8 @@
-﻿using PasswordManager.Authorization.Interfaces;
+﻿using SinglePass.WPF.Authorization.Interfaces;
 using System;
 using System.Text.Json.Serialization;
 
-namespace PasswordManager.Authorization.Responses
+namespace SinglePass.WPF.Authorization.Responses
 {
     public class GoogleDriveTokenResponse : ITokenResponse
     {

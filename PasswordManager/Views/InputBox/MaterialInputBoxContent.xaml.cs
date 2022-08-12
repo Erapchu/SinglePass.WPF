@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 
-namespace PasswordManager.Views.InputBox
+namespace SinglePass.WPF.Views.InputBox
 {
     /// <summary>
     /// Interaction logic for MaterialInputBoxContent.xaml

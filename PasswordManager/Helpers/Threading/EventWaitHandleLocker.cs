@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace PasswordManager.Helpers.Threading
+namespace SinglePass.WPF.Helpers.Threading
 {
     /// <summary>
     /// A <see cref="WaitHandle"/> based multi-threaded code execution control class.

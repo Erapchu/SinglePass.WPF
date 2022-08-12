@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace PasswordManager.Views.MessageBox
+namespace SinglePass.WPF.Views.MessageBox
 {
     /// <summary>
     /// Interaction logic for MaterialMessageBoxContent.xaml

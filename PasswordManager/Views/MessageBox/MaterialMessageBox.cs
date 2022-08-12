@@ -1,7 +1,7 @@
 ﻿using MaterialDesignThemes.Wpf;
 using System.Threading.Tasks;
 
-namespace PasswordManager.Views.MessageBox
+namespace SinglePass.WPF.Views.MessageBox
 {
     public static class MaterialMessageBox
     {

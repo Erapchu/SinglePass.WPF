@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Security;
 
-namespace PasswordManager.Helpers
+namespace SinglePass.WPF.Helpers
 {
     public class SecureStringHelper
     {

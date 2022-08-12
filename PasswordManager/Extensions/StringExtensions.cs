@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace PasswordManager.Extensions
+namespace SinglePass.WPF.Extensions
 {
     public static class StringExtensions
     {

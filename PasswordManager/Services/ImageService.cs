@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace PasswordManager.Services
+namespace SinglePass.WPF.Services
 {
     public class ImageService
     {

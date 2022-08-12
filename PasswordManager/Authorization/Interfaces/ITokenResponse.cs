@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PasswordManager.Authorization.Interfaces
+namespace SinglePass.WPF.Authorization.Interfaces
 {
     public interface ITokenResponse
     {

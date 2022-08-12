@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using PasswordManager.Models;
-using PasswordManager.Services;
+using SinglePass.WPF.Models;
+using SinglePass.WPF.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -8,7 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows.Media;
 
-namespace PasswordManager.ViewModels
+namespace SinglePass.WPF.ViewModels
 {
     [DebuggerDisplay("{Model}")]
     public class CredentialViewModel : ObservableRecipient

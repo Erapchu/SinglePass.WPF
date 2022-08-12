@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Windows;
 
-namespace PasswordManager.Converters
+namespace SinglePass.WPF.Converters
 {
     /// <summary>
     /// Converts a <see cref="ResizeMode" /> of a window into an enabled state of an according caption button.

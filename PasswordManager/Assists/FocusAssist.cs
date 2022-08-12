@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace PasswordManager.Assists
+namespace SinglePass.WPF.Assists
 {
     public static class FocusAssist
     {

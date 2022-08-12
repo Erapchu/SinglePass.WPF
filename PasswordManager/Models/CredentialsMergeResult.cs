@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace PasswordManager.Models
+namespace SinglePass.WPF.Models
 {
     public class CredentialsMergeResult
     {

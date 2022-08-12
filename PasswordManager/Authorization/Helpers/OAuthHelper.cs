@@ -2,7 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 
-namespace PasswordManager.Authorization.Helpers
+namespace SinglePass.WPF.Authorization.Helpers
 {
     internal static class OAuthHelper
     {

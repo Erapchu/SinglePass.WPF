@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace PasswordManager.Helpers
+namespace SinglePass.WPF.Helpers
 {
     public static class ResourceKeys
     {

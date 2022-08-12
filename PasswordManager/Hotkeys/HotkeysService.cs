@@ -1,12 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
 using NHotkey;
 using NHotkey.Wpf;
-using PasswordManager.Settings;
+using SinglePass.WPF.Settings;
 using System;
 using System.Media;
 using System.Windows.Input;
 
-namespace PasswordManager.Hotkeys
+namespace SinglePass.WPF.Hotkeys
 {
     public class HotkeysService
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace PasswordManager.Models
+namespace SinglePass.WPF.Models
 {
     [DebuggerDisplay("{NameField.Value}")]
     public class Credential

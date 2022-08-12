@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows;
 
-namespace PasswordManager.Helpers
+namespace SinglePass.WPF.Helpers
 {
     internal static class MvvmHelper
     {

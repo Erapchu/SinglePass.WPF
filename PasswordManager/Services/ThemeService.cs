@@ -1,10 +1,10 @@
 ﻿using MaterialDesignThemes.Wpf;
-using PasswordManager.Settings;
+using SinglePass.WPF.Settings;
 using System;
 using System.Linq;
 using System.Windows;
 
-namespace PasswordManager.Services
+namespace SinglePass.WPF.Services
 {
     public class ThemeService
     {

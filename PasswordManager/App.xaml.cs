@@ -6,18 +6,18 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NLog;
 using NLog.Extensions.Logging;
-using PasswordManager.Application;
 using PasswordManager.Authorization.Brokers;
 using PasswordManager.Authorization.Holders;
 using PasswordManager.Clouds.Services;
 using PasswordManager.Helpers;
 using PasswordManager.Hotkeys;
 using PasswordManager.Options;
-using PasswordManager.Repository;
 using PasswordManager.Services;
 using PasswordManager.Settings;
 using PasswordManager.ViewModels;
 using PasswordManager.Views;
+using SinglePass.FavIcons.Application;
+using SinglePass.FavIcons.Repository;
 using System;
 using System.Threading;
 using System.Windows;
@@ -167,9 +167,9 @@ namespace PasswordManager
 
                 // favicons
                 services.AddSingleton<IFavIconCollector, FavIconCollector>();
+                services.Configure<FavIconCacheOptions>(_configuration.GetSection("FavIconCacheOptions"));
                 services.AddScoped<FavIconCacheService>();
                 services.AddScoped<IFavIconRepository, FavIconRepository>();
-                services.Configure<FavIconCacheOptions>(_configuration.GetSection("FavIconCacheOptions"));
                 services.AddDbContext<FavIconDbContext>((sp, options) => options.UseSqlite(sp.GetService<IOptions<FavIconCacheOptions>>().Value.ConnectionString));
             });
 

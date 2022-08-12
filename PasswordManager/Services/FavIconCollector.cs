@@ -1,7 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using PasswordManager.Application;
+using PasswordManager.Helpers;
 using PasswordManager.Utilities;
+using SinglePass.FavIcons.Application;
 using System;
 using System.Linq;
 using System.Threading;
@@ -86,18 +87,23 @@ namespace PasswordManager.Services
                         // Set existing to UI
                         foreach (var processingImage in processingWrappers)
                         {
-                            if (tempFavIconCache.TryGetValue(processingImage.Host, out FavIconWrapper favIcon))
+                            if (tempFavIconCache.TryGetValue(processingImage.Host, out FavIcon favIcon))
                             {
-                                processingImage.SetPropertyAction.Invoke(favIcon.ImageSource);
+                                var imageSource = ImageSourceHelper.ToImageSource(favIcon.Bytes);
+                                processingImage.SetPropertyAction.Invoke(imageSource);
                             }
                             else
                             {
                                 // Download, set to DB, set to UI and save to temp local cache
                                 var bitmapImage = await _imageService.GetImageAsync(string.Format(_favIconServiceUrl, processingImage.Host), cancellationToken);
-                                var freshFavIcon = new FavIconWrapper(bitmapImage, processingImage.Host);
+                                var freshFavIcon = new FavIcon()
+                                {
+                                    Bytes = ImageSourceHelper.ToBytes(bitmapImage),
+                                    Host = processingImage.Host,
+                                };
                                 await favIconCacheService.SetCachedImage(freshFavIcon);
-                                processingImage.SetPropertyAction.Invoke(freshFavIcon.ImageSource);
                                 tempFavIconCache.TryAdd(processingImage.Host, freshFavIcon);
+                                processingImage.SetPropertyAction.Invoke(bitmapImage);
                             }
                         }
                     }

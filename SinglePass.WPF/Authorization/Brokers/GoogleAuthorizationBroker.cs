@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using SinglePass.WPF.Authorization.Helpers;
-using SinglePass.WPF.Authorization.Holders;
+using SinglePass.WPF.Authorization.TokenHolders;
 using System.Net.Http;
 using System.Web;
 

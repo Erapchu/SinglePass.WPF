@@ -1,5 +1,4 @@
-﻿using SinglePass.WPF.Authorization.Interfaces;
-using System;
+﻿using System;
 using System.Text.Json.Serialization;
 
 namespace SinglePass.WPF.Authorization.Responses

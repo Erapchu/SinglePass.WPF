@@ -1,7 +1,8 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using SinglePass.WPF.Authorization.Responses;
 
-namespace SinglePass.WPF.Authorization.Interfaces
+namespace SinglePass.WPF.Authorization.TokenHolders
 {
     public interface ITokenHolder
     {

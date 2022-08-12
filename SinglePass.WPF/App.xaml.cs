@@ -9,7 +9,7 @@ using NLog.Extensions.Logging;
 using SinglePass.FavIcons.Application;
 using SinglePass.FavIcons.Repository;
 using SinglePass.WPF.Authorization.Brokers;
-using SinglePass.WPF.Authorization.Holders;
+using SinglePass.WPF.Authorization.TokenHolders;
 using SinglePass.WPF.Clouds.Services;
 using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Hotkeys;

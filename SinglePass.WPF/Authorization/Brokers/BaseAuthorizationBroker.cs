@@ -1,6 +1,6 @@
 ﻿using SinglePass.WPF.Authorization.Helpers;
-using SinglePass.WPF.Authorization.Interfaces;
 using SinglePass.WPF.Authorization.Responses;
+using SinglePass.WPF.Authorization.TokenHolders;
 using System;
 using System.Collections.Specialized;
 using System.Linq;

@@ -1,7 +1,8 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using SinglePass.WPF.Authorization.TokenHolders;
 
-namespace SinglePass.WPF.Authorization.Interfaces
+namespace SinglePass.WPF.Authorization.Brokers
 {
     public interface IAuthorizationBroker
     {

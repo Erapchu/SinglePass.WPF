@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using SinglePass.WPF.Authorization.Interfaces;
 using SinglePass.WPF.Authorization.Responses;
 using SinglePass.WPF.Helpers;
 using System;
@@ -8,7 +7,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SinglePass.WPF.Authorization.Holders
+namespace SinglePass.WPF.Authorization.TokenHolders
 {
     public class GoogleDriveTokenHolder : ITokenHolder
     {

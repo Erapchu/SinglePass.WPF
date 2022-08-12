@@ -54,7 +54,7 @@
     </None>
   </ItemGroup>
 
-	<!--Should be removed after fixes on .NET 6.0.302-->
+	<!--Should be removed after fixes on .NET 6.0.400-->
 	<!--https://github.com/dotnet/wpf/issues/6792-->
 	<!--Issue related to Microsoft.Toolkit.Mvvm NuGet package-->
 	<Target Name="WorkaroundRemoveAnalayzers" BeforeTargets="GenerateTemporaryTargetAssembly">

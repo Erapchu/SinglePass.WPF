@@ -1,5 +1,4 @@
 ﻿using SinglePass.WPF.Authorization.Brokers;
-using SinglePass.WPF.Clouds.Interfaces;
 using SinglePass.WPF.Clouds.Models;
 using System.IO;
 using System.Net.Http;

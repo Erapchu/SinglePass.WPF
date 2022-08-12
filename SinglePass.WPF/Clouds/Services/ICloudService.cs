@@ -4,7 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SinglePass.WPF.Clouds.Interfaces
+namespace SinglePass.WPF.Clouds.Services
 {
     public interface ICloudService
     {

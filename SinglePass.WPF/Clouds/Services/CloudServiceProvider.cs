@@ -1,5 +1,4 @@
 ﻿using SinglePass.WPF.Cloud.Enums;
-using SinglePass.WPF.Clouds.Interfaces;
 using System;
 
 namespace SinglePass.WPF.Clouds.Services

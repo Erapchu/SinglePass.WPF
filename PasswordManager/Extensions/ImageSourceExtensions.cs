@@ -8,7 +8,7 @@ using System.Windows.Media.Imaging;
 
 namespace PasswordManager.Extensions
 {
-    public static class ImageExtensions
+    public static class ImageSourceExtensions
     {
         public static ImageSource GetWpfImageSource(this Image image)
         {

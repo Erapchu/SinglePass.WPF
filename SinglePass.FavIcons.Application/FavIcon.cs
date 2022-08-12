@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SinglePass.FavIcons.Application
+﻿namespace SinglePass.FavIcons.Application
 {
     public class FavIcon
     {

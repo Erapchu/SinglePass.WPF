@@ -9,7 +9,7 @@ namespace SinglePass.FavIcons.Repository
 
         public FavIconDbContext(DbContextOptions<FavIconDbContext> options) : base(options)
         {
-            
+
         }
     }
 }

@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using SinglePass.FavIcons.Application;
 using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Utilities;
-using SinglePass.FavIcons.Application;
 using System;
 using System.Linq;
 using System.Threading;

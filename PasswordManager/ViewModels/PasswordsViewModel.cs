@@ -1,7 +1,7 @@
-﻿using MaterialDesignThemes.Wpf;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using MaterialDesignThemes.Wpf;
 using Microsoft.Extensions.Logging;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.Input;
 using PasswordManager.Collections;
 using PasswordManager.Enums;
 using PasswordManager.Helpers;

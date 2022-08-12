@@ -1,5 +1,5 @@
-﻿using MaterialDesignThemes.Wpf;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using MaterialDesignThemes.Wpf;
 using System;
 using System.Windows.Controls;
 

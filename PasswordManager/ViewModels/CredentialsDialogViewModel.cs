@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
 using PasswordManager.Enums;
 using PasswordManager.Helpers;
 using PasswordManager.Models;

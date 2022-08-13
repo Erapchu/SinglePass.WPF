@@ -10,7 +10,8 @@ using System.Threading.Tasks;
 
 namespace SinglePass.WPF.ViewModels
 {
-    public class MainWindowViewModel : ObservableRecipient
+    [INotifyPropertyChanged]
+    public partial class MainWindowViewModel
     {
         #region Design time instance
         private static readonly Lazy<MainWindowViewModel> _lazy = new(GetDesignTimeVM);
@@ -25,15 +26,12 @@ namespace SinglePass.WPF.ViewModels
 
         public event Action<CredentialViewModel> CredentialSelected;
 
-        private AsyncRelayCommand _loadingCommand;
-        private NavigationItemViewModel _selectedNavigationItem;
-
-        public AsyncRelayCommand LoadingCommand => _loadingCommand ??= new AsyncRelayCommand(LoadingAsync);
         public PasswordsViewModel PasswordsVM { get; }
         public SettingsViewModel SettingsVM { get; }
         public CloudSyncViewModel CloudSyncVM { get; }
         public ObservableCollectionDelayed<NavigationItemViewModel> NavigationItems { get; }
 
+        private NavigationItemViewModel _selectedNavigationItem;
         public NavigationItemViewModel SelectedNavigationItem
         {
             get => _selectedNavigationItem;
@@ -88,6 +86,7 @@ namespace SinglePass.WPF.ViewModels
             CredentialSelected?.Invoke(credVM);
         }
 
+        [RelayCommand]
         private async Task LoadingAsync()
         {
             // Delay to boost loading of the window

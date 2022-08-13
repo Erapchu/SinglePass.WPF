@@ -1,0 +1,207 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:SinglePass.WPF.Controls">
+
+    <Color x:Key="MaterialShadow">#AA000000</Color>
+
+    <ControlTemplate x:Key="FlyoutTemplate" TargetType="{x:Type controls:Flyout}">
+        <Border
+            x:Name="PART_Root"
+            Background="{TemplateBinding Background}"
+            BorderBrush="{TemplateBinding BorderBrush}"
+            BorderThickness="{TemplateBinding BorderThickness}">
+            <Border.RenderTransform>
+                <TranslateTransform />
+            </Border.RenderTransform>
+            <Grid>
+                <AdornerDecorator x:Name="PART_ShadowBorder" Visibility="{TemplateBinding ShadowVisibility}">
+                    <controls:FastShadow
+                        BlurRadius="30"
+                        Direction="270"
+                        IsHitTestVisible="False"
+                        Opacity="0.42"
+                        ShadowDepth="0"
+                        Color="{StaticResource MaterialShadow}">
+                        <Border Background="{TemplateBinding Background}" />
+                    </controls:FastShadow>
+                </AdornerDecorator>
+                <AdornerDecorator>
+                    <DockPanel FocusVisualStyle="{x:Null}" Focusable="False">
+                        <ContentPresenter
+                            x:Name="PART_Content"
+                            ContentSource="Content"
+                            DockPanel.Dock="Bottom" />
+                    </DockPanel>
+                </AdornerDecorator>
+            </Grid>
+            <VisualStateManager.VisualStateGroups>
+                <VisualStateGroup>
+                    <VisualState x:Name="Default" />
+                    <VisualState x:Name="Hide">
+                        <Storyboard x:Name="HideStoryboard">
+                            <DoubleAnimationUsingKeyFrames
+                                BeginTime="00:00:00"
+                                Storyboard.TargetName="PART_Root"
+                                Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)">
+                                <SplineDoubleKeyFrame
+                                    x:Name="hideFrame"
+                                    KeySpline="0.25,1,0.05,1"
+                                    KeyTime="00:00:00.750"
+                                    Value="0" />
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames
+                                BeginTime="00:00:00"
+                                Storyboard.TargetName="PART_Root"
+                                Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)">
+                                <SplineDoubleKeyFrame
+                                    x:Name="hideFrameY"
+                                    KeySpline="0.25,1,0.05,1"
+                                    KeyTime="00:00:00.750"
+                                    Value="0" />
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames
+                                BeginTime="00:00:00"
+                                Storyboard.TargetName="PART_Root"
+                                Storyboard.TargetProperty="(UIElement.Opacity)">
+                                <SplineDoubleKeyFrame
+                                    x:Name="fadeOutFrame"
+                                    KeySpline="0.25,1,0.05,1"
+                                    KeyTime="00:00:00.750"
+                                    Value="0" />
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames
+                                BeginTime="00:00:00"
+                                Storyboard.TargetName="PART_ShadowBorder"
+                                Storyboard.TargetProperty="(UIElement.Opacity)">
+                                <SplineDoubleKeyFrame
+                                    x:Name="fadeOutShadowFrame"
+                                    KeySpline="0.25,1,0.05,1"
+                                    KeyTime="00:00:00.750"
+                                    Value="0" />
+                            </DoubleAnimationUsingKeyFrames>
+                        </Storyboard>
+                    </VisualState>
+                    <VisualState x:Name="Show">
+                        <Storyboard x:Name="ShowStoryboard">
+                            <DoubleAnimationUsingKeyFrames
+                                BeginTime="00:00:00"
+                                Storyboard.TargetName="PART_Root"
+                                Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)">
+                                <SplineDoubleKeyFrame
+                                    x:Name="showFrame"
+                                    KeySpline="0.25,1,0.05,1"
+                                    KeyTime="00:00:00.750"
+                                    Value="0" />
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames
+                                BeginTime="00:00:00"
+                                Storyboard.TargetName="PART_Root"
+                                Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)">
+                                <SplineDoubleKeyFrame
+                                    x:Name="showFrameY"
+                                    KeySpline="0.25,1,0.05,1"
+                                    KeyTime="00:00:00.750"
+                                    Value="0" />
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames
+                                BeginTime="00:00:00"
+                                Storyboard.TargetName="PART_Root"
+                                Storyboard.TargetProperty="(UIElement.Opacity)">
+                                <SplineDoubleKeyFrame
+                                    KeySpline="0.25,1,0.05,1"
+                                    KeyTime="00:00:00.750"
+                                    Value="1" />
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames
+                                BeginTime="00:00:00"
+                                Storyboard.TargetName="PART_ShadowBorder"
+                                Storyboard.TargetProperty="(UIElement.Opacity)">
+                                <SplineDoubleKeyFrame
+                                    KeySpline="0.25,1,0.05,1"
+                                    KeyTime="00:00:00.750"
+                                    Value="1" />
+                            </DoubleAnimationUsingKeyFrames>
+                        </Storyboard>
+                    </VisualState>
+                    <VisualState x:Name="HideDirect">
+                        <Storyboard>
+                            <DoubleAnimationUsingKeyFrames
+                                BeginTime="00:00:00"
+                                Storyboard.TargetName="PART_Root"
+                                Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)">
+                                <SplineDoubleKeyFrame KeyTime="0" Value="0" />
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames
+                                BeginTime="00:00:00"
+                                Storyboard.TargetName="PART_Root"
+                                Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)">
+                                <SplineDoubleKeyFrame KeyTime="0" Value="0" />
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames
+                                BeginTime="00:00:00"
+                                Storyboard.TargetName="PART_Root"
+                                Storyboard.TargetProperty="(UIElement.Opacity)">
+                                <SplineDoubleKeyFrame KeyTime="0" Value="0" />
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames
+                                BeginTime="00:00:00"
+                                Storyboard.TargetName="PART_ShadowBorder"
+                                Storyboard.TargetProperty="(UIElement.Opacity)">
+                                <SplineDoubleKeyFrame KeyTime="0" Value="0" />
+                            </DoubleAnimationUsingKeyFrames>
+                        </Storyboard>
+                    </VisualState>
+                    <VisualState x:Name="ShowDirect">
+                        <Storyboard>
+                            <DoubleAnimationUsingKeyFrames
+                                BeginTime="00:00:00"
+                                Storyboard.TargetName="PART_Root"
+                                Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)">
+                                <SplineDoubleKeyFrame KeyTime="0" Value="0" />
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames
+                                BeginTime="00:00:00"
+                                Storyboard.TargetName="PART_Root"
+                                Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)">
+                                <SplineDoubleKeyFrame KeyTime="0" Value="0" />
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames
+                                BeginTime="00:00:00"
+                                Storyboard.TargetName="PART_Root"
+                                Storyboard.TargetProperty="(UIElement.Opacity)">
+                                <SplineDoubleKeyFrame KeyTime="0" Value="1" />
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames
+                                BeginTime="00:00:00"
+                                Storyboard.TargetName="PART_ShadowBorder"
+                                Storyboard.TargetProperty="(UIElement.Opacity)">
+                                <SplineDoubleKeyFrame KeyTime="0" Value="1" />
+                            </DoubleAnimationUsingKeyFrames>
+                        </Storyboard>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateManager.VisualStateGroups>
+        </Border>
+        <ControlTemplate.Triggers>
+            <Trigger Property="Position" Value="Top">
+                <Setter TargetName="PART_Content" Property="DockPanel.Dock" Value="Right" />
+            </Trigger>
+            <Trigger Property="Position" Value="Bottom">
+                <Setter TargetName="PART_Content" Property="DockPanel.Dock" Value="Right" />
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <Style x:Key="FlyoutStyle" TargetType="{x:Type controls:Flyout}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+        <Setter Property="KeyboardNavigation.ControlTabNavigation" Value="Cycle" />
+        <Setter Property="KeyboardNavigation.DirectionalNavigation" Value="Cycle" />
+        <Setter Property="KeyboardNavigation.TabNavigation" Value="Cycle" />
+        <Setter Property="Visibility" Value="Hidden" />
+        <Setter Property="Template" Value="{StaticResource FlyoutTemplate}" />
+    </Style>
+</ResourceDictionary>

@@ -24,7 +24,6 @@ namespace SinglePass.WPF.ViewModels
         }
         #endregion
 
-        private readonly CredentialsCryptoService _credentialsCryptoService;
         private readonly ILogger<PopupViewModel> _logger;
         private readonly CredentialViewModelFactory _credentialViewModelFactory;
         private readonly AddressBarExtractor _addressBarExtractor;
@@ -54,12 +53,10 @@ namespace SinglePass.WPF.ViewModels
         private PopupViewModel() { }
 
         public PopupViewModel(
-            CredentialsCryptoService credentialsCryptoService,
             ILogger<PopupViewModel> logger,
             CredentialViewModelFactory credentialViewModelFactory,
             AddressBarExtractor addressBarExtractor)
         {
-            _credentialsCryptoService = credentialsCryptoService;
             _logger = logger;
             _credentialViewModelFactory = credentialViewModelFactory;
             _addressBarExtractor = addressBarExtractor;

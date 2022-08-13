@@ -112,7 +112,7 @@ namespace SinglePass.WPF.ViewModels
 
         private async Task Login(CloudType cloudType)
         {
-            var windowDialogName = MvvmHelper.MainWindowDialogName;
+            var windowDialogName = DialogIdentifiers.MainWindowName;
             var authorizing = false;
             switch (cloudType)
             {
@@ -237,7 +237,6 @@ namespace SinglePass.WPF.ViewModels
             try
             {
                 MergeProcessing = true;
-                var windowDialogName = MvvmHelper.MainWindowDialogName;
                 var mergeResult = await _syncService.Synchronize(cloudType, SyncPasswordRequired);
 
                 await MaterialMessageBox.ShowAsync(
@@ -246,7 +245,7 @@ namespace SinglePass.WPF.ViewModels
                     : SinglePass.Language.Properties.Resources.SyncFailed,
                     mergeResult.ToString(),
                     MaterialMessageBoxButtons.OK,
-                    windowDialogName);
+                    DialogIdentifiers.MainWindowName);
             }
             catch (Exception ex)
             {
@@ -267,7 +266,6 @@ namespace SinglePass.WPF.ViewModels
             try
             {
                 UploadProcessing = true;
-                var windowDialogName = MvvmHelper.MainWindowDialogName;
                 var success = await _syncService.Upload(cloudType);
 
                 await MaterialMessageBox.ShowAsync(
@@ -278,7 +276,7 @@ namespace SinglePass.WPF.ViewModels
                     ? SinglePass.Language.Properties.Resources.UploadSuccess
                     : SinglePass.Language.Properties.Resources.UploadFailed,
                     MaterialMessageBoxButtons.OK,
-                    windowDialogName);
+                    DialogIdentifiers.MainWindowName);
             }
             catch (Exception ex)
             {
@@ -296,7 +294,7 @@ namespace SinglePass.WPF.ViewModels
             var password = await MaterialInputBox.ShowAsync(
                 SinglePass.Language.Properties.Resources.InputPasswordOfFile,
                 SinglePass.Language.Properties.Resources.Password,
-                MvvmHelper.MainWindowDialogName,
+                DialogIdentifiers.MainWindowName,
                 true);
             return password;
         }

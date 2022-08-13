@@ -79,7 +79,7 @@
     </i:Interaction.Triggers>
     <md:DialogHost
         CloseOnClickAway="False"
-        Identifier="{x:Static helpers:MvvmHelper.MainWindowDialogName}"
+        Identifier="{x:Static helpers:DialogIdentifiers.MainWindowName}"
         Style="{StaticResource MaterialDesignEmbeddedFastDialogHost}">
         <Grid>
             <Grid>

@@ -108,7 +108,6 @@ namespace SinglePass.WPF.ViewModels
             }
 
             NewPasswordHelperText = string.Empty;
-            var dialogIdentifier = MvvmHelper.MainWindowDialogName;
             var success = false;
 
             try
@@ -130,7 +129,7 @@ namespace SinglePass.WPF.ViewModels
                     "Success",
                     "New password applied",
                     MaterialMessageBoxButtons.OK,
-                    dialogIdentifier,
+                    DialogIdentifiers.MainWindowName,
                     PackIconKind.Tick);
             }
         }

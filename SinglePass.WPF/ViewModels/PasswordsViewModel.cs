@@ -131,7 +131,7 @@ namespace SinglePass.WPF.ViewModels
                 SinglePass.Language.Properties.Resources.DeleteItem,
                 string.Format(SinglePass.Language.Properties.Resources.Name0, credVM.NameFieldVM.Value),
                 MaterialMessageBoxButtons.YesNo,
-                MvvmHelper.MainWindowDialogName,
+                DialogIdentifiers.MainWindowName,
                 PackIconKind.Delete);
             if (result == MaterialDialogResult.Yes)
             {

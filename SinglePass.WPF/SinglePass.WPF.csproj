@@ -57,15 +57,11 @@
 	<!--Should be removed after fixes on .NET 6.0.400-->
 	<!--https://github.com/dotnet/wpf/issues/6792-->
 	<!--Issue related to Microsoft.Toolkit.Mvvm NuGet package-->
-	<Target Name="WorkaroundRemoveAnalayzers" BeforeTargets="GenerateTemporaryTargetAssembly">
+	<Target Name="RemoveDuplicateAnalyzers" BeforeTargets="CoreCompile">
 		<ItemGroup>
-			<_TempWorkaroundAnalyzer Include="@(Analyzer)" />
+			<FilteredAnalyzer Include="@(Analyzer->Distinct())" />
 			<Analyzer Remove="@(Analyzer)" />
-		</ItemGroup>
-	</Target>
-	<Target Name="WorkaroundAddAnalayzers" AfterTargets="GenerateTemporaryTargetAssembly">
-		<ItemGroup>
-			<Analyzer Include="@(_TempWorkaroundAnalyzer)" />
+			<Analyzer Include="@(FilteredAnalyzer)" />
 		</ItemGroup>
 	</Target>
 

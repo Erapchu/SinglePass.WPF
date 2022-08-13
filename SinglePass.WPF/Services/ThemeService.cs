@@ -8,7 +8,7 @@ namespace SinglePass.WPF.Services
 {
     public class ThemeService
     {
-        private const string _defaultsSource = "pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml";
+        private const string _defaultsSource = "pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml";
 
         private readonly AppSettingsService _appSettingsService;
         private BundledTheme _bundledThemeDictionary;

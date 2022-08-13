@@ -321,4 +321,16 @@
   <data name="TextCopied" xml:space="preserve">
     <value>Текст скопирован!</value>
   </data>
+  <data name="Authorizing" xml:space="preserve">
+    <value>Авторизация...</value>
+  </data>
+  <data name="PleaseContinueAuthorizationOrCancelIt" xml:space="preserve">
+    <value>Пожалуйста, авторизуйтесь или отмените операцию.</value>
+  </data>
+  <data name="PleaseWait" xml:space="preserve">
+    <value>Пожалуйста, подождите.</value>
+  </data>
+  <data name="SigningOut" xml:space="preserve">
+    <value>Выход из системы...</value>
+  </data>
 </root>

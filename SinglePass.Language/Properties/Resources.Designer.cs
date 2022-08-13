@@ -88,6 +88,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Authorizing....
+        /// </summary>
+        public static string Authorizing {
+            get {
+                return ResourceManager.GetString("Authorizing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cancel.
         /// </summary>
         public static string Cancel {
@@ -484,6 +493,24 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Please, continue authorization or cancel it..
+        /// </summary>
+        public static string PleaseContinueAuthorizationOrCancelIt {
+            get {
+                return ResourceManager.GetString("PleaseContinueAuthorizationOrCancelIt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please, wait..
+        /// </summary>
+        public static string PleaseWait {
+            get {
+                return ResourceManager.GetString("PleaseWait", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Popup.
         /// </summary>
         public static string Popup {
@@ -543,6 +570,15 @@ namespace SinglePass.Language.Properties {
         public static string SignIn {
             get {
                 return ResourceManager.GetString("SignIn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Signing out....
+        /// </summary>
+        public static string SigningOut {
+            get {
+                return ResourceManager.GetString("SigningOut", resourceCulture);
             }
         }
         

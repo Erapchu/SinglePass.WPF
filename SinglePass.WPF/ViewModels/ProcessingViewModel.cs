@@ -6,7 +6,8 @@ using System.Threading;
 
 namespace SinglePass.WPF.ViewModels
 {
-    public class ProcessingViewModel : ObservableObject
+    [INotifyPropertyChanged]
+    public partial class ProcessingViewModel
     {
         #region Design time instance
         private static readonly Lazy<ProcessingViewModel> _lazy = new(GetDesignTimeVM);
@@ -22,24 +23,14 @@ namespace SinglePass.WPF.ViewModels
         #endregion
 
         private readonly string _dialogIdentifier;
+        private readonly CancellationTokenSource _processingCTS;
+
+        [ObservableProperty]
         private string _headText;
+
+        [ObservableProperty]
         private string _midText;
-        private RelayCommand _cancelCommand;
-        private CancellationTokenSource _processingCTS;
 
-        public string HeadText
-        {
-            get => _headText;
-            set => SetProperty(ref _headText, value);
-        }
-
-        public string MidText
-        {
-            get => _midText;
-            set => SetProperty(ref _midText, value);
-        }
-
-        public RelayCommand CancelCommand => _cancelCommand ??= new RelayCommand(Cancel);
         public CancellationToken CancellationToken => _processingCTS.Token;
 
         private ProcessingViewModel() { }
@@ -52,6 +43,7 @@ namespace SinglePass.WPF.ViewModels
             _processingCTS = new CancellationTokenSource();
         }
 
+        [RelayCommand]
         private void Cancel()
         {
             DialogHost.Close(_dialogIdentifier);

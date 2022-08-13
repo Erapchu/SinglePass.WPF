@@ -155,7 +155,7 @@ namespace SinglePass.WPF.ViewModels
             }
             catch (OperationCanceledException)
             {
-                _logger.LogInformation("Authorization process to Google Drive has been cancelled.");
+                _logger.LogWarning($"Authorization process to {cloudType} has been cancelled.");
             }
             catch (Exception ex)
             {

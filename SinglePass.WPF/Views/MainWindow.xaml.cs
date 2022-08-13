@@ -46,6 +46,7 @@ namespace SinglePass.WPF.Views
 
             mainViewModel.CredentialSelected += Vm_CredentialSelected;
             mainViewModel.PasswordsVM.ActiveCredentialDialogVM.EnqueueSnackbarMessage += ActiveCredentialDialogVM_EnqueueSnackbarMessage;
+
             DataContext = mainViewModel;
         }
 

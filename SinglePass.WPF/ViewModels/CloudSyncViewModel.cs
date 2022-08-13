@@ -41,7 +41,6 @@ namespace SinglePass.WPF.ViewModels
         private bool _fetchingUserInfo;
         private ImageSource _googleProfileImage;
         private string _googleUserName;
-        private string _syncStage;
 
         private AsyncRelayCommand<CloudType> _syncCommand;
         private AsyncRelayCommand<CloudType> _loginCommand;
@@ -90,12 +89,6 @@ namespace SinglePass.WPF.ViewModels
             set => SetProperty(ref _googleUserName, value);
         }
 
-        public string SyncState
-        {
-            get => _syncStage;
-            set => SetProperty(ref _syncStage, value);
-        }
-
         public AsyncRelayCommand<CloudType> LoginCommand => _loginCommand ??= new AsyncRelayCommand<CloudType>(Login);
         public AsyncRelayCommand<CloudType> SyncCommand => _syncCommand ??= new AsyncRelayCommand<CloudType>(SyncCredentials);
         public AsyncRelayCommand<CloudType> UploadCommand => _uploadCommand ??= new AsyncRelayCommand<CloudType>(UploadCredentials);
@@ -115,13 +108,6 @@ namespace SinglePass.WPF.ViewModels
             _imageService = imageService;
             _syncService = syncService;
             _logger = logger;
-
-            _syncService.SyncStateChanged += SyncService_SyncStateChanged;
-        }
-
-        private void SyncService_SyncStateChanged(string syncState)
-        {
-            SyncState = syncState;
         }
 
         private async Task Login(CloudType cloudType)

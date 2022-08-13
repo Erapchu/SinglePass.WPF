@@ -59,28 +59,23 @@
                         Visibility="{Binding GoogleDriveEnabled, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                     <Grid Visibility="{Binding GoogleDriveEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="120" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="auto" />
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="100" />
                             <RowDefinition Height="auto" />
                         </Grid.RowDefinitions>
-                        <StackPanel Width="120" Visibility="{Binding FetchingUserInfo, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <ProgressBar
-                                Width="64"
-                                Height="64"
-                                IsIndeterminate="True"
-                                Style="{StaticResource MaterialDesignCircularProgressBar}" />
-                            <TextBlock
-                                Margin="0 8 0 0"
-                                HorizontalAlignment="Center"
-                                Text="{x:Static properties:Resources.Loading}"
-                                TextAlignment="Center"
-                                TextTrimming="CharacterEllipsis" />
-                        </StackPanel>
-                        <StackPanel Width="120" Visibility="{Binding FetchingUserInfo, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                        <TextBlock
+                            Margin="0 8 0 0"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Text="{x:Static properties:Resources.Loading}"
+                            TextAlignment="Center"
+                            TextTrimming="CharacterEllipsis"
+                            Visibility="{Binding FetchingUserInfo, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        <StackPanel Visibility="{Binding FetchingUserInfo, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                             <Ellipse
                                 Width="64"
                                 Height="64"
@@ -139,13 +134,6 @@
                                 </StackPanel>
                             </Button>
                         </StackPanel>
-                        <TextBlock
-                            Grid.Row="1"
-                            MaxWidth="300"
-                            Margin="0 8 0 0"
-                            HorizontalAlignment="Center"
-                            Text="{Binding SyncState}"
-                            TextTrimming="CharacterEllipsis" />
                         <Button
                             Grid.Column="2"
                             Command="{Binding LoginCommand}"

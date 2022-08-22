@@ -18,7 +18,7 @@ namespace SinglePass.WPF.Services
 
     public class FavIconCollector : IFavIconCollector
     {
-        private const int _processingTimeout = 200;
+        private const int _processingTimeout = 100;
         private const string _favIconServiceUrl = "http://www.google.com/s2/favicons?domain_url={0}";
 
         private readonly RegeneratedList<ProcessingImageWrapper> _processingImages = new();

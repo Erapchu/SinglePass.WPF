@@ -45,16 +45,8 @@ namespace SinglePass.WPF.ViewModels
         [NotifyCanExecuteChangedFor(nameof(ChangeHelperPopupHotkeyCommand))]
         private Hotkey _showPopupHotkey;
 
+        [ObservableProperty]
         private BaseTheme _themeMode;
-        public BaseTheme ThemeMode
-        {
-            get => _themeMode;
-            set
-            {
-                SetProperty(ref _themeMode, value);
-                _themeService.ThemeMode = value;
-            }
-        }
 
         private SettingsViewModel() { }
 
@@ -130,6 +122,13 @@ namespace SinglePass.WPF.ViewModels
         private void ClearShowPopupHotkey()
         {
             ShowPopupHotkey = Hotkey.Empty;
+        }
+
+        [RelayCommand]
+        private void ChangeTheme(BaseTheme baseTheme)
+        {
+            _themeService.ThemeMode = baseTheme;
+            ThemeMode = baseTheme;
         }
     }
 }

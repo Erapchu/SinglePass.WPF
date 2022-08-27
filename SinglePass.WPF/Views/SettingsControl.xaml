@@ -15,10 +15,21 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     DataContextChanged="UserControl_DataContextChanged"
+    Loaded="UserControl_Loaded"
     mc:Ignorable="d">
     <UserControl.Resources>
         <ResourceDictionary>
+            <Style
+                x:Key="ThemeButtonStyle"
+                BasedOn="{StaticResource MaterialDesignRaisedButton}"
+                TargetType="{x:Type ButtonBase}">
+                <Setter Property="md:ButtonAssist.CornerRadius" Value="45" />
+                <Setter Property="md:ShadowAssist.ShadowDepth" Value="Depth0" />
+                <Setter Property="Width" Value="48" />
+                <Setter Property="Height" Value="48" />
+            </Style>
             <conv:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
+            <conv:BaseThemeToSelectionConverter x:Key="BaseThemeToSelectionConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid MaxWidth="800">
@@ -40,29 +51,31 @@
                         </StackPanel>
                     </DataTemplate>
                 </GroupBox.HeaderTemplate>
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <StackPanel Grid.Row="1">
-                        <RadioButton
-                            Margin="12 6"
-                            Padding="12 0"
-                            Content="{x:Static properties:Resources.System}"
-                            IsChecked="{Binding ThemeMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static md:BaseTheme.Inherit}}" />
-                        <RadioButton
-                            Margin="12 6"
-                            Padding="12 0"
-                            Content="{x:Static properties:Resources.Dark}"
-                            IsChecked="{Binding ThemeMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static md:BaseTheme.Dark}}" />
-                        <RadioButton
-                            Margin="12 6"
-                            Padding="12 0"
-                            Content="{x:Static properties:Resources.Light}"
-                            IsChecked="{Binding ThemeMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static md:BaseTheme.Light}}" />
-                    </StackPanel>
-                </Grid>
+                <StackPanel Margin="8" Orientation="Horizontal">
+                    <md:Badged Badge="{Binding ThemeMode, Converter={StaticResource BaseThemeToSelectionConverter}, ConverterParameter={x:Static md:BaseTheme.Inherit}}">
+                        <Button
+                            x:Name="AutoButton"
+                            Command="{Binding ChangeThemeCommand}"
+                            CommandParameter="{x:Static md:BaseTheme.Inherit}"
+                            Style="{StaticResource ThemeButtonStyle}" />
+                    </md:Badged>
+                    <md:Badged Margin="16 0 0 0" Badge="{Binding ThemeMode, Converter={StaticResource BaseThemeToSelectionConverter}, ConverterParameter={x:Static md:BaseTheme.Dark}}">
+                        <Button
+                            x:Name="DarkButton"
+                            md:RippleAssist.Feedback="{DynamicResource MaterialDesignLightBackground}"
+                            Command="{Binding ChangeThemeCommand}"
+                            CommandParameter="{x:Static md:BaseTheme.Dark}"
+                            Style="{StaticResource ThemeButtonStyle}" />
+                    </md:Badged>
+                    <md:Badged Margin="16 0 0 0" Badge="{Binding ThemeMode, Converter={StaticResource BaseThemeToSelectionConverter}, ConverterParameter={x:Static md:BaseTheme.Light}}">
+                        <Button
+                            x:Name="LightButton"
+                            md:RippleAssist.Feedback="{DynamicResource MaterialDesignDarkBackground}"
+                            Command="{Binding ChangeThemeCommand}"
+                            CommandParameter="{x:Static md:BaseTheme.Light}"
+                            Style="{StaticResource ThemeButtonStyle}" />
+                    </md:Badged>
+                </StackPanel>
             </GroupBox>
             <GroupBox Margin="16 8" Style="{StaticResource MaterialDesignCardGroupBox}">
                 <GroupBox.HeaderTemplate>

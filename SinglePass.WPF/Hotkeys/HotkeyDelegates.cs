@@ -28,12 +28,8 @@ namespace SinglePass.WPF.Hotkeys
             {
                 var hwndFocus = info.hwndFocus;
                 var caretRect = GetAccessibleCaretRect(hwndFocus);
-
                 var popup = (System.Windows.Application.Current as App).Host.Services.GetService(typeof(PopupControl)) as PopupControl;
 
-                // Obtain popup handle for placement
-                //var popupRect = new WinApiProvider.RECT();
-                //WinApiProvider.GetWindowRect(popupHandle, ref popupRect);
                 if (!RectValid(caretRect))
                 {
                     // Can't accquire caret placement
@@ -57,16 +53,6 @@ namespace SinglePass.WPF.Hotkeys
                 popup.VerticalOffset = caretRect.bottom * DpiUtilities.DefaultDpiY / dpiAtPoint;
                 popup.ForegroundHWND = hwndFocus;
                 popup.IsOpen = true;
-
-                // OK caret placement
-                //WinApiProvider.SetWindowPos(
-                //    popup.Handle,
-                //    IntPtr.Zero,
-                //    caretRect.right,
-                //    caretRect.bottom,
-                //    (int)popup.Width,
-                //    (int)popup.Height,
-                //    WinApiProvider.SWP_NOZORDER);
             }
         }
 

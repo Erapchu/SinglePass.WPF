@@ -1,7 +1,9 @@
-﻿using SinglePass.WPF.ViewModels;
+﻿using SinglePass.WPF.Helpers;
+using SinglePass.WPF.ViewModels;
 using System;
 using System.Windows;
 using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using System.Windows.Interop;
 
 namespace SinglePass.WPF.Views
@@ -32,15 +34,28 @@ namespace SinglePass.WPF.Views
             IsOpen = false;
         }
 
-        private void Popup_Opened(object sender, System.EventArgs e)
+        private void Popup_Opened(object sender, EventArgs e)
         {
-            Handle = ((HwndSource)PresentationSource.FromVisual(Child)).Handle;
+            Mouse.AddPreviewMouseDownOutsideCapturedElementHandler(this, HandleClickOutsideOfControl);
+
             ViewModel.LoadedCommand.Execute(null);
+            Handle = ((HwndSource)PresentationSource.FromVisual(Child)).Handle;
+            WinApiProvider.SetForegroundWindow(Handle);
         }
 
-        private void Popup_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void HandleClickOutsideOfControl(object sender, MouseButtonEventArgs e)
         {
-            if (e.ChangedButton == System.Windows.Input.MouseButton.Left)
+            IsOpen = false;
+        }
+
+        private void Popup_Closed(object sender, EventArgs e)
+        {
+            Mouse.RemovePreviewMouseDownOutsideCapturedElementHandler(this, HandleClickOutsideOfControl);
+        }
+
+        private void Popup_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
                 DraggableThumb.RaiseEvent(e);
         }
 

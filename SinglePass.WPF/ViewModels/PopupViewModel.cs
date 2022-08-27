@@ -64,6 +64,8 @@ namespace SinglePass.WPF.ViewModels
         {
             try
             {
+                Accept?.Invoke();
+
                 var inputData = passFieldViewModel.Value;
                 if (!string.IsNullOrWhiteSpace(inputData))
                 {
@@ -88,8 +90,6 @@ namespace SinglePass.WPF.ViewModels
                     // Send input simulate Ctrl + V
                     var uSent = WindowsKeyboard.SendInput((uint)inputs.Length, inputs, INPUT.Size);
                 }
-
-                Accept?.Invoke();
             }
             catch (Exception ex)
             {

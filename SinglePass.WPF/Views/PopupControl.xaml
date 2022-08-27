@@ -14,11 +14,10 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     AllowsTransparency="True"
-    FocusManager.IsFocusScope="False"
-    Focusable="False"
+    Closed="Popup_Closed"
     MouseDown="Popup_MouseDown"
     Opened="Popup_Opened"
-    Placement="Absolute"
+    Placement="AbsolutePoint"
     PopupAnimation="None"
     StaysOpen="False"
     mc:Ignorable="d">

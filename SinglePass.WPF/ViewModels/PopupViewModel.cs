@@ -11,7 +11,8 @@ using System.Threading.Tasks;
 
 namespace SinglePass.WPF.ViewModels
 {
-    public class PopupViewModel : ObservableObject
+    [INotifyPropertyChanged]
+    public partial class PopupViewModel
     {
         #region Design time instance
         private static readonly Lazy<PopupViewModel> _lazy = new(GetDesignTimeVM);
@@ -32,21 +33,8 @@ namespace SinglePass.WPF.ViewModels
 
         public ObservableCollectionDelayed<CredentialViewModel> DisplayedCredentials { get; private set; } = new();
 
+        [ObservableProperty]
         private CredentialViewModel _selectedCredentialVM;
-        public CredentialViewModel SelectedCredentialVM
-        {
-            get => _selectedCredentialVM;
-            set => SetProperty(ref _selectedCredentialVM, value);
-        }
-
-        private RelayCommand<PassFieldViewModel> _setAndCloseCommand;
-        public RelayCommand<PassFieldViewModel> SetAndCloseCommand => _setAndCloseCommand ??= new RelayCommand<PassFieldViewModel>(SetAndClose);
-
-        private RelayCommand _closeCommand;
-        public RelayCommand CloseCommand => _closeCommand ??= new RelayCommand(Close);
-
-        private AsyncRelayCommand _loadedCommand;
-        public AsyncRelayCommand LoadedCommand => _loadedCommand ??= new AsyncRelayCommand(Loaded);
 
         public IntPtr ForegroundHWND { get; set; }
 
@@ -62,11 +50,13 @@ namespace SinglePass.WPF.ViewModels
             _addressBarExtractor = addressBarExtractor;
         }
 
+        [RelayCommand]
         private void Close()
         {
             Accept?.Invoke();
         }
 
+        [RelayCommand]
         private void SetAndClose(PassFieldViewModel passFieldViewModel)
         {
             try
@@ -104,6 +94,7 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
+        [RelayCommand]
         private Task Loaded()
         {
             return Task.Run(() =>

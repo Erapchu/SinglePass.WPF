@@ -77,6 +77,7 @@
                 x:Key="CredentialPopupItemStyle"
                 BasedOn="{StaticResource MaterialDesignListBoxItem}"
                 TargetType="{x:Type ListBoxItem}" />
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         </ResourceDictionary>
     </Popup.Resources>
     <Grid>
@@ -89,7 +90,7 @@
                 </Grid.RowDefinitions>
                 <Border
                     Width="36"
-                    Height="5"
+                    Height="4"
                     Background="{DynamicResource MaterialDesignTextFieldBoxHoverBackground}"
                     CornerRadius="4" />
                 <Button
@@ -100,20 +101,26 @@
                     HorizontalAlignment="Right"
                     Command="{Binding CloseCommand}"
                     Content="{md:PackIcon Kind=Close}"
+                    Cursor="Arrow"
                     Style="{StaticResource MaterialDesignFlatButton}" />
-                <ListBox
-                    x:Name="CredListBox"
-                    Grid.Row="1"
-                    HorizontalContentAlignment="Stretch"
-                    md:RippleAssist.IsDisabled="True"
-                    ItemContainerStyle="{StaticResource CredentialPopupItemStyle}"
-                    ItemTemplate="{StaticResource CredentialDataTemplate}"
-                    ItemsSource="{Binding DisplayedCredentials}"
-                    SelectedItem="{Binding SelectedCredentialVM}">
-                    <ListBox.Resources>
-                        <Style BasedOn="{StaticResource MaterialDesignScrollBarMinimal}" TargetType="ScrollBar" />
-                    </ListBox.Resources>
-                </ListBox>
+                <Grid Grid.Row="1">
+                    <ListBox
+                        x:Name="CredListBox"
+                        HorizontalContentAlignment="Stretch"
+                        md:RippleAssist.IsDisabled="True"
+                        ItemContainerStyle="{StaticResource CredentialPopupItemStyle}"
+                        ItemTemplate="{StaticResource CredentialDataTemplate}"
+                        ItemsSource="{Binding DisplayedCredentials}"
+                        SelectedItem="{Binding SelectedCredentialVM}">
+                        <ListBox.Resources>
+                            <Style BasedOn="{StaticResource MaterialDesignScrollBarMinimal}" TargetType="ScrollBar" />
+                        </ListBox.Resources>
+                    </ListBox>
+                    <ProgressBar
+                        IsIndeterminate="True"
+                        Style="{StaticResource MaterialDesignCircularProgressBar}"
+                        Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                </Grid>
             </Grid>
         </Border>
     </Grid>

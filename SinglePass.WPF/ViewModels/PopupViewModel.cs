@@ -36,6 +36,9 @@ namespace SinglePass.WPF.ViewModels
         [ObservableProperty]
         private CredentialViewModel _selectedCredentialVM;
 
+        [ObservableProperty]
+        private bool _isLoading;
+
         public IntPtr ForegroundHWND { get; set; }
 
         private PopupViewModel() { }
@@ -100,10 +103,11 @@ namespace SinglePass.WPF.ViewModels
             return Task.Run(() =>
             {
                 var tempCredentialsVM = new List<CredentialViewModel>();
-                tempCredentialsVM.AddRange(_credentialViewModelFactory.ProvideAllNew());
-
                 try
                 {
+                    IsLoading = true;
+                    tempCredentialsVM.AddRange(_credentialViewModelFactory.ProvideAllNew());
+
                     var addressBarString = _addressBarExtractor.ExtractAddressBar(ForegroundHWND);
                     if (!addressBarString.StartsWith("http"))
                         addressBarString = "http://" + addressBarString;
@@ -129,6 +133,7 @@ namespace SinglePass.WPF.ViewModels
                 {
                     DisplayedCredentials = new ObservableCollectionDelayed<CredentialViewModel>(tempCredentialsVM);
                     OnPropertyChanged(nameof(DisplayedCredentials));
+                    IsLoading = false;
                 }
             });
         }

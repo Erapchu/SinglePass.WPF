@@ -75,7 +75,7 @@ namespace SinglePass.WPF.ViewModels
             _showPopupHotkey = _appSettingsService.ShowPopupHotkey;
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanChangePassword))]
         private async Task ChangePasswordAsync()
         {
             if (string.IsNullOrWhiteSpace(NewPassword) || NewPassword.Length < 8)
@@ -111,6 +111,11 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
+        private bool CanChangePassword()
+        {
+            return !string.IsNullOrWhiteSpace(NewPassword);
+        }
+
         [RelayCommand]
         private void ChangeHelperPopupHotkey(System.Windows.Input.KeyEventArgs args)
         {
@@ -121,15 +126,10 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
-        [RelayCommand(CanExecute = nameof(CanChangePassword))]
+        [RelayCommand]
         private void ClearShowPopupHotkey()
         {
             ShowPopupHotkey = Hotkey.Empty;
-        }
-
-        private bool CanChangePassword()
-        {
-            return !string.IsNullOrWhiteSpace(NewPassword);
         }
     }
 }

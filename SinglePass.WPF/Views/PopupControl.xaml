@@ -18,7 +18,7 @@
     Focusable="False"
     MouseDown="Popup_MouseDown"
     Opened="Popup_Opened"
-    Placement="AbsolutePoint"
+    Placement="Absolute"
     PopupAnimation="None"
     StaysOpen="False"
     mc:Ignorable="d">

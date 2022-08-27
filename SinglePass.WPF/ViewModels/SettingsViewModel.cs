@@ -12,7 +12,8 @@ using System.Threading.Tasks;
 
 namespace SinglePass.WPF.ViewModels
 {
-    public class SettingsViewModel : ObservableRecipient
+    [INotifyPropertyChanged]
+    public partial class SettingsViewModel
     {
         #region Design time instance
         private static readonly Lazy<SettingsViewModel> _lazy = new(GetDesignTimeVM);
@@ -30,13 +31,19 @@ namespace SinglePass.WPF.ViewModels
         private readonly CredentialsCryptoService _credentialsCryptoService;
         private readonly ILogger<SettingsViewModel> _logger;
         private readonly HotkeysService _hotkeysService;
-        private string _newPassword;
-        private string _newPasswordHelperText;
-        private AsyncRelayCommand _changePasswordCommand;
-        private RelayCommand<System.Windows.Input.KeyEventArgs> _changeHelperPopupHotkeyCommand;
-        private RelayCommand _clearShowPopupHotkeyCommand;
 
         public event Action NewPasswordIsSet;
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(ChangePasswordCommand))]
+        private string _newPassword;
+
+        [ObservableProperty]
+        private string _newPasswordHelperText;
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(ChangeHelperPopupHotkeyCommand))]
+        private Hotkey _showPopupHotkey;
 
         private BaseTheme _themeMode;
         public BaseTheme ThemeMode
@@ -48,37 +55,6 @@ namespace SinglePass.WPF.ViewModels
                 _themeService.ThemeMode = value;
             }
         }
-
-        public string NewPassword
-        {
-            get => _newPassword;
-            set
-            {
-                SetProperty(ref _newPassword, value);
-                ChangePasswordCommand.NotifyCanExecuteChanged();
-            }
-        }
-
-        public string NewPasswordHelperText
-        {
-            get => _newPasswordHelperText;
-            set => SetProperty(ref _newPasswordHelperText, value);
-        }
-
-        private Hotkey _showPopupHotkey;
-        public Hotkey ShowPopupHotkey
-        {
-            get => _showPopupHotkey;
-            set
-            {
-                SetProperty(ref _showPopupHotkey, value);
-                ChangeHelperPopupHotkeyCommand.NotifyCanExecuteChanged();
-            }
-        }
-
-        public AsyncRelayCommand ChangePasswordCommand => _changePasswordCommand ??= new AsyncRelayCommand(ChangePasswordAsync, CanChangePassword);
-        public RelayCommand<System.Windows.Input.KeyEventArgs> ChangeHelperPopupHotkeyCommand => _changeHelperPopupHotkeyCommand ??= new RelayCommand<System.Windows.Input.KeyEventArgs>(ChangeHelperPopupHotkey);
-        public RelayCommand ClearShowPopupHotkeyCommand => _clearShowPopupHotkeyCommand ??= new RelayCommand(ClearShowPopupHotkey);
 
         private SettingsViewModel() { }
 
@@ -99,6 +75,7 @@ namespace SinglePass.WPF.ViewModels
             _showPopupHotkey = _appSettingsService.ShowPopupHotkey;
         }
 
+        [RelayCommand]
         private async Task ChangePasswordAsync()
         {
             if (string.IsNullOrWhiteSpace(NewPassword) || NewPassword.Length < 8)
@@ -134,6 +111,7 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
+        [RelayCommand]
         private void ChangeHelperPopupHotkey(System.Windows.Input.KeyEventArgs args)
         {
             if (_hotkeysService.GetHotkeyForKeyPress(args, out Hotkey hotkey))
@@ -143,6 +121,7 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
+        [RelayCommand(CanExecute = nameof(CanChangePassword))]
         private void ClearShowPopupHotkey()
         {
             ShowPopupHotkey = Hotkey.Empty;

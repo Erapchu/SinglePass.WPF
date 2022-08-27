@@ -36,6 +36,8 @@ namespace SinglePass.WPF.ViewModels
         private RelayCommand<System.Windows.Input.KeyEventArgs> _changeHelperPopupHotkeyCommand;
         private RelayCommand _clearShowPopupHotkeyCommand;
 
+        public event Action NewPasswordIsSet;
+
         private BaseTheme _themeMode;
         public BaseTheme ThemeMode
         {
@@ -73,8 +75,6 @@ namespace SinglePass.WPF.ViewModels
                 ChangeHelperPopupHotkeyCommand.NotifyCanExecuteChanged();
             }
         }
-
-        public event Action NewPasswordIsSet;
 
         public AsyncRelayCommand ChangePasswordCommand => _changePasswordCommand ??= new AsyncRelayCommand(ChangePasswordAsync, CanChangePassword);
         public RelayCommand<System.Windows.Input.KeyEventArgs> ChangeHelperPopupHotkeyCommand => _changeHelperPopupHotkeyCommand ??= new RelayCommand<System.Windows.Input.KeyEventArgs>(ChangeHelperPopupHotkey);

@@ -34,7 +34,7 @@ namespace SinglePass.WPF.Views
             if (windowSettings is not null)
             {
                 var windowRect = new Rect(windowSettings.Left, windowSettings.Top, windowSettings.Width, windowSettings.Height);
-                if (WindowPositionHelper.IsOnPrimaryScreen(windowRect))
+                if (WindowPositionHelper.CheckIsOnAnyScreen(windowRect))
                 {
                     Left = windowSettings.Left;
                     Top = windowSettings.Top;

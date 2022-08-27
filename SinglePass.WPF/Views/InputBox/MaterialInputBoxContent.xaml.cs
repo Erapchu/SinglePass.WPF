@@ -9,15 +9,15 @@ namespace SinglePass.WPF.Views.InputBox
     /// </summary>
     public partial class MaterialInputBoxContent : UserControl
     {
-        private readonly bool _passwordInput;
+        private readonly bool _isPassword;
         private MaterialInputBoxViewModel ViewModel => DataContext as MaterialInputBoxViewModel;
 
-        public MaterialInputBoxContent(bool passwordInput)
+        public MaterialInputBoxContent(bool isPassword)
         {
             InitializeComponent();
-            _passwordInput = passwordInput;
+            _isPassword = isPassword;
 
-            if (_passwordInput)
+            if (_isPassword)
                 PasswordInputBox.Visibility = Visibility.Visible;
             else
                 TextInputBox.Visibility = Visibility.Visible;
@@ -26,7 +26,7 @@ namespace SinglePass.WPF.Views.InputBox
         private async void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             await Task.Delay(200);
-            if (_passwordInput)
+            if (_isPassword)
                 PasswordInputBox.Focus();
             else
                 TextInputBox.Focus();

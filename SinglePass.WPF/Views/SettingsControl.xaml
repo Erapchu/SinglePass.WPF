@@ -57,7 +57,8 @@
                             x:Name="AutoButton"
                             Command="{Binding ChangeThemeCommand}"
                             CommandParameter="{x:Static md:BaseTheme.Inherit}"
-                            Style="{StaticResource ThemeButtonStyle}" />
+                            Style="{StaticResource ThemeButtonStyle}"
+                            ToolTip="{x:Static properties:Resources.System}" />
                     </md:Badged>
                     <md:Badged Margin="16 0 0 0" Badge="{Binding ThemeMode, Converter={StaticResource BaseThemeToSelectionConverter}, ConverterParameter={x:Static md:BaseTheme.Dark}}">
                         <Button
@@ -65,7 +66,8 @@
                             md:RippleAssist.Feedback="{DynamicResource MaterialDesignLightBackground}"
                             Command="{Binding ChangeThemeCommand}"
                             CommandParameter="{x:Static md:BaseTheme.Dark}"
-                            Style="{StaticResource ThemeButtonStyle}" />
+                            Style="{StaticResource ThemeButtonStyle}"
+                            ToolTip="{x:Static properties:Resources.Dark}" />
                     </md:Badged>
                     <md:Badged Margin="16 0 0 0" Badge="{Binding ThemeMode, Converter={StaticResource BaseThemeToSelectionConverter}, ConverterParameter={x:Static md:BaseTheme.Light}}">
                         <Button
@@ -73,7 +75,8 @@
                             md:RippleAssist.Feedback="{DynamicResource MaterialDesignDarkBackground}"
                             Command="{Binding ChangeThemeCommand}"
                             CommandParameter="{x:Static md:BaseTheme.Light}"
-                            Style="{StaticResource ThemeButtonStyle}" />
+                            Style="{StaticResource ThemeButtonStyle}"
+                            ToolTip="{x:Static properties:Resources.Light}" />
                     </md:Badged>
                 </StackPanel>
             </GroupBox>

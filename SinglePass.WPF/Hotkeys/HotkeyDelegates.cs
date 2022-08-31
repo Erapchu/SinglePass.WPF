@@ -28,7 +28,7 @@ namespace SinglePass.WPF.Hotkeys
             {
                 var hwndFocus = info.hwndFocus;
                 var caretRect = GetAccessibleCaretRect(hwndFocus);
-                var popup = (System.Windows.Application.Current as App).Host.Services.GetService(typeof(PopupControl)) as PopupControl;
+                var popup = (System.Windows.Application.Current as App).Services.GetService(typeof(PopupControl)) as PopupControl;
 
                 if (!RectValid(caretRect))
                 {

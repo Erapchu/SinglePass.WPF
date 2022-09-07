@@ -1,4 +1,5 @@
-﻿using SinglePass.WPF.Helpers;
+﻿using SinglePass.WPF.Controls;
+using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Views;
 using System;
 using System.Collections.Generic;
@@ -28,7 +29,8 @@ namespace SinglePass.WPF.Hotkeys
             {
                 var hwndFocus = info.hwndFocus;
                 var caretRect = GetAccessibleCaretRect(hwndFocus);
-                var popup = (System.Windows.Application.Current as App).Services.GetService(typeof(PopupControl)) as PopupControl;
+                //var popup = (System.Windows.Application.Current as App).Services.GetService(typeof(PopupControl)) as PopupControl;
+                var popup = new MaterialWindow();
 
                 if (!RectValid(caretRect))
                 {
@@ -49,10 +51,25 @@ namespace SinglePass.WPF.Hotkeys
                 // https://stackoverflow.com/questions/1918877/how-can-i-get-the-dpi-in-wpf
                 // VisualTreeHelper.GetDpi(Visual visual)
                 var dpiAtPoint = DpiUtilities.GetDpiForNearestMonitor(caretRect.right, caretRect.bottom);
-                popup.HorizontalOffset = caretRect.right * DpiUtilities.DefaultDpiX / dpiAtPoint;
-                popup.VerticalOffset = caretRect.bottom * DpiUtilities.DefaultDpiY / dpiAtPoint;
-                popup.ForegroundHWND = hwndFocus;
-                popup.IsOpen = true;
+                popup.Left = caretRect.right * DpiUtilities.DefaultDpiX / dpiAtPoint;
+                popup.Top = caretRect.bottom * DpiUtilities.DefaultDpiY / dpiAtPoint;
+                popup.Width = 200;
+                popup.Height = 200;
+                popup.Deactivated += (object sender, EventArgs e) =>
+                {
+                    try
+                    {
+                        popup.Close();
+                    }
+                    catch { }
+                };
+                popup.Show();
+                var popuHandle = new WindowInteropHelper(popup).EnsureHandle();
+                WinApiProvider.SetForegroundWindow(popuHandle);
+                //popup.HorizontalOffset = caretRect.right * DpiUtilities.DefaultDpiX / dpiAtPoint;
+                //popup.VerticalOffset = caretRect.bottom * DpiUtilities.DefaultDpiY / dpiAtPoint;
+                //popup.ForegroundHWND = hwndFocus;
+                //popup.IsOpen = true;
             }
         }
 

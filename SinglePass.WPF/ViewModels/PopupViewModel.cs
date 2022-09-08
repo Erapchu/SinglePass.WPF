@@ -98,7 +98,7 @@ namespace SinglePass.WPF.ViewModels
         }
 
         [RelayCommand]
-        private Task Loaded()
+        private Task Loading()
         {
             return Task.Run(() =>
             {

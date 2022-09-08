@@ -38,7 +38,7 @@ namespace SinglePass.WPF.Views
         {
             Mouse.AddPreviewMouseDownOutsideCapturedElementHandler(this, HandleClickOutsideOfControl);
 
-            ViewModel.LoadedCommand.Execute(null);
+            ViewModel.LoadingCommand.Execute(null);
             Handle = ((HwndSource)PresentationSource.FromVisual(Child)).Handle;
             WinApiProvider.SetForegroundWindow(Handle);
         }

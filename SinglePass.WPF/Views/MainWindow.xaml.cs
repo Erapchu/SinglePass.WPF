@@ -84,12 +84,11 @@ namespace SinglePass.WPF.Views
                 e.Handled = true;
         }
 
-        private async void MaterialWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private void MaterialWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (e.NewValue is bool visibility && visibility && ViewModel.SelectedNavigationItem?.Content is PasswordsControl passwordsControl)
             {
-                await Task.Delay(1);
-                passwordsControl.SearchTextBox.Focus();
+                Application.Current.Dispatcher.InvokeAsync(() => passwordsControl.SearchTextBox.Focus());
             }
         }
 

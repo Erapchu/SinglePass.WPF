@@ -9,6 +9,7 @@
     xmlns:local="clr-namespace:SinglePass.WPF.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:properties="clr-namespace:SinglePass.Language.Properties;assembly=SinglePass.Language"
     xmlns:vm="clr-namespace:SinglePass.WPF.ViewModels"
     Title=""
     Width="260"
@@ -18,6 +19,7 @@
     d:DesignWidth="260"
     Closing="Window_Closing"
     Deactivated="Window_Deactivated"
+    Loaded="MaterialWindow_Loaded"
     ResizeMode="NoResize"
     ShowInTaskbar="False"
     UseLayoutRounding="True"
@@ -86,10 +88,18 @@
             <i:InvokeCommandAction Command="{Binding LoadingCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
-    <Grid>
+    <Grid Margin="0 32 0 0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <TextBox
+            x:Name="SearchTextBox"
+            Margin="4 0 4 4"
+            md:HintAssist.Hint="{x:Static properties:Resources.Search}" />
         <ListBox
             x:Name="CredListBox"
-            Margin="0 36 0 0"
+            Grid.Row="1"
             HorizontalContentAlignment="Stretch"
             md:RippleAssist.IsDisabled="True"
             ItemContainerStyle="{StaticResource CredentialPopupItemStyle}"

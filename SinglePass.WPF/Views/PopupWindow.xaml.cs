@@ -1,6 +1,7 @@
 ﻿using SinglePass.WPF.Controls;
 using SinglePass.WPF.ViewModels;
 using System;
+using System.Windows;
 
 namespace SinglePass.WPF.Views
 {
@@ -42,6 +43,11 @@ namespace SinglePass.WPF.Views
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             IsClosed = true;
+        }
+
+        private void MaterialWindow_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        {
+            Application.Current.Dispatcher.InvokeAsync(() => SearchTextBox.Focus());
         }
     }
 }

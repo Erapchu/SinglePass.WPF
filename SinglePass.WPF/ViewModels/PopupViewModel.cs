@@ -124,7 +124,7 @@ namespace SinglePass.WPF.ViewModels
                     tempCredentialsVM.AddRange(_credentialViewModelFactory.ProvideAllNew());
 
                     var addressBarString = _addressBarExtractor.ExtractAddressBar(ForegroundHWND);
-                    if (addressBarString is not null)
+                    if (!string.IsNullOrWhiteSpace(addressBarString))
                     {
                         if (!addressBarString.StartsWith("http"))
                             addressBarString = "http://" + addressBarString;
@@ -141,6 +141,12 @@ namespace SinglePass.WPF.ViewModels
                                 .ThenByDescending(c => c.LastModifiedTime)
                                 .ToList();
                         }
+                    }
+                    else
+                    {
+                        tempCredentialsVM = tempCredentialsVM
+                            .OrderByDescending(c => c.LastModifiedTime)
+                            .ToList();
                     }
 
                     _credentialVMs.AddRange(tempCredentialsVM);

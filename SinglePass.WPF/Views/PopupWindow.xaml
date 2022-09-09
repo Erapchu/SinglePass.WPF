@@ -98,6 +98,7 @@
             x:Name="SearchTextBox"
             Margin="4 0 4 4"
             md:HintAssist.Hint="{x:Static properties:Resources.Search}"
+            md:TextFieldAssist.HasClearButton="True"
             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="PreviewKeyDown">

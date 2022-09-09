@@ -96,6 +96,7 @@
         <TextBox
             x:Name="SearchTextBox"
             Margin="4 0 4 4"
+            Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
             md:HintAssist.Hint="{x:Static properties:Resources.Search}" />
         <ListBox
             x:Name="CredListBox"

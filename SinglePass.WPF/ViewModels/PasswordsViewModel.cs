@@ -19,7 +19,8 @@ using Unidecode.NET;
 
 namespace SinglePass.WPF.ViewModels
 {
-    public class PasswordsViewModel : ObservableRecipient
+    [INotifyPropertyChanged]
+    public partial class PasswordsViewModel
     {
         #region Design time instance
         private static readonly Lazy<PasswordsViewModel> _lazy = new(GetDesignTimeVM);
@@ -45,12 +46,6 @@ namespace SinglePass.WPF.ViewModels
         private readonly CredentialViewModelFactory _credentialViewModelFactory;
 
         public event Action<CredentialViewModel> CredentialSelected;
-
-        private RelayCommand _addCredentialCommand;
-        public RelayCommand AddCredentialCommand => _addCredentialCommand ??= new RelayCommand(AddCredential);
-
-        private RelayCommand<KeyEventArgs> _searchKeyEventCommand;
-        public RelayCommand<KeyEventArgs> SearchKeyEventCommand => _searchKeyEventCommand ??= new RelayCommand<KeyEventArgs>(HandleSearchKeyEvent);
 
         public ObservableCollectionDelayed<CredentialViewModel> DisplayedCredentials { get; private set; } = new();
         public CredentialsDialogViewModel ActiveCredentialDialogVM { get; }
@@ -258,6 +253,7 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
+        [RelayCommand]
         private void AddCredential()
         {
             ActiveCredentialDialogVM.CredentialViewModel = _credentialViewModelFactory.ProvideNew(Credential.CreateNew());
@@ -266,7 +262,8 @@ namespace SinglePass.WPF.ViewModels
             ActiveCredentialDialogVM.SetFocus();
         }
 
-        private void HandleSearchKeyEvent(KeyEventArgs args)
+        [RelayCommand]
+        private void HandleSearchKey(KeyEventArgs args)
         {
             if (args is null)
                 return;

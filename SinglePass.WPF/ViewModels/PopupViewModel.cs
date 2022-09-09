@@ -120,9 +120,9 @@ namespace SinglePass.WPF.ViewModels
                         var domainsString = string.Join('.', domains.TakeLast(2));
 
                         tempCredentialsVM = tempCredentialsVM
-                        .Where(c => c.SiteFieldVM.Value != null && c.SiteFieldVM.Value.Contains(domainsString))
-                        .OrderByDescending(c => c.LastModifiedTime)
-                        .ToList();
+                            .OrderByDescending(c => c.SiteFieldVM.Value is null ? -1 : c.SiteFieldVM.Value.Contains(domainsString) ? 1 : -1)
+                            .ThenByDescending(c => c.LastModifiedTime)
+                            .ToList();
                     }
                 }
                 catch (Exception ex)

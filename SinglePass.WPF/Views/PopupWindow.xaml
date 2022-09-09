@@ -20,6 +20,7 @@
     Closing="Window_Closing"
     Deactivated="Window_Deactivated"
     Loaded="MaterialWindow_Loaded"
+    PreviewKeyDown="MaterialWindow_PreviewKeyDown"
     ResizeMode="NoResize"
     ShowInTaskbar="False"
     UseLayoutRounding="True"

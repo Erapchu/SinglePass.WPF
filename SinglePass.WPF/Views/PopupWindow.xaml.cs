@@ -49,5 +49,11 @@ namespace SinglePass.WPF.Views
         {
             Application.Current.Dispatcher.InvokeAsync(() => SearchTextBox.Focus());
         }
+
+        private void MaterialWindow_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Escape)
+                Close();
+        }
     }
 }

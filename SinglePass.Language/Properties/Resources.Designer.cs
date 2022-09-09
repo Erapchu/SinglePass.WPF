@@ -106,6 +106,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Can&apos;t merge credentials.
+        /// </summary>
+        public static string CanTMergeCredentials {
+            get {
+                return ResourceManager.GetString("CanTMergeCredentials", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CAPS LOCK enabled.
         /// </summary>
         public static string CAPSLOCKEnabled {
@@ -174,6 +183,15 @@ namespace SinglePass.Language.Properties {
         public static string CreatedFormatted {
             get {
                 return ResourceManager.GetString("CreatedFormatted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Credentials changed:.
+        /// </summary>
+        public static string CredentialsChanged {
+            get {
+                return ResourceManager.GetString("CredentialsChanged", resourceCulture);
             }
         }
         
@@ -394,6 +412,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to New credentials added:.
+        /// </summary>
+        public static string NewCredentialsAdded {
+            get {
+                return ResourceManager.GetString("NewCredentialsAdded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to New item.
         /// </summary>
         public static string NewItem {
@@ -417,6 +444,15 @@ namespace SinglePass.Language.Properties {
         public static string No {
             get {
                 return ResourceManager.GetString("No", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No any changes.
+        /// </summary>
+        public static string NoAnyChanges {
+            get {
+                return ResourceManager.GetString("NoAnyChanges", resourceCulture);
             }
         }
         

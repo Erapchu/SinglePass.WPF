@@ -4,6 +4,7 @@ using SinglePass.FavIcons.Application;
 using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Utilities;
 using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,6 +27,7 @@ namespace SinglePass.WPF.Services
         private readonly ImageService _imageService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly CancellationTokenSource _processingCTS = new();
+        private readonly ConcurrentDictionary<string, ImageSource> _imagesCache = new();
 
         public FavIconCollector(
             ILogger<FavIconCollector> logger,
@@ -46,7 +48,16 @@ namespace SinglePass.WPF.Services
                 if (string.IsNullOrWhiteSpace(imageUrlString) || setPropertyAction is null)
                     return;
 
-                _processingImages.Add(new ProcessingImageWrapper(imageUrlString, setPropertyAction));
+                var processingImageWrapper = new ProcessingImageWrapper(imageUrlString, setPropertyAction);
+
+                if (_imagesCache.TryGetValue(processingImageWrapper.Host, out ImageSource image))
+                {
+                    processingImageWrapper.SetPropertyAction.Invoke(image);
+                }
+                else
+                {
+                    _processingImages.Add(processingImageWrapper);
+                }
             }
             catch (Exception ex)
             {
@@ -87,10 +98,12 @@ namespace SinglePass.WPF.Services
                         // Set existing to UI
                         foreach (var processingImage in processingWrappers)
                         {
+                            ImageSource cachedImageSource;
                             if (tempFavIconCache.TryGetValue(processingImage.Host, out FavIcon favIcon))
                             {
                                 var imageSource = ImageSourceHelper.ToImageSource(favIcon.Bytes);
                                 processingImage.SetPropertyAction.Invoke(imageSource);
+                                cachedImageSource = imageSource;
                             }
                             else
                             {
@@ -104,7 +117,10 @@ namespace SinglePass.WPF.Services
                                 await favIconCacheService.SetCachedImage(freshFavIcon);
                                 tempFavIconCache.TryAdd(processingImage.Host, freshFavIcon);
                                 processingImage.SetPropertyAction.Invoke(bitmapImage);
+                                cachedImageSource = bitmapImage;
                             }
+
+                            _imagesCache.TryAdd(processingImage.Host, cachedImageSource);
                         }
                     }
 

@@ -27,5 +27,29 @@ namespace SinglePass.WPF.Helpers
                 return result;
             }
         }
+
+        /// <summary>
+        /// Shifts window to nearest screen if it's out of it.
+        /// </summary>
+        /// <param name="window">Target window.</param>
+        public static void ShiftWindowToScreen(Window window)
+        {
+            var windowPoint = new System.Drawing.Point((int)window.Left, (int)window.Top);
+            Screen activeScreen = Screen.FromPoint(windowPoint);
+
+            var windowRight = window.Left + window.Width;
+            var screenRight = activeScreen.WorkingArea.X + activeScreen.WorkingArea.Width;
+            if (windowRight > screenRight)
+            {
+                window.Left = screenRight - window.Width;
+            }
+
+            var windowBottom = window.Top + window.Height;
+            var screenBottom = activeScreen.WorkingArea.Y + activeScreen.WorkingArea.Height;
+            if (windowBottom > screenBottom)
+            {
+                window.Top = screenBottom - window.Height;
+            }
+        }
     }
 }

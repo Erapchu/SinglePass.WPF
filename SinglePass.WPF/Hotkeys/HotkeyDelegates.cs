@@ -1,11 +1,9 @@
 ﻿using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Views;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Controls.Primitives;
 using System.Windows.Interop;
 using UIAutomationClient;
 
@@ -16,8 +14,7 @@ namespace SinglePass.WPF.Hotkeys
         public static void PopupHotkeyHandler()
         {
             // Prevent duplicates
-            var popups = GetOpenPopups();
-            if (popups != null && popups.Any(p => p is PopupControl))
+            if (IsAnyPopupWindowOpened())
             {
                 return;
             }
@@ -28,7 +25,7 @@ namespace SinglePass.WPF.Hotkeys
             {
                 var hwndFocus = info.hwndFocus;
                 var caretRect = GetAccessibleCaretRect(hwndFocus);
-                var popup = (System.Windows.Application.Current as App).Services.GetService(typeof(PopupControl)) as PopupControl;
+                var popup = (System.Windows.Application.Current as App).Services.GetService(typeof(PopupWindow)) as PopupWindow;
 
                 if (!RectValid(caretRect))
                 {
@@ -49,21 +46,23 @@ namespace SinglePass.WPF.Hotkeys
                 // https://stackoverflow.com/questions/1918877/how-can-i-get-the-dpi-in-wpf
                 // VisualTreeHelper.GetDpi(Visual visual)
                 var dpiAtPoint = DpiUtilities.GetDpiForNearestMonitor(caretRect.right, caretRect.bottom);
-                popup.HorizontalOffset = caretRect.right * DpiUtilities.DefaultDpiX / dpiAtPoint;
-                popup.VerticalOffset = caretRect.bottom * DpiUtilities.DefaultDpiY / dpiAtPoint;
+                popup.Left = caretRect.right * DpiUtilities.DefaultDpiX / dpiAtPoint;
+                popup.Top = caretRect.bottom * DpiUtilities.DefaultDpiY / dpiAtPoint;
+                WindowPositionHelper.ShiftWindowToScreen(popup);
                 popup.ForegroundHWND = hwndFocus;
-                popup.IsOpen = true;
+                popup.Show();
+                var popuHandle = new WindowInteropHelper(popup).EnsureHandle();
+                WinApiProvider.SetForegroundWindow(popuHandle);
+                //popup.HorizontalOffset = caretRect.right * DpiUtilities.DefaultDpiX / dpiAtPoint;
+                //popup.VerticalOffset = caretRect.bottom * DpiUtilities.DefaultDpiY / dpiAtPoint;
+                //popup.ForegroundHWND = hwndFocus;
+                //popup.IsOpen = true;
             }
         }
 
-        private static IEnumerable<Popup> GetOpenPopups()
+        private static bool IsAnyPopupWindowOpened()
         {
-            return PresentationSource.CurrentSources.OfType<HwndSource>()
-                .Select(h => h.RootVisual)
-                .OfType<FrameworkElement>()
-                .Select(f => f.Parent)
-                .OfType<Popup>()
-                .Where(p => p.IsOpen);
+            return Application.Current.Windows.OfType<PopupWindow>().Any();
         }
 
         private static WinApiProvider.RECT GetAccessibleCaretRect(IntPtr hwnd)

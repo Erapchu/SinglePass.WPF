@@ -13,17 +13,12 @@ namespace SinglePass.WPF.Hotkeys
         private readonly AppSettingsService _appSettingsService;
         private readonly ILogger<HotkeysService> _logger;
 
-        public bool IsEnabled
-        {
-            get => HotkeyManager.Current.IsEnabled;
-            set => HotkeyManager.Current.IsEnabled = value;
-        }
-
         public HotkeysService(AppSettingsService appSettingsService, ILogger<HotkeysService> logger)
         {
             _appSettingsService = appSettingsService;
             _logger = logger;
 
+            HotkeyManager.Current.IsEnabled = true;
             UpdateKey(_appSettingsService.ShowPopupHotkey, nameof(_appSettingsService.ShowPopupHotkey), HotkeyDelegates.PopupHotkeyHandler);
         }
 

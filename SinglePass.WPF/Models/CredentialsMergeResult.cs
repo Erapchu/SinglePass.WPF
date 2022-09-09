@@ -30,25 +30,26 @@ namespace SinglePass.WPF.Models
                 if (NewCredentials.Count > 0)
                 {
                     newCreds = true;
-                    sb.AppendLine("New credentials added:");
+                    sb.AppendLine(SinglePass.Language.Properties.Resources.NewCredentialsAdded);
                     sb.Append(string.Join(Environment.NewLine, NewCredentials.Select(c => c.NameField.Value)));
+                    sb.AppendLine();
                     sb.AppendLine();
                 }
                 if (ChangedCredentials.Count > 0)
                 {
                     changedCreds = true;
-                    sb.AppendLine("Credentials changed:");
+                    sb.AppendLine(SinglePass.Language.Properties.Resources.CredentialsChanged);
                     sb.Append(string.Join(Environment.NewLine, ChangedCredentials.Select(c => c.NameField.Value)));
                     sb.AppendLine();
                 }
                 if (!newCreds && !changedCreds)
                 {
-                    sb.AppendLine("No any changes");
+                    sb.AppendLine(SinglePass.Language.Properties.Resources.NoAnyChanges);
                 }
             }
             else
             {
-                sb.AppendLine("Can't merge credentials");
+                sb.AppendLine(SinglePass.Language.Properties.Resources.CanTMergeCredentials);
             }
 
             return sb.ToString();

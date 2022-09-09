@@ -313,4 +313,16 @@
   <data name="PleaseWait" xml:space="preserve">
     <value>Please, wait.</value>
   </data>
+  <data name="NewCredentialsAdded" xml:space="preserve">
+    <value>New credentials added:</value>
+  </data>
+  <data name="CredentialsChanged" xml:space="preserve">
+    <value>Credentials changed:</value>
+  </data>
+  <data name="NoAnyChanges" xml:space="preserve">
+    <value>No any changes</value>
+  </data>
+  <data name="CanTMergeCredentials" xml:space="preserve">
+    <value>Can't merge credentials</value>
+  </data>
 </root>

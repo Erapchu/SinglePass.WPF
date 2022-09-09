@@ -41,14 +41,14 @@ namespace SinglePass.WPF.Helpers
             var screenRight = activeScreen.WorkingArea.X + activeScreen.WorkingArea.Width;
             if (windowRight > screenRight)
             {
-                window.Left = activeScreen.WorkingArea.Width - window.Width;
+                window.Left = screenRight - window.Width;
             }
 
             var windowBottom = window.Top + window.Height;
             var screenBottom = activeScreen.WorkingArea.Y + activeScreen.WorkingArea.Height;
             if (windowBottom > screenBottom)
             {
-                window.Top = activeScreen.WorkingArea.Height - window.Height;
+                window.Top = screenBottom - window.Height;
             }
         }
     }

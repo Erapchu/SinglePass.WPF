@@ -1,28 +1,32 @@
-﻿<Popup
-    x:Class="SinglePass.WPF.Views.PopupControl"
+﻿<controls:MaterialWindow
+    x:Class="SinglePass.WPF.Views.PopupWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:SinglePass.WPF.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:helpers="clr-namespace:SinglePass.WPF.Helpers"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:SinglePass.WPF.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:properties="clr-namespace:SinglePass.Language.Properties;assembly=SinglePass.Language"
     xmlns:vm="clr-namespace:SinglePass.WPF.ViewModels"
+    Title=""
     Width="260"
     Height="300"
     d:DataContext="{x:Static vm:PopupViewModel.DesignTimeInstance}"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
-    AllowsTransparency="True"
-    FocusManager.IsFocusScope="False"
-    Focusable="False"
-    MouseDown="Popup_MouseDown"
-    Opened="Popup_Opened"
-    Placement="AbsolutePoint"
-    PopupAnimation="None"
-    StaysOpen="False"
+    d:DesignHeight="300"
+    d:DesignWidth="260"
+    Closing="Window_Closing"
+    Deactivated="Window_Deactivated"
+    Loaded="MaterialWindow_Loaded"
+    PreviewKeyDown="MaterialWindow_PreviewKeyDown"
+    ResizeMode="NoResize"
+    ShowInTaskbar="False"
+    UseLayoutRounding="True"
+    WindowStyle="ToolWindow"
     mc:Ignorable="d">
-    <Popup.Resources>
+    <controls:MaterialWindow.Resources>
         <ResourceDictionary>
             <DataTemplate x:Key="CredentialPopupDataTemplate" DataType="{x:Type vm:CredentialViewModel}">
                 <TextBlock Text="{Binding NameFieldVM.Value}" />
@@ -77,44 +81,48 @@
                 x:Key="CredentialPopupItemStyle"
                 BasedOn="{StaticResource MaterialDesignListBoxItem}"
                 TargetType="{x:Type ListBoxItem}" />
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         </ResourceDictionary>
-    </Popup.Resources>
-    <Grid>
-        <Thumb x:Name="DraggableThumb" DragDelta="DraggableThumb_DragDelta" />
-        <Border Background="{DynamicResource MaterialDesignPaper}" CornerRadius="8">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                <Border
-                    Width="36"
-                    Height="5"
-                    Background="{DynamicResource MaterialDesignTextFieldBoxHoverBackground}"
-                    CornerRadius="4" />
-                <Button
-                    Width="24"
-                    Height="24"
-                    Margin="4"
-                    Padding="0"
-                    HorizontalAlignment="Right"
-                    Command="{Binding CloseCommand}"
-                    Content="{md:PackIcon Kind=Close}"
-                    Style="{StaticResource MaterialDesignFlatButton}" />
-                <ListBox
-                    x:Name="CredListBox"
-                    Grid.Row="1"
-                    HorizontalContentAlignment="Stretch"
-                    md:RippleAssist.IsDisabled="True"
-                    ItemContainerStyle="{StaticResource CredentialPopupItemStyle}"
-                    ItemTemplate="{StaticResource CredentialDataTemplate}"
-                    ItemsSource="{Binding DisplayedCredentials}"
-                    SelectedItem="{Binding SelectedCredentialVM}">
-                    <ListBox.Resources>
-                        <Style BasedOn="{StaticResource MaterialDesignScrollBarMinimal}" TargetType="ScrollBar" />
-                    </ListBox.Resources>
-                </ListBox>
-            </Grid>
-        </Border>
+    </controls:MaterialWindow.Resources>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding LoadingCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <Grid Margin="0 32 0 0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <TextBox
+            x:Name="SearchTextBox"
+            Margin="4 0 4 4"
+            md:HintAssist.Hint="{x:Static properties:Resources.Search}"
+            md:TextFieldAssist.HasClearButton="True"
+            Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="PreviewKeyDown">
+                    <i:InvokeCommandAction Command="{Binding HandleSearchKeyCommand}" PassEventArgsToCommand="True" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </TextBox>
+        <ListBox
+            x:Name="CredListBox"
+            Grid.Row="1"
+            HorizontalContentAlignment="Stretch"
+            md:RippleAssist.IsDisabled="True"
+            ItemContainerStyle="{StaticResource CredentialPopupItemStyle}"
+            ItemTemplate="{StaticResource CredentialDataTemplate}"
+            ItemsSource="{Binding DisplayedCredentials}"
+            SelectedItem="{Binding SelectedCredentialVM}">
+            <ListBox.Resources>
+                <Style BasedOn="{StaticResource MaterialDesignScrollBarMinimal}" TargetType="ScrollBar" />
+            </ListBox.Resources>
+        </ListBox>
+        <ProgressBar
+            Grid.Row="1"
+            IsIndeterminate="True"
+            Style="{StaticResource MaterialDesignCircularProgressBar}"
+            Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
     </Grid>
-</Popup>
+</controls:MaterialWindow>

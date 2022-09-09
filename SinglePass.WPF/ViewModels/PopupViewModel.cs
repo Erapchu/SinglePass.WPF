@@ -7,11 +7,15 @@ using SinglePass.WPF.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Input;
+using Unidecode.NET;
 
 namespace SinglePass.WPF.ViewModels
 {
-    public class PopupViewModel : ObservableObject
+    [INotifyPropertyChanged]
+    public partial class PopupViewModel
     {
         #region Design time instance
         private static readonly Lazy<PopupViewModel> _lazy = new(GetDesignTimeVM);
@@ -27,26 +31,28 @@ namespace SinglePass.WPF.ViewModels
         private readonly ILogger<PopupViewModel> _logger;
         private readonly CredentialViewModelFactory _credentialViewModelFactory;
         private readonly AddressBarExtractor _addressBarExtractor;
+        private readonly List<CredentialViewModel> _credentialVMs = new();
 
         public event Action Accept;
 
         public ObservableCollectionDelayed<CredentialViewModel> DisplayedCredentials { get; private set; } = new();
 
+        [ObservableProperty]
         private CredentialViewModel _selectedCredentialVM;
-        public CredentialViewModel SelectedCredentialVM
+
+        [ObservableProperty]
+        private bool _isLoading;
+
+        private string _searchText;
+        public string SearchText
         {
-            get => _selectedCredentialVM;
-            set => SetProperty(ref _selectedCredentialVM, value);
+            get => _searchText;
+            set
+            {
+                SetProperty(ref _searchText, value);
+                _ = DisplayCredentialsAsync();
+            }
         }
-
-        private RelayCommand<PassFieldViewModel> _setAndCloseCommand;
-        public RelayCommand<PassFieldViewModel> SetAndCloseCommand => _setAndCloseCommand ??= new RelayCommand<PassFieldViewModel>(SetAndClose);
-
-        private RelayCommand _closeCommand;
-        public RelayCommand CloseCommand => _closeCommand ??= new RelayCommand(Close);
-
-        private AsyncRelayCommand _loadedCommand;
-        public AsyncRelayCommand LoadedCommand => _loadedCommand ??= new AsyncRelayCommand(Loaded);
 
         public IntPtr ForegroundHWND { get; set; }
 
@@ -62,15 +68,19 @@ namespace SinglePass.WPF.ViewModels
             _addressBarExtractor = addressBarExtractor;
         }
 
+        [RelayCommand]
         private void Close()
         {
             Accept?.Invoke();
         }
 
+        [RelayCommand]
         private void SetAndClose(PassFieldViewModel passFieldViewModel)
         {
             try
             {
+                Accept?.Invoke();
+
                 var inputData = passFieldViewModel.Value;
                 if (!string.IsNullOrWhiteSpace(inputData))
                 {
@@ -95,8 +105,6 @@ namespace SinglePass.WPF.ViewModels
                     // Send input simulate Ctrl + V
                     var uSent = WindowsKeyboard.SendInput((uint)inputs.Length, inputs, INPUT.Size);
                 }
-
-                Accept?.Invoke();
             }
             catch (Exception ex)
             {
@@ -104,31 +112,45 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
-        private Task Loaded()
+        [RelayCommand]
+        private Task Loading()
         {
-            return Task.Run(() =>
+            return Task.Run(async () =>
             {
                 var tempCredentialsVM = new List<CredentialViewModel>();
-                tempCredentialsVM.AddRange(_credentialViewModelFactory.ProvideAllNew());
-
                 try
                 {
+                    IsLoading = true;
+                    tempCredentialsVM.AddRange(_credentialViewModelFactory.ProvideAllNew());
+
                     var addressBarString = _addressBarExtractor.ExtractAddressBar(ForegroundHWND);
-                    if (!addressBarString.StartsWith("http"))
-                        addressBarString = "http://" + addressBarString;
-
-                    if (Uri.TryCreate(addressBarString, UriKind.Absolute, out Uri addressBarUri))
+                    if (!string.IsNullOrWhiteSpace(addressBarString))
                     {
-                        var host = addressBarUri.Host;
-                        var domains = host.Split('.', StringSplitOptions.RemoveEmptyEntries);
-                        // Take last 2 levels of domains
-                        var domainsString = string.Join('.', domains.TakeLast(2));
+                        if (!addressBarString.StartsWith("http"))
+                            addressBarString = "http://" + addressBarString;
 
-                        tempCredentialsVM = tempCredentialsVM
-                        .Where(c => c.SiteFieldVM.Value != null && c.SiteFieldVM.Value.Contains(domainsString))
-                        .OrderByDescending(c => c.LastModifiedTime)
-                        .ToList();
+                        if (Uri.TryCreate(addressBarString, UriKind.Absolute, out Uri addressBarUri))
+                        {
+                            var host = addressBarUri.Host;
+                            var domains = host.Split('.', StringSplitOptions.RemoveEmptyEntries);
+                            // Take last 2 levels of domains
+                            var domainsString = string.Join('.', domains.TakeLast(2));
+
+                            tempCredentialsVM = tempCredentialsVM
+                                .OrderByDescending(c => c.SiteFieldVM.Value is null ? -1 : c.SiteFieldVM.Value.Contains(domainsString) ? 1 : -1)
+                                .ThenByDescending(c => c.LastModifiedTime)
+                                .ToList();
+                        }
                     }
+                    else
+                    {
+                        tempCredentialsVM = tempCredentialsVM
+                            .OrderByDescending(c => c.LastModifiedTime)
+                            .ToList();
+                    }
+
+                    _credentialVMs.AddRange(tempCredentialsVM);
+                    await DisplayCredentialsAsync();
                 }
                 catch (Exception ex)
                 {
@@ -136,10 +158,102 @@ namespace SinglePass.WPF.ViewModels
                 }
                 finally
                 {
-                    DisplayedCredentials = new ObservableCollectionDelayed<CredentialViewModel>(tempCredentialsVM);
-                    OnPropertyChanged(nameof(DisplayedCredentials));
+                    IsLoading = false;
                 }
             });
+        }
+
+        private async Task DisplayCredentialsAsync()
+        {
+            try
+            {
+                List<CredentialViewModel> filteredCredentials = null;
+                var filterText = SearchText;
+
+                if (string.IsNullOrEmpty(filterText))
+                {
+                    List<CredentialViewModel> tempList = null;
+                    await Task.Run(() =>
+                    {
+                        tempList = _credentialVMs.ToList();
+                    });
+                    filteredCredentials = tempList;
+                }
+                else
+                {
+                    filteredCredentials = await Task.Run(() =>
+                    {
+                        string transliteratedText = null;
+                        if (Regex.IsMatch(filterText, @"\p{IsCyrillic}"))
+                        {
+                            // there is at least one cyrillic character in the string
+                            transliteratedText = filterText.Unidecode();
+                        }
+                        var translitCompare = !string.IsNullOrWhiteSpace(transliteratedText);
+
+                        var fCreds = new List<CredentialViewModel>();
+                        foreach (var cred in _credentialVMs)
+                        {
+                            var nameValue = cred.NameFieldVM.Value;
+                            var loginValue = cred.LoginFieldVM.Value;
+                            var websiteValue = cred.SiteFieldVM.Value;
+                            var otherValue = cred.OtherFieldVM.Value;
+
+                            if (nameValue.IndexOf(filterText, StringComparison.OrdinalIgnoreCase) != -1
+                                || (loginValue != null && loginValue.IndexOf(filterText, StringComparison.OrdinalIgnoreCase) != -1)
+                                || (websiteValue != null && websiteValue.IndexOf(filterText, StringComparison.OrdinalIgnoreCase) != -1)
+                                || (otherValue != null && otherValue.IndexOf(filterText, StringComparison.OrdinalIgnoreCase) != -1)
+                                || (translitCompare && nameValue.IndexOf(transliteratedText, StringComparison.OrdinalIgnoreCase) != -1))
+                            {
+                                fCreds.Add(cred);
+                            }
+                        }
+
+                        return fCreds;
+                    });
+                }
+
+                DisplayedCredentials = new ObservableCollectionDelayed<CredentialViewModel>(filteredCredentials);
+                OnPropertyChanged(nameof(DisplayedCredentials));
+
+                // Selected credential always first according to search request
+                SelectedCredentialVM = DisplayedCredentials.FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, string.Empty);
+            }
+        }
+
+        [RelayCommand]
+        private void HandleSearchKey(KeyEventArgs args)
+        {
+            if (args is null)
+                return;
+
+            switch (args.Key)
+            {
+                case Key.Up:
+                    {
+                        // Select previous
+                        var selectedIndex = DisplayedCredentials.IndexOf(SelectedCredentialVM);
+                        if (selectedIndex != -1 && selectedIndex > 0)
+                        {
+                            SelectedCredentialVM = DisplayedCredentials[selectedIndex - 1];
+                        }
+                        break;
+                    }
+                case Key.Down:
+                    {
+                        // Select next
+                        var selectedIndex = DisplayedCredentials.IndexOf(SelectedCredentialVM);
+                        if (selectedIndex != -1 && selectedIndex < DisplayedCredentials.Count - 1)
+                        {
+                            SelectedCredentialVM = DisplayedCredentials[selectedIndex + 1];
+                        }
+                        break;
+                    }
+            }
         }
     }
 }

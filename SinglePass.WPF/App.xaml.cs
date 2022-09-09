@@ -1,10 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NLog;
 using NLog.Extensions.Logging;
 using SinglePass.FavIcons.Application;
 using SinglePass.FavIcons.Repository;
@@ -29,14 +27,14 @@ namespace SinglePass.WPF
     /// </summary>
     public partial class App : System.Windows.Application
     {
+        private readonly IConfiguration _configuration;
         private readonly Mutex _mutex;
-        private static IConfiguration _configuration;
 
-        private Logger _logger;
+        private ILogger<App> _logger;
         private TrayIcon _trayIcon;
 
-        public IHost Host { get; private set; }
         private bool IsFirstInstance { get; }
+        public IServiceProvider Services { get; }
 
         public App()
         {
@@ -45,16 +43,80 @@ namespace SinglePass.WPF
 
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
+
+            if (IsFirstInstance)
+            {
+                _configuration = BuildConfiguration();
+                Services = ConfigureServices(_configuration);
+            }
         }
 
-        private void Current_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        private static IServiceProvider ConfigureServices(IConfiguration configuration)
         {
-            _logger?.Error(e.Exception, "Dispatcher unhandled exception");
+            var services = new ServiceCollection();
+
+            services.AddOptions();
+
+            // NLog
+            services.AddLogging(lb =>
+            {
+                lb.ClearProviders();
+                lb.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
+                lb.AddNLog(configuration);
+            });
+
+            services.AddHttpClient();
+
+            // Clouds
+            // Google
+            services.Configure<GoogleDriveConfig>(configuration.GetSection("Settings:GoogleDriveConfig"));
+            services.AddTransient<GoogleAuthorizationBroker>();
+            services.AddTransient<GoogleDriveTokenHolder>();
+            services.AddTransient<GoogleDriveCloudService>();
+            services.AddTransient<CryptoService>();
+            services.AddSingleton<CloudServiceProvider>();
+
+            // Windows
+            services.AddScoped<LoginWindow>();
+            services.AddScoped<LoginWindowViewModel>();
+
+            services.AddScoped<MainWindow>();
+            services.AddScoped<MainWindowViewModel>();
+            services.AddScoped<PasswordsViewModel>();
+            services.AddScoped<CloudSyncViewModel>();
+            services.AddScoped<SettingsViewModel>();
+            services.AddScoped<CredentialsDialogViewModel>();
+
+            services.AddTransient<PopupWindow>();
+            services.AddTransient<PopupViewModel>();
+
+            // Main services
+            services.AddSingleton<CredentialsCryptoService>();
+            services.AddSingleton<ThemeService>();
+            services.AddSingleton<AppSettingsService>();
+            services.AddSingleton<SyncService>();
+            services.AddSingleton<HotkeysService>();
+            services.AddSingleton<ImageService>();
+            services.AddSingleton<CredentialViewModelFactory>();
+            services.AddSingleton<AddressBarExtractor>();
+
+            // favicons
+            services.AddSingleton<IFavIconCollector, FavIconCollector>();
+            services.Configure<FavIconCacheOptions>(configuration.GetSection("FavIconCacheOptions"));
+            services.AddScoped<FavIconCacheService>();
+            services.AddScoped<IFavIconRepository, FavIconRepository>();
+            services.AddDbContext<FavIconDbContext>((sp, options) => options.UseSqlite(sp.GetService<IOptions<FavIconCacheOptions>>().Value.ConnectionString));
+
+            return services.BuildServiceProvider();
         }
 
-        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        private static IConfiguration BuildConfiguration()
         {
-            _logger?.Error(e.ExceptionObject as Exception, "Domain unhandled exception");
+            return new ConfigurationBuilder()
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                .AddJsonFile("settings.json", optional: false, reloadOnChange: true)
+                .AddEnvironmentVariables()
+                .Build();
         }
 
         private void Application_Startup(object sender, StartupEventArgs e)
@@ -70,32 +132,23 @@ namespace SinglePass.WPF
                 var welcomeWindow = new WelcomeWindow();
                 welcomeWindow.Show();
 
-                _configuration = new ConfigurationBuilder()
-                    .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                    .AddJsonFile("settings.json", optional: false, reloadOnChange: true)
-                    .AddEnvironmentVariables()
-                    .Build();
-
-                _logger = LogManager.Setup()
-                    .LoadConfigurationFromSection(_configuration)
-                    .GetCurrentClassLogger();
-
-                Host = CreateHostBuilder().Build();
-                _logger.Info("Log session started!");
+                _logger = Services.GetService<ILogger<App>>();
+                _logger.LogInformation("Log session started!");
 
                 Constants.EnsurePaths();
 
                 // Resolve theme
-                var themeService = Host.Services.GetService<ThemeService>();
+                var themeService = Services.GetService<ThemeService>();
                 themeService.Init();
 
                 // Create tray icon
                 _trayIcon = new TrayIcon();
 
                 // Login
-                using (var loginScope = Host.Services.CreateScope())
+                using (var loginScope = Services.CreateScope())
                 {
-                    var loginWindow = Host.Services.GetService<LoginWindow>();
+                    var loginWindow = loginScope.ServiceProvider.GetService<LoginWindow>();
+
                     welcomeWindow.Close();
                     bool? dialogResult = loginWindow.ShowDialog(); // Stop here
 
@@ -107,7 +160,7 @@ namespace SinglePass.WPF
                 }
 
                 // Open main window
-                var mainWindow = Host.Services.GetService<MainWindow>();
+                var mainWindow = Services.GetService<MainWindow>();
                 mainWindow.Show();
             }
             else
@@ -116,66 +169,19 @@ namespace SinglePass.WPF
             }
         }
 
-        private IHostBuilder CreateHostBuilder() =>
-            Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
-            .ConfigureServices(services =>
-            {
-                services.AddOptions();
-
-                // NLog
-                services.AddLogging(lb =>
-                {
-                    lb.ClearProviders();
-                    lb.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
-                    lb.AddNLog(_configuration);
-                });
-
-                services.AddHttpClient();
-
-                // Clouds
-                // Google
-                services.Configure<GoogleDriveConfig>(_configuration.GetSection("Settings:GoogleDriveConfig"));
-                services.AddTransient<GoogleAuthorizationBroker>();
-                services.AddTransient<GoogleDriveTokenHolder>();
-                services.AddTransient<GoogleDriveCloudService>();
-                services.AddTransient<CryptoService>();
-                services.AddSingleton<CloudServiceProvider>();
-
-                // Windows
-                services.AddScoped<LoginWindow>();
-                services.AddScoped<LoginWindowViewModel>();
-
-                services.AddScoped<MainWindow>();
-                services.AddScoped<MainWindowViewModel>();
-                services.AddScoped<PasswordsViewModel>();
-                services.AddScoped<CloudSyncViewModel>();
-                services.AddScoped<SettingsViewModel>();
-                services.AddScoped<CredentialsDialogViewModel>();
-
-                services.AddTransient<PopupControl>();
-                services.AddTransient<PopupViewModel>();
-
-                // Main services
-                services.AddSingleton<CredentialsCryptoService>();
-                services.AddSingleton<ThemeService>();
-                services.AddSingleton<AppSettingsService>();
-                services.AddSingleton<SyncService>();
-                services.AddSingleton<HotkeysService>();
-                services.AddSingleton<ImageService>();
-                services.AddSingleton<CredentialViewModelFactory>();
-                services.AddSingleton<AddressBarExtractor>();
-
-                // favicons
-                services.AddSingleton<IFavIconCollector, FavIconCollector>();
-                services.Configure<FavIconCacheOptions>(_configuration.GetSection("FavIconCacheOptions"));
-                services.AddScoped<FavIconCacheService>();
-                services.AddScoped<IFavIconRepository, FavIconRepository>();
-                services.AddDbContext<FavIconDbContext>((sp, options) => options.UseSqlite(sp.GetService<IOptions<FavIconCacheOptions>>().Value.ConnectionString));
-            });
-
         private void Application_Exit(object sender, ExitEventArgs e)
         {
-            _logger?.Info($"The application is shutting down...{Environment.NewLine}");
+            _logger?.LogInformation("The application is shutting down...{0}", Environment.NewLine);
+        }
+
+        private void Current_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            _logger?.LogError(e.Exception, "Dispatcher unhandled exception");
+        }
+
+        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            _logger?.LogError(e.ExceptionObject as Exception, "Domain unhandled exception");
         }
     }
 }

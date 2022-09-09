@@ -17,7 +17,8 @@ using System.Windows.Media;
 
 namespace SinglePass.WPF.ViewModels
 {
-    public class CloudSyncViewModel : ObservableRecipient
+    [INotifyPropertyChanged]
+    public partial class CloudSyncViewModel
     {
         #region Design time instance
         private static readonly Lazy<CloudSyncViewModel> _lazy = new(GetDesignTimeVM);
@@ -36,16 +37,20 @@ namespace SinglePass.WPF.ViewModels
         private readonly ImageService _imageService;
         private readonly SyncService _syncService;
 
+        [ObservableProperty]
         private bool _mergeProcessing;
-        private bool _uploadProcessing;
-        private bool _fetchingUserInfo;
-        private ImageSource _googleProfileImage;
-        private string _googleUserName;
 
-        private AsyncRelayCommand<CloudType> _syncCommand;
-        private AsyncRelayCommand<CloudType> _loginCommand;
-        private AsyncRelayCommand<CloudType> _uploadCommand;
-        private AsyncRelayCommand _loadingCommand;
+        [ObservableProperty]
+        private bool _uploadProcessing;
+
+        [ObservableProperty]
+        private bool _fetchingUserInfo;
+
+        [ObservableProperty]
+        private ImageSource _googleProfileImage;
+
+        [ObservableProperty]
+        private string _googleUserName;
 
         public event Action SyncCompleted;
 
@@ -58,41 +63,6 @@ namespace SinglePass.WPF.ViewModels
                 OnPropertyChanged();
             }
         }
-
-        public bool MergeProcessing
-        {
-            get => _mergeProcessing;
-            set => SetProperty(ref _mergeProcessing, value);
-        }
-
-        public bool UploadProcessing
-        {
-            get => _uploadProcessing;
-            set => SetProperty(ref _uploadProcessing, value);
-        }
-
-        public bool FetchingUserInfo
-        {
-            get => _fetchingUserInfo;
-            set => SetProperty(ref _fetchingUserInfo, value);
-        }
-
-        public ImageSource GoogleProfileImage
-        {
-            get => _googleProfileImage;
-            set => SetProperty(ref _googleProfileImage, value);
-        }
-
-        public string GoogleUserName
-        {
-            get => _googleUserName;
-            set => SetProperty(ref _googleUserName, value);
-        }
-
-        public AsyncRelayCommand<CloudType> LoginCommand => _loginCommand ??= new AsyncRelayCommand<CloudType>(Login);
-        public AsyncRelayCommand<CloudType> SyncCommand => _syncCommand ??= new AsyncRelayCommand<CloudType>(SyncCredentials);
-        public AsyncRelayCommand<CloudType> UploadCommand => _uploadCommand ??= new AsyncRelayCommand<CloudType>(UploadCredentials);
-        public AsyncRelayCommand LoadingCommand => _loadingCommand ??= new AsyncRelayCommand(LoadingAsync);
 
         private CloudSyncViewModel() { }
 
@@ -110,6 +80,7 @@ namespace SinglePass.WPF.ViewModels
             _logger = logger;
         }
 
+        [RelayCommand]
         private async Task Login(CloudType cloudType)
         {
             var windowDialogName = DialogIdentifiers.MainWindowName;
@@ -174,7 +145,7 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
-        internal Task FetchUserInfoIfRequired()
+        private Task FetchUserInfoIfRequired()
         {
             try
             {
@@ -235,6 +206,7 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
+        [RelayCommand]
         private async Task SyncCredentials(CloudType cloudType)
         {
             if (MergeProcessing)
@@ -264,6 +236,7 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
+        [RelayCommand]
         private async Task UploadCredentials(CloudType cloudType)
         {
             if (UploadProcessing)
@@ -305,7 +278,8 @@ namespace SinglePass.WPF.ViewModels
             return password;
         }
 
-        private Task LoadingAsync()
+        [RelayCommand]
+        private Task Loading()
         {
             return FetchUserInfoIfRequired();
         }

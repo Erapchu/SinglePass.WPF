@@ -96,7 +96,7 @@
                                 HorizontalAlignment="Center"
                                 md:ButtonProgressAssist.IsIndeterminate="True"
                                 md:ButtonProgressAssist.IsIndicatorVisible="{Binding MergeProcessing}"
-                                Command="{Binding SyncCommand}"
+                                Command="{Binding SyncCredentialsCommand}"
                                 CommandParameter="{x:Static cloudEnums:CloudType.GoogleDrive}"
                                 Style="{StaticResource MaterialDesignFlatButton}"
                                 ToolTip="{x:Static properties:Resources.Sync}">
@@ -117,7 +117,7 @@
                                 HorizontalAlignment="Center"
                                 md:ButtonProgressAssist.IsIndeterminate="True"
                                 md:ButtonProgressAssist.IsIndicatorVisible="{Binding UploadProcessing}"
-                                Command="{Binding UploadCommand}"
+                                Command="{Binding UploadCredentialsCommand}"
                                 CommandParameter="{x:Static cloudEnums:CloudType.GoogleDrive}"
                                 Style="{StaticResource MaterialDesignFlatButton}"
                                 ToolTip="{x:Static properties:Resources.Upload}">

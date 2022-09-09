@@ -111,6 +111,7 @@
             </ListBox.Resources>
         </ListBox>
         <ProgressBar
+            Grid.Row="1"
             IsIndeterminate="True"
             Style="{StaticResource MaterialDesignCircularProgressBar}"
             Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />

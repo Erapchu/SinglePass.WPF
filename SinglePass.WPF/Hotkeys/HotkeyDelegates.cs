@@ -48,6 +48,7 @@ namespace SinglePass.WPF.Hotkeys
                 var dpiAtPoint = DpiUtilities.GetDpiForNearestMonitor(caretRect.right, caretRect.bottom);
                 popup.Left = caretRect.right * DpiUtilities.DefaultDpiX / dpiAtPoint;
                 popup.Top = caretRect.bottom * DpiUtilities.DefaultDpiY / dpiAtPoint;
+                WindowPositionHelper.ShiftWindowToScreen(popup);
                 popup.ForegroundHWND = hwndFocus;
                 popup.Show();
                 var popuHandle = new WindowInteropHelper(popup).EnsureHandle();

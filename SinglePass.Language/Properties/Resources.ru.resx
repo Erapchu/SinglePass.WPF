@@ -333,4 +333,16 @@
   <data name="SigningOut" xml:space="preserve">
     <value>Выход из системы...</value>
   </data>
+  <data name="CanTMergeCredentials" xml:space="preserve">
+    <value>Не удалось соединить пароли</value>
+  </data>
+  <data name="CredentialsChanged" xml:space="preserve">
+    <value>Изменены пароли:</value>
+  </data>
+  <data name="NewCredentialsAdded" xml:space="preserve">
+    <value>Новые пароли добавлены:</value>
+  </data>
+  <data name="NoAnyChanges" xml:space="preserve">
+    <value>Нет изменений</value>
+  </data>
 </root>

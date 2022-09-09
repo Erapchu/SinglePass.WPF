@@ -84,16 +84,6 @@ namespace SinglePass.WPF.Views
                 e.Handled = true;
         }
 
-        private void MaterialWindow_Activated(object sender, EventArgs e)
-        {
-            _hotkeyService.IsEnabled = false;
-        }
-
-        private void MaterialWindow_Deactivated(object sender, EventArgs e)
-        {
-            _hotkeyService.IsEnabled = true;
-        }
-
         private async void MaterialWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (e.NewValue is bool visibility && visibility && ViewModel.SelectedNavigationItem?.Content is PasswordsControl passwordsControl)

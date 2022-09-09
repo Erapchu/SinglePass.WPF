@@ -96,8 +96,14 @@
         <TextBox
             x:Name="SearchTextBox"
             Margin="4 0 4 4"
-            Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-            md:HintAssist.Hint="{x:Static properties:Resources.Search}" />
+            md:HintAssist.Hint="{x:Static properties:Resources.Search}"
+            Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="PreviewKeyDown">
+                    <i:InvokeCommandAction Command="{Binding HandleSearchKeyCommand}" PassEventArgsToCommand="True" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </TextBox>
         <ListBox
             x:Name="CredListBox"
             Grid.Row="1"

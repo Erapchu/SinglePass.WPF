@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Unidecode.NET;
 
 namespace SinglePass.WPF.ViewModels
@@ -123,20 +124,23 @@ namespace SinglePass.WPF.ViewModels
                     tempCredentialsVM.AddRange(_credentialViewModelFactory.ProvideAllNew());
 
                     var addressBarString = _addressBarExtractor.ExtractAddressBar(ForegroundHWND);
-                    if (!addressBarString.StartsWith("http"))
-                        addressBarString = "http://" + addressBarString;
-
-                    if (Uri.TryCreate(addressBarString, UriKind.Absolute, out Uri addressBarUri))
+                    if (addressBarString is not null)
                     {
-                        var host = addressBarUri.Host;
-                        var domains = host.Split('.', StringSplitOptions.RemoveEmptyEntries);
-                        // Take last 2 levels of domains
-                        var domainsString = string.Join('.', domains.TakeLast(2));
+                        if (!addressBarString.StartsWith("http"))
+                            addressBarString = "http://" + addressBarString;
 
-                        tempCredentialsVM = tempCredentialsVM
-                            .OrderByDescending(c => c.SiteFieldVM.Value is null ? -1 : c.SiteFieldVM.Value.Contains(domainsString) ? 1 : -1)
-                            .ThenByDescending(c => c.LastModifiedTime)
-                            .ToList();
+                        if (Uri.TryCreate(addressBarString, UriKind.Absolute, out Uri addressBarUri))
+                        {
+                            var host = addressBarUri.Host;
+                            var domains = host.Split('.', StringSplitOptions.RemoveEmptyEntries);
+                            // Take last 2 levels of domains
+                            var domainsString = string.Join('.', domains.TakeLast(2));
+
+                            tempCredentialsVM = tempCredentialsVM
+                                .OrderByDescending(c => c.SiteFieldVM.Value is null ? -1 : c.SiteFieldVM.Value.Contains(domainsString) ? 1 : -1)
+                                .ThenByDescending(c => c.LastModifiedTime)
+                                .ToList();
+                        }
                     }
 
                     _credentialVMs.AddRange(tempCredentialsVM);
@@ -205,10 +209,44 @@ namespace SinglePass.WPF.ViewModels
 
                 DisplayedCredentials = new ObservableCollectionDelayed<CredentialViewModel>(filteredCredentials);
                 OnPropertyChanged(nameof(DisplayedCredentials));
+
+                // Selected credential always first according to search request
+                SelectedCredentialVM = DisplayedCredentials.FirstOrDefault();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, string.Empty);
+            }
+        }
+
+        [RelayCommand]
+        private void HandleSearchKey(KeyEventArgs args)
+        {
+            if (args is null)
+                return;
+
+            switch (args.Key)
+            {
+                case Key.Up:
+                    {
+                        // Select previous
+                        var selectedIndex = DisplayedCredentials.IndexOf(SelectedCredentialVM);
+                        if (selectedIndex != -1 && selectedIndex > 0)
+                        {
+                            SelectedCredentialVM = DisplayedCredentials[selectedIndex - 1];
+                        }
+                        break;
+                    }
+                case Key.Down:
+                    {
+                        // Select next
+                        var selectedIndex = DisplayedCredentials.IndexOf(SelectedCredentialVM);
+                        if (selectedIndex != -1 && selectedIndex < DisplayedCredentials.Count - 1)
+                        {
+                            SelectedCredentialVM = DisplayedCredentials[selectedIndex + 1];
+                        }
+                        break;
+                    }
             }
         }
     }

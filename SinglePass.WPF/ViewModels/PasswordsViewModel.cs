@@ -268,24 +268,28 @@ namespace SinglePass.WPF.ViewModels
             if (args is null)
                 return;
 
-            if (args.Key == Key.Up)
+            switch (args.Key)
             {
-                // Select previous
-                var selectedIndex = DisplayedCredentials.IndexOf(SelectedCredential);
-                if (selectedIndex != -1 && selectedIndex > 0)
-                {
-                    SelectedCredential = DisplayedCredentials[selectedIndex - 1];
-                }
-            }
-
-            if (args.Key == Key.Down)
-            {
-                // Select next
-                var selectedIndex = DisplayedCredentials.IndexOf(SelectedCredential);
-                if (selectedIndex != -1 && selectedIndex < DisplayedCredentials.Count - 1)
-                {
-                    SelectedCredential = DisplayedCredentials[selectedIndex + 1];
-                }
+                case Key.Up:
+                    {
+                        // Select previous
+                        var selectedIndex = DisplayedCredentials.IndexOf(SelectedCredential);
+                        if (selectedIndex != -1 && selectedIndex > 0)
+                        {
+                            SelectedCredential = DisplayedCredentials[selectedIndex - 1];
+                        }
+                        break;
+                    }
+                case Key.Down:
+                    {
+                        // Select next
+                        var selectedIndex = DisplayedCredentials.IndexOf(SelectedCredential);
+                        if (selectedIndex != -1 && selectedIndex < DisplayedCredentials.Count - 1)
+                        {
+                            SelectedCredential = DisplayedCredentials[selectedIndex + 1];
+                        }
+                        break;
+                    }
             }
         }
 

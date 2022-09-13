@@ -49,6 +49,7 @@
                         Margin="8 0 0 0"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Center"
+                        ToolTip="{Binding NameFieldVM.Value}"
                         Text="{Binding NameFieldVM.Value}"
                         TextTrimming="CharacterEllipsis" />
                     <Button
@@ -79,8 +80,8 @@
             </DataTemplate>
             <Style
                 x:Key="CredentialPopupItemStyle"
-                BasedOn="{StaticResource MaterialDesignListBoxItem}"
-                TargetType="{x:Type ListBoxItem}" />
+                BasedOn="{StaticResource MaterialDesignToolToggleListBoxItem}"
+                TargetType="{x:Type ListBoxItem}"/>
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         </ResourceDictionary>
     </controls:MaterialWindow.Resources>
@@ -110,7 +111,6 @@
             x:Name="CredListBox"
             Grid.Row="1"
             HorizontalContentAlignment="Stretch"
-            md:RippleAssist.IsDisabled="True"
             ItemContainerStyle="{StaticResource CredentialPopupItemStyle}"
             ItemTemplate="{StaticResource CredentialDataTemplate}"
             ItemsSource="{Binding DisplayedCredentials}"

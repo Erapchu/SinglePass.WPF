@@ -2,6 +2,7 @@
 using SinglePass.WPF.ViewModels;
 using System;
 using System.Windows;
+using System.Windows.Input;
 
 namespace SinglePass.WPF.Views
 {
@@ -52,6 +53,24 @@ namespace SinglePass.WPF.Views
 
         private void MaterialWindow_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
+            var isCtrlDown = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
+            var isShiftDown = Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift);
+            var isVDown = e.Key == Key.V;
+
+            if (isCtrlDown && isVDown)
+            {
+                if (isShiftDown)
+                {
+                    // This is Ctrl + Shift + V
+                    ViewModel.SetAndCloseCommand.Execute(ViewModel.SelectedCredentialVM.PasswordFieldVM);
+                }
+                else
+                {
+                    // This is Ctrl + V
+                    ViewModel.SetAndCloseCommand.Execute(ViewModel.SelectedCredentialVM.LoginFieldVM);
+                }
+            }
+
             if (e.Key == System.Windows.Input.Key.Escape)
                 Close();
         }

@@ -169,10 +169,10 @@
                         Grid.Column="1"
                         Margin="8 0 0 0"
                         VerticalAlignment="Center">
-                        <Run Text="Ctrl + V" FontWeight="Bold" />
+                        <Run Text="Enter" FontWeight="Bold" />
                         <Run Text="{x:Static properties:Resources.ToPasteLogin}" />
                         <LineBreak />
-                        <Run Text="Ctrl + Shift + V" FontWeight="Bold" />
+                        <Run Text="Enter + Shift" FontWeight="Bold" />
                         <Run Text="{x:Static properties:Resources.ToPastePassword}" />
                     </TextBlock>
                 </Grid>

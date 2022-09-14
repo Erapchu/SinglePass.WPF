@@ -49,9 +49,9 @@
                         Margin="8 0 0 0"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Center"
-                        ToolTip="{Binding NameFieldVM.Value}"
                         Text="{Binding NameFieldVM.Value}"
-                        TextTrimming="CharacterEllipsis" />
+                        TextTrimming="CharacterEllipsis"
+                        ToolTip="{Binding NameFieldVM.Value}" />
                     <Button
                         Grid.Column="2"
                         Width="16"
@@ -81,7 +81,7 @@
             <Style
                 x:Key="CredentialPopupItemStyle"
                 BasedOn="{StaticResource MaterialDesignToolToggleListBoxItem}"
-                TargetType="{x:Type ListBoxItem}"/>
+                TargetType="{x:Type ListBoxItem}" />
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         </ResourceDictionary>
     </controls:MaterialWindow.Resources>

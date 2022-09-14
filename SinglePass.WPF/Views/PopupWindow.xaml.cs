@@ -53,14 +53,14 @@ namespace SinglePass.WPF.Views
 
         private void MaterialWindow_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
-            var isShiftDown = Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift);
+            var isCtrlDown = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
             var isEnterDown = e.Key == Key.Enter;
 
             if (isEnterDown)
             {
-                if (isShiftDown)
+                if (isCtrlDown)
                 {
-                    // This is Enter + Shift
+                    // This is Ctrl + Enter
                     ViewModel.SetAndCloseCommand.Execute(ViewModel.SelectedCredentialVM.PasswordFieldVM);
                 }
                 else

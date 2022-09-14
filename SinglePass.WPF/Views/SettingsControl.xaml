@@ -172,7 +172,7 @@
                         <Run Text="Enter" FontWeight="Bold" />
                         <Run Text="{x:Static properties:Resources.ToPasteLogin}" />
                         <LineBreak />
-                        <Run Text="Enter + Shift" FontWeight="Bold" />
+                        <Run Text="Ctrl + Enter" FontWeight="Bold" />
                         <Run Text="{x:Static properties:Resources.ToPastePassword}" />
                     </TextBlock>
                 </Grid>

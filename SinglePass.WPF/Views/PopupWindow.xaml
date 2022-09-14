@@ -25,6 +25,7 @@
     ShowInTaskbar="False"
     UseLayoutRounding="True"
     WindowStyle="ToolWindow"
+    Closed="MaterialWindow_Closed"
     mc:Ignorable="d">
     <controls:MaterialWindow.Resources>
         <ResourceDictionary>

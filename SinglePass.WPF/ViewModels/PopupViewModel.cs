@@ -34,6 +34,7 @@ namespace SinglePass.WPF.ViewModels
         private readonly List<CredentialViewModel> _credentialVMs = new();
 
         public event Action Accept;
+        public event Action<CredentialViewModel> ScrollIntoViewRequired;
 
         public ObservableCollectionDelayed<CredentialViewModel> DisplayedCredentials { get; private set; } = new();
 
@@ -254,6 +255,8 @@ namespace SinglePass.WPF.ViewModels
                         break;
                     }
             }
+
+            ScrollIntoViewRequired?.Invoke(SelectedCredentialVM);
         }
     }
 }

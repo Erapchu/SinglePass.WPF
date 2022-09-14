@@ -26,8 +26,14 @@ namespace SinglePass.WPF.Views
             InitializeComponent();
             
             popupViewModel.Accept += PopupViewModel_Accept;
+            popupViewModel.ScrollIntoViewRequired += PopupViewModel_ScrollIntoViewRequired;
             DataContext = popupViewModel;
             ViewModel = popupViewModel;
+        }
+
+        private void PopupViewModel_ScrollIntoViewRequired(CredentialViewModel vm)
+        {
+            CredListBox.ScrollIntoView(vm);
         }
 
         private void PopupViewModel_Accept()
@@ -72,6 +78,12 @@ namespace SinglePass.WPF.Views
 
             if (e.Key == System.Windows.Input.Key.Escape)
                 Close();
+        }
+
+        private void MaterialWindow_Closed(object sender, EventArgs e)
+        {
+            ViewModel.Accept -= PopupViewModel_Accept;
+            ViewModel.ScrollIntoViewRequired -= PopupViewModel_ScrollIntoViewRequired;
         }
     }
 }

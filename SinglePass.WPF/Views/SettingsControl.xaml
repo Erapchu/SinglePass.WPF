@@ -67,6 +67,7 @@
                                 Command="{Binding ChangeThemeCommand}"
                                 CommandParameter="{x:Static md:BaseTheme.Inherit}"
                                 Content="{md:PackIcon Kind=ThemeLightDark}"
+                                Cursor="Arrow"
                                 Style="{StaticResource ThemeButtonStyle}"
                                 ToolTip="{x:Static properties:Resources.System}" />
                         </md:Badged>
@@ -76,6 +77,7 @@
                                 md:RippleAssist.Feedback="{DynamicResource MaterialDesignLightBackground}"
                                 Command="{Binding ChangeThemeCommand}"
                                 CommandParameter="{x:Static md:BaseTheme.Dark}"
+                                Cursor="Arrow"
                                 Style="{StaticResource ThemeButtonStyle}"
                                 ToolTip="{x:Static properties:Resources.Dark}" />
                         </md:Badged>
@@ -85,6 +87,7 @@
                                 md:RippleAssist.Feedback="{DynamicResource MaterialDesignDarkBackground}"
                                 Command="{Binding ChangeThemeCommand}"
                                 CommandParameter="{x:Static md:BaseTheme.Light}"
+                                Cursor="Arrow"
                                 Style="{StaticResource ThemeButtonStyle}"
                                 ToolTip="{x:Static properties:Resources.Light}" />
                         </md:Badged>

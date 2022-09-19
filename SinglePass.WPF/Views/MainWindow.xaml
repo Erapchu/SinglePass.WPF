@@ -35,6 +35,7 @@
                 BasedOn="{StaticResource MaterialDesignNavigationPrimaryListBoxItem}"
                 TargetType="{x:Type ListBoxItem}">
                 <EventSetter Event="PreviewMouseDown" Handler="ListBoxItem_PreviewMouseDown" />
+                <Setter Property="Cursor" Value="Hand" />
             </Style>
 
             <DataTemplate x:Key="NavigationItemDataTemplate" DataType="{x:Type vm:NavigationItemViewModel}">

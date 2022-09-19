@@ -4,7 +4,6 @@ using SinglePass.WPF.Hotkeys;
 using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels;
 using System;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 

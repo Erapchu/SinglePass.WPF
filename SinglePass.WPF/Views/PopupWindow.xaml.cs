@@ -24,7 +24,7 @@ namespace SinglePass.WPF.Views
         public PopupWindow(PopupViewModel popupViewModel)
         {
             InitializeComponent();
-            
+
             popupViewModel.Accept += PopupViewModel_Accept;
             popupViewModel.ScrollIntoViewRequired += PopupViewModel_ScrollIntoViewRequired;
             DataContext = popupViewModel;

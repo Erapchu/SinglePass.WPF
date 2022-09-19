@@ -51,34 +51,45 @@
                         </StackPanel>
                     </DataTemplate>
                 </GroupBox.HeaderTemplate>
-                <StackPanel Margin="8" Orientation="Horizontal">
-                    <md:Badged Badge="{Binding ThemeMode, Converter={StaticResource BaseThemeToSelectionConverter}, ConverterParameter={x:Static md:BaseTheme.Inherit}}">
-                        <Button
-                            x:Name="AutoButton"
-                            Command="{Binding ChangeThemeCommand}"
-                            CommandParameter="{x:Static md:BaseTheme.Inherit}"
-                            Style="{StaticResource ThemeButtonStyle}"
-                            ToolTip="{x:Static properties:Resources.System}" />
-                    </md:Badged>
-                    <md:Badged Margin="16 0 0 0" Badge="{Binding ThemeMode, Converter={StaticResource BaseThemeToSelectionConverter}, ConverterParameter={x:Static md:BaseTheme.Dark}}">
-                        <Button
-                            x:Name="DarkButton"
-                            md:RippleAssist.Feedback="{DynamicResource MaterialDesignLightBackground}"
-                            Command="{Binding ChangeThemeCommand}"
-                            CommandParameter="{x:Static md:BaseTheme.Dark}"
-                            Style="{StaticResource ThemeButtonStyle}"
-                            ToolTip="{x:Static properties:Resources.Dark}" />
-                    </md:Badged>
-                    <md:Badged Margin="16 0 0 0" Badge="{Binding ThemeMode, Converter={StaticResource BaseThemeToSelectionConverter}, ConverterParameter={x:Static md:BaseTheme.Light}}">
-                        <Button
-                            x:Name="LightButton"
-                            md:RippleAssist.Feedback="{DynamicResource MaterialDesignDarkBackground}"
-                            Command="{Binding ChangeThemeCommand}"
-                            CommandParameter="{x:Static md:BaseTheme.Light}"
-                            Style="{StaticResource ThemeButtonStyle}"
-                            ToolTip="{x:Static properties:Resources.Light}" />
-                    </md:Badged>
-                </StackPanel>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Margin="8 0 8 8" Text="{x:Static properties:Resources.Theme}" />
+                    <StackPanel
+                        Grid.Row="1"
+                        Margin="8 0 8 8"
+                        Orientation="Horizontal">
+                        <md:Badged Badge="{Binding ThemeMode, Converter={StaticResource BaseThemeToSelectionConverter}, ConverterParameter={x:Static md:BaseTheme.Inherit}}">
+                            <Button
+                                x:Name="AutoButton"
+                                Command="{Binding ChangeThemeCommand}"
+                                CommandParameter="{x:Static md:BaseTheme.Inherit}"
+                                Content="{md:PackIcon Kind=ThemeLightDark}"
+                                Style="{StaticResource ThemeButtonStyle}"
+                                ToolTip="{x:Static properties:Resources.System}" />
+                        </md:Badged>
+                        <md:Badged Margin="16 0 0 0" Badge="{Binding ThemeMode, Converter={StaticResource BaseThemeToSelectionConverter}, ConverterParameter={x:Static md:BaseTheme.Dark}}">
+                            <Button
+                                x:Name="DarkButton"
+                                md:RippleAssist.Feedback="{DynamicResource MaterialDesignLightBackground}"
+                                Command="{Binding ChangeThemeCommand}"
+                                CommandParameter="{x:Static md:BaseTheme.Dark}"
+                                Style="{StaticResource ThemeButtonStyle}"
+                                ToolTip="{x:Static properties:Resources.Dark}" />
+                        </md:Badged>
+                        <md:Badged Margin="16 0 0 0" Badge="{Binding ThemeMode, Converter={StaticResource BaseThemeToSelectionConverter}, ConverterParameter={x:Static md:BaseTheme.Light}}">
+                            <Button
+                                x:Name="LightButton"
+                                md:RippleAssist.Feedback="{DynamicResource MaterialDesignDarkBackground}"
+                                Command="{Binding ChangeThemeCommand}"
+                                CommandParameter="{x:Static md:BaseTheme.Light}"
+                                Style="{StaticResource ThemeButtonStyle}"
+                                ToolTip="{x:Static properties:Resources.Light}" />
+                        </md:Badged>
+                    </StackPanel>
+                </Grid>
             </GroupBox>
             <GroupBox Margin="16 8" Style="{StaticResource MaterialDesignCardGroupBox}">
                 <GroupBox.HeaderTemplate>
@@ -168,11 +179,12 @@
                     <TextBlock
                         Grid.Column="1"
                         Margin="8 0 0 0"
-                        VerticalAlignment="Center">
-                        <Run Text="Enter" FontWeight="Bold" />
+                        VerticalAlignment="Center"
+                        Opacity="0.5">
+                        <Run FontWeight="Bold" Text="Enter" />
                         <Run Text="{x:Static properties:Resources.ToPasteLogin}" />
                         <LineBreak />
-                        <Run Text="Ctrl + Enter" FontWeight="Bold" />
+                        <Run FontWeight="Bold" Text="Ctrl + Enter" />
                         <Run Text="{x:Static properties:Resources.ToPastePassword}" />
                     </TextBlock>
                 </Grid>

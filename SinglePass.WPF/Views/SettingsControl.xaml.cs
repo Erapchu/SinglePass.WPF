@@ -23,13 +23,6 @@ namespace SinglePass.WPF.Views
             var darkColor = BaseTheme.Dark.GetBaseTheme().MaterialDesignPaper;
             var lightColor = BaseTheme.Light.GetBaseTheme().MaterialDesignPaper;
 
-            var gradCollection = new GradientStopCollection()
-            {
-                new GradientStop(darkColor, 0.5),
-                new GradientStop(lightColor, 0.5),
-            };
-
-            AutoButton.Background = new LinearGradientBrush(gradCollection, 0);
             DarkButton.Background = new SolidColorBrush(darkColor);
             LightButton.Background = new SolidColorBrush(lightColor);
         }

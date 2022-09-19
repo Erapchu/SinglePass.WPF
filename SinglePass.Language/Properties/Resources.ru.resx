@@ -351,4 +351,7 @@
   <data name="ToPastePassword" xml:space="preserve">
     <value>для вставки пароля</value>
   </data>
+  <data name="Theme" xml:space="preserve">
+    <value>Тема</value>
+  </data>
 </root>

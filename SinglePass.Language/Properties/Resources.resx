@@ -331,4 +331,7 @@
   <data name="ToPastePassword" xml:space="preserve">
     <value>to paste password</value>
   </data>
+  <data name="Theme" xml:space="preserve">
+    <value>Theme</value>
+  </data>
 </root>

@@ -46,6 +46,7 @@ namespace SinglePass.WPF.ViewModels
         private readonly CredentialViewModelFactory _credentialViewModelFactory;
 
         public event Action<CredentialViewModel> CredentialSelected;
+        public event Action<CredentialViewModel> ScrollIntoViewRequired;
 
         public ObservableCollectionDelayed<CredentialViewModel> DisplayedCredentials { get; private set; } = new();
         public CredentialsDialogViewModel ActiveCredentialDialogVM { get; }
@@ -277,6 +278,7 @@ namespace SinglePass.WPF.ViewModels
                         if (selectedIndex != -1 && selectedIndex > 0)
                         {
                             SelectedCredential = DisplayedCredentials[selectedIndex - 1];
+                            ScrollIntoViewRequired?.Invoke(SelectedCredential);
                         }
                         break;
                     }
@@ -287,6 +289,7 @@ namespace SinglePass.WPF.ViewModels
                         if (selectedIndex != -1 && selectedIndex < DisplayedCredentials.Count - 1)
                         {
                             SelectedCredential = DisplayedCredentials[selectedIndex + 1];
+                            ScrollIntoViewRequired?.Invoke(SelectedCredential);
                         }
                         break;
                     }

@@ -257,7 +257,6 @@ namespace SinglePass.WPF.ViewModels
                         break;
                     }
             }
-
         }
     }
 }

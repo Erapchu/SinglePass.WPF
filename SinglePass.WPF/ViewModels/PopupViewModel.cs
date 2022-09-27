@@ -241,6 +241,7 @@ namespace SinglePass.WPF.ViewModels
                         if (selectedIndex != -1 && selectedIndex > 0)
                         {
                             SelectedCredentialVM = DisplayedCredentials[selectedIndex - 1];
+                            ScrollIntoViewRequired?.Invoke(SelectedCredentialVM);
                         }
                         break;
                     }
@@ -251,12 +252,12 @@ namespace SinglePass.WPF.ViewModels
                         if (selectedIndex != -1 && selectedIndex < DisplayedCredentials.Count - 1)
                         {
                             SelectedCredentialVM = DisplayedCredentials[selectedIndex + 1];
+                            ScrollIntoViewRequired?.Invoke(SelectedCredentialVM);
                         }
                         break;
                     }
             }
 
-            ScrollIntoViewRequired?.Invoke(SelectedCredentialVM);
         }
     }
 }

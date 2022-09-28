@@ -68,13 +68,13 @@
             <Button
                 md:ButtonProgressAssist.IsIndeterminate="True"
                 md:ButtonProgressAssist.IsIndicatorVisible="{Binding Loading}"
-                md:ShadowAssist.ShadowDepth="Depth3"
+                md:ElevationAssist.Elevation="Dp5"
                 Command="{Binding LoadCredentialsCommand}"
                 Content="{x:Static properties:Resources.Enter}"
                 IsDefault="True" />
             <Button
                 Margin="8 0 0 0"
-                md:ShadowAssist.ShadowDepth="Depth3"
+                md:ElevationAssist.Elevation="Dp5"
                 Content="{x:Static properties:Resources.Exit}"
                 IsCancel="True"
                 Style="{StaticResource MaterialDesignPaperButton}" />

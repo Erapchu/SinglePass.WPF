@@ -26,7 +26,6 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/SinglePass.WPF;component/Themes/SeparatorTemplates.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/SinglePass.WPF;component/Themes/DialogHostTemplates.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <helpers:BindingProxy x:Key="Proxy" Data="{Binding .}" />
 
@@ -79,7 +78,8 @@
     <md:DialogHost
         CloseOnClickAway="False"
         Identifier="{x:Static helpers:DialogIdentifiers.MainWindowName}"
-        Style="{StaticResource MaterialDesignEmbeddedFastDialogHost}">
+        Style="{StaticResource MaterialDesignEmbeddedDialogHost}"
+        md:TransitionAssist.DisableTransitions="True">
         <Grid>
             <Grid>
                 <Grid.ColumnDefinitions>

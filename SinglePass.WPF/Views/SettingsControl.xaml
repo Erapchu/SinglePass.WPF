@@ -24,7 +24,7 @@
                 BasedOn="{StaticResource MaterialDesignRaisedButton}"
                 TargetType="{x:Type ButtonBase}">
                 <Setter Property="md:ButtonAssist.CornerRadius" Value="45" />
-                <Setter Property="md:ShadowAssist.ShadowDepth" Value="Depth0" />
+                <Setter Property="md:ElevationAssist.Elevation" Value="Dp0" />
                 <Setter Property="Width" Value="48" />
                 <Setter Property="Height" Value="48" />
             </Style>

@@ -2,7 +2,6 @@
 using SinglePass.WPF.Authorization.Helpers;
 using SinglePass.WPF.Authorization.TokenHolders;
 using System.Net.Http;
-using System.Threading.Tasks;
 using System.Web;
 
 namespace SinglePass.WPF.Authorization.Brokers

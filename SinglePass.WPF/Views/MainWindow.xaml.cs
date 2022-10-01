@@ -3,6 +3,7 @@ using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Hotkeys;
 using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels;
+using SinglePass.WPF.Views.Controls;
 using System;
 using System.Windows;
 using System.Windows.Input;

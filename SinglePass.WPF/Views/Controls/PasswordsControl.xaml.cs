@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using System.Windows.Controls;
 
-namespace SinglePass.WPF.Views
+namespace SinglePass.WPF.Views.Controls
 {
     /// <summary>
     /// Interaction logic for PasswordsControl.xaml

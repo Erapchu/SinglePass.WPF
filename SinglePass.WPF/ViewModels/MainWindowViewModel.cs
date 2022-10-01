@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using MaterialDesignThemes.Wpf;
 using SinglePass.WPF.Collections;
 using SinglePass.WPF.Views;
+using SinglePass.WPF.Views.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -7,7 +7,7 @@ using SinglePass.WPF.Clouds.Services;
 using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Services;
 using SinglePass.WPF.Settings;
-using SinglePass.WPF.Views;
+using SinglePass.WPF.Views.Controls;
 using SinglePass.WPF.Views.InputBox;
 using SinglePass.WPF.Views.MessageBox;
 using System;

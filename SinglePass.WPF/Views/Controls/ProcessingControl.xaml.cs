@@ -1,7 +1,7 @@
 ﻿using SinglePass.WPF.ViewModels;
 using System.Windows.Controls;
 
-namespace SinglePass.WPF.Views
+namespace SinglePass.WPF.Views.Controls
 {
     /// <summary>
     /// Interaction logic for ProcessingControl.xaml

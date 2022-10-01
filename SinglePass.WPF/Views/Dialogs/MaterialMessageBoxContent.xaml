@@ -1,14 +1,15 @@
 ﻿<UserControl
-    x:Class="SinglePass.WPF.Views.MessageBox.MaterialMessageBoxContent"
+    x:Class="SinglePass.WPF.Views.Dialogs.MaterialMessageBoxContent"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:SinglePass.WPF.Views.MessageBox"
+    xmlns:local="clr-namespace:SinglePass.WPF.Views.Dialogs"
+    xmlns:vm="clr-namespace:SinglePass.WPF.ViewModels.Dialogs"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
     MinWidth="200"
     MaxWidth="700"
-    d:DataContext="{x:Static local:MaterialMessageBoxViewModel.DesignTimeInstance}"
+    d:DataContext="{x:Static vm:MaterialMessageBoxViewModel.DesignTimeInstance}"
     d:DesignHeight="300"
     d:DesignWidth="400"
     mc:Ignorable="d">

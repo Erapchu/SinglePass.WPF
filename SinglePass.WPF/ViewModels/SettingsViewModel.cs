@@ -6,7 +6,8 @@ using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Hotkeys;
 using SinglePass.WPF.Services;
 using SinglePass.WPF.Settings;
-using SinglePass.WPF.Views.MessageBox;
+using SinglePass.WPF.ViewModels.Dialogs;
+using SinglePass.WPF.Views.Helpers;
 using System;
 using System.Threading.Tasks;
 

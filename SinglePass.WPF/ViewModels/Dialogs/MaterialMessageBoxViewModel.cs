@@ -4,8 +4,84 @@ using MaterialDesignThemes.Wpf;
 using System;
 using System.Windows;
 
-namespace SinglePass.WPF.Views.MessageBox
+namespace SinglePass.WPF.ViewModels.Dialogs
 {
+    public enum MaterialMessageBoxButtons
+    {
+        /// <summary>
+        /// The message box contains an OK button.
+        /// </summary>
+        OK,
+
+        /// <summary>
+        /// The message box contains OK and Cancel buttons.
+        /// </summary>
+        OKCancel,
+
+        /// <summary>
+        /// The message box contains Yes and No buttons.
+        /// </summary>
+        YesNo,
+
+        /// <summary>
+        /// The message box contains Yes, No, and Cancel buttons.
+        /// </summary>
+        YesNoCancel,
+
+        /// <summary>
+        /// The message box contains Abort, Retry, and Ignore buttons.
+        /// </summary>
+        AbortRetryIgnore,
+
+        /// <summary>
+        /// The message box contains Retry and Cancel buttons.
+        /// </summary>
+        RetryCancel
+    }
+
+    public enum MaterialDialogResult
+    {
+        /// <summary>
+        /// Nothing is returned from the dialog box. This means that the modal dialog continues running.
+        /// </summary>
+        None = 0,
+
+        /// <summary>
+        /// The dialog box return value is OK (usually sent from a button labeled OK).
+        /// </summary>
+        OK = 1,
+
+        /// <summary>
+        /// The dialog box return value is Cancel (usually sent from a button labeled Cancel).
+        /// </summary>
+        Cancel = 2,
+
+        /// <summary>
+        /// The dialog box return value is Abort (usually sent from a button labeled Abort).
+        /// </summary>
+        Abort = 3,
+
+        /// <summary>
+        /// The dialog box return value is Retry (usually sent from a button labeled Retry).
+        /// </summary>
+        Retry = 4,
+
+        /// <summary>
+        /// The dialog box return value is Ignore (usually sent from a button labeled Ignore).
+        /// </summary>
+        Ignore = 5,
+
+        /// <summary>
+        /// The dialog box return value is Yes (usually sent from a button labeled Yes).
+        /// </summary>
+        Yes = 6,
+
+        /// <summary>
+        /// The dialog box return value is No (usually sent from a button labeled No).
+        /// </summary>
+        No = 7
+    }
+
     internal class MaterialMessageBoxViewModel : ObservableRecipient
     {
         #region Design time instance

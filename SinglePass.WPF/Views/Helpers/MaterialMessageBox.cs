@@ -1,7 +1,9 @@
 ﻿using MaterialDesignThemes.Wpf;
+using SinglePass.WPF.ViewModels.Dialogs;
+using SinglePass.WPF.Views.Dialogs;
 using System.Threading.Tasks;
 
-namespace SinglePass.WPF.Views.MessageBox
+namespace SinglePass.WPF.Views.Helpers
 {
     public static class MaterialMessageBox
     {

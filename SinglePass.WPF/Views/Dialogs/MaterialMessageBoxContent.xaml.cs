@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace SinglePass.WPF.Views.MessageBox
+namespace SinglePass.WPF.Views.Dialogs
 {
     /// <summary>
     /// Interaction logic for MaterialMessageBoxContent.xaml

@@ -5,6 +5,7 @@ namespace SinglePass.WPF.Helpers
 {
     public static class Constants
     {
+        public const string InterprocessWindowName = "HiddenInterprocessWindow";
         public const string ProcessName = "SinglePass.WPF";
         public const string AppName = "SinglePass";
         public const string PasswordsFileName = "singlePass.dat";

@@ -20,6 +20,7 @@ using SinglePass.WPF.Views.Windows;
 using System;
 using System.Threading;
 using System.Windows;
+using System.Windows.Interop;
 
 namespace SinglePass.WPF
 {
@@ -133,6 +134,9 @@ namespace SinglePass.WPF
                 // Welcome window
                 var welcomeWindow = new WelcomeWindow();
                 welcomeWindow.Show();
+
+                var hiw = new HiddenInterprocessWindow();
+                hiw.InitWithoutShowing();
 
                 _logger = Services.GetService<ILogger<App>>();
                 _logger.LogInformation("Log session started!");

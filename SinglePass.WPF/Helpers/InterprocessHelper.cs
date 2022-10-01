@@ -22,7 +22,7 @@ namespace SinglePass.WPF.Helpers
             foreach (var processWindowHandle in processWindowHandles)
             {
                 var windowCaption = WinApiProvider.GetWindowText(processWindowHandle);
-                if (windowCaption.Equals(Constants.AppName))
+                if (windowCaption.Equals(Constants.InterprocessWindowName))
                 {
                     WinApiProvider.PostMessage(
                         processWindowHandle,

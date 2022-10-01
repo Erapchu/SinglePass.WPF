@@ -8,7 +8,6 @@ using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Services;
 using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels.Dialogs;
-using SinglePass.WPF.Views.Dialogs;
 using SinglePass.WPF.Views.Helpers;
 using System;
 using System.Threading;
@@ -83,44 +82,54 @@ namespace SinglePass.WPF.ViewModels
         [RelayCommand]
         private async Task Login(CloudType cloudType)
         {
-            var authorizing = false;
-            switch (cloudType)
-            {
-                case CloudType.GoogleDrive:
-                    authorizing = !GoogleDriveEnabled;
-                    break;
-            }
-            var cloudService = _cloudServiceProvider.GetCloudService(cloudType);
 
             try
             {
-                if (authorizing)
-                {
-                    // Authorize
-                    _ = ProcessingDialog.Show(
-                        SinglePass.Language.Properties.Resources.Authorizing,
-                        SinglePass.Language.Properties.Resources.PleaseContinueAuthorizationOrCancelIt,
-                        DialogIdentifiers.MainWindowName,
-                        out CancellationToken cancellationToken);
+                // Authorize
+                var cloudService = _cloudServiceProvider.GetCloudService(cloudType);
+                _ = ProcessingDialog.Show(
+                    SinglePass.Language.Properties.Resources.Authorizing,
+                    SinglePass.Language.Properties.Resources.PleaseContinueAuthorizationOrCancelIt,
+                    DialogIdentifiers.MainWindowName,
+                    out CancellationToken cancellationToken);
 
-                    await cloudService.AuthorizationBroker.AuthorizeAsync(cancellationToken);
-                    _logger.LogInformation($"Authorization process to {cloudType} has been complete.");
-                    GoogleDriveEnabled = true;
-                    _ = FetchUserInfoFromCloud(cloudType, CancellationToken.None); // Don't await set user info for now
-                }
-                else
-                {
-                    // Revoke
-                    _ = ProcessingDialog.Show(
-                        SinglePass.Language.Properties.Resources.SigningOut,
-                        SinglePass.Language.Properties.Resources.PleaseWait,
-                        DialogIdentifiers.MainWindowName,
-                        out CancellationToken cancellationToken);
+                await cloudService.AuthorizationBroker.AuthorizeAsync(cancellationToken);
+                _logger.LogInformation($"Authorization process to {cloudType} has been complete.");
+                GoogleDriveEnabled = true;
+                _ = FetchUserInfoFromCloud(cloudType, CancellationToken.None); // Don't await set user info for now
+                await _appSettingsService.Save();
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogWarning($"Authorization process to {cloudType} has been cancelled.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, string.Empty);
+            }
+            finally
+            {
+                if (DialogHost.IsDialogOpen(DialogIdentifiers.MainWindowName))
+                    DialogHost.Close(DialogIdentifiers.MainWindowName);
+            }
+        }
 
-                    await cloudService.AuthorizationBroker.RevokeToken(cancellationToken);
-                    GoogleDriveEnabled = false;
-                    ClearUserInfo(cloudType);
-                }
+        [RelayCommand]
+        private async Task Logout(CloudType cloudType)
+        {
+            try
+            {
+                // Revoke
+                var cloudService = _cloudServiceProvider.GetCloudService(cloudType);
+                _ = ProcessingDialog.Show(
+                    SinglePass.Language.Properties.Resources.SigningOut,
+                    SinglePass.Language.Properties.Resources.PleaseWait,
+                    DialogIdentifiers.MainWindowName,
+                    out CancellationToken cancellationToken);
+
+                await cloudService.AuthorizationBroker.RevokeToken(cancellationToken);
+                GoogleDriveEnabled = false;
+                ClearUserInfo(cloudType);
                 await _appSettingsService.Save();
             }
             catch (OperationCanceledException)

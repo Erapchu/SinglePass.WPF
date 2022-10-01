@@ -136,7 +136,7 @@
                         </StackPanel>
                         <Button
                             Grid.Column="2"
-                            Command="{Binding LoginCommand}"
+                            Command="{Binding LogoutCommand}"
                             CommandParameter="{x:Static cloudEnums:CloudType.GoogleDrive}"
                             Content="{x:Static properties:Resources.SignOut}"
                             Style="{StaticResource MaterialDesignFlatAccentButton}" />

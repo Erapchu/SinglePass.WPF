@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using MaterialDesignThemes.Wpf;
 using System;
 
-namespace SinglePass.WPF.Views.InputBox
+namespace SinglePass.WPF.ViewModels.Dialogs
 {
     internal class MaterialInputBoxViewModel : ObservableObject
     {

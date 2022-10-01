@@ -10,7 +10,6 @@ using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels.Dialogs;
 using SinglePass.WPF.Views.Dialogs;
 using SinglePass.WPF.Views.Helpers;
-using SinglePass.WPF.Views.InputBox;
 using System;
 using System.Threading;
 using System.Threading.Tasks;

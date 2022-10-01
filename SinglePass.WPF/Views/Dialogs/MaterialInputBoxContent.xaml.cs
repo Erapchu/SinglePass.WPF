@@ -1,8 +1,9 @@
 ﻿using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using SinglePass.WPF.ViewModels.Dialogs;
 
-namespace SinglePass.WPF.Views.InputBox
+namespace SinglePass.WPF.Views.Dialogs
 {
     /// <summary>
     /// Interaction logic for MaterialInputBoxContent.xaml

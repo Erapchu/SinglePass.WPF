@@ -1,4 +1,6 @@
 ﻿using SinglePass.WPF.Controls;
+using SinglePass.WPF.Enums;
+using SinglePass.WPF.Extensions;
 using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels;
@@ -6,6 +8,7 @@ using SinglePass.WPF.Views.Controls;
 using System;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Interop;
 
 namespace SinglePass.WPF.Views.Windows
 {
@@ -144,6 +147,27 @@ namespace SinglePass.WPF.Views.Windows
                 // Save settings and wait to avoid file corruptions
                 _appSettingsService.Save().Wait();
             }
+        }
+
+        private void MaterialWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            HwndSource source = PresentationSource.FromVisual(this) as HwndSource;
+            source.AddHook(WndProc);
+        }
+
+        private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            // Handle messages...
+            switch (msg)
+            {
+                case (int)CustomWindowsMessages.WM_SHOW_MAIN_WINDOW:
+                    {
+                        WindowExtensions.BringToFrontAndActivate(this);
+                        break;
+                    }
+            }
+
+            return IntPtr.Zero;
         }
     }
 }

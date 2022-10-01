@@ -167,6 +167,7 @@ namespace SinglePass.WPF
             }
             else
             {
+                InterprocessHelper.ShowMainWindow();
                 Shutdown();
             }
         }

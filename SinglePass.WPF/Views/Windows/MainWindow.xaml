@@ -11,7 +11,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:vm="clr-namespace:SinglePass.WPF.ViewModels"
-    Title="SinglePass"
+    Title="{x:Static helpers:Constants.AppName}"
     Width="800"
     Height="550"
     MinWidth="500"
@@ -20,6 +20,7 @@
     Closed="MaterialWindow_Closed"
     Closing="MaterialWindow_Closing"
     IsVisibleChanged="MaterialWindow_IsVisibleChanged"
+    Loaded="MaterialWindow_Loaded"
     UseLayoutRounding="True"
     mc:Ignorable="d">
     <Window.Resources>

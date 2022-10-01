@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SinglePass.WPF.Extensions;
-using SinglePass.WPF.Views;
+using SinglePass.WPF.Views.Windows;
 using System.Linq;
 
 namespace SinglePass.WPF.ViewModels

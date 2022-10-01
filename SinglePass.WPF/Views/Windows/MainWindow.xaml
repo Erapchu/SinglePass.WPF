@@ -1,5 +1,5 @@
 ﻿<controls:MaterialWindow
-    x:Class="SinglePass.WPF.Views.MainWindow"
+    x:Class="SinglePass.WPF.Views.Windows.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="clr-namespace:SinglePass.WPF.Controls"

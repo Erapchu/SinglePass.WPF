@@ -1,5 +1,5 @@
 ﻿using SinglePass.WPF.Helpers;
-using SinglePass.WPF.Views;
+using SinglePass.WPF.Views.Windows;
 using System;
 using System.Linq;
 using System.Runtime.InteropServices;

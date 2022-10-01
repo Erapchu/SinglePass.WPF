@@ -2,7 +2,7 @@
 using SinglePass.WPF.ViewModels;
 using System.Windows.Controls;
 
-namespace SinglePass.WPF.Views
+namespace SinglePass.WPF.Views.Windows
 {
     /// <summary>
     /// Interaction logic for LoginWindow.xaml

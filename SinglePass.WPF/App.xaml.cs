@@ -16,6 +16,7 @@ using SinglePass.WPF.Services;
 using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels;
 using SinglePass.WPF.Views;
+using SinglePass.WPF.Views.Windows;
 using System;
 using System.Threading;
 using System.Windows;

@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace SinglePass.WPF.Views
+namespace SinglePass.WPF.Views.Windows
 {
     /// <summary>
     /// Interaction logic for WelcomeWindow.xaml

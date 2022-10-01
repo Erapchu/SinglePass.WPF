@@ -4,7 +4,7 @@ using System;
 using System.Windows;
 using System.Windows.Input;
 
-namespace SinglePass.WPF.Views
+namespace SinglePass.WPF.Views.Windows
 {
     /// <summary>
     /// Interaction logic for PopupWindow.xaml

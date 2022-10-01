@@ -70,7 +70,7 @@ namespace SinglePass.WPF.Views
             var passStringLength = credVM?.PasswordFieldVM?.Value?.Length ?? 0;
             if (ViewModel.SelectedNavigationItem?.Content is PasswordsControl passwordsControl)
             {
-                passwordsControl.CredentialsDialog.PasswordFieldBox.Password = new string('*', passStringLength);
+                passwordsControl.CredentialsDetailsControl.PasswordFieldBox.Password = new string('*', passStringLength);
             }
         }
 

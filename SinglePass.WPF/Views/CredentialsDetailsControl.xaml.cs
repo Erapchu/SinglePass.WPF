@@ -3,11 +3,11 @@
 namespace SinglePass.WPF.Views
 {
     /// <summary>
-    /// Interaction logic for CredentialsDialog.xaml
+    /// Interaction logic for CredentialsDetailsControl.xaml
     /// </summary>
-    public partial class CredentialsDialog : UserControl
+    public partial class CredentialsDetailsControl : UserControl
     {
-        public CredentialsDialog()
+        public CredentialsDetailsControl()
         {
             InitializeComponent();
         }

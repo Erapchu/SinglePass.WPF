@@ -83,7 +83,6 @@ namespace SinglePass.WPF.ViewModels
         [RelayCommand]
         private async Task Login(CloudType cloudType)
         {
-            var windowDialogName = DialogIdentifiers.MainWindowName;
             var authorizing = false;
             switch (cloudType)
             {
@@ -98,37 +97,31 @@ namespace SinglePass.WPF.ViewModels
                 if (authorizing)
                 {
                     // Authorize
-                    var processingControl = new ProcessingDialogContent(
+                    _ = ProcessingDialog.Show(
                         SinglePass.Language.Properties.Resources.Authorizing,
                         SinglePass.Language.Properties.Resources.PleaseContinueAuthorizationOrCancelIt,
-                        windowDialogName);
-                    var token = processingControl.ViewModel.CancellationToken;
-                    _ = DialogHost.Show(processingControl, windowDialogName); // Don't await dialog host
+                        DialogIdentifiers.MainWindowName,
+                        out CancellationToken cancellationToken);
 
-                    await cloudService.AuthorizationBroker.AuthorizeAsync(token);
+                    await cloudService.AuthorizationBroker.AuthorizeAsync(cancellationToken);
                     _logger.LogInformation($"Authorization process to {cloudType} has been complete.");
                     GoogleDriveEnabled = true;
-                    await _appSettingsService.Save();
-
                     _ = FetchUserInfoFromCloud(cloudType, CancellationToken.None); // Don't await set user info for now
                 }
                 else
                 {
                     // Revoke
-                    var processingControl = new ProcessingDialogContent(
+                    _ = ProcessingDialog.Show(
                         SinglePass.Language.Properties.Resources.SigningOut,
                         SinglePass.Language.Properties.Resources.PleaseWait,
-                        windowDialogName);
-                    var token = processingControl.ViewModel.CancellationToken;
-                    _ = DialogHost.Show(processingControl, windowDialogName); // Don't await dialog host
+                        DialogIdentifiers.MainWindowName,
+                        out CancellationToken cancellationToken);
 
-                    await cloudService.AuthorizationBroker.RevokeToken(token);
-
+                    await cloudService.AuthorizationBroker.RevokeToken(cancellationToken);
                     GoogleDriveEnabled = false;
-                    await _appSettingsService.Save();
-
                     ClearUserInfo(cloudType);
                 }
+                await _appSettingsService.Save();
             }
             catch (OperationCanceledException)
             {
@@ -140,8 +133,8 @@ namespace SinglePass.WPF.ViewModels
             }
             finally
             {
-                if (DialogHost.IsDialogOpen(windowDialogName))
-                    DialogHost.Close(windowDialogName);
+                if (DialogHost.IsDialogOpen(DialogIdentifiers.MainWindowName))
+                    DialogHost.Close(DialogIdentifiers.MainWindowName);
             }
         }
 

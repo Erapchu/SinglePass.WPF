@@ -98,7 +98,7 @@ namespace SinglePass.WPF.ViewModels
                 if (authorizing)
                 {
                     // Authorize
-                    var processingControl = new ProcessingControl(
+                    var processingControl = new ProcessingDialogContent(
                         SinglePass.Language.Properties.Resources.Authorizing,
                         SinglePass.Language.Properties.Resources.PleaseContinueAuthorizationOrCancelIt,
                         windowDialogName);
@@ -115,7 +115,7 @@ namespace SinglePass.WPF.ViewModels
                 else
                 {
                     // Revoke
-                    var processingControl = new ProcessingControl(
+                    var processingControl = new ProcessingDialogContent(
                         SinglePass.Language.Properties.Resources.SigningOut,
                         SinglePass.Language.Properties.Resources.PleaseWait,
                         windowDialogName);

@@ -4,13 +4,13 @@ using System.Windows.Controls;
 namespace SinglePass.WPF.Views.Dialogs
 {
     /// <summary>
-    /// Interaction logic for ProcessingControl.xaml
+    /// Interaction logic for ProcessingDialogContent.xaml
     /// </summary>
-    public partial class ProcessingControl : UserControl
+    public partial class ProcessingDialogContent : UserControl
     {
         public ProcessingViewModel ViewModel => DataContext as ProcessingViewModel;
 
-        public ProcessingControl(string headText, string midText, string dialogIdentifier)
+        public ProcessingDialogContent(string headText, string midText, string dialogIdentifier)
         {
             InitializeComponent();
 

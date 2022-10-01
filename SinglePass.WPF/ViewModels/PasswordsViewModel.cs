@@ -49,7 +49,7 @@ namespace SinglePass.WPF.ViewModels
         public event Action<CredentialViewModel> ScrollIntoViewRequired;
 
         public ObservableCollectionDelayed<CredentialViewModel> DisplayedCredentials { get; private set; } = new();
-        public CredentialsDialogViewModel ActiveCredentialDialogVM { get; }
+        public CredentialsDetailsViewModel ActiveCredentialDialogVM { get; }
 
         private CredentialViewModel _selectedCredential;
         public CredentialViewModel SelectedCredential
@@ -58,7 +58,7 @@ namespace SinglePass.WPF.ViewModels
             set
             {
                 SetProperty(ref _selectedCredential, value);
-                ActiveCredentialDialogVM.Mode = CredentialsDialogMode.View;
+                ActiveCredentialDialogVM.Mode = CredentialDetailsMode.View;
                 ActiveCredentialDialogVM.CredentialViewModel = value;
                 ActiveCredentialDialogVM.IsPasswordVisible = false;
                 CredentialSelected?.Invoke(value);
@@ -103,7 +103,7 @@ namespace SinglePass.WPF.ViewModels
         public PasswordsViewModel(
             CredentialsCryptoService credentialsCryptoService,
             ILogger<PasswordsViewModel> logger,
-            CredentialsDialogViewModel credentialsDialogViewModel,
+            CredentialsDetailsViewModel credentialsDialogViewModel,
             AppSettingsService appSettingsService,
             CredentialViewModelFactory credentialViewModelFactory)
         {
@@ -147,22 +147,22 @@ namespace SinglePass.WPF.ViewModels
         private void ActiveCredentialDialogVM_Cancel()
         {
             ActiveCredentialDialogVM.IsPasswordVisible = false;
-            ActiveCredentialDialogVM.Mode = CredentialsDialogMode.View;
+            ActiveCredentialDialogVM.Mode = CredentialDetailsMode.View;
             ActiveCredentialDialogVM.CredentialViewModel = SelectedCredential;
         }
 
-        private async void ActiveCredentialDialogVM_Accept(CredentialViewModel newCredVM, CredentialsDialogMode mode)
+        private async void ActiveCredentialDialogVM_Accept(CredentialViewModel newCredVM, CredentialDetailsMode mode)
         {
             var dateTimeNow = DateTime.Now;
             newCredVM.LastModifiedTime = dateTimeNow;
-            if (mode == CredentialsDialogMode.New)
+            if (mode == CredentialDetailsMode.New)
             {
                 newCredVM.CreationTime = dateTimeNow;
                 await _credentialsCryptoService.AddCredential(newCredVM.Model);
                 _credentialVMs.Add(newCredVM);
                 await DisplayCredentialsAsync();
             }
-            else if (mode == CredentialsDialogMode.Edit)
+            else if (mode == CredentialDetailsMode.Edit)
             {
                 await _credentialsCryptoService.EditCredential(newCredVM.Model);
                 var staleCredVM = _credentialVMs.FirstOrDefault(c => c.Model.Equals(newCredVM.Model));
@@ -258,7 +258,7 @@ namespace SinglePass.WPF.ViewModels
         private void AddCredential()
         {
             ActiveCredentialDialogVM.CredentialViewModel = _credentialViewModelFactory.ProvideNew(Credential.CreateNew());
-            ActiveCredentialDialogVM.Mode = CredentialsDialogMode.New;
+            ActiveCredentialDialogVM.Mode = CredentialDetailsMode.New;
             ActiveCredentialDialogVM.IsPasswordVisible = true;
             ActiveCredentialDialogVM.SetFocus();
         }

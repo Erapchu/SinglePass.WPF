@@ -1,6 +1,6 @@
 ﻿namespace SinglePass.WPF.Enums
 {
-    public enum CredentialsDialogMode
+    public enum CredentialDetailsMode
     {
         Edit,
         New,

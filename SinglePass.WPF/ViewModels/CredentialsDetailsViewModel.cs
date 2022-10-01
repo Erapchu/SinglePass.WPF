@@ -10,28 +10,28 @@ using System.Diagnostics;
 
 namespace SinglePass.WPF.ViewModels
 {
-    public class CredentialsDialogViewModel : ObservableRecipient
+    public class CredentialsDetailsViewModel : ObservableRecipient
     {
         #region Design time instance
-        private static readonly Lazy<CredentialsDialogViewModel> _lazy = new(GetDesignTimeVM);
-        public static CredentialsDialogViewModel DesignTimeInstance => _lazy.Value;
-        private static CredentialsDialogViewModel GetDesignTimeVM()
+        private static readonly Lazy<CredentialsDetailsViewModel> _lazy = new(GetDesignTimeVM);
+        public static CredentialsDetailsViewModel DesignTimeInstance => _lazy.Value;
+        private static CredentialsDetailsViewModel GetDesignTimeVM()
         {
             var additionalFields = new List<PassField>() { new PassField() { Name = "Design additional field", Value = "Test value" } };
             var model = Credential.CreateNew();
             model.AdditionalFields = additionalFields;
 
             var credVm = new CredentialViewModel(model, null);
-            var vm = new CredentialsDialogViewModel(null);
+            var vm = new CredentialsDetailsViewModel(null);
             vm._credentialViewModel = credVm;
-            vm.Mode = CredentialsDialogMode.View;
+            vm.Mode = CredentialDetailsMode.View;
             return vm;
         }
         #endregion
 
-        private readonly ILogger<CredentialsDialogViewModel> _logger;
+        private readonly ILogger<CredentialsDetailsViewModel> _logger;
 
-        public event Action<CredentialViewModel, CredentialsDialogMode> Accept;
+        public event Action<CredentialViewModel, CredentialDetailsMode> Accept;
         public event Action<CredentialViewModel> Delete;
         public event Action Cancel;
         public event Action<string> EnqueueSnackbarMessage;
@@ -43,7 +43,7 @@ namespace SinglePass.WPF.ViewModels
         private RelayCommand _openInBrowserCommand;
         private RelayCommand<string> _copyToClipboardCommand;
         private CredentialViewModel _credentialViewModel;
-        private CredentialsDialogMode _mode = CredentialsDialogMode.View;
+        private CredentialDetailsMode _mode = CredentialDetailsMode.View;
         private bool _isPasswordVisible;
         private bool _isNameTextBoxFocused;
 
@@ -66,11 +66,11 @@ namespace SinglePass.WPF.ViewModels
             {
                 switch (_mode)
                 {
-                    case CredentialsDialogMode.Edit:
+                    case CredentialDetailsMode.Edit:
                         return SinglePass.Language.Properties.Resources.Edit;
-                    case CredentialsDialogMode.New:
+                    case CredentialDetailsMode.New:
                         return SinglePass.Language.Properties.Resources.New;
-                    case CredentialsDialogMode.View:
+                    case CredentialDetailsMode.View:
                         return SinglePass.Language.Properties.Resources.Details;
                     default:
                         break;
@@ -80,7 +80,7 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
-        public CredentialsDialogMode Mode
+        public CredentialDetailsMode Mode
         {
             get => _mode;
             set
@@ -102,7 +102,7 @@ namespace SinglePass.WPF.ViewModels
             set => SetProperty(ref _isNameTextBoxFocused, value);
         }
 
-        public CredentialsDialogViewModel(ILogger<CredentialsDialogViewModel> logger)
+        public CredentialsDetailsViewModel(ILogger<CredentialsDetailsViewModel> logger)
         {
             _logger = logger;
         }
@@ -127,7 +127,7 @@ namespace SinglePass.WPF.ViewModels
                 return;
 
             CredentialViewModel = CredentialViewModel.Clone();
-            Mode = CredentialsDialogMode.Edit;
+            Mode = CredentialDetailsMode.Edit;
             IsPasswordVisible = true;
             SetFocus();
         }

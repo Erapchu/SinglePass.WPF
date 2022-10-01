@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using MaterialDesignThemes.Wpf;
 using SinglePass.WPF.Collections;
 using SinglePass.WPF.Views;
+using SinglePass.WPF.Views.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +26,7 @@ namespace SinglePass.WPF.ViewModels
         #endregion
 
         public event Action<CredentialViewModel> CredentialSelected;
+        public event Action<CredentialViewModel> ScrollIntoViewRequired;
 
         public PasswordsViewModel PasswordsVM { get; }
         public SettingsViewModel SettingsVM { get; }
@@ -57,6 +59,7 @@ namespace SinglePass.WPF.ViewModels
             SettingsVM = settingsViewModel;
 
             PasswordsVM.CredentialSelected += PasswordsViewModel_CredentialSelected;
+            PasswordsVM.ScrollIntoViewRequired += PasswordsVM_ScrollIntoViewRequired;
             CloudSyncVM.SyncCompleted += SettingsViewModel_SyncCompleted;
 
             NavigationItems = new ObservableCollectionDelayed<NavigationItemViewModel>(new List<NavigationItemViewModel>()
@@ -74,6 +77,11 @@ namespace SinglePass.WPF.ViewModels
                     PackIconKind.Settings,
                     () => new SettingsControl() { DataContext = SettingsVM }),
             });
+        }
+
+        private void PasswordsVM_ScrollIntoViewRequired(CredentialViewModel credVM)
+        {
+            ScrollIntoViewRequired?.Invoke(credVM);
         }
 
         private void SettingsViewModel_SyncCompleted()

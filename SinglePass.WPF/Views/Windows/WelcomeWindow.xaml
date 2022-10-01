@@ -1,0 +1,34 @@
+﻿<Window
+    x:Class="SinglePass.WPF.Views.Windows.WelcomeWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:SinglePass.WPF.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="WelcomeWindow"
+    Width="380"
+    Height="280"
+    AllowsTransparency="True"
+    Background="Transparent"
+    ResizeMode="NoResize"
+    ShowInTaskbar="False"
+    WindowStartupLocation="CenterScreen"
+    WindowStyle="None"
+    mc:Ignorable="d">
+    <Grid>
+        <Border CornerRadius="16">
+            <Border.Background>
+                <LinearGradientBrush>
+                    <GradientStop Color="#bf00ef" Offset="0"/>
+                    <GradientStop Color="#ff7aca" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.Background>
+            <TextBlock
+                Foreground="White"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontSize="24"
+                Text="SinglePass" />
+        </Border>
+    </Grid>
+</Window>

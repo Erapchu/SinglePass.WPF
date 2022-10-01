@@ -7,9 +7,8 @@ using SinglePass.WPF.Clouds.Services;
 using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Services;
 using SinglePass.WPF.Settings;
-using SinglePass.WPF.Views;
-using SinglePass.WPF.Views.InputBox;
-using SinglePass.WPF.Views.MessageBox;
+using SinglePass.WPF.ViewModels.Dialogs;
+using SinglePass.WPF.Views.Helpers;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -83,52 +82,22 @@ namespace SinglePass.WPF.ViewModels
         [RelayCommand]
         private async Task Login(CloudType cloudType)
         {
-            var windowDialogName = DialogIdentifiers.MainWindowName;
-            var authorizing = false;
-            switch (cloudType)
-            {
-                case CloudType.GoogleDrive:
-                    authorizing = !GoogleDriveEnabled;
-                    break;
-            }
-            var cloudService = _cloudServiceProvider.GetCloudService(cloudType);
 
             try
             {
-                if (authorizing)
-                {
-                    // Authorize
-                    var processingControl = new ProcessingControl(
-                        SinglePass.Language.Properties.Resources.Authorizing,
-                        SinglePass.Language.Properties.Resources.PleaseContinueAuthorizationOrCancelIt,
-                        windowDialogName);
-                    var token = processingControl.ViewModel.CancellationToken;
-                    _ = DialogHost.Show(processingControl, windowDialogName); // Don't await dialog host
+                // Authorize
+                var cloudService = _cloudServiceProvider.GetCloudService(cloudType);
+                _ = ProcessingDialog.Show(
+                    SinglePass.Language.Properties.Resources.Authorizing,
+                    SinglePass.Language.Properties.Resources.PleaseContinueAuthorizationOrCancelIt,
+                    DialogIdentifiers.MainWindowName,
+                    out CancellationToken cancellationToken);
 
-                    await cloudService.AuthorizationBroker.AuthorizeAsync(token);
-                    _logger.LogInformation($"Authorization process to {cloudType} has been complete.");
-                    GoogleDriveEnabled = true;
-                    await _appSettingsService.Save();
-
-                    _ = FetchUserInfoFromCloud(cloudType, CancellationToken.None); // Don't await set user info for now
-                }
-                else
-                {
-                    // Revoke
-                    var processingControl = new ProcessingControl(
-                        SinglePass.Language.Properties.Resources.SigningOut,
-                        SinglePass.Language.Properties.Resources.PleaseWait,
-                        windowDialogName);
-                    var token = processingControl.ViewModel.CancellationToken;
-                    _ = DialogHost.Show(processingControl, windowDialogName); // Don't await dialog host
-
-                    await cloudService.AuthorizationBroker.RevokeToken(token);
-
-                    GoogleDriveEnabled = false;
-                    await _appSettingsService.Save();
-
-                    ClearUserInfo(cloudType);
-                }
+                await cloudService.AuthorizationBroker.AuthorizeAsync(cancellationToken);
+                _logger.LogInformation($"Authorization process to {cloudType} has been complete.");
+                GoogleDriveEnabled = true;
+                _ = FetchUserInfoFromCloud(cloudType, CancellationToken.None); // Don't await set user info for now
+                await _appSettingsService.Save();
             }
             catch (OperationCanceledException)
             {
@@ -140,8 +109,41 @@ namespace SinglePass.WPF.ViewModels
             }
             finally
             {
-                if (DialogHost.IsDialogOpen(windowDialogName))
-                    DialogHost.Close(windowDialogName);
+                if (DialogHost.IsDialogOpen(DialogIdentifiers.MainWindowName))
+                    DialogHost.Close(DialogIdentifiers.MainWindowName);
+            }
+        }
+
+        [RelayCommand]
+        private async Task Logout(CloudType cloudType)
+        {
+            try
+            {
+                // Revoke
+                var cloudService = _cloudServiceProvider.GetCloudService(cloudType);
+                _ = ProcessingDialog.Show(
+                    SinglePass.Language.Properties.Resources.SigningOut,
+                    SinglePass.Language.Properties.Resources.PleaseWait,
+                    DialogIdentifiers.MainWindowName,
+                    out CancellationToken cancellationToken);
+
+                await cloudService.AuthorizationBroker.RevokeToken(cancellationToken);
+                GoogleDriveEnabled = false;
+                ClearUserInfo(cloudType);
+                await _appSettingsService.Save();
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogWarning($"Authorization process to {cloudType} has been cancelled.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, string.Empty);
+            }
+            finally
+            {
+                if (DialogHost.IsDialogOpen(DialogIdentifiers.MainWindowName))
+                    DialogHost.Close(DialogIdentifiers.MainWindowName);
             }
         }
 

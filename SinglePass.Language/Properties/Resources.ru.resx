@@ -345,4 +345,13 @@
   <data name="NoAnyChanges" xml:space="preserve">
     <value>Нет изменений</value>
   </data>
+  <data name="ToPasteLogin" xml:space="preserve">
+    <value>для вставки логина</value>
+  </data>
+  <data name="ToPastePassword" xml:space="preserve">
+    <value>для вставки пароля</value>
+  </data>
+  <data name="Theme" xml:space="preserve">
+    <value>Тема</value>
+  </data>
 </root>

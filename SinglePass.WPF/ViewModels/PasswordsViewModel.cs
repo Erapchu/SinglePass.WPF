@@ -8,7 +8,8 @@ using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Models;
 using SinglePass.WPF.Services;
 using SinglePass.WPF.Settings;
-using SinglePass.WPF.Views.MessageBox;
+using SinglePass.WPF.ViewModels.Dialogs;
+using SinglePass.WPF.Views.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,9 +47,10 @@ namespace SinglePass.WPF.ViewModels
         private readonly CredentialViewModelFactory _credentialViewModelFactory;
 
         public event Action<CredentialViewModel> CredentialSelected;
+        public event Action<CredentialViewModel> ScrollIntoViewRequired;
 
         public ObservableCollectionDelayed<CredentialViewModel> DisplayedCredentials { get; private set; } = new();
-        public CredentialsDialogViewModel ActiveCredentialDialogVM { get; }
+        public CredentialsDetailsViewModel ActiveCredentialDialogVM { get; }
 
         private CredentialViewModel _selectedCredential;
         public CredentialViewModel SelectedCredential
@@ -57,7 +59,7 @@ namespace SinglePass.WPF.ViewModels
             set
             {
                 SetProperty(ref _selectedCredential, value);
-                ActiveCredentialDialogVM.Mode = CredentialsDialogMode.View;
+                ActiveCredentialDialogVM.Mode = CredentialDetailsMode.View;
                 ActiveCredentialDialogVM.CredentialViewModel = value;
                 ActiveCredentialDialogVM.IsPasswordVisible = false;
                 CredentialSelected?.Invoke(value);
@@ -102,7 +104,7 @@ namespace SinglePass.WPF.ViewModels
         public PasswordsViewModel(
             CredentialsCryptoService credentialsCryptoService,
             ILogger<PasswordsViewModel> logger,
-            CredentialsDialogViewModel credentialsDialogViewModel,
+            CredentialsDetailsViewModel credentialsDialogViewModel,
             AppSettingsService appSettingsService,
             CredentialViewModelFactory credentialViewModelFactory)
         {
@@ -146,22 +148,22 @@ namespace SinglePass.WPF.ViewModels
         private void ActiveCredentialDialogVM_Cancel()
         {
             ActiveCredentialDialogVM.IsPasswordVisible = false;
-            ActiveCredentialDialogVM.Mode = CredentialsDialogMode.View;
+            ActiveCredentialDialogVM.Mode = CredentialDetailsMode.View;
             ActiveCredentialDialogVM.CredentialViewModel = SelectedCredential;
         }
 
-        private async void ActiveCredentialDialogVM_Accept(CredentialViewModel newCredVM, CredentialsDialogMode mode)
+        private async void ActiveCredentialDialogVM_Accept(CredentialViewModel newCredVM, CredentialDetailsMode mode)
         {
             var dateTimeNow = DateTime.Now;
             newCredVM.LastModifiedTime = dateTimeNow;
-            if (mode == CredentialsDialogMode.New)
+            if (mode == CredentialDetailsMode.New)
             {
                 newCredVM.CreationTime = dateTimeNow;
                 await _credentialsCryptoService.AddCredential(newCredVM.Model);
                 _credentialVMs.Add(newCredVM);
                 await DisplayCredentialsAsync();
             }
-            else if (mode == CredentialsDialogMode.Edit)
+            else if (mode == CredentialDetailsMode.Edit)
             {
                 await _credentialsCryptoService.EditCredential(newCredVM.Model);
                 var staleCredVM = _credentialVMs.FirstOrDefault(c => c.Model.Equals(newCredVM.Model));
@@ -257,7 +259,7 @@ namespace SinglePass.WPF.ViewModels
         private void AddCredential()
         {
             ActiveCredentialDialogVM.CredentialViewModel = _credentialViewModelFactory.ProvideNew(Credential.CreateNew());
-            ActiveCredentialDialogVM.Mode = CredentialsDialogMode.New;
+            ActiveCredentialDialogVM.Mode = CredentialDetailsMode.New;
             ActiveCredentialDialogVM.IsPasswordVisible = true;
             ActiveCredentialDialogVM.SetFocus();
         }
@@ -268,24 +270,30 @@ namespace SinglePass.WPF.ViewModels
             if (args is null)
                 return;
 
-            if (args.Key == Key.Up)
+            switch (args.Key)
             {
-                // Select previous
-                var selectedIndex = DisplayedCredentials.IndexOf(SelectedCredential);
-                if (selectedIndex != -1 && selectedIndex > 0)
-                {
-                    SelectedCredential = DisplayedCredentials[selectedIndex - 1];
-                }
-            }
-
-            if (args.Key == Key.Down)
-            {
-                // Select next
-                var selectedIndex = DisplayedCredentials.IndexOf(SelectedCredential);
-                if (selectedIndex != -1 && selectedIndex < DisplayedCredentials.Count - 1)
-                {
-                    SelectedCredential = DisplayedCredentials[selectedIndex + 1];
-                }
+                case Key.Up:
+                    {
+                        // Select previous
+                        var selectedIndex = DisplayedCredentials.IndexOf(SelectedCredential);
+                        if (selectedIndex != -1 && selectedIndex > 0)
+                        {
+                            SelectedCredential = DisplayedCredentials[selectedIndex - 1];
+                            ScrollIntoViewRequired?.Invoke(SelectedCredential);
+                        }
+                        break;
+                    }
+                case Key.Down:
+                    {
+                        // Select next
+                        var selectedIndex = DisplayedCredentials.IndexOf(SelectedCredential);
+                        if (selectedIndex != -1 && selectedIndex < DisplayedCredentials.Count - 1)
+                        {
+                            SelectedCredential = DisplayedCredentials[selectedIndex + 1];
+                            ScrollIntoViewRequired?.Invoke(SelectedCredential);
+                        }
+                        break;
+                    }
             }
         }
 

@@ -6,23 +6,22 @@ using System.Windows.Data;
 
 namespace SinglePass.WPF.Converters
 {
-    [ValueConversion(typeof(CredentialsDialogMode), typeof(Visibility))]
+    [ValueConversion(typeof(CredentialDetailsMode), typeof(Visibility))]
     internal class ModeToVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is CredentialsDialogMode mode)
+            if (value is CredentialDetailsMode mode)
             {
                 var inverse = parameter is string sparam && sparam == "inverse";
 
                 switch (mode)
                 {
-                    case CredentialsDialogMode.New:
+                    case CredentialDetailsMode.New:
+                    case CredentialDetailsMode.Edit:
                         return inverse ? Visibility.Collapsed : Visibility.Visible;
-                    case CredentialsDialogMode.View:
+                    case CredentialDetailsMode.View:
                         return inverse ? Visibility.Visible : Visibility.Collapsed;
-                    case CredentialsDialogMode.Edit:
-                        return inverse ? Visibility.Collapsed : Visibility.Visible;
                     default:
                         break;
                 }

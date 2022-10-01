@@ -1,6 +1,6 @@
-﻿using System.Threading;
+﻿using SinglePass.WPF.Authorization.TokenHolders;
+using System.Threading;
 using System.Threading.Tasks;
-using SinglePass.WPF.Authorization.TokenHolders;
 
 namespace SinglePass.WPF.Authorization.Brokers
 {

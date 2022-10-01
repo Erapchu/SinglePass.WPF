@@ -691,6 +691,33 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Theme.
+        /// </summary>
+        public static string Theme {
+            get {
+                return ResourceManager.GetString("Theme", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to to paste login.
+        /// </summary>
+        public static string ToPasteLogin {
+            get {
+                return ResourceManager.GetString("ToPasteLogin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to to paste password.
+        /// </summary>
+        public static string ToPastePassword {
+            get {
+                return ResourceManager.GetString("ToPastePassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Upload.
         /// </summary>
         public static string Upload {

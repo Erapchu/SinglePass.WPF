@@ -25,7 +25,7 @@ namespace SinglePass.WPF.Authorization.Brokers
             _config = options.Value;
         }
 
-        protected override string BuildAuthorizationUri(string redirectUri)
+        protected override string BuildAuthorizationUri()
         {
             return "https://accounts.google.com/o/oauth2/v2/auth?" +
                 $"scope={HttpUtility.UrlEncode(_config.Scopes)}&" +
@@ -33,22 +33,22 @@ namespace SinglePass.WPF.Authorization.Brokers
                 "include_granted_scopes=true&" +
                 "response_type=code&" +
                 "state=state_parameter_passthrough_value&" +
-                $"redirect_uri={HttpUtility.UrlEncode(redirectUri)}&" +
+                $"redirect_uri={HttpUtility.UrlEncode(RedirectUri)}&" +
                 $"client_id={_config.ClientId}";
         }
 
-        protected override string BuildRedirectUri()
+        protected override void BuildRedirectUri()
         {
             var unusedPort = OAuthHelper.GetRandomUnusedPort();
-            return $"http://localhost:{unusedPort}/";
+            RedirectUri = $"http://localhost:{unusedPort}/";
         }
 
-        protected override string BuildRefreshAccessTokenEndpointUri()
+        protected override string BuildRefreshTokenEndpointUri()
         {
             return "https://oauth2.googleapis.com/token";
         }
 
-        protected override string BuildRequestForRefreshToken()
+        protected override string BuildRefreshTokenRequest()
         {
             return $"client_id={_config.ClientId}&" +
                 $"client_secret={_config.ClientSecret}&" +
@@ -56,12 +56,12 @@ namespace SinglePass.WPF.Authorization.Brokers
                 $"grant_type=refresh_token";
         }
 
-        protected override string BuildRequestForToken(string code, string redirectUri)
+        protected override string BuildTokenRequest(string code)
         {
             return $"code={code}&" +
                 $"client_id={_config.ClientId}&" +
                 $"client_secret={_config.ClientSecret}&" +
-                $"redirect_uri={HttpUtility.UrlEncode(redirectUri)}&" +
+                $"redirect_uri={HttpUtility.UrlEncode(RedirectUri)}&" +
                 $"grant_type=authorization_code";
         }
 
@@ -70,7 +70,7 @@ namespace SinglePass.WPF.Authorization.Brokers
             return "https://oauth2.googleapis.com/token";
         }
 
-        protected override string BuildRevokeTokenEndpointUri()
+        protected override string BuildTokenRevokeEndpointUri()
         {
             return $"https://oauth2.googleapis.com/revoke?token={TokenHolder.Token.RefreshToken}";
         }

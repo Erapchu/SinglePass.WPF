@@ -1,10 +1,6 @@
 ﻿using SinglePass.WPF.Authorization.Helpers;
-using SinglePass.WPF.Authorization.Responses;
 using SinglePass.WPF.Authorization.TokenHolders;
 using System;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
@@ -16,6 +12,7 @@ namespace SinglePass.WPF.Authorization.Brokers
     {
         private readonly IHttpClientFactory _httpClientFactory;
 
+        protected string RedirectUri { get; set; }
         public ITokenHolder TokenHolder { get; }
 
         public BaseAuthorizationBroker(IHttpClientFactory httpClientFactory, ITokenHolder tokenHolder)
@@ -26,24 +23,24 @@ namespace SinglePass.WPF.Authorization.Brokers
 
         public async Task AuthorizeAsync(CancellationToken cancellationToken)
         {
-            var redirectUri = BuildRedirectUri();
-            var authorizationUri = BuildAuthorizationUri(redirectUri);
-            using var listener = OAuthHelper.StartListener(redirectUri);
+            BuildRedirectUri();
+            var authorizationUri = BuildAuthorizationUri();
+            using var listener = OAuthHelper.StartListener(RedirectUri);
             OAuthHelper.OpenBrowser(authorizationUri);
-            var response = await GetResponseFromListener(listener, cancellationToken);
+            var response = await OAuthHelper.GetResponseFromListener(listener, BuildClosePageResponse(), cancellationToken);
             if (string.IsNullOrWhiteSpace(response?.Code))
             {
                 throw new Exception("Code was empty!");
             }
-            var tokenResponse = await RetrieveToken(response.Code, redirectUri, cancellationToken);
+            var tokenResponse = await RetrieveToken(response.Code, cancellationToken);
             await TokenHolder.SetAndSaveToken(tokenResponse, cancellationToken);
         }
 
         public async Task RefreshAccessToken(CancellationToken cancellationToken)
         {
             var client = _httpClientFactory.CreateClient();
-            var refreshTokenEndpointUri = BuildRefreshAccessTokenEndpointUri();
-            var postData = BuildRequestForRefreshToken();
+            var refreshTokenEndpointUri = BuildRefreshTokenEndpointUri();
+            var postData = BuildRefreshTokenRequest();
             var request = new HttpRequestMessage(HttpMethod.Post, new Uri(refreshTokenEndpointUri))
             {
                 Content = new StringContent(postData, Encoding.UTF8, "application/x-www-form-urlencoded")
@@ -58,61 +55,20 @@ namespace SinglePass.WPF.Authorization.Brokers
         {
             await TokenHolder.RemoveToken();
             var client = _httpClientFactory.CreateClient();
-            var revokeTokenEndpointUri = BuildRevokeTokenEndpointUri();
+            var revokeTokenEndpointUri = BuildTokenRevokeEndpointUri();
             var stringContent = new StringContent(string.Empty, Encoding.UTF8, "application/x-www-form-urlencoded");
             var response = await client.PostAsync(revokeTokenEndpointUri, stringContent, cancellationToken);
             using var content = response.Content;
             var json = await content.ReadAsStringAsync(cancellationToken);
         }
 
-        private async Task<AuthorizationCodeResponseUrl> GetResponseFromListener(HttpListener listener, CancellationToken cancellationToken)
-        {
-            HttpListenerContext context;
-            // Set up cancellation. HttpListener.GetContextAsync() doesn't accept a cancellation token,
-            // the HttpListener needs to be stopped which immediately aborts the GetContextAsync() call.
-            using (cancellationToken.Register(listener.Stop))
-            {
-                // Wait to get the authorization code response.
-                try
-                {
-                    context = await listener.GetContextAsync().ConfigureAwait(false);
-                }
-                catch (Exception) when (cancellationToken.IsCancellationRequested)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    // Next line will never be reached because cancellation will always have been requested in this catch block.
-                    // But it's required to satisfy compiler.
-                    throw new InvalidOperationException();
-                }
-                catch
-                {
-                    throw;
-                }
-            }
-            NameValueCollection coll = context.Request.QueryString;
-
-            // Write a "close" response.
-            var bytes = Encoding.UTF8.GetBytes(BuildClosePageResponse());
-            context.Response.ContentLength64 = bytes.Length;
-            context.Response.SendChunked = false;
-            context.Response.KeepAlive = false;
-            var output = context.Response.OutputStream;
-            await output.WriteAsync(bytes, cancellationToken).ConfigureAwait(false);
-            await output.FlushAsync(cancellationToken).ConfigureAwait(false);
-            output.Close();
-            context.Response.Close();
-
-            // Create a new response URL with a dictionary that contains all the response query parameters.
-            return new AuthorizationCodeResponseUrl(coll.AllKeys.ToDictionary(k => k, k => coll[k]));
-        }
-
-        private async Task<string> RetrieveToken(string code, string redirectUri, CancellationToken cancellationToken)
+        private async Task<string> RetrieveToken(string code, CancellationToken cancellationToken)
         {
             string result;
 
             var client = _httpClientFactory.CreateClient();
             var tokenEndpointUri = BuildTokenEndpointUri();
-            var postData = BuildRequestForToken(code, redirectUri);
+            var postData = BuildTokenRequest(code);
             var request = new HttpRequestMessage(HttpMethod.Post, new Uri(tokenEndpointUri))
             {
                 Content = new StringContent(postData, Encoding.UTF8, "application/x-www-form-urlencoded")
@@ -130,12 +86,12 @@ namespace SinglePass.WPF.Authorization.Brokers
             return "Authorization success, you can return to application";
         }
 
-        protected abstract string BuildRedirectUri();
-        protected abstract string BuildAuthorizationUri(string redirectUri);
+        protected abstract void BuildRedirectUri();
+        protected abstract string BuildAuthorizationUri();
         protected abstract string BuildTokenEndpointUri();
-        protected abstract string BuildRequestForToken(string code, string redirectUri);
-        protected abstract string BuildRefreshAccessTokenEndpointUri();
-        protected abstract string BuildRequestForRefreshToken();
-        protected abstract string BuildRevokeTokenEndpointUri();
+        protected abstract string BuildTokenRequest(string code);
+        protected abstract string BuildRefreshTokenEndpointUri();
+        protected abstract string BuildRefreshTokenRequest();
+        protected abstract string BuildTokenRevokeEndpointUri();
     }
 }

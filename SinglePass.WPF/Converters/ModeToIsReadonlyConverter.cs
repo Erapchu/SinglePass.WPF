@@ -5,21 +5,20 @@ using System.Windows.Data;
 
 namespace SinglePass.WPF.Converters
 {
-    [ValueConversion(typeof(CredentialsDialogMode), typeof(bool))]
+    [ValueConversion(typeof(CredentialDetailsMode), typeof(bool))]
     internal class ModeToIsReadonlyConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is CredentialsDialogMode mode)
+            if (value is CredentialDetailsMode mode)
             {
                 switch (mode)
                 {
-                    case CredentialsDialogMode.New:
+                    case CredentialDetailsMode.New:
+                    case CredentialDetailsMode.Edit:
                         return false;
-                    case CredentialsDialogMode.View:
+                    case CredentialDetailsMode.View:
                         return true;
-                    case CredentialsDialogMode.Edit:
-                        return false;
                     default:
                         break;
                 }

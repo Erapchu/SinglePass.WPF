@@ -16,9 +16,11 @@ using SinglePass.WPF.Services;
 using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels;
 using SinglePass.WPF.Views;
+using SinglePass.WPF.Views.Windows;
 using System;
 using System.Threading;
 using System.Windows;
+using System.Windows.Interop;
 
 namespace SinglePass.WPF
 {
@@ -85,8 +87,9 @@ namespace SinglePass.WPF
             services.AddScoped<PasswordsViewModel>();
             services.AddScoped<CloudSyncViewModel>();
             services.AddScoped<SettingsViewModel>();
-            services.AddScoped<CredentialsDialogViewModel>();
+            services.AddScoped<CredentialsDetailsViewModel>();
 
+            // Popup
             services.AddTransient<PopupWindow>();
             services.AddTransient<PopupViewModel>();
 
@@ -132,6 +135,9 @@ namespace SinglePass.WPF
                 var welcomeWindow = new WelcomeWindow();
                 welcomeWindow.Show();
 
+                var hiw = new HiddenInterprocessWindow();
+                hiw.InitWithoutShowing();
+
                 _logger = Services.GetService<ILogger<App>>();
                 _logger.LogInformation("Log session started!");
 
@@ -165,6 +171,7 @@ namespace SinglePass.WPF
             }
             else
             {
+                InterprocessHelper.ShowMainWindow();
                 Shutdown();
             }
         }

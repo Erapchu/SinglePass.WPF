@@ -4,7 +4,7 @@ using MaterialDesignThemes.Wpf;
 using System;
 using System.Threading;
 
-namespace SinglePass.WPF.ViewModels
+namespace SinglePass.WPF.ViewModels.Dialogs
 {
     [INotifyPropertyChanged]
     public partial class ProcessingViewModel

@@ -1,6 +1,5 @@
 ﻿using SinglePass.WPF.Controls;
 using SinglePass.WPF.Helpers;
-using SinglePass.WPF.Hotkeys;
 using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels;
 using SinglePass.WPF.Views.Controls;
@@ -15,19 +14,16 @@ namespace SinglePass.WPF.Views
     /// </summary>
     public partial class MainWindow : MaterialWindow
     {
-        private readonly HotkeysService _hotkeyService;
         private readonly AppSettingsService _appSettingsService;
 
         private MainWindowViewModel ViewModel => DataContext as MainWindowViewModel;
 
         public MainWindow(
             MainWindowViewModel mainViewModel,
-            HotkeysService hotkeysService,
             AppSettingsService appSettingsService)
         {
             InitializeComponent();
 
-            _hotkeyService = hotkeysService;
             _appSettingsService = appSettingsService;
 
             var windowSettings = _appSettingsService.MainWindowSettings;

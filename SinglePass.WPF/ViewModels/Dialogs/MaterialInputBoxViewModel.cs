@@ -5,58 +5,23 @@ using System;
 
 namespace SinglePass.WPF.ViewModels.Dialogs
 {
-    internal class MaterialInputBoxViewModel : ObservableObject
+    [INotifyPropertyChanged]
+    internal partial class MaterialInputBoxViewModel
     {
         private static readonly Lazy<MaterialInputBoxViewModel> _lazy = new(() => new MaterialInputBoxViewModel("Header", "Example", null));
         public static MaterialInputBoxViewModel DesignTimeInstance => _lazy.Value;
 
-        private string _hint;
-        private string _inputedText;
-        private string _header;
         private readonly string _dialogIdentifier;
-        private RelayCommand _cancelCommand;
-        private RelayCommand _acceptCommand;
 
-        public string Hint
-        {
-            get => _hint;
-            set
-            {
-                if (_hint == value)
-                    return;
+        [ObservableProperty]
+        private string _hint;
 
-                _hint = value;
-                OnPropertyChanged();
-            }
-        }
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(AcceptCommand))]
+        private string _inputedText;
 
-        public string InputedText
-        {
-            get => _inputedText;
-            set
-            {
-                _inputedText = value;
-                OnPropertyChanged();
-                AcceptCommand.NotifyCanExecuteChanged();
-            }
-        }
-
-        public string Header
-        {
-            get => _header;
-            set
-            {
-                if (_header == value)
-                    return;
-
-                _header = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public RelayCommand AcceptCommand => _acceptCommand ??= new RelayCommand(Accept, CanAccept);
-
-        public RelayCommand CancelCommand => _cancelCommand ??= new RelayCommand(Cancel);
+        [ObservableProperty]
+        private string _header;
 
         public MaterialInputBoxViewModel(string header, string hint, string dialogIdentifier)
         {
@@ -65,17 +30,19 @@ namespace SinglePass.WPF.ViewModels.Dialogs
             _dialogIdentifier = dialogIdentifier;
         }
 
-        private bool CanAccept()
-        {
-            return !string.IsNullOrWhiteSpace(InputedText);
-        }
-
+        [RelayCommand(CanExecute = nameof(CanAccept))]
         private void Accept()
         {
             if (DialogHost.IsDialogOpen(_dialogIdentifier))
                 DialogHost.Close(_dialogIdentifier, InputedText);
         }
 
+        private bool CanAccept()
+        {
+            return !string.IsNullOrWhiteSpace(InputedText);
+        }
+
+        [RelayCommand]
         private void Cancel()
         {
             if (DialogHost.IsDialogOpen(_dialogIdentifier))

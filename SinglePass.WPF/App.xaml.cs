@@ -15,12 +15,13 @@ using SinglePass.WPF.Options;
 using SinglePass.WPF.Services;
 using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels;
+using SinglePass.WPF.ViewModels.Dialogs;
 using SinglePass.WPF.Views;
+using SinglePass.WPF.Views.Dialogs;
 using SinglePass.WPF.Views.Windows;
 using System;
 using System.Threading;
 using System.Windows;
-using System.Windows.Interop;
 
 namespace SinglePass.WPF
 {
@@ -88,6 +89,8 @@ namespace SinglePass.WPF
             services.AddScoped<CloudSyncViewModel>();
             services.AddScoped<SettingsViewModel>();
             services.AddScoped<CredentialsDetailsViewModel>();
+            services.AddTransient<MaterialInputBoxContent>();
+            services.AddTransient<MaterialInputBoxViewModel>();
 
             // Popup
             services.AddTransient<PopupWindow>();

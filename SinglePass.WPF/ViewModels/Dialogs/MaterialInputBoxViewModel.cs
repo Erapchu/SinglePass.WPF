@@ -6,12 +6,12 @@ using System;
 namespace SinglePass.WPF.ViewModels.Dialogs
 {
     [INotifyPropertyChanged]
-    internal partial class MaterialInputBoxViewModel
+    public partial class MaterialInputBoxViewModel
     {
-        private static readonly Lazy<MaterialInputBoxViewModel> _lazy = new(() => new MaterialInputBoxViewModel("Header", "Example", null));
+        private static readonly Lazy<MaterialInputBoxViewModel> _lazy = new(() => new MaterialInputBoxViewModel());
         public static MaterialInputBoxViewModel DesignTimeInstance => _lazy.Value;
 
-        private readonly string _dialogIdentifier;
+        public string DialogIdentifier { get; set; }
 
         [ObservableProperty]
         private string _hint;
@@ -23,18 +23,19 @@ namespace SinglePass.WPF.ViewModels.Dialogs
         [ObservableProperty]
         private string _header;
 
-        public MaterialInputBoxViewModel(string header, string hint, string dialogIdentifier)
+        [ObservableProperty]
+        private bool _isPassword;
+
+        public MaterialInputBoxViewModel()
         {
-            _header = header;
-            _hint = hint;
-            _dialogIdentifier = dialogIdentifier;
+
         }
 
         [RelayCommand(CanExecute = nameof(CanAccept))]
         private void Accept()
         {
-            if (DialogHost.IsDialogOpen(_dialogIdentifier))
-                DialogHost.Close(_dialogIdentifier, InputedText);
+            if (DialogHost.IsDialogOpen(DialogIdentifier))
+                DialogHost.Close(DialogIdentifier, InputedText);
         }
 
         private bool CanAccept()
@@ -45,8 +46,8 @@ namespace SinglePass.WPF.ViewModels.Dialogs
         [RelayCommand]
         private void Cancel()
         {
-            if (DialogHost.IsDialogOpen(_dialogIdentifier))
-                DialogHost.Close(_dialogIdentifier);
+            if (DialogHost.IsDialogOpen(DialogIdentifier))
+                DialogHost.Close(DialogIdentifier);
         }
     }
 }

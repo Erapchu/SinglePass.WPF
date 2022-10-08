@@ -1,6 +1,8 @@
 ﻿using MaterialDesignThemes.Wpf;
+using Microsoft.Extensions.DependencyInjection;
 using SinglePass.WPF.ViewModels.Dialogs;
 using SinglePass.WPF.Views.Dialogs;
+using SinglePass.WPF.Views.Windows;
 using System.Threading.Tasks;
 
 namespace SinglePass.WPF.Views.Helpers
@@ -22,10 +24,11 @@ namespace SinglePass.WPF.Views.Helpers
             string dialogIdentifier,
             bool isPassword = false)
         {
-            var instance = new MaterialInputBoxContent(isPassword)
-            {
-                DataContext = new MaterialInputBoxViewModel(header, hint, dialogIdentifier)
-            };
+            var instance = (System.Windows.Application.Current as App).Services.GetService<MaterialInputBoxContent>();
+            instance.ViewModel.Header = header;
+            instance.ViewModel.Hint = hint;
+            instance.ViewModel.DialogIdentifier = dialogIdentifier;
+            instance.ViewModel.IsPassword = isPassword;
             var result = await DialogHost.Show(instance, dialogIdentifier);
             return result is string str ? str : null;
         }

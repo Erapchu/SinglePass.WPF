@@ -62,9 +62,26 @@ namespace SinglePass.WPF.ViewModels
             get
             {
                 if (_favIcon is null)
-                    _favIconCollector.ScheduleGetImage(SiteFieldVM.Value, (image) => SetProperty(ref _favIcon, image, nameof(FavIcon)));
+                    _favIconCollector.ScheduleGetImage(
+                        SiteFieldVM.Value,
+                        (image) => SetProperty(ref _favIcon, image, nameof(FavIcon)));
 
                 return _favIcon;
+            }
+        }
+
+        private ImageSource _favIcon32;
+        public ImageSource FavIcon32
+        {
+            get
+            {
+                if (_favIcon32 is null)
+                    _favIconCollector.ScheduleGetImage(
+                        SiteFieldVM.Value,
+                        (image) => SetProperty(ref _favIcon32, image, nameof(FavIcon32)),
+                        32);
+
+                return _favIcon32;
             }
         }
 

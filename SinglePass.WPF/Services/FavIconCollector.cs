@@ -100,7 +100,7 @@ namespace SinglePass.WPF.Services
                         foreach (var processingImage in uniqueProcessingImages)
                         {
                             ImageSource cachedImageSource;
-                            if (tempFavIconCache.TryGetValue(processingImage, out FavIcon favIcon) && favIcon.Size == processingImage.Size)
+                            if (tempFavIconCache.TryGetValue(processingImage, out FavIcon favIcon))
                             {
                                 var imageSource = ImageSourceHelper.ToImageSource(favIcon.Bytes);
                                 processingImage.SetPropertyAction.Invoke(imageSource);

@@ -90,40 +90,41 @@ namespace SinglePass.WPF.Services
                     {
                         using var scope = _serviceScopeFactory.CreateScope();
                         var favIconCacheService = scope.ServiceProvider.GetService<FavIconCacheService>();
-
-                        var uniqueProcessingImages = processingWrappers.Distinct().ToList();
-                        var hosts = uniqueProcessingImages.Select(ipw => ipw.Host).Distinct().ToList();
-                        var favIconsFromDB = await favIconCacheService.GetManyCachedImages(hosts);
-                        var tempFavIconCache = favIconsFromDB.ToDictionary(fi => new ProcessingImageWrapper(fi.Host, fi.Size));
+                        var uniqueHosts = processingWrappers
+                            .Select(ipw => ipw.Host)
+                            .Distinct()
+                            .ToList();
+                        var favIconsFromDB = await favIconCacheService.GetManyCachedImages(uniqueHosts);
+                        var tempFavIconCacheFromDB = favIconsFromDB.ToDictionary(fi => new ProcessingImageWrapper(fi.Host, fi.Size));
 
                         // Set existing to UI
-                        foreach (var processingImage in uniqueProcessingImages)
+                        foreach (var processingWrapper in processingWrappers)
                         {
                             ImageSource cachedImageSource;
-                            if (tempFavIconCache.TryGetValue(processingImage, out FavIcon favIcon))
+                            if (tempFavIconCacheFromDB.TryGetValue(processingWrapper, out FavIcon favIcon))
                             {
                                 var imageSource = ImageSourceHelper.ToImageSource(favIcon.Bytes);
-                                processingImage.SetPropertyAction.Invoke(imageSource);
+                                processingWrapper.SetPropertyAction.Invoke(imageSource);
                                 cachedImageSource = imageSource;
                             }
                             else
                             {
                                 // Download, set to DB, set to UI and save to temp local cache
                                 var bitmapImage = await _imageService.GetImageAsync(
-                                    string.Format(_favIconServiceUrl, processingImage.Host, processingImage.Size), cancellationToken);
+                                    string.Format(_favIconServiceUrl, processingWrapper.Host, processingWrapper.Size), cancellationToken);
                                 var freshFavIcon = new FavIcon()
                                 {
                                     Bytes = ImageSourceHelper.ToBytes(bitmapImage),
-                                    Host = processingImage.Host,
-                                    Size = processingImage.Size,
+                                    Host = processingWrapper.Host,
+                                    Size = processingWrapper.Size,
                                 };
                                 await favIconCacheService.SetCachedImage(freshFavIcon);
-                                tempFavIconCache.TryAdd(processingImage, freshFavIcon);
-                                processingImage.SetPropertyAction.Invoke(bitmapImage);
+                                tempFavIconCacheFromDB.TryAdd(processingWrapper, freshFavIcon);
+                                processingWrapper.SetPropertyAction.Invoke(bitmapImage);
                                 cachedImageSource = bitmapImage;
                             }
 
-                            _imagesCache.TryAdd(processingImage, cachedImageSource);
+                            _imagesCache.TryAdd(processingWrapper, cachedImageSource);
                         }
                     }
 

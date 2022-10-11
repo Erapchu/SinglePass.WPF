@@ -4,6 +4,7 @@
     {
         public Guid Id { get; set; }
         public string? Host { get; set; }
+        public int Size { get; set; }
         public byte[]? Bytes { get; set; }
     }
 }

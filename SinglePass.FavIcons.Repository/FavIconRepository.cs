@@ -20,7 +20,7 @@ namespace SinglePass.FavIcons.Repository
 
         public Task EnsureCreated()
         {
-            return _favIconDbContext.Database.EnsureCreatedAsync();
+            return _favIconDbContext.Database.MigrateAsync();
         }
 
         public Task<FavIcon?> Get(string host)

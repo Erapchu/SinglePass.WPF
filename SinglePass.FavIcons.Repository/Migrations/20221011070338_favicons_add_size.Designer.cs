@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SinglePass.FavIcons.Repository;
 
@@ -10,9 +11,10 @@ using SinglePass.FavIcons.Repository;
 namespace SinglePass.FavIcons.Repository.Migrations
 {
     [DbContext(typeof(FavIconDbContext))]
-    partial class FavIconDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221011070338_favicons_add_size")]
+    partial class favicons_add_size
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.9");

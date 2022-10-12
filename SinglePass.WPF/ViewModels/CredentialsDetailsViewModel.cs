@@ -10,7 +10,8 @@ using System.Diagnostics;
 
 namespace SinglePass.WPF.ViewModels
 {
-    public class CredentialsDetailsViewModel : ObservableRecipient
+    [INotifyPropertyChanged]
+    public partial class CredentialsDetailsViewModel
     {
         #region Design time instance
         private static readonly Lazy<CredentialsDetailsViewModel> _lazy = new(GetDesignTimeVM);
@@ -31,34 +32,23 @@ namespace SinglePass.WPF.ViewModels
 
         private readonly ILogger<CredentialsDetailsViewModel> _logger;
 
-        public event Action<CredentialViewModel, CredentialDetailsMode> Accept;
-        public event Action<CredentialViewModel> Delete;
-        public event Action Cancel;
+        public event Action<CredentialViewModel, CredentialDetailsMode> Accepted;
+        public event Action<CredentialViewModel> Deleted;
+        public event Action Cancelled;
         public event Action<string> EnqueueSnackbarMessage;
 
-        private RelayCommand _okCommand;
-        private RelayCommand _cancelCommand;
-        private RelayCommand _editCommand;
-        private RelayCommand _deleteCommand;
-        private RelayCommand _openInBrowserCommand;
-        private RelayCommand<string> _copyToClipboardCommand;
+        [ObservableProperty]
         private CredentialViewModel _credentialViewModel;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CaptionText))]
         private CredentialDetailsMode _mode = CredentialDetailsMode.View;
+
+        [ObservableProperty]
         private bool _isPasswordVisible;
+
+        [ObservableProperty]
         private bool _isNameTextBoxFocused;
-
-        public RelayCommand OkCommand => _okCommand ??= new RelayCommand(OkExecute);
-        public RelayCommand CancelCommand => _cancelCommand ??= new RelayCommand(CancelExecute);
-        public RelayCommand EditCommand => _editCommand ??= new RelayCommand(EditExecute);
-        public RelayCommand DeleteCommand => _deleteCommand ??= new RelayCommand(DeleteExecute);
-        public RelayCommand<string> CopyToClipboardCommand => _copyToClipboardCommand ??= new RelayCommand<string>(CopyToClipboard);
-        public RelayCommand OpenInBrowserCommand => _openInBrowserCommand ??= new RelayCommand(OpenInBrowser);
-
-        public CredentialViewModel CredentialViewModel
-        {
-            get => _credentialViewModel;
-            set => SetProperty(ref _credentialViewModel, value);
-        }
 
         public string CaptionText
         {
@@ -80,48 +70,29 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
-        public CredentialDetailsMode Mode
-        {
-            get => _mode;
-            set
-            {
-                SetProperty(ref _mode, value);
-                OnPropertyChanged(nameof(CaptionText));
-            }
-        }
-
-        public bool IsPasswordVisible
-        {
-            get => _isPasswordVisible;
-            set => SetProperty(ref _isPasswordVisible, value);
-        }
-
-        public bool IsNameTextBoxFocused
-        {
-            get => _isNameTextBoxFocused;
-            set => SetProperty(ref _isNameTextBoxFocused, value);
-        }
-
         public CredentialsDetailsViewModel(ILogger<CredentialsDetailsViewModel> logger)
         {
             _logger = logger;
         }
 
-        private void OkExecute()
+        [RelayCommand]
+        private void Ok()
         {
             CredentialViewModel.NameFieldVM.ValidateValue();
             if (CredentialViewModel.NameFieldVM.HasErrors)
                 return;
 
-            Accept?.Invoke(CredentialViewModel, Mode);
+            Accepted?.Invoke(CredentialViewModel, Mode);
         }
 
-        private void CancelExecute()
+        [RelayCommand]
+        private void Cancel()
         {
-            Cancel?.Invoke();
+            Cancelled?.Invoke();
         }
 
-        private void EditExecute()
+        [RelayCommand]
+        private void Edit()
         {
             if (CredentialViewModel is null)
                 return;
@@ -132,14 +103,16 @@ namespace SinglePass.WPF.ViewModels
             SetFocus();
         }
 
-        private void DeleteExecute()
+        [RelayCommand]
+        private void Delete()
         {
             if (CredentialViewModel is null)
                 return;
 
-            Delete?.Invoke(CredentialViewModel);
+            Deleted?.Invoke(CredentialViewModel);
         }
 
+        [RelayCommand]
         private void CopyToClipboard(string data)
         {
             if (string.IsNullOrWhiteSpace(data))
@@ -156,6 +129,7 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
+        [RelayCommand]
         private void OpenInBrowser()
         {
             var uri = CredentialViewModel?.SiteFieldVM?.Value;

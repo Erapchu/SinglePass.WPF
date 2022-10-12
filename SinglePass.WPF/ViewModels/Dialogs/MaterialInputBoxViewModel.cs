@@ -5,64 +5,37 @@ using System;
 
 namespace SinglePass.WPF.ViewModels.Dialogs
 {
-    internal class MaterialInputBoxViewModel : ObservableObject
+    [INotifyPropertyChanged]
+    public partial class MaterialInputBoxViewModel
     {
-        private static readonly Lazy<MaterialInputBoxViewModel> _lazy = new(() => new MaterialInputBoxViewModel("Header", "Example", null));
+        private static readonly Lazy<MaterialInputBoxViewModel> _lazy = new(() => new MaterialInputBoxViewModel());
         public static MaterialInputBoxViewModel DesignTimeInstance => _lazy.Value;
 
+        public string DialogIdentifier { get; set; }
+
+        [ObservableProperty]
         private string _hint;
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(AcceptCommand))]
         private string _inputedText;
+
+        [ObservableProperty]
         private string _header;
-        private readonly string _dialogIdentifier;
-        private RelayCommand _cancelCommand;
-        private RelayCommand _acceptCommand;
 
-        public string Hint
+        [ObservableProperty]
+        private bool _isPassword;
+
+        public MaterialInputBoxViewModel()
         {
-            get => _hint;
-            set
-            {
-                if (_hint == value)
-                    return;
 
-                _hint = value;
-                OnPropertyChanged();
-            }
         }
 
-        public string InputedText
+        [RelayCommand(CanExecute = nameof(CanAccept))]
+        private void Accept()
         {
-            get => _inputedText;
-            set
-            {
-                _inputedText = value;
-                OnPropertyChanged();
-                AcceptCommand.NotifyCanExecuteChanged();
-            }
-        }
-
-        public string Header
-        {
-            get => _header;
-            set
-            {
-                if (_header == value)
-                    return;
-
-                _header = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public RelayCommand AcceptCommand => _acceptCommand ??= new RelayCommand(Accept, CanAccept);
-
-        public RelayCommand CancelCommand => _cancelCommand ??= new RelayCommand(Cancel);
-
-        public MaterialInputBoxViewModel(string header, string hint, string dialogIdentifier)
-        {
-            _header = header;
-            _hint = hint;
-            _dialogIdentifier = dialogIdentifier;
+            if (DialogHost.IsDialogOpen(DialogIdentifier))
+                DialogHost.Close(DialogIdentifier, InputedText);
         }
 
         private bool CanAccept()
@@ -70,16 +43,11 @@ namespace SinglePass.WPF.ViewModels.Dialogs
             return !string.IsNullOrWhiteSpace(InputedText);
         }
 
-        private void Accept()
-        {
-            if (DialogHost.IsDialogOpen(_dialogIdentifier))
-                DialogHost.Close(_dialogIdentifier, InputedText);
-        }
-
+        [RelayCommand]
         private void Cancel()
         {
-            if (DialogHost.IsDialogOpen(_dialogIdentifier))
-                DialogHost.Close(_dialogIdentifier);
+            if (DialogHost.IsDialogOpen(DialogIdentifier))
+                DialogHost.Close(DialogIdentifier);
         }
     }
 }

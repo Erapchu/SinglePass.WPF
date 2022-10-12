@@ -117,12 +117,12 @@ namespace SinglePass.WPF.ViewModels
             _order = _appSettingsService.Order;
 
             ActiveCredentialDialogVM = credentialsDialogViewModel;
-            ActiveCredentialDialogVM.Accept += ActiveCredentialDialogVM_Accept;
-            ActiveCredentialDialogVM.Cancel += ActiveCredentialDialogVM_Cancel;
-            ActiveCredentialDialogVM.Delete += ActiveCredentialDialogVM_Delete;
+            ActiveCredentialDialogVM.Accepted += ActiveCredentialDialogVM_Accepted;
+            ActiveCredentialDialogVM.Cancelled += ActiveCredentialDialogVM_Canceled;
+            ActiveCredentialDialogVM.Deleted += ActiveCredentialDialogVM_Deleted;
         }
 
-        private async void ActiveCredentialDialogVM_Delete(CredentialViewModel credVM)
+        private async void ActiveCredentialDialogVM_Deleted(CredentialViewModel credVM)
         {
             var result = await MaterialMessageBox.ShowAsync(
                 SinglePass.Language.Properties.Resources.DeleteItem,
@@ -145,14 +145,14 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
-        private void ActiveCredentialDialogVM_Cancel()
+        private void ActiveCredentialDialogVM_Canceled()
         {
             ActiveCredentialDialogVM.IsPasswordVisible = false;
             ActiveCredentialDialogVM.Mode = CredentialDetailsMode.View;
             ActiveCredentialDialogVM.CredentialViewModel = SelectedCredential;
         }
 
-        private async void ActiveCredentialDialogVM_Accept(CredentialViewModel newCredVM, CredentialDetailsMode mode)
+        private async void ActiveCredentialDialogVM_Accepted(CredentialViewModel newCredVM, CredentialDetailsMode mode)
         {
             var dateTimeNow = DateTime.Now;
             newCredVM.LastModifiedTime = dateTimeNow;

@@ -10,24 +10,19 @@ namespace SinglePass.WPF.Views.Dialogs
     /// </summary>
     public partial class MaterialInputBoxContent : UserControl
     {
-        private readonly bool _isPassword;
-        private MaterialInputBoxViewModel ViewModel => DataContext as MaterialInputBoxViewModel;
+        public MaterialInputBoxViewModel ViewModel { get; }
 
-        public MaterialInputBoxContent(bool isPassword)
+        public MaterialInputBoxContent(MaterialInputBoxViewModel viewModel)
         {
             InitializeComponent();
-            _isPassword = isPassword;
-
-            if (_isPassword)
-                PasswordInputBox.Visibility = Visibility.Visible;
-            else
-                TextInputBox.Visibility = Visibility.Visible;
+            ViewModel = viewModel;
+            DataContext = viewModel;
         }
 
         private async void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             await Task.Delay(200);
-            if (_isPassword)
+            if (ViewModel.IsPassword)
                 PasswordInputBox.Focus();
             else
                 TextInputBox.Focus();

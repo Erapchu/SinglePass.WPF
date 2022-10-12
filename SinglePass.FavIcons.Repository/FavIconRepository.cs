@@ -28,9 +28,15 @@ namespace SinglePass.FavIcons.Repository
             return _favIconDbContext.FavIcons.FirstOrDefaultAsync(f => f.Host == host);
         }
 
-        public Task<List<FavIcon>> GetMany(List<string> hosts)
+        public Task<List<FavIcon>> GetMany(List<FavIconDto> favIcons)
         {
-            return _favIconDbContext.FavIcons.Where(fi => hosts.Contains(fi.Host)).ToListAsync();
+            IQueryable<FavIcon> query = _favIconDbContext.FavIcons.Where(f => f.Host == favIcons[0].Host && f.Size == favIcons[0].Size);
+            var whereClause = _favIconDbContext.FavIcons.AsNoTracking();
+            foreach (var favIcon in favIcons.Skip(1))
+            {
+                query = query.Concat(whereClause.Where(f => f.Host == favIcon.Host && f.Size == favIcon.Size));
+            }
+            return query.ToListAsync();
         }
     }
 }

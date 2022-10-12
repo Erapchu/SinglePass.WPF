@@ -19,9 +19,9 @@
             return _favIconRepository.Get(host);
         }
 
-        public Task<List<FavIcon>> GetManyCachedImages(List<string> hosts)
+        public Task<List<FavIcon>> GetManyCachedImages(List<FavIconDto> favIcons)
         {
-            return _favIconRepository.GetMany(hosts);
+            return _favIconRepository.GetMany(favIcons);
         }
 
         public Task SetCachedImage(FavIcon favIcon)

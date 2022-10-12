@@ -4,7 +4,7 @@
     {
         public Task Add(FavIcon favIcon);
         public Task<FavIcon?> Get(string host);
-        public Task<List<FavIcon>> GetMany(List<string> hosts);
+        public Task<List<FavIcon>> GetMany(List<FavIconDto> favIcons);
         public Task EnsureCreated();
     }
 }

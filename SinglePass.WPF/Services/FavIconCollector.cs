@@ -91,8 +91,8 @@ namespace SinglePass.WPF.Services
                         using var scope = _serviceScopeFactory.CreateScope();
                         var favIconCacheService = scope.ServiceProvider.GetService<FavIconCacheService>();
                         var uniqueHosts = processingWrappers
-                            .Select(ipw => ipw.Host)
                             .Distinct()
+                            .Select(ipw => new FavIconDto() { Host = ipw.Host, Size = ipw.Size })
                             .ToList();
                         var favIconsFromDB = await favIconCacheService.GetManyCachedImages(uniqueHosts);
                         var tempFavIconCacheFromDB = favIconsFromDB.ToDictionary(fi => new ProcessingImageWrapper(fi.Host, fi.Size));

@@ -14,17 +14,17 @@
             return _favIconRepository.Migrate();
         }
 
-        public Task<FavIcon?> GetCachedImage(FavIconDto favIconDto)
+        public Task<FavIcon?> Get(FavIconDto favIconDto)
         {
             return _favIconRepository.Get(favIconDto);
         }
 
-        public Task<List<FavIcon>> GetManyCachedImages(List<FavIconDto> favIconDtos)
+        public Task<List<FavIcon>> GetMany(List<FavIconDto> favIconDtos)
         {
             return _favIconRepository.GetMany(favIconDtos);
         }
 
-        public Task SetCachedImage(FavIcon favIcon)
+        public Task Add(FavIcon favIcon)
         {
             return _favIconRepository.Add(favIcon);
         }

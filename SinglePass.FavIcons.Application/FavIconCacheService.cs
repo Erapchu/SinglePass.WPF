@@ -14,14 +14,14 @@
             return _favIconRepository.EnsureCreated();
         }
 
-        public Task<FavIcon?> GetCachedImage(string host)
+        public Task<FavIcon?> GetCachedImage(FavIconDto favIconDto)
         {
-            return _favIconRepository.Get(host);
+            return _favIconRepository.Get(favIconDto);
         }
 
-        public Task<List<FavIcon>> GetManyCachedImages(List<FavIconDto> favIcons)
+        public Task<List<FavIcon>> GetManyCachedImages(List<FavIconDto> favIconDtos)
         {
-            return _favIconRepository.GetMany(favIcons);
+            return _favIconRepository.GetMany(favIconDtos);
         }
 
         public Task SetCachedImage(FavIcon favIcon)

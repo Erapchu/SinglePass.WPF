@@ -23,16 +23,19 @@ namespace SinglePass.FavIcons.Repository
             return _favIconDbContext.Database.MigrateAsync();
         }
 
-        public Task<FavIcon?> Get(string host)
+        public Task<FavIcon?> Get(FavIconDto favIconDto)
         {
-            return _favIconDbContext.FavIcons.FirstOrDefaultAsync(f => f.Host == host);
+            return _favIconDbContext.FavIcons.FirstOrDefaultAsync(f => f.Host == favIconDto.Host && f.Size == favIconDto.Size);
         }
 
-        public Task<List<FavIcon>> GetMany(List<FavIconDto> favIcons)
+        public Task<List<FavIcon>> GetMany(List<FavIconDto> favIconDtos)
         {
-            IQueryable<FavIcon> query = _favIconDbContext.FavIcons.Where(f => f.Host == favIcons[0].Host && f.Size == favIcons[0].Size);
+            if (favIconDtos.Count == 0)
+                return Task.FromResult(new List<FavIcon>());
+
+            IQueryable<FavIcon> query = _favIconDbContext.FavIcons.AsNoTracking().Where(f => f.Host == favIconDtos[0].Host && f.Size == favIconDtos[0].Size);
             var whereClause = _favIconDbContext.FavIcons.AsNoTracking();
-            foreach (var favIcon in favIcons.Skip(1))
+            foreach (var favIcon in favIconDtos.Skip(1))
             {
                 query = query.Concat(whereClause.Where(f => f.Host == favIcon.Host && f.Size == favIcon.Size));
             }

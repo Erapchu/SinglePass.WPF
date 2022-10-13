@@ -18,7 +18,7 @@ namespace SinglePass.FavIcons.Repository
             return _favIconDbContext.SaveChangesAsync();
         }
 
-        public Task EnsureCreated()
+        public Task Migrate()
         {
             return _favIconDbContext.Database.MigrateAsync();
         }

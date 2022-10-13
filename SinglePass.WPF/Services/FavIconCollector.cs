@@ -72,7 +72,7 @@ namespace SinglePass.WPF.Services
             {
                 using var scope = _serviceScopeFactory.CreateScope();
                 var favIconCacheService = scope.ServiceProvider.GetService<FavIconCacheService>();
-                await favIconCacheService.EnsureCreated();
+                await favIconCacheService.Migrate();
             }
             catch (Exception ex)
             {

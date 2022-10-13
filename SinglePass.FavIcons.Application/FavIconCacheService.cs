@@ -9,9 +9,9 @@
             _favIconRepository = favIconRepository;
         }
 
-        public Task EnsureCreated()
+        public Task Migrate()
         {
-            return _favIconRepository.EnsureCreated();
+            return _favIconRepository.Migrate();
         }
 
         public Task<FavIcon?> GetCachedImage(FavIconDto favIconDto)

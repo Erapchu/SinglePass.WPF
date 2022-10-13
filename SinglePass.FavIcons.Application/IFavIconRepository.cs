@@ -5,6 +5,6 @@
         public Task Add(FavIcon favIcon);
         public Task<FavIcon?> Get(FavIconDto favIcon);
         public Task<List<FavIcon>> GetMany(List<FavIconDto> favIcons);
-        public Task EnsureCreated();
+        public Task Migrate();
     }
 }

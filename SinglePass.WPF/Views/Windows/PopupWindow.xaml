@@ -115,7 +115,8 @@
             ItemContainerStyle="{StaticResource CredentialPopupItemStyle}"
             ItemTemplate="{StaticResource CredentialDataTemplate}"
             ItemsSource="{Binding DisplayedCredentials}"
-            SelectedItem="{Binding SelectedCredentialVM}">
+            SelectedItem="{Binding SelectedCredentialVM}"
+            VirtualizingPanel.VirtualizationMode="Recycling">
             <ListBox.Resources>
                 <Style BasedOn="{StaticResource MaterialDesignScrollBarMinimal}" TargetType="ScrollBar" />
             </ListBox.Resources>

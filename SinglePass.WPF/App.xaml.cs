@@ -91,6 +91,8 @@ namespace SinglePass.WPF
             services.AddScoped<CredentialsDetailsViewModel>();
             services.AddTransient<MaterialInputBoxContent>();
             services.AddTransient<MaterialInputBoxViewModel>();
+            services.AddTransient<CreateCredentialView>();
+            services.AddTransient<CreateCredentialViewModel>();
 
             // Popup
             services.AddTransient<PopupWindow>();

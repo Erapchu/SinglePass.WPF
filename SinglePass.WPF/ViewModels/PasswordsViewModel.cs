@@ -12,6 +12,7 @@ using SinglePass.WPF.ViewModels.Dialogs;
 using SinglePass.WPF.Views.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -48,20 +49,17 @@ namespace SinglePass.WPF.ViewModels
 
         public event Action<CredentialViewModel> CredentialSelected;
         public event Action<CredentialViewModel> ScrollIntoViewRequired;
+        public event Action<string> EnqueueSnackbarMessage;
 
         public ObservableCollectionDelayed<CredentialViewModel> DisplayedCredentials { get; private set; } = new();
-        public CredentialsDetailsViewModel ActiveCredentialDialogVM { get; }
 
-        private CredentialViewModel _selectedCredential;
-        public CredentialViewModel SelectedCredential
+        private CredentialViewModel _selectedCredentialVM;
+        public CredentialViewModel SelectedCredentialVM
         {
-            get => _selectedCredential;
+            get => _selectedCredentialVM;
             set
             {
-                SetProperty(ref _selectedCredential, value);
-                ActiveCredentialDialogVM.Mode = CredentialDetailsMode.View;
-                ActiveCredentialDialogVM.CredentialViewModel = value;
-                ActiveCredentialDialogVM.IsPasswordVisible = false;
+                SetProperty(ref _selectedCredentialVM, value);
                 CredentialSelected?.Invoke(value);
             }
         }
@@ -104,7 +102,6 @@ namespace SinglePass.WPF.ViewModels
         public PasswordsViewModel(
             CredentialsCryptoService credentialsCryptoService,
             ILogger<PasswordsViewModel> logger,
-            CredentialsDetailsViewModel credentialsDialogViewModel,
             AppSettingsService appSettingsService,
             CredentialViewModelFactory credentialViewModelFactory)
         {
@@ -115,55 +112,13 @@ namespace SinglePass.WPF.ViewModels
 
             _sort = _appSettingsService.Sort;
             _order = _appSettingsService.Order;
-
-            ActiveCredentialDialogVM = credentialsDialogViewModel;
-            ActiveCredentialDialogVM.Accepted += ActiveCredentialDialogVM_Accepted;
-            ActiveCredentialDialogVM.Cancelled += ActiveCredentialDialogVM_Canceled;
-            ActiveCredentialDialogVM.Deleted += ActiveCredentialDialogVM_Deleted;
-        }
-
-        private async void ActiveCredentialDialogVM_Deleted(CredentialViewModel credVM)
-        {
-            var result = await MaterialMessageBox.ShowAsync(
-                SinglePass.Language.Properties.Resources.DeleteItem,
-                string.Format(SinglePass.Language.Properties.Resources.Name0, credVM.NameFieldVM.Value),
-                MaterialMessageBoxButtons.YesNo,
-                DialogIdentifiers.MainWindowName,
-                PackIconKind.Delete);
-            if (result == MaterialDialogResult.Yes)
-            {
-                await _credentialsCryptoService.DeleteCredential(credVM.Model);
-                _credentialVMs.Remove(credVM);
-                var dIndex = DisplayedCredentials.IndexOf(credVM);
-                var countAfterDeletion = DisplayedCredentials.Count - 1;
-                var sIndex = dIndex >= countAfterDeletion ? countAfterDeletion - 1 : dIndex;
-                await DisplayCredentialsAsync();
-                if (sIndex >= 0)
-                {
-                    SelectedCredential = DisplayedCredentials.ElementAt(sIndex);
-                }
-            }
-        }
-
-        private void ActiveCredentialDialogVM_Canceled()
-        {
-            ActiveCredentialDialogVM.IsPasswordVisible = false;
-            ActiveCredentialDialogVM.Mode = CredentialDetailsMode.View;
-            ActiveCredentialDialogVM.CredentialViewModel = SelectedCredential;
         }
 
         private async void ActiveCredentialDialogVM_Accepted(CredentialViewModel newCredVM, CredentialDetailsMode mode)
         {
             var dateTimeNow = DateTime.Now;
             newCredVM.LastModifiedTime = dateTimeNow;
-            if (mode == CredentialDetailsMode.New)
-            {
-                newCredVM.CreationTime = dateTimeNow;
-                await _credentialsCryptoService.AddCredential(newCredVM.Model);
-                _credentialVMs.Add(newCredVM);
-                await DisplayCredentialsAsync();
-            }
-            else if (mode == CredentialDetailsMode.Edit)
+            if (mode == CredentialDetailsMode.Edit)
             {
                 await _credentialsCryptoService.EditCredential(newCredVM.Model);
                 var staleCredVM = _credentialVMs.FirstOrDefault(c => c.Model.Equals(newCredVM.Model));
@@ -173,7 +128,7 @@ namespace SinglePass.WPF.ViewModels
                 await DisplayCredentialsAsync();
             }
 
-            SelectedCredential = newCredVM;
+            SelectedCredentialVM = newCredVM;
         }
 
         public void ReloadCredentials()
@@ -247,7 +202,7 @@ namespace SinglePass.WPF.ViewModels
                 OnPropertyChanged(nameof(DisplayedCredentials));
 
                 // Selected credential always first according to search request
-                SelectedCredential = DisplayedCredentials.FirstOrDefault();
+                SelectedCredentialVM = DisplayedCredentials.FirstOrDefault();
             }
             catch (Exception ex)
             {
@@ -256,12 +211,22 @@ namespace SinglePass.WPF.ViewModels
         }
 
         [RelayCommand]
-        private void AddCredential()
+        private async Task Add()
         {
-            ActiveCredentialDialogVM.CredentialViewModel = _credentialViewModelFactory.ProvideNew(Credential.CreateNew());
-            ActiveCredentialDialogVM.Mode = CredentialDetailsMode.New;
-            ActiveCredentialDialogVM.IsPasswordVisible = true;
-            ActiveCredentialDialogVM.SetFocus();
+            var newCredVM = _credentialViewModelFactory.ProvideNew(Credential.CreateNew());
+            var result = await CreateCredentialDialog.ShowAsync(
+                newCredVM,
+                DialogIdentifiers.MainWindowName,
+                CredentialDetailsMode.New);
+            if (result == MaterialDialogResult.Cancel)
+                return;
+
+            var dateTimeNow = DateTime.Now;
+            newCredVM.CreationTime = dateTimeNow;
+            newCredVM.LastModifiedTime = dateTimeNow;
+            await _credentialsCryptoService.AddCredential(newCredVM.Model);
+            _credentialVMs.Add(newCredVM);
+            await DisplayCredentialsAsync();
         }
 
         [RelayCommand]
@@ -275,22 +240,22 @@ namespace SinglePass.WPF.ViewModels
                 case Key.Up:
                     {
                         // Select previous
-                        var selectedIndex = DisplayedCredentials.IndexOf(SelectedCredential);
+                        var selectedIndex = DisplayedCredentials.IndexOf(SelectedCredentialVM);
                         if (selectedIndex != -1 && selectedIndex > 0)
                         {
-                            SelectedCredential = DisplayedCredentials[selectedIndex - 1];
-                            ScrollIntoViewRequired?.Invoke(SelectedCredential);
+                            SelectedCredentialVM = DisplayedCredentials[selectedIndex - 1];
+                            ScrollIntoViewRequired?.Invoke(SelectedCredentialVM);
                         }
                         break;
                     }
                 case Key.Down:
                     {
                         // Select next
-                        var selectedIndex = DisplayedCredentials.IndexOf(SelectedCredential);
+                        var selectedIndex = DisplayedCredentials.IndexOf(SelectedCredentialVM);
                         if (selectedIndex != -1 && selectedIndex < DisplayedCredentials.Count - 1)
                         {
-                            SelectedCredential = DisplayedCredentials[selectedIndex + 1];
-                            ScrollIntoViewRequired?.Invoke(SelectedCredential);
+                            SelectedCredentialVM = DisplayedCredentials[selectedIndex + 1];
+                            ScrollIntoViewRequired?.Invoke(SelectedCredentialVM);
                         }
                         break;
                     }
@@ -333,6 +298,74 @@ namespace SinglePass.WPF.ViewModels
                         }
                     }
                     break;
+            }
+        }
+
+        [RelayCommand]
+        private void Edit()
+        {
+            if (SelectedCredentialVM is null)
+                return;
+
+            var tempCredentialVM = SelectedCredentialVM.Clone();
+
+        }
+
+        [RelayCommand]
+        private async Task Delete()
+        {
+            if (SelectedCredentialVM is null)
+                return;
+
+            var result = await MaterialMessageBox.ShowAsync(
+                SinglePass.Language.Properties.Resources.DeleteItem,
+                string.Format(SinglePass.Language.Properties.Resources.Name0, SelectedCredentialVM.NameFieldVM.Value),
+                MaterialMessageBoxButtons.YesNo,
+                DialogIdentifiers.MainWindowName,
+                PackIconKind.Delete);
+            if (result == MaterialDialogResult.Yes)
+            {
+                await _credentialsCryptoService.DeleteCredential(SelectedCredentialVM.Model);
+                _credentialVMs.Remove(SelectedCredentialVM);
+                var dIndex = DisplayedCredentials.IndexOf(SelectedCredentialVM);
+                var countAfterDeletion = DisplayedCredentials.Count - 1;
+                var sIndex = dIndex >= countAfterDeletion ? countAfterDeletion - 1 : dIndex;
+                await DisplayCredentialsAsync();
+                if (sIndex >= 0)
+                {
+                    SelectedCredentialVM = DisplayedCredentials.ElementAt(sIndex);
+                }
+            }
+        }
+
+        [RelayCommand]
+        private void CopyToClipboard(string data)
+        {
+            if (string.IsNullOrWhiteSpace(data))
+                return;
+
+            try
+            {
+                WindowsClipboard.SetText(data);
+                EnqueueSnackbarMessage?.Invoke(SinglePass.Language.Properties.Resources.TextCopied);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, string.Empty);
+            }
+        }
+
+        [RelayCommand]
+        private void OpenInBrowser()
+        {
+            var uri = SelectedCredentialVM?.SiteFieldVM?.Value;
+            if (string.IsNullOrWhiteSpace(uri))
+                return;
+
+            uri = uri.Replace("&", "^&");
+            if (Uri.TryCreate(uri, UriKind.RelativeOrAbsolute, out var site))
+            {
+                Process.Start(new ProcessStartInfo("cmd", $"/c start {site}") { CreateNoWindow = true });
             }
         }
     }

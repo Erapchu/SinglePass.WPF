@@ -42,7 +42,7 @@ namespace SinglePass.WPF.Views.Windows
 
             mainViewModel.CredentialSelected += Vm_CredentialSelected;
             mainViewModel.ScrollIntoViewRequired += MainViewModel_ScrollIntoViewRequired;
-            mainViewModel.PasswordsVM.ActiveCredentialDialogVM.EnqueueSnackbarMessage += ActiveCredentialDialogVM_EnqueueSnackbarMessage;
+            mainViewModel.PasswordsVM.EnqueueSnackbarMessage += PasswordsVM_EnqueueSnackbarMessage;
 
             DataContext = mainViewModel;
         }
@@ -53,7 +53,7 @@ namespace SinglePass.WPF.Views.Windows
                 passwordsControl.CredentialsListBox.ScrollIntoView(credVM);
         }
 
-        private void ActiveCredentialDialogVM_EnqueueSnackbarMessage(string message)
+        private void PasswordsVM_EnqueueSnackbarMessage(string message)
         {
             if (SnackbarMain.MessageQueue is { } messageQueue)
             {

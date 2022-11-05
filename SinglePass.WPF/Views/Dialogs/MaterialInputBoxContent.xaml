@@ -53,25 +53,24 @@
                 md:HintAssist.IsFloating="True"
                 PasswordChanged="PasswordInputBox_PasswordChanged"
                 Visibility="{Binding IsPassword, Converter={StaticResource BooleanToVisibilityConverter}}" />
-            <Grid Grid.Row="2">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
+            <StackPanel
+                Grid.Row="2"
+                HorizontalAlignment="Right"
+                Orientation="Horizontal">
                 <Button
                     Grid.Column="0"
-                    Command="{Binding AcceptCommand}"
-                    Content="OK"
-                    IsDefault="True"
-                    Style="{StaticResource MaterialDesignFlatButton}" />
-                <Button
-                    Grid.Column="1"
-                    Margin="8 0 0 0"
+                    Margin="0 0 8 0"
                     Command="{Binding CancelCommand}"
                     Content="Cancel"
                     IsCancel="True"
                     Style="{StaticResource MaterialDesignFlatButton}" />
-            </Grid>
+                <Button
+                    Grid.Column="1"
+                    Command="{Binding AcceptCommand}"
+                    Content="OK"
+                    IsDefault="True"
+                    Style="{StaticResource MaterialDesignRaisedButton}" />
+            </StackPanel>
         </Grid>
     </Grid>
 </UserControl>

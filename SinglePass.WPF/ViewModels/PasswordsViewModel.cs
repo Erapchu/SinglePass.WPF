@@ -304,10 +304,8 @@ namespace SinglePass.WPF.ViewModels
             var dateTimeNow = DateTime.Now;
             tempCredentialVM.LastModifiedTime = dateTimeNow;
             await _credentialsCryptoService.EditCredential(tempCredentialVM.Model);
-            var staleCredVM = _credentialVMs.FirstOrDefault(c => c.Model.Equals(tempCredentialVM.Model));
-            var staleIndex = _credentialVMs.IndexOf(staleCredVM);
-            _credentialVMs.Remove(staleCredVM);
-            _credentialVMs.Insert(staleIndex, tempCredentialVM);
+            _credentialVMs.Remove(SelectedCredentialVM);
+            _credentialVMs.Add(tempCredentialVM);
             await DisplayCredentialsAsync();
             SelectedCredentialVM = tempCredentialVM;
         }

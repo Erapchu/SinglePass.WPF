@@ -97,6 +97,9 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
+        [ObservableProperty]
+        private bool _isPasswordVisible;
+
         private PasswordsViewModel() { }
 
         public PasswordsViewModel(
@@ -112,23 +115,6 @@ namespace SinglePass.WPF.ViewModels
 
             _sort = _appSettingsService.Sort;
             _order = _appSettingsService.Order;
-        }
-
-        private async void ActiveCredentialDialogVM_Accepted(CredentialViewModel newCredVM, CredentialDetailsMode mode)
-        {
-            var dateTimeNow = DateTime.Now;
-            newCredVM.LastModifiedTime = dateTimeNow;
-            if (mode == CredentialDetailsMode.Edit)
-            {
-                await _credentialsCryptoService.EditCredential(newCredVM.Model);
-                var staleCredVM = _credentialVMs.FirstOrDefault(c => c.Model.Equals(newCredVM.Model));
-                var staleIndex = _credentialVMs.IndexOf(staleCredVM);
-                _credentialVMs.Remove(staleCredVM);
-                _credentialVMs.Insert(staleIndex, newCredVM);
-                await DisplayCredentialsAsync();
-            }
-
-            SelectedCredentialVM = newCredVM;
         }
 
         public void ReloadCredentials()
@@ -302,13 +288,28 @@ namespace SinglePass.WPF.ViewModels
         }
 
         [RelayCommand]
-        private void Edit()
+        private async Task Edit()
         {
             if (SelectedCredentialVM is null)
                 return;
 
             var tempCredentialVM = SelectedCredentialVM.Clone();
+            var result = await CreateCredentialDialog.ShowAsync(
+                tempCredentialVM,
+                DialogIdentifiers.MainWindowName,
+                CredentialDetailsMode.Edit);
+            if (result == MaterialDialogResult.Cancel)
+                return;
 
+            var dateTimeNow = DateTime.Now;
+            tempCredentialVM.LastModifiedTime = dateTimeNow;
+            await _credentialsCryptoService.EditCredential(tempCredentialVM.Model);
+            var staleCredVM = _credentialVMs.FirstOrDefault(c => c.Model.Equals(tempCredentialVM.Model));
+            var staleIndex = _credentialVMs.IndexOf(staleCredVM);
+            _credentialVMs.Remove(staleCredVM);
+            _credentialVMs.Insert(staleIndex, tempCredentialVM);
+            await DisplayCredentialsAsync();
+            SelectedCredentialVM = tempCredentialVM;
         }
 
         [RelayCommand]

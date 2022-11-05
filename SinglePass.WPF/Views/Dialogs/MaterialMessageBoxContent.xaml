@@ -58,24 +58,24 @@
                 HorizontalAlignment="Right"
                 Orientation="Horizontal">
                 <Button
-                    Command="{Binding Button1Command}"
-                    Content="{Binding Button1Text}"
-                    IsDefault="{Binding Button1IsDefault}"
-                    Style="{StaticResource MaterialDesignFlatButton}" />
+                    Margin="0 0 8 0"
+                    Command="{Binding Button3Command}"
+                    Content="{Binding Button3Text}"
+                    IsCancel="{Binding Button3IsCancel}"
+                    Style="{StaticResource MaterialDesignFlatButton}"
+                    Visibility="{Binding Button3Visible, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 <Button
-                    Margin="8 0 0 0"
+                    Margin="0 0 8 0"
                     Command="{Binding Button2Command}"
                     Content="{Binding Button2Text}"
                     IsCancel="{Binding Button2IsCancel}"
                     Style="{StaticResource MaterialDesignFlatButton}"
                     Visibility="{Binding Button2Visible, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 <Button
-                    Margin="8 0 0 0"
-                    Command="{Binding Button3Command}"
-                    Content="{Binding Button3Text}"
-                    IsCancel="{Binding Button3IsCancel}"
-                    Style="{StaticResource MaterialDesignFlatButton}"
-                    Visibility="{Binding Button3Visible, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    Command="{Binding Button1Command}"
+                    Content="{Binding Button1Text}"
+                    IsDefault="{Binding Button1IsDefault}"
+                    Style="{StaticResource MaterialDesignRaisedButton}" />
             </StackPanel>
         </Grid>
     </Grid>

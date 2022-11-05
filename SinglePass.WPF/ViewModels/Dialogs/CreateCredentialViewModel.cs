@@ -6,7 +6,7 @@ using SinglePass.WPF.Enums;
 namespace SinglePass.WPF.ViewModels.Dialogs
 {
     [INotifyPropertyChanged]
-    public partial class CreateCredentialViewModel
+    public partial class CredentialEditViewModel
     {
         [ObservableProperty]
         private CredentialViewModel _credentialViewModel;
@@ -24,7 +24,7 @@ namespace SinglePass.WPF.ViewModels.Dialogs
             _ => string.Empty,
         };
 
-        public CreateCredentialViewModel()
+        public CredentialEditViewModel()
         {
 
         }

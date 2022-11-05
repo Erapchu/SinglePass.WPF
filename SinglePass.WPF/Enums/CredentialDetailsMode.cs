@@ -4,6 +4,5 @@
     {
         Edit,
         New,
-        View,
     }
 }

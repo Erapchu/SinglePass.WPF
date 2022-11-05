@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace SinglePass.WPF.Views.Helpers
 {
-    public static class CreateCredentialDialog
+    public static class CredentialDialog
     {
         /// <summary>
         /// Shows materialized analog of input MessageBox. To use this method you need to set <see cref="DialogHost"/> instance in your window
@@ -25,7 +25,7 @@ namespace SinglePass.WPF.Views.Helpers
             string dialogIdentifier,
             CredentialDetailsMode mode)
         {
-            var instance = (System.Windows.Application.Current as App).Services.GetService<CreateCredentialView>();
+            var instance = (System.Windows.Application.Current as App).Services.GetService<CredentialEditContent>();
             instance.ViewModel.CredentialViewModel = credentialViewModel;
             instance.ViewModel.DialogIdentifier = dialogIdentifier;
             instance.ViewModel.Mode = mode;

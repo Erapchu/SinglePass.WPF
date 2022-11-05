@@ -200,7 +200,7 @@ namespace SinglePass.WPF.ViewModels
         private async Task Add()
         {
             var newCredVM = _credentialViewModelFactory.ProvideNew(Credential.CreateNew());
-            var result = await CreateCredentialDialog.ShowAsync(
+            var result = await CredentialDialog.ShowAsync(
                 newCredVM,
                 DialogIdentifiers.MainWindowName,
                 CredentialDetailsMode.New);
@@ -294,7 +294,7 @@ namespace SinglePass.WPF.ViewModels
                 return;
 
             var tempCredentialVM = SelectedCredentialVM.Clone();
-            var result = await CreateCredentialDialog.ShowAsync(
+            var result = await CredentialDialog.ShowAsync(
                 tempCredentialVM,
                 DialogIdentifiers.MainWindowName,
                 CredentialDetailsMode.Edit);

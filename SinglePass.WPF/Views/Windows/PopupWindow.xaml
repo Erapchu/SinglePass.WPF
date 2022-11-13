@@ -17,6 +17,7 @@
     d:DataContext="{x:Static vm:PopupViewModel.DesignTimeInstance}"
     d:DesignHeight="300"
     d:DesignWidth="260"
+    Closed="MaterialWindow_Closed"
     Closing="Window_Closing"
     Deactivated="Window_Deactivated"
     Loaded="MaterialWindow_Loaded"
@@ -25,7 +26,6 @@
     ShowInTaskbar="False"
     UseLayoutRounding="True"
     WindowStyle="ToolWindow"
-    Closed="MaterialWindow_Closed"
     mc:Ignorable="d">
     <controls:MaterialWindow.Resources>
         <ResourceDictionary>
@@ -33,12 +33,12 @@
                 <TextBlock Text="{Binding NameFieldVM.Value}" />
             </DataTemplate>
             <helpers:BindingProxy x:Key="Proxy" Data="{Binding}" />
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
             <DataTemplate x:Key="CredentialDataTemplate" DataType="{x:Type vm:CredentialViewModel}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto" />
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="auto" />
                         <ColumnDefinition Width="auto" />
                     </Grid.ColumnDefinitions>
                     <Image
@@ -53,37 +53,39 @@
                         Text="{Binding NameFieldVM.Value}"
                         TextTrimming="CharacterEllipsis"
                         ToolTip="{Binding NameFieldVM.Value}" />
-                    <Button
+                    <StackPanel
                         Grid.Column="2"
-                        Width="16"
-                        Height="16"
-                        Margin="0"
-                        Padding="0"
-                        HorizontalContentAlignment="Center"
-                        VerticalContentAlignment="Center"
-                        Command="{Binding Data.SetAndCloseCommand, Source={StaticResource Proxy}}"
-                        CommandParameter="{Binding LoginFieldVM}"
-                        Content="{md:PackIcon Kind=User}"
-                        Style="{StaticResource MaterialDesignFlatButton}" />
-                    <Button
-                        Grid.Column="3"
-                        Width="16"
-                        Height="16"
-                        Margin="4 0 0 0"
-                        Padding="0"
-                        HorizontalContentAlignment="Center"
-                        VerticalContentAlignment="Center"
-                        Command="{Binding Data.SetAndCloseCommand, Source={StaticResource Proxy}}"
-                        CommandParameter="{Binding PasswordFieldVM}"
-                        Content="{md:PackIcon Kind=Password}"
-                        Style="{StaticResource MaterialDesignFlatButton}" />
+                        Orientation="Horizontal"
+                        Visibility="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=ListBoxItem}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Button
+                            Width="16"
+                            Height="16"
+                            Margin="0"
+                            Padding="0"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            Command="{Binding Data.SetAndCloseCommand, Source={StaticResource Proxy}}"
+                            CommandParameter="{Binding LoginFieldVM}"
+                            Content="{md:PackIcon Kind=User}"
+                            Style="{StaticResource MaterialDesignFlatButton}" />
+                        <Button
+                            Width="16"
+                            Height="16"
+                            Margin="4 0 0 0"
+                            Padding="0"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            Command="{Binding Data.SetAndCloseCommand, Source={StaticResource Proxy}}"
+                            CommandParameter="{Binding PasswordFieldVM}"
+                            Content="{md:PackIcon Kind=Password}"
+                            Style="{StaticResource MaterialDesignFlatButton}" />
+                    </StackPanel>
                 </Grid>
             </DataTemplate>
             <Style
                 x:Key="CredentialPopupItemStyle"
                 BasedOn="{StaticResource MaterialDesignToolToggleListBoxItem}"
                 TargetType="{x:Type ListBoxItem}" />
-            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         </ResourceDictionary>
     </controls:MaterialWindow.Resources>
     <i:Interaction.Triggers>
@@ -111,6 +113,7 @@
         <ListBox
             x:Name="CredListBox"
             Grid.Row="1"
+            Margin="0 0 4 0"
             HorizontalContentAlignment="Stretch"
             ItemContainerStyle="{StaticResource CredentialPopupItemStyle}"
             ItemTemplate="{StaticResource CredentialDataTemplate}"

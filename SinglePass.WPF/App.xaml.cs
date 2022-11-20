@@ -34,7 +34,6 @@ namespace SinglePass.WPF
         private readonly IConfiguration _configuration;
         private readonly Mutex _mutex;
 
-        private ILogger<App> _logger;
         private TrayIcon _trayIcon;
 
         private bool IsFirstInstance { get; }
@@ -89,9 +88,10 @@ namespace SinglePass.WPF
             services.AddScoped<PasswordsViewModel>();
             services.AddScoped<CloudSyncViewModel>();
             services.AddScoped<SettingsViewModel>();
-            services.AddScoped<CredentialsDetailsViewModel>();
             services.AddTransient<MaterialInputBoxContent>();
             services.AddTransient<MaterialInputBoxViewModel>();
+            services.AddTransient<CredentialEditContent>();
+            services.AddTransient<CredentialEditViewModel>();
 
             // Popup
             services.AddTransient<PopupWindow>();
@@ -136,15 +136,8 @@ namespace SinglePass.WPF
 
             if (IsFirstInstance)
             {
-                // Welcome window
-                var welcomeWindow = new WelcomeWindow();
-                welcomeWindow.Show();
-
                 var hiw = new HiddenInterprocessWindow();
                 hiw.InitWithoutShowing();
-
-                _logger = Services.GetService<ILogger<App>>();
-                _logger.LogInformation("Log session started!");
 
                 Constants.EnsurePaths();
 
@@ -152,15 +145,10 @@ namespace SinglePass.WPF
                 var themeService = Services.GetService<ThemeService>();
                 themeService.Init();
 
-                // Create tray icon
-                _trayIcon = new TrayIcon();
-
                 // Login
                 using (var loginScope = Services.CreateScope())
                 {
                     var loginWindow = loginScope.ServiceProvider.GetService<LoginWindow>();
-
-                    welcomeWindow.Close();
                     bool? dialogResult = loginWindow.ShowDialog(); // Stop here
 
                     if (dialogResult != true)
@@ -169,6 +157,9 @@ namespace SinglePass.WPF
                         return;
                     }
                 }
+
+                // Create tray icon
+                _trayIcon = new TrayIcon();
 
                 // Open main window
                 var mainWindow = Services.GetService<MainWindow>();
@@ -183,17 +174,20 @@ namespace SinglePass.WPF
 
         private void Application_Exit(object sender, ExitEventArgs e)
         {
-            _logger?.LogInformation("The application is shutting down...{0}", Environment.NewLine);
+            var logger = Services.GetService<ILogger<App>>();
+            logger?.LogInformation("The application is shutting down...{0}", Environment.NewLine);
         }
 
         private void Current_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
-            _logger?.LogError(e.Exception, "Dispatcher unhandled exception");
+            var logger = Services.GetService<ILogger<App>>();
+            logger?.LogError(e.Exception, "Dispatcher unhandled exception");
         }
 
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            _logger?.LogError(e.ExceptionObject as Exception, "Domain unhandled exception");
+            var logger = Services.GetService<ILogger<App>>();
+            logger?.LogError(e.ExceptionObject as Exception, "Domain unhandled exception");
         }
     }
 }

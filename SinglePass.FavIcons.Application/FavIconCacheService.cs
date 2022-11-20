@@ -9,22 +9,22 @@
             _favIconRepository = favIconRepository;
         }
 
-        public Task EnsureCreated()
+        public Task Migrate()
         {
-            return _favIconRepository.EnsureCreated();
+            return _favIconRepository.Migrate();
         }
 
-        public Task<FavIcon?> GetCachedImage(string host)
+        public Task<FavIcon?> Get(FavIconDto favIconDto)
         {
-            return _favIconRepository.Get(host);
+            return _favIconRepository.Get(favIconDto);
         }
 
-        public Task<List<FavIcon>> GetManyCachedImages(List<string> hosts)
+        public Task<List<FavIcon>> GetMany(List<FavIconDto> favIconDtos)
         {
-            return _favIconRepository.GetMany(hosts);
+            return _favIconRepository.GetMany(favIconDtos);
         }
 
-        public Task SetCachedImage(FavIcon favIcon)
+        public Task Add(FavIcon favIcon)
         {
             return _favIconRepository.Add(favIcon);
         }

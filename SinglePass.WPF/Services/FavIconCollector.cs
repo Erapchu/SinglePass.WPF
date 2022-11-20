@@ -72,7 +72,7 @@ namespace SinglePass.WPF.Services
             {
                 using var scope = _serviceScopeFactory.CreateScope();
                 var favIconCacheService = scope.ServiceProvider.GetService<FavIconCacheService>();
-                await favIconCacheService.EnsureCreated();
+                await favIconCacheService.Migrate();
             }
             catch (Exception ex)
             {
@@ -91,10 +91,10 @@ namespace SinglePass.WPF.Services
                         using var scope = _serviceScopeFactory.CreateScope();
                         var favIconCacheService = scope.ServiceProvider.GetService<FavIconCacheService>();
                         var uniqueHosts = processingWrappers
-                            .Select(ipw => ipw.Host)
                             .Distinct()
+                            .Select(ipw => new FavIconDto() { Host = ipw.Host, Size = ipw.Size })
                             .ToList();
-                        var favIconsFromDB = await favIconCacheService.GetManyCachedImages(uniqueHosts);
+                        var favIconsFromDB = await favIconCacheService.GetMany(uniqueHosts);
                         var tempFavIconCacheFromDB = favIconsFromDB.ToDictionary(fi => new ProcessingImageWrapper(fi.Host, fi.Size));
 
                         // Set existing to UI
@@ -118,7 +118,7 @@ namespace SinglePass.WPF.Services
                                     Host = processingWrapper.Host,
                                     Size = processingWrapper.Size,
                                 };
-                                await favIconCacheService.SetCachedImage(freshFavIcon);
+                                await favIconCacheService.Add(freshFavIcon);
                                 tempFavIconCacheFromDB.TryAdd(processingWrapper, freshFavIcon);
                                 processingWrapper.SetPropertyAction.Invoke(bitmapImage);
                                 cachedImageSource = bitmapImage;

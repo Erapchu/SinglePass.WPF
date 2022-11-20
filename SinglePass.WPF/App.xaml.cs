@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AsyncKeyedLock;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -105,6 +106,7 @@ namespace SinglePass.WPF
             services.AddSingleton<ImageService>();
             services.AddSingleton<CredentialViewModelFactory>();
             services.AddSingleton<AddressBarExtractor>();
+            services.AddSingleton<AsyncKeyedLocker<string>>();
 
             // favicons
             services.AddSingleton<IFavIconCollector, FavIconCollector>();

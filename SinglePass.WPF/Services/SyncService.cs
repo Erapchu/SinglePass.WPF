@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using AsyncKeyedLock;
+using Microsoft.Extensions.Logging;
 using SinglePass.WPF.Cloud.Enums;
 using SinglePass.WPF.Clouds.Services;
 using SinglePass.WPF.Helpers;
@@ -18,6 +19,7 @@ namespace SinglePass.WPF.Services
         private readonly ILogger<SyncService> _logger;
         private readonly CredentialsCryptoService _credentialsCryptoService;
         private readonly CryptoService _cryptoService;
+        private readonly AsyncKeyedLocker<string> _asyncKeyedLocker;
         private readonly HashSet<CloudType> _syncClouds = new();
         // TODO: implement IDisposable
         private readonly CancellationTokenSource _syncCTS = new();
@@ -28,12 +30,14 @@ namespace SinglePass.WPF.Services
             CloudServiceProvider cloudServiceProvider,
             CredentialsCryptoService credentialsCryptoService,
             CryptoService cryptoService,
+            AsyncKeyedLocker<string> asyncKeyedLocker,
             ILogger<SyncService> logger)
         {
             _cloudServiceProvider = cloudServiceProvider;
             _logger = logger;
             _credentialsCryptoService = credentialsCryptoService;
             _cryptoService = cryptoService;
+            _asyncKeyedLocker = asyncKeyedLocker;
         }
 
         public async Task<CredentialsMergeResult> Synchronize(CloudType cloudType, Func<Task<string>> userPasswordRequired)
@@ -128,7 +132,7 @@ namespace SinglePass.WPF.Services
                 SyncStateChanged?.Invoke(SinglePass.Language.Properties.Resources.Uploading);
 
                 // Additional lock to ensure file not used by other thread
-                using var locker = await AsyncDuplicateLock.LockAsync(Constants.PasswordsFilePath);
+                using var locker = await _asyncKeyedLocker.LockAsync(Constants.PasswordsFilePath);
                 using var fileStream = File.Open(Constants.PasswordsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                 // Ensure begining
                 fileStream.Seek(0, SeekOrigin.Begin);

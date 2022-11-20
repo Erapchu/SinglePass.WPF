@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using AsyncKeyedLock;
+using Microsoft.Extensions.Logging;
 using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Helpers.Threading;
 using SinglePass.WPF.Models;
@@ -18,6 +19,7 @@ namespace SinglePass.WPF.Services
         private readonly object _credentialsLock = new();
         private readonly ILogger<CredentialsCryptoService> _logger;
         private readonly CryptoService _cryptoService;
+        private readonly AsyncKeyedLocker<string> _asyncKeyedLocker;
 
         private List<Credential> _credentials = new();
         public List<Credential> Credentials
@@ -42,10 +44,11 @@ namespace SinglePass.WPF.Services
 
         public CredentialsCryptoService(
             ILogger<CredentialsCryptoService> logger,
-            CryptoService cryptoService)
+            CryptoService cryptoService, AsyncKeyedLocker<string> asyncKeyedLocker)
         {
             _logger = logger;
             _cryptoService = cryptoService;
+            _asyncKeyedLocker = asyncKeyedLocker;
         }
 
         public Task<bool> IsCredentialsFileExistAsync()
@@ -65,14 +68,14 @@ namespace SinglePass.WPF.Services
 
         public Task<bool> LoadCredentialsAsync()
         {
-            return Task.Run(() =>
+            return Task.Run(async () =>
             {
                 _logger.LogInformation("Loading credentials from file...");
                 bool success = false;
                 try
                 {
                     // Access to file
-                    using var locker = AsyncDuplicateLock.Lock(Constants.PasswordsFilePath);
+                    using var locker = await _asyncKeyedLocker.LockAsync(Constants.PasswordsFilePath);
                     using var fileStream = new FileStream(Constants.PasswordsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                     // Just to ensure
                     fileStream.Seek(0, SeekOrigin.Begin);
@@ -204,12 +207,12 @@ namespace SinglePass.WPF.Services
 
         public Task SaveCredentials()
         {
-            return Task.Run(() =>
+            return Task.Run(async () =>
             {
                 try
                 {
                     // Access to file
-                    using var locker = AsyncDuplicateLock.Lock(Constants.PasswordsFilePath);
+                    using var locker = await _asyncKeyedLocker.LockAsync(Constants.PasswordsFilePath);
                     using var fileStream = new FileStream(Constants.PasswordsFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
                     // Just to ensure
                     fileStream.Seek(0, SeekOrigin.Begin);

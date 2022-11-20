@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using AsyncKeyedLock;
+using Microsoft.Extensions.Logging;
 using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Helpers.Threading;
 using SinglePass.WPF.Hotkeys;
@@ -11,6 +12,7 @@ namespace SinglePass.WPF.Settings
 {
     public class AppSettingsService : IAppSettings
     {
+        private readonly AsyncKeyedLocker<string> _asyncKeyedLocker;
         private readonly ILogger<AppSettingsService> _logger;
 
         public AppSettings Settings { get; } = new();
@@ -51,8 +53,9 @@ namespace SinglePass.WPF.Settings
             set => Settings.Order = value;
         }
 
-        public AppSettingsService(ILogger<AppSettingsService> logger)
+        public AppSettingsService(AsyncKeyedLocker<string> asyncKeyedLocker, ILogger<AppSettingsService> logger)
         {
+            _asyncKeyedLocker = asyncKeyedLocker;
             _logger = logger;
 
             if (File.Exists(Constants.CommonSettingsFilePath))
@@ -73,7 +76,7 @@ namespace SinglePass.WPF.Settings
         public async Task Save()
         {
             // Use local lock instead of interprocess lock - only one instance of app will work with this file
-            using var locker = await AsyncDuplicateLock.LockAsync(Constants.CommonSettingsFilePath).ConfigureAwait(false);
+            using var locker = await _asyncKeyedLocker.LockAsync(Constants.CommonSettingsFilePath).ConfigureAwait(false);
             using var fileStream = new FileStream(Constants.CommonSettingsFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
             await JsonSerializer.SerializeAsync(fileStream, Settings).ConfigureAwait(false);
             _logger.LogInformation("Settings saved to file");

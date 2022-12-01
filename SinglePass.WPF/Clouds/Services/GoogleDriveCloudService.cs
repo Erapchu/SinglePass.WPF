@@ -33,7 +33,10 @@ namespace SinglePass.WPF.Clouds.Services
         {
             if (!TokenHolder.OAuthInfo.IsValid())
             {
-                await OAuthProvider.RefreshTokenAsync(TokenHolder.OAuthInfo, cancellationToken).ConfigureAwait(false);
+                var oauthInfo = await OAuthProvider.RefreshTokenAsync(TokenHolder.OAuthInfo, cancellationToken).ConfigureAwait(false);
+                // Only Googe Drive should re-use the same refresh token and it will not return it again
+                oauthInfo.RefreshToken = TokenHolder.OAuthInfo.RefreshToken;
+                await TokenHolder.SetAndSaveToken(oauthInfo, cancellationToken);
             }
         }
 

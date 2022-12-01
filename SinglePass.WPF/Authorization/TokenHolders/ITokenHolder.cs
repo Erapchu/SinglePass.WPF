@@ -6,8 +6,8 @@ namespace SinglePass.WPF.Authorization.TokenHolders
 {
     public interface ITokenHolder
     {
-        ITokenResponse Token { get; }
-        Task SetAndSaveToken(string tokenResponse, CancellationToken cancellationToken);
+        OAuthInfo OAuthInfo { get; }
+        Task SetAndSaveToken(OAuthInfo oauthInfo, CancellationToken cancellationToken);
         Task RemoveToken();
     }
 }

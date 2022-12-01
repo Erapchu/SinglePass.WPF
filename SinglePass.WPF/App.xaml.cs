@@ -73,7 +73,7 @@ namespace SinglePass.WPF
             // Clouds
             // Google
             services.Configure<GoogleDriveConfig>(configuration.GetSection("Settings:GoogleDriveConfig"));
-            services.AddTransient<GoogleAuthorizationBroker>();
+            services.AddTransient<GoogleOAuthProvider>();
             services.AddTransient<GoogleDriveTokenHolder>();
             services.AddTransient<GoogleDriveCloudService>();
             services.AddTransient<CryptoService>();

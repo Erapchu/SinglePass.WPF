@@ -93,8 +93,9 @@ namespace SinglePass.WPF.ViewModels
                     DialogIdentifiers.MainWindowName,
                     out CancellationToken cancellationToken);
 
-                await cloudService.AuthorizationBroker.AuthorizeAsync(cancellationToken);
+                var oauthInfo = await cloudService.OAuthProvider.AuthorizeAsync(cancellationToken);
                 _logger.LogInformation($"Authorization process to {cloudType} has been complete.");
+                await cloudService.TokenHolder.SetAndSaveToken(oauthInfo, cancellationToken);
                 GoogleDriveEnabled = true;
                 _ = FetchUserInfoFromCloud(cloudType, CancellationToken.None); // Don't await set user info for now
                 await _appSettingsService.Save();
@@ -127,7 +128,8 @@ namespace SinglePass.WPF.ViewModels
                     DialogIdentifiers.MainWindowName,
                     out CancellationToken cancellationToken);
 
-                await cloudService.AuthorizationBroker.RevokeToken(cancellationToken);
+                var oauthInfo = cloudService.TokenHolder.OAuthInfo;
+                await cloudService.OAuthProvider.RevokeTokenAsync(oauthInfo, cancellationToken);
                 GoogleDriveEnabled = false;
                 ClearUserInfo(cloudType);
                 await _appSettingsService.Save();

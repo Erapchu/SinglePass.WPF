@@ -8,11 +8,22 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace SinglePass.WPF.Authorization.Helpers
 {
     internal static class OAuthHelper
     {
+        public const string GrantType = "grant_type";
+        public const string RefreshToken = "refresh_token";
+        public const string ClientId = "client_id";
+        public const string ClientSecret = "client_secret";
+        public const string RedirectUri = "redirect_uri";
+        public const string ApplicationXWWW = "application/x-www-form-urlencoded";
+        public const string ResponseType = "response_type";
+        public const string Code = "code";
+        public const string AuthorizationCode = "authorization_code";
+
         public static int GetRandomUnusedPort()
         {
             var listener = new TcpListener(IPAddress.Loopback, 0);
@@ -84,6 +95,16 @@ namespace SinglePass.WPF.Authorization.Helpers
 
             // Create a new response URL with a dictionary that contains all the response query parameters.
             return new AuthorizationCodeResponseUrl(coll.AllKeys.ToDictionary(k => k, k => coll[k]));
+        }
+
+        /// <summary>
+        /// Get HttpQSCollection instance. Important difference between <see cref="HttpUtility"/>.ParseQueryString("") and new <see cref="NameValueCollection"/>:
+        /// only the <see cref="HttpUtility"/> result will override ToString() to produce a proper Query String.
+        /// </summary>
+        /// <returns>New instance of <see cref="NameValueCollection"/>.</returns>
+        public static NameValueCollection GetHttpQSCollection()
+        {
+            return HttpUtility.ParseQueryString(string.Empty);
         }
     }
 }

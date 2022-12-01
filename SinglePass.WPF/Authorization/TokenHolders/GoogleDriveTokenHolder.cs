@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using SinglePass.WPF.Authorization.Responses;
 using SinglePass.WPF.Helpers;
 using System;
 using System.IO;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,57 +13,59 @@ namespace SinglePass.WPF.Authorization.TokenHolders
     {
         private readonly ILogger _logger;
 
-        public ITokenResponse Token { get; private set; }
+        private readonly Lazy<OAuthInfo> _lazyOAuthInfo = new(GetOAuthInfo);
+        public OAuthInfo OAuthInfo => _lazyOAuthInfo.Value;
 
         public GoogleDriveTokenHolder(ILogger<GoogleDriveTokenHolder> logger)
         {
             _logger = logger;
-            ReadToken();
         }
 
-        private void ReadToken()
+        private static OAuthInfo GetOAuthInfo()
         {
             try
             {
                 if (!File.Exists(Constants.GoogleDriveFilePath))
-                    return;
+                    return new OAuthInfo();
 
-                using var fileStream = new FileStream(Constants.GoogleDriveFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                Token = JsonSerializer.Deserialize<GoogleDriveTokenResponse>(fileStream);
+                var fileContent = File.ReadAllText(Constants.GoogleDriveFilePath);
+                return JsonConvert.DeserializeObject<OAuthInfo>(fileContent);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                _logger.LogError(ex, string.Empty);
+                return new OAuthInfo();
             }
         }
 
-        public async Task SetAndSaveToken(string tokenResponse, CancellationToken cancellationToken)
+        public Task SetAndSaveToken(OAuthInfo freshOAuthInfo, CancellationToken cancellationToken)
         {
-            var deserialized = JsonSerializer.Deserialize<GoogleDriveTokenResponse>(tokenResponse);
+            try
+            {
+                var oauthInfo = OAuthInfo;
+                oauthInfo.AccessToken = freshOAuthInfo.AccessToken;
+                oauthInfo.ClientId = freshOAuthInfo.ClientId;
+                oauthInfo.ClientSecret = freshOAuthInfo.ClientSecret;
+                oauthInfo.CreationTime = freshOAuthInfo.CreationTime;
+                oauthInfo.ExpiresIn = freshOAuthInfo.ExpiresIn;
+                oauthInfo.RedirectUri = freshOAuthInfo.RedirectUri;
+                oauthInfo.RefreshToken = freshOAuthInfo.RefreshToken;
+                oauthInfo.TokenType = freshOAuthInfo.TokenType;
 
-            if (!string.IsNullOrWhiteSpace(deserialized.RefreshToken))
-            {
-                // Refresh token reset
-                Token = deserialized;
-            }
-            else
-            {
-                // Leave refresh token as is
-                var refreshToken = Token?.RefreshToken;
-                Token = new GoogleDriveTokenResponse()
+                using var fileStream = new FileStream(Constants.GoogleDriveFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
+                using (var writer = new StreamWriter(fileStream))
                 {
-                    AccessToken = deserialized.AccessToken,
-                    ExpiresIn = deserialized.ExpiresIn,
-                    InitDate = deserialized.InitDate,
-                    Scope = deserialized.Scope,
-                    TokenType = deserialized.TokenType,
-                    RefreshToken = refreshToken
-                };
+                    using var jsonWriter = new JsonTextWriter(writer);
+                    var ser = new JsonSerializer();
+                    ser.Serialize(jsonWriter, oauthInfo);
+                    jsonWriter.Flush();
+                }
+                _logger.LogInformation("Token response saved to file");
             }
-
-            using var fileStream = new FileStream(Constants.GoogleDriveFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
-            await JsonSerializer.SerializeAsync(fileStream, Token as GoogleDriveTokenResponse, cancellationToken: cancellationToken);
-            _logger.LogInformation("Token response saved to file");
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, null);
+            }
+            return Task.CompletedTask;
         }
 
         public Task RemoveToken()
@@ -75,7 +77,7 @@ namespace SinglePass.WPF.Authorization.TokenHolders
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Empty);
+                _logger.LogError(ex, null);
             }
             return Task.CompletedTask;
         }

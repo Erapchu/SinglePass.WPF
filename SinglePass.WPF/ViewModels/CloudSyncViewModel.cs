@@ -130,6 +130,7 @@ namespace SinglePass.WPF.ViewModels
 
                 var oauthInfo = cloudService.TokenHolder.OAuthInfo;
                 await cloudService.OAuthProvider.RevokeTokenAsync(oauthInfo, cancellationToken);
+                await cloudService.TokenHolder.RemoveToken();
                 GoogleDriveEnabled = false;
                 ClearUserInfo(cloudType);
                 await _appSettingsService.Save();

@@ -21,10 +21,10 @@
                             Opacity="1" />
                         <Grid
                             x:Name="PART_ContentCoverGrid"
-                            Background="Transparent"
+                            Background="{Binding OverlayBackground, RelativeSource={RelativeSource TemplatedParent}}"
                             Focusable="False"
                             IsHitTestVisible="False"
-                            Visibility="Collapsed" />
+                            Opacity="0" />
                         <Grid
                             x:Name="PART_Popup"
                             HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
@@ -41,11 +41,11 @@
                                 RenderTransformOrigin="0.5,0.5"
                                 ShadowDepth="5"
                                 Color="#40000000">
-                                <!--<controls:FastShadow.RenderTransform>
+                                <controls:FastShadow.RenderTransform>
                                     <TransformGroup>
                                         <ScaleTransform x:Name="ShadowScaleTransform" ScaleX="0" ScaleY="0" />
                                     </TransformGroup>
-                                </controls:FastShadow.RenderTransform>-->
+                                </controls:FastShadow.RenderTransform>
                             </controls:FastShadow>
                             <wpf:Card
                                 x:Name="PART_PopupContentElement"
@@ -64,11 +64,11 @@
                                 Tag="{TemplateBinding DialogBackground}"
                                 TextElement.Foreground="{DynamicResource MaterialDesignBody}"
                                 UniformCornerRadius="4">
-                                <!--<wpf:Card.RenderTransform>
+                                <wpf:Card.RenderTransform>
                                     <TransformGroup>
                                         <ScaleTransform x:Name="CardScaleTransform" ScaleX="0" ScaleY="0" />
                                     </TransformGroup>
-                                </wpf:Card.RenderTransform>-->
+                                </wpf:Card.RenderTransform>
                                 <wpf:Card.Style>
                                     <Style BasedOn="{StaticResource {x:Type wpf:Card}}" TargetType="wpf:Card">
                                         <Setter Property="Background" Value="{Binding Tag, RelativeSource={RelativeSource Self}}" />
@@ -91,13 +91,13 @@
                                             </ObjectAnimationUsingKeyFrames>
                                             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PART_PopupContentElement" Storyboard.TargetProperty="(UIElement.Opacity)">
                                                 <EasingDoubleKeyFrame KeyTime="0" Value="0" />
-                                                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="1" />
+                                                <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="1" />
                                             </DoubleAnimationUsingKeyFrames>
                                             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PART_PopupShadow" Storyboard.TargetProperty="(UIElement.Opacity)">
                                                 <EasingDoubleKeyFrame KeyTime="0" Value="0" />
-                                                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="1" />
+                                                <EasingDoubleKeyFrame KeyTime="0:0:0.15" Value="1" />
                                             </DoubleAnimationUsingKeyFrames>
-                                            <!--<DoubleAnimationUsingKeyFrames Storyboard.TargetName="CardScaleTransform" Storyboard.TargetProperty="ScaleX">
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="CardScaleTransform" Storyboard.TargetProperty="ScaleX">
                                                 <EasingDoubleKeyFrame KeyTime="0" Value="0" />
                                                 <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="1">
                                                     <EasingDoubleKeyFrame.EasingFunction>
@@ -128,7 +128,7 @@
                                                         <SineEase EasingMode="EaseInOut" />
                                                     </EasingDoubleKeyFrame.EasingFunction>
                                                 </EasingDoubleKeyFrame>
-                                            </DoubleAnimationUsingKeyFrames>-->
+                                            </DoubleAnimationUsingKeyFrames>
                                         </Storyboard>
                                     </VisualTransition>
                                     <VisualTransition From="Open" To="Closed">
@@ -138,13 +138,13 @@
                                             </ObjectAnimationUsingKeyFrames>
                                             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PART_PopupContentElement" Storyboard.TargetProperty="(UIElement.Opacity)">
                                                 <EasingDoubleKeyFrame KeyTime="0" Value="1" />
-                                                <EasingDoubleKeyFrame KeyTime="0:0:0.0" Value="0" />
+                                                <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="0" />
                                             </DoubleAnimationUsingKeyFrames>
                                             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PART_PopupShadow" Storyboard.TargetProperty="(UIElement.Opacity)">
                                                 <EasingDoubleKeyFrame KeyTime="0" Value="1" />
-                                                <EasingDoubleKeyFrame KeyTime="0:0:0.0" Value="0" />
+                                                <EasingDoubleKeyFrame KeyTime="0:0:0.15" Value="0" />
                                             </DoubleAnimationUsingKeyFrames>
-                                            <!--<DoubleAnimationUsingKeyFrames Storyboard.TargetName="CardScaleTransform" Storyboard.TargetProperty="ScaleX">
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="CardScaleTransform" Storyboard.TargetProperty="ScaleX">
                                                 <EasingDoubleKeyFrame KeyTime="0" Value="1" />
                                                 <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="0.5">
                                                     <EasingDoubleKeyFrame.EasingFunction>
@@ -175,7 +175,7 @@
                                                         <SineEase EasingMode="EaseInOut" />
                                                     </EasingDoubleKeyFrame.EasingFunction>
                                                 </EasingDoubleKeyFrame>
-                                            </DoubleAnimationUsingKeyFrames>-->
+                                            </DoubleAnimationUsingKeyFrames>
                                         </Storyboard>
                                     </VisualTransition>
                                 </VisualStateGroup.Transitions>
@@ -197,7 +197,7 @@
                                             Storyboard.TargetProperty="(UIElement.Opacity)"
                                             To="1"
                                             Duration="0" />
-                                        <!--<DoubleAnimation
+                                        <DoubleAnimation
                                             Storyboard.TargetName="CardScaleTransform"
                                             Storyboard.TargetProperty="ScaleX"
                                             To="1"
@@ -216,7 +216,7 @@
                                             Storyboard.TargetName="ShadowScaleTransform"
                                             Storyboard.TargetProperty="ScaleY"
                                             To="1"
-                                            Duration="0" />-->
+                                            Duration="0" />
                                     </Storyboard>
                                 </VisualState>
                                 <VisualState x:Name="Closed">
@@ -235,7 +235,6 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsOpen" Value="True">
                             <Setter TargetName="PART_ContentCoverGrid" Property="IsHitTestVisible" Value="True" />
-                            <Setter TargetName="PART_ContentCoverGrid" Property="Visibility" Value="Visible" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

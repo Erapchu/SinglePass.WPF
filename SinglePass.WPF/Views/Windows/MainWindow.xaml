@@ -10,6 +10,7 @@
     xmlns:local="clr-namespace:SinglePass.WPF.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:vcontrols="clr-namespace:SinglePass.WPF.Views.Controls"
     xmlns:vm="clr-namespace:SinglePass.WPF.ViewModels"
     Title="{x:Static helpers:Constants.AppName}"
     Width="800"
@@ -81,31 +82,20 @@
         Identifier="{x:Static helpers:DialogIdentifiers.MainWindowName}"
         Style="{StaticResource MaterialDesignEmbeddedFastDialogHost}">
         <Grid>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto" />
-                    <ColumnDefinition Width="auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <ListBox
-                    Grid.Column="0"
-                    Width="220"
-                    Margin="0 36 0 0"
-                    HorizontalContentAlignment="Stretch"
-                    ItemContainerStyle="{StaticResource CustomNavigationListboxItem}"
-                    ItemTemplate="{StaticResource NavigationItemDataTemplate}"
-                    ItemsSource="{Binding NavigationItems}"
-                    SelectedItem="{Binding SelectedNavigationItem}"
-                    Style="{StaticResource MaterialDesignNavigationPrimaryListBox}">
-                    <ListBox.Resources>
-                        <Style BasedOn="{StaticResource MaterialDesignScrollBarMinimal}" TargetType="{x:Type ScrollBar}" />
-                    </ListBox.Resources>
-                </ListBox>
-                <Separator Grid.Column="1" Style="{StaticResource MaterialDesignVerticalSeparator}" />
-                <AdornerDecorator Grid.Column="2">
-                    <ContentControl Content="{Binding Content, UpdateSourceTrigger=PropertyChanged}" DataContext="{Binding SelectedNavigationItem}" />
-                </AdornerDecorator>
-            </Grid>
+            <TabControl Style="{StaticResource MaterialDesignNavigationRailTabControl}" TabStripPlacement="Left">
+                <TabItem>
+                    <TabItem.Header>
+                        <md:PackIcon Kind="Password" Margin="0 36 0 0"/>
+                    </TabItem.Header>
+                    <vcontrols:PasswordsControl DataContext="{Binding PasswordsVM}" />
+                </TabItem>
+                <TabItem>
+                    <vcontrols:CloudSyncControl DataContext="{Binding CloudSyncVM}" />
+                </TabItem>
+                <TabItem>
+                    <vcontrols:SettingsControl DataContext="{Binding SettingsVM}" />
+                </TabItem>
+            </TabControl>
             <md:Snackbar x:Name="SnackbarMain" MessageQueue="{md:MessageQueue}" />
         </Grid>
     </md:DialogHost>

@@ -98,8 +98,7 @@ namespace SinglePass.WPF.ViewModels
                 MaterialMessageBox.ShowDialog(
                     "Success",
                     "New password applied",
-                    MaterialMessageBoxButtons.OK,
-                    PackIconKind.Tick);
+                    MaterialMessageBoxButtons.OK);
             }
         }
 

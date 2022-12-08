@@ -319,8 +319,7 @@ namespace SinglePass.WPF.ViewModels
             var result = MaterialMessageBox.ShowDialog(
                 SinglePass.Language.Properties.Resources.DeleteItem,
                 string.Format(SinglePass.Language.Properties.Resources.Name0, SelectedCredentialVM.NameFieldVM.Value),
-                MaterialMessageBoxButtons.YesNo,
-                PackIconKind.Delete);
+                MaterialMessageBoxButtons.YesNo);
 
             if (result == MaterialDialogResult.Yes)
             {

@@ -83,11 +83,11 @@ namespace SinglePass.WPF
             services.AddScoped<LoginWindow>();
             services.AddScoped<LoginWindowViewModel>();
 
-            services.AddSingleton<MainWindow>();
-            services.AddSingleton<MainWindowViewModel>();
-            services.AddSingleton<PasswordsViewModel>();
-            services.AddSingleton<CloudSyncViewModel>();
-            services.AddSingleton<SettingsViewModel>();
+            services.AddScoped<MainWindow>();
+            services.AddScoped<MainWindowViewModel>();
+            services.AddScoped<PasswordsViewModel>();
+            services.AddScoped<CloudSyncViewModel>();
+            services.AddScoped<SettingsViewModel>();
             services.AddTransient<MaterialInputBoxContent>();
             services.AddTransient<MaterialInputBoxViewModel>();
             services.AddTransient<CredentialEditContent>();

@@ -222,13 +222,12 @@ namespace SinglePass.WPF.ViewModels
                 MergeProcessing = true;
                 var mergeResult = await _syncService.Synchronize(cloudType, SyncPasswordRequired);
 
-                await MaterialMessageBox.ShowAsync(
+                MaterialMessageBox.ShowDialog(
                     mergeResult.Success
                     ? SinglePass.Language.Properties.Resources.SyncSuccess
                     : SinglePass.Language.Properties.Resources.SyncFailed,
                     mergeResult.ToString(),
-                    MaterialMessageBoxButtons.OK,
-                    DialogIdentifiers.MainWindowName);
+                    MaterialMessageBoxButtons.OK);
             }
             catch (Exception ex)
             {
@@ -252,15 +251,14 @@ namespace SinglePass.WPF.ViewModels
                 UploadProcessing = true;
                 var success = await _syncService.Upload(cloudType);
 
-                await MaterialMessageBox.ShowAsync(
+                MaterialMessageBox.ShowDialog(
                     success
                     ? SinglePass.Language.Properties.Resources.Success
                     : SinglePass.Language.Properties.Resources.Error,
                     success
                     ? SinglePass.Language.Properties.Resources.UploadSuccess
                     : SinglePass.Language.Properties.Resources.UploadFailed,
-                    MaterialMessageBoxButtons.OK,
-                    DialogIdentifiers.MainWindowName);
+                    MaterialMessageBoxButtons.OK);
             }
             catch (Exception ex)
             {

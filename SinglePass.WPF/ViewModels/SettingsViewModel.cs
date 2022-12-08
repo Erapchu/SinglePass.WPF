@@ -95,11 +95,10 @@ namespace SinglePass.WPF.ViewModels
 
             if (success)
             {
-                await MaterialMessageBox.ShowAsync(
+                MaterialMessageBox.ShowDialog(
                     "Success",
                     "New password applied",
                     MaterialMessageBoxButtons.OK,
-                    DialogIdentifiers.MainWindowName,
                     PackIconKind.Tick);
             }
         }

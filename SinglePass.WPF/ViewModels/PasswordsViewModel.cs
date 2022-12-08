@@ -316,12 +316,12 @@ namespace SinglePass.WPF.ViewModels
             if (SelectedCredentialVM is null)
                 return;
 
-            var result = await MaterialMessageBox.ShowAsync(
+            var result = MaterialMessageBox.ShowDialog(
                 SinglePass.Language.Properties.Resources.DeleteItem,
                 string.Format(SinglePass.Language.Properties.Resources.Name0, SelectedCredentialVM.NameFieldVM.Value),
                 MaterialMessageBoxButtons.YesNo,
-                DialogIdentifiers.MainWindowName,
                 PackIconKind.Delete);
+
             if (result == MaterialDialogResult.Yes)
             {
                 await _credentialsCryptoService.DeleteCredential(SelectedCredentialVM.Model);

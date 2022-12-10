@@ -90,11 +90,12 @@ namespace SinglePass.WPF
             services.AddScoped<SettingsViewModel>();
             services.AddTransient<MaterialInputBoxContent>();
             services.AddTransient<MaterialInputBoxViewModel>();
-            services.AddTransient<CredentialEditContent>();
-            services.AddTransient<CredentialEditViewModel>();
 
             services.AddTransient<MaterialMessageBoxDialogWindow>();
             services.AddTransient<MaterialMessageBoxViewModel>();
+
+            services.AddTransient<CredentialEditDialogWindow>();
+            services.AddTransient<CredentialEditViewModel>();
 
             // Popup
             services.AddTransient<PopupWindow>();

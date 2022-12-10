@@ -1,13 +1,15 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MaterialDesignThemes.Wpf;
 using SinglePass.WPF.Enums;
+using System;
 
 namespace SinglePass.WPF.ViewModels.Dialogs
 {
     [INotifyPropertyChanged]
     public partial class CredentialEditViewModel
     {
+        public event Action<MaterialDialogResult?> Accept;
+
         [ObservableProperty]
         private CredentialViewModel _credentialViewModel;
 
@@ -32,8 +34,7 @@ namespace SinglePass.WPF.ViewModels.Dialogs
         [RelayCommand]
         private void Cancel()
         {
-            if (DialogHost.IsDialogOpen(DialogIdentifier))
-                DialogHost.Close(DialogIdentifier, MaterialDialogResult.Cancel);
+            Accept?.Invoke(MaterialDialogResult.None);
         }
 
         [RelayCommand]
@@ -43,8 +44,7 @@ namespace SinglePass.WPF.ViewModels.Dialogs
             if (CredentialViewModel.NameFieldVM.HasErrors)
                 return;
 
-            if (DialogHost.IsDialogOpen(DialogIdentifier))
-                DialogHost.Close(DialogIdentifier, MaterialDialogResult.OK);
+            Accept?.Invoke(MaterialDialogResult.OK);
         }
     }
 }

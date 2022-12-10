@@ -9,7 +9,7 @@ namespace SinglePass.WPF.Views.Windows
     /// </summary>
     public partial class MaterialMessageBoxDialogWindow : MaterialWindow
     {
-        public MaterialMessageBoxViewModel ViewModel { get; set; }
+        public MaterialMessageBoxViewModel ViewModel { get; }
         public MaterialDialogResult? Result { get; private set; }
 
         public MaterialMessageBoxDialogWindow()

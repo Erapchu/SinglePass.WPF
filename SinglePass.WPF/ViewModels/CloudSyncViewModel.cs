@@ -227,7 +227,10 @@ namespace SinglePass.WPF.ViewModels
                     ? SinglePass.Language.Properties.Resources.SyncSuccess
                     : SinglePass.Language.Properties.Resources.SyncFailed,
                     mergeResult.ToString(),
-                    MaterialMessageBoxButtons.OK);
+                    MaterialMessageBoxButtons.OK,
+                    mergeResult.Success
+                    ? PackIconKind.Tick
+                    : PackIconKind.Error);
             }
             catch (Exception ex)
             {
@@ -258,7 +261,10 @@ namespace SinglePass.WPF.ViewModels
                     success
                     ? SinglePass.Language.Properties.Resources.UploadSuccess
                     : SinglePass.Language.Properties.Resources.UploadFailed,
-                    MaterialMessageBoxButtons.OK);
+                    MaterialMessageBoxButtons.OK,
+                    success
+                    ? PackIconKind.Tick
+                    : PackIconKind.Error);
             }
             catch (Exception ex)
             {

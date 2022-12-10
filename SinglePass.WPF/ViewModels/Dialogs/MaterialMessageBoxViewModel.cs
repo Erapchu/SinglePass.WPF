@@ -2,7 +2,6 @@
 using CommunityToolkit.Mvvm.Input;
 using MaterialDesignThemes.Wpf;
 using System;
-using System.Windows;
 
 namespace SinglePass.WPF.ViewModels.Dialogs
 {
@@ -19,7 +18,7 @@ namespace SinglePass.WPF.ViewModels.Dialogs
             materialMessageBoxVM.Header = "Dialog header";
             materialMessageBoxVM.Content = "Lorem ipsum dolor sit amet";
             materialMessageBoxVM.MaterialMessageBoxButtons = MaterialMessageBoxButtons.YesNoCancel;
-            materialMessageBoxVM.IconKind = null;
+            materialMessageBoxVM.IconKind = PackIconKind.Warning;
             return materialMessageBoxVM;
         }
         #endregion
@@ -37,8 +36,6 @@ namespace SinglePass.WPF.ViewModels.Dialogs
         [ObservableProperty]
         private PackIconKind? _iconKind;
 
-        public HorizontalAlignment HeaderHorizontalAlignment => IconVisible ? HorizontalAlignment.Center : HorizontalAlignment.Left;
-
         public bool IconVisible => IconKind != null;
 
         public string Button1Text
@@ -55,8 +52,6 @@ namespace SinglePass.WPF.ViewModels.Dialogs
                 };
             }
         }
-
-        public bool Button1IsDefault => true;
 
         public string Button2Text
         {

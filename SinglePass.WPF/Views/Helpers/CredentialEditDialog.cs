@@ -7,7 +7,7 @@ using System;
 
 namespace SinglePass.WPF.Views.Helpers
 {
-    public static class CredentialDialog
+    public static class CredentialEditDialog
     {
         public static MaterialDialogResult ShowDialog(
             CredentialViewModel credentialViewModel,

@@ -290,7 +290,7 @@ namespace SinglePass.WPF.ViewModels
         [RelayCommand]
         private Task Loading()
         {
-            return FetchUserInfoIfRequired();
+            return Task.Run(FetchUserInfoIfRequired);
         }
     }
 }

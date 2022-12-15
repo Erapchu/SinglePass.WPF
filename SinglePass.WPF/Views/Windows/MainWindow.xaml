@@ -20,7 +20,9 @@
     Closed="MaterialWindow_Closed"
     Closing="MaterialWindow_Closing"
     IsVisibleChanged="MaterialWindow_IsVisibleChanged"
+    Loaded="MaterialWindow_Loaded"
     UseLayoutRounding="True"
+    WindowStartupLocation="Manual"
     mc:Ignorable="d">
     <Window.Resources>
         <ResourceDictionary>

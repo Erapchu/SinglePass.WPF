@@ -93,8 +93,9 @@ namespace SinglePass.WPF.ViewModels
                     DialogIdentifiers.MainWindowName,
                     out CancellationToken cancellationToken);
 
-                await cloudService.AuthorizationBroker.AuthorizeAsync(cancellationToken);
+                var oauthInfo = await cloudService.OAuthProvider.AuthorizeAsync(cancellationToken);
                 _logger.LogInformation($"Authorization process to {cloudType} has been complete.");
+                await cloudService.TokenHolder.SetAndSaveToken(oauthInfo, cancellationToken);
                 GoogleDriveEnabled = true;
                 _ = FetchUserInfoFromCloud(cloudType, CancellationToken.None); // Don't await set user info for now
                 await _appSettingsService.Save();
@@ -127,7 +128,9 @@ namespace SinglePass.WPF.ViewModels
                     DialogIdentifiers.MainWindowName,
                     out CancellationToken cancellationToken);
 
-                await cloudService.AuthorizationBroker.RevokeToken(cancellationToken);
+                var oauthInfo = cloudService.TokenHolder.OAuthInfo;
+                await cloudService.OAuthProvider.RevokeTokenAsync(oauthInfo, cancellationToken);
+                await cloudService.TokenHolder.RemoveToken();
                 GoogleDriveEnabled = false;
                 ClearUserInfo(cloudType);
                 await _appSettingsService.Save();
@@ -219,13 +222,15 @@ namespace SinglePass.WPF.ViewModels
                 MergeProcessing = true;
                 var mergeResult = await _syncService.Synchronize(cloudType, SyncPasswordRequired);
 
-                await MaterialMessageBox.ShowAsync(
+                MaterialMessageBox.ShowDialog(
                     mergeResult.Success
                     ? SinglePass.Language.Properties.Resources.SyncSuccess
                     : SinglePass.Language.Properties.Resources.SyncFailed,
                     mergeResult.ToString(),
                     MaterialMessageBoxButtons.OK,
-                    DialogIdentifiers.MainWindowName);
+                    mergeResult.Success
+                    ? PackIconKind.Tick
+                    : PackIconKind.Error);
             }
             catch (Exception ex)
             {
@@ -249,7 +254,7 @@ namespace SinglePass.WPF.ViewModels
                 UploadProcessing = true;
                 var success = await _syncService.Upload(cloudType);
 
-                await MaterialMessageBox.ShowAsync(
+                MaterialMessageBox.ShowDialog(
                     success
                     ? SinglePass.Language.Properties.Resources.Success
                     : SinglePass.Language.Properties.Resources.Error,
@@ -257,7 +262,9 @@ namespace SinglePass.WPF.ViewModels
                     ? SinglePass.Language.Properties.Resources.UploadSuccess
                     : SinglePass.Language.Properties.Resources.UploadFailed,
                     MaterialMessageBoxButtons.OK,
-                    DialogIdentifiers.MainWindowName);
+                    success
+                    ? PackIconKind.Tick
+                    : PackIconKind.Error);
             }
             catch (Exception ex)
             {
@@ -283,7 +290,7 @@ namespace SinglePass.WPF.ViewModels
         [RelayCommand]
         private Task Loading()
         {
-            return FetchUserInfoIfRequired();
+            return Task.Run(FetchUserInfoIfRequired);
         }
     }
 }

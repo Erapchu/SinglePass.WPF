@@ -73,7 +73,7 @@ namespace SinglePass.WPF
             // Clouds
             // Google
             services.Configure<GoogleDriveConfig>(configuration.GetSection("Settings:GoogleDriveConfig"));
-            services.AddTransient<GoogleAuthorizationBroker>();
+            services.AddTransient<GoogleOAuthProvider>();
             services.AddTransient<GoogleDriveTokenHolder>();
             services.AddTransient<GoogleDriveCloudService>();
             services.AddTransient<CryptoService>();
@@ -90,7 +90,11 @@ namespace SinglePass.WPF
             services.AddScoped<SettingsViewModel>();
             services.AddTransient<MaterialInputBoxContent>();
             services.AddTransient<MaterialInputBoxViewModel>();
-            services.AddTransient<CredentialEditContent>();
+
+            services.AddTransient<MaterialMessageBoxDialogWindow>();
+            services.AddTransient<MaterialMessageBoxViewModel>();
+
+            services.AddTransient<CredentialEditDialogWindow>();
             services.AddTransient<CredentialEditViewModel>();
 
             // Popup

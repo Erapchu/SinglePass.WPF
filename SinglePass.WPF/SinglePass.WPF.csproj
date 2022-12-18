@@ -6,6 +6,7 @@
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Resources\pass-man.ico</ApplicationIcon>
     <AssemblyVersion>1.0.1.0</AssemblyVersion>
+	<ResolveComReferenceSilent>True</ResolveComReferenceSilent>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,6 +33,7 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="NHotkey.Wpf" Version="2.1.0" />
     <PackageReference Include="NLog" Version="5.0.2" />
     <PackageReference Include="NLog.Extensions.Logging" Version="5.0.2" />

@@ -20,7 +20,9 @@
     Closed="MaterialWindow_Closed"
     Closing="MaterialWindow_Closing"
     IsVisibleChanged="MaterialWindow_IsVisibleChanged"
+    Loaded="MaterialWindow_Loaded"
     UseLayoutRounding="True"
+    WindowStartupLocation="Manual"
     mc:Ignorable="d">
     <Window.Resources>
         <ResourceDictionary>
@@ -29,15 +31,13 @@
                 <ResourceDictionary Source="pack://application:,,,/SinglePass.WPF;component/Themes/DialogHostTemplates.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <helpers:BindingProxy x:Key="Proxy" Data="{Binding .}" />
-
             <Style
                 x:Key="CustomNavigationListboxItem"
                 BasedOn="{StaticResource MaterialDesignNavigationPrimaryListBoxItem}"
                 TargetType="{x:Type ListBoxItem}">
                 <EventSetter Event="PreviewMouseDown" Handler="ListBoxItem_PreviewMouseDown" />
-                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Cursor" Value="Arrow" />
             </Style>
-
             <DataTemplate x:Key="NavigationItemDataTemplate" DataType="{x:Type vm:NavigationItemViewModel}">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -67,7 +67,6 @@
                         Visibility="{Binding Loading, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 </Grid>
             </DataTemplate>
-
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         </ResourceDictionary>
     </Window.Resources>

@@ -1,4 +1,5 @@
 ﻿using SinglePass.WPF.Authorization.Brokers;
+using SinglePass.WPF.Authorization.TokenHolders;
 using SinglePass.WPF.Clouds.Models;
 using System.IO;
 using System.Net.Http;
@@ -15,28 +16,34 @@ namespace SinglePass.WPF.Clouds.Services
     {
         private readonly IHttpClientFactory _httpClientFactory;
 
-        public IAuthorizationBroker AuthorizationBroker { get; }
+        public IOAuthProvider OAuthProvider { get; }
+        public ITokenHolder TokenHolder { get; }
 
         public GoogleDriveCloudService(
-            GoogleAuthorizationBroker googleAuthorizationBroker,
+            GoogleOAuthProvider googleOAuthProvider,
+            GoogleDriveTokenHolder googleDriveTokenHolder,
             IHttpClientFactory httpClientFactory)
         {
-            AuthorizationBroker = googleAuthorizationBroker;
+            OAuthProvider = googleOAuthProvider;
+            TokenHolder = googleDriveTokenHolder;
             _httpClientFactory = httpClientFactory;
         }
 
         private async Task RefreshAccessTokenIfRequired(CancellationToken cancellationToken)
         {
-            if (AuthorizationBroker.TokenHolder.Token.RefreshRequired)
+            if (!TokenHolder.OAuthInfo.IsValid())
             {
-                await AuthorizationBroker.RefreshAccessToken(cancellationToken).ConfigureAwait(false);
+                var oauthInfo = await OAuthProvider.RefreshTokenAsync(TokenHolder.OAuthInfo, cancellationToken).ConfigureAwait(false);
+                // Only Googe Drive should re-use the same refresh token and it will not return it again
+                oauthInfo.RefreshToken = TokenHolder.OAuthInfo.RefreshToken;
+                await TokenHolder.SetAndSaveToken(oauthInfo, cancellationToken).ConfigureAwait(false);
             }
         }
 
         private HttpRequestMessage GetAuthHttpRequestMessage()
         {
             var requestMessage = new HttpRequestMessage();
-            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AuthorizationBroker.TokenHolder.Token.AccessToken);
+            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", TokenHolder.OAuthInfo.AccessToken);
             return requestMessage;
         }
 

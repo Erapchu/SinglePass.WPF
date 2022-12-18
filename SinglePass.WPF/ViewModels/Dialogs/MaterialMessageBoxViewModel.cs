@@ -2,10 +2,218 @@
 using CommunityToolkit.Mvvm.Input;
 using MaterialDesignThemes.Wpf;
 using System;
-using System.Windows;
 
 namespace SinglePass.WPF.ViewModels.Dialogs
 {
+    [INotifyPropertyChanged]
+    public partial class MaterialMessageBoxViewModel
+    {
+        #region Design time instance
+        private static readonly Lazy<MaterialMessageBoxViewModel> _lazyDesignTime = new(CreateDesignTime);
+        public static MaterialMessageBoxViewModel DesignTimeInstance => _lazyDesignTime.Value;
+
+        private static MaterialMessageBoxViewModel CreateDesignTime()
+        {
+            var materialMessageBoxVM = new MaterialMessageBoxViewModel();
+            materialMessageBoxVM.Header = "Dialog header";
+            materialMessageBoxVM.Content = "Lorem ipsum dolor sit amet";
+            materialMessageBoxVM.MaterialMessageBoxButtons = MaterialMessageBoxButtons.YesNoCancel;
+            materialMessageBoxVM.IconKind = PackIconKind.Warning;
+            return materialMessageBoxVM;
+        }
+        #endregion
+
+        public event Action<MaterialDialogResult?> Accept;
+
+        public MaterialMessageBoxButtons MaterialMessageBoxButtons { get; set; }
+
+        [ObservableProperty]
+        private string _header;
+
+        [ObservableProperty]
+        private string _content;
+
+        [ObservableProperty]
+        private PackIconKind? _iconKind;
+
+        public bool IconVisible => IconKind != null;
+
+        public string Button1Text
+        {
+            get
+            {
+                return MaterialMessageBoxButtons switch
+                {
+                    MaterialMessageBoxButtons.AbortRetryIgnore => SinglePass.Language.Properties.Resources.Abort,
+                    MaterialMessageBoxButtons.OK or MaterialMessageBoxButtons.OKCancel => SinglePass.Language.Properties.Resources.OK,
+                    MaterialMessageBoxButtons.RetryCancel => SinglePass.Language.Properties.Resources.Retry,
+                    MaterialMessageBoxButtons.YesNo or MaterialMessageBoxButtons.YesNoCancel => SinglePass.Language.Properties.Resources.Yes,
+                    _ => string.Empty,
+                };
+            }
+        }
+
+        public string Button2Text
+        {
+            get
+            {
+                return MaterialMessageBoxButtons switch
+                {
+                    MaterialMessageBoxButtons.AbortRetryIgnore => SinglePass.Language.Properties.Resources.Retry,
+                    MaterialMessageBoxButtons.OKCancel or MaterialMessageBoxButtons.RetryCancel => SinglePass.Language.Properties.Resources.Cancel,
+                    MaterialMessageBoxButtons.YesNo or MaterialMessageBoxButtons.YesNoCancel => SinglePass.Language.Properties.Resources.No,
+                    _ => string.Empty,
+                };
+            }
+        }
+
+        public bool Button2Visible
+        {
+            get
+            {
+                return MaterialMessageBoxButtons switch
+                {
+                    MaterialMessageBoxButtons.AbortRetryIgnore or
+                    MaterialMessageBoxButtons.OKCancel or
+                    MaterialMessageBoxButtons.RetryCancel or
+                    MaterialMessageBoxButtons.YesNo or
+                    MaterialMessageBoxButtons.YesNoCancel => true,
+                    _ => false,
+                };
+            }
+        }
+
+        public bool Button2IsCancel
+        {
+            get
+            {
+                return MaterialMessageBoxButtons switch
+                {
+                    MaterialMessageBoxButtons.AbortRetryIgnore => false,
+                    MaterialMessageBoxButtons.OK => false,
+                    MaterialMessageBoxButtons.OKCancel => true,
+                    MaterialMessageBoxButtons.RetryCancel => true,
+                    MaterialMessageBoxButtons.YesNo => true,
+                    MaterialMessageBoxButtons.YesNoCancel => false,
+                    _ => false,
+                };
+            }
+        }
+
+        public string Button3Text
+        {
+            get
+            {
+                return MaterialMessageBoxButtons switch
+                {
+                    MaterialMessageBoxButtons.AbortRetryIgnore => SinglePass.Language.Properties.Resources.Ignore,
+                    MaterialMessageBoxButtons.YesNoCancel => SinglePass.Language.Properties.Resources.Cancel,
+                    _ => string.Empty,
+                };
+            }
+        }
+
+        public bool Button3Visible
+        {
+            get
+            {
+                return MaterialMessageBoxButtons switch
+                {
+                    MaterialMessageBoxButtons.AbortRetryIgnore or MaterialMessageBoxButtons.YesNoCancel => true,
+                    _ => false,
+                };
+            }
+        }
+
+        public bool Button3IsCancel
+        {
+            get
+            {
+                return MaterialMessageBoxButtons switch
+                {
+                    MaterialMessageBoxButtons.AbortRetryIgnore => true,
+                    MaterialMessageBoxButtons.OK => false,
+                    MaterialMessageBoxButtons.OKCancel => false,
+                    MaterialMessageBoxButtons.RetryCancel => false,
+                    MaterialMessageBoxButtons.YesNo => false,
+                    MaterialMessageBoxButtons.YesNoCancel => true,
+                    _ => false,
+                };
+            }
+        }
+
+        public MaterialMessageBoxViewModel()
+        {
+
+        }
+
+        [RelayCommand]
+        private void Button1Action()
+        {
+            MaterialDialogResult result = MaterialDialogResult.None;
+            switch (MaterialMessageBoxButtons)
+            {
+                case MaterialMessageBoxButtons.AbortRetryIgnore:
+                    result = MaterialDialogResult.Abort;
+                    break;
+                case MaterialMessageBoxButtons.OK:
+                case MaterialMessageBoxButtons.OKCancel:
+                    result = MaterialDialogResult.OK;
+                    break;
+                case MaterialMessageBoxButtons.RetryCancel:
+                    result = MaterialDialogResult.Retry;
+                    break;
+                case MaterialMessageBoxButtons.YesNo:
+                case MaterialMessageBoxButtons.YesNoCancel:
+                    result = MaterialDialogResult.Yes;
+                    break;
+            }
+
+            Accept?.Invoke(result);
+        }
+
+        [RelayCommand]
+        private void Button2Action()
+        {
+            MaterialDialogResult result = MaterialDialogResult.None;
+            switch (MaterialMessageBoxButtons)
+            {
+                case MaterialMessageBoxButtons.AbortRetryIgnore:
+                    result = MaterialDialogResult.Retry;
+                    break;
+                case MaterialMessageBoxButtons.OKCancel:
+                    result = MaterialDialogResult.Cancel;
+                    break;
+                case MaterialMessageBoxButtons.RetryCancel:
+                    result = MaterialDialogResult.Cancel;
+                    break;
+                case MaterialMessageBoxButtons.YesNo:
+                case MaterialMessageBoxButtons.YesNoCancel:
+                    result = MaterialDialogResult.No;
+                    break;
+            }
+
+            Accept?.Invoke(result);
+        }
+
+        [RelayCommand]
+        private void Button3Action()
+        {
+            MaterialDialogResult result = MaterialDialogResult.None;
+            switch (MaterialMessageBoxButtons)
+            {
+                case MaterialMessageBoxButtons.AbortRetryIgnore:
+                    result = MaterialDialogResult.Ignore;
+                    break;
+                case MaterialMessageBoxButtons.YesNoCancel:
+                    result = MaterialDialogResult.Cancel;
+                    break;
+            }
+
+            Accept?.Invoke(result);
+        }
+    }
+
     public enum MaterialMessageBoxButtons
     {
         /// <summary>
@@ -80,293 +288,5 @@ namespace SinglePass.WPF.ViewModels.Dialogs
         /// The dialog box return value is No (usually sent from a button labeled No).
         /// </summary>
         No = 7
-    }
-
-    internal class MaterialMessageBoxViewModel : ObservableRecipient
-    {
-        #region Design time instance
-        private static Lazy<MaterialMessageBoxViewModel> _lazyDesignTime = new Lazy<MaterialMessageBoxViewModel>(CreateDesignTime);
-        public static MaterialMessageBoxViewModel DesignTimeInstance => _lazyDesignTime.Value;
-
-        private static MaterialMessageBoxViewModel CreateDesignTime()
-        {
-            var columnsViewModel = new MaterialMessageBoxViewModel("Dialog header", "Lorem ipsum dolor sit amet", MaterialMessageBoxButtons.YesNoCancel, null);
-            return columnsViewModel;
-        }
-        #endregion
-
-        private string _header;
-        private string _content;
-        private PackIconKind? _iconKind;
-        private RelayCommand _button1Command;
-        private RelayCommand _button2Command;
-        private RelayCommand _button3Command;
-
-        public RelayCommand Button1Command => _button1Command ??= new RelayCommand(Button1Action);
-        public RelayCommand Button2Command => _button2Command ??= new RelayCommand(Button2Action);
-        public RelayCommand Button3Command => _button3Command ??= new RelayCommand(Button3Action);
-
-        public string Header
-        {
-            get => _header;
-            set
-            {
-                if (_header == value)
-                    return;
-
-                _header = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public HorizontalAlignment HeaderHorizontalAlignment => IconVisible ? HorizontalAlignment.Center : HorizontalAlignment.Left;
-
-        public string Content
-        {
-            get => _content;
-            set
-            {
-                if (_content == value)
-                    return;
-
-                _content = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public PackIconKind? IconKind
-        {
-            get => _iconKind;
-            set
-            {
-                if (_iconKind == value)
-                    return;
-
-                _iconKind = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public bool IconVisible => IconKind != null;
-
-        public string Button1Text
-        {
-            get
-            {
-                switch (_materialMessageBoxButtons)
-                {
-                    case MaterialMessageBoxButtons.AbortRetryIgnore:
-                        return SinglePass.Language.Properties.Resources.Abort;
-                    case MaterialMessageBoxButtons.OK:
-                    case MaterialMessageBoxButtons.OKCancel:
-                        return SinglePass.Language.Properties.Resources.OK;
-                    case MaterialMessageBoxButtons.RetryCancel:
-                        return SinglePass.Language.Properties.Resources.Retry;
-                    case MaterialMessageBoxButtons.YesNo:
-                    case MaterialMessageBoxButtons.YesNoCancel:
-                        return SinglePass.Language.Properties.Resources.Yes;
-                    default:
-                        return string.Empty;
-                }
-            }
-        }
-
-        public bool Button1IsDefault => true;
-
-        public string Button2Text
-        {
-            get
-            {
-                switch (_materialMessageBoxButtons)
-                {
-                    case MaterialMessageBoxButtons.AbortRetryIgnore:
-                        return SinglePass.Language.Properties.Resources.Retry;
-                    case MaterialMessageBoxButtons.OKCancel:
-                    case MaterialMessageBoxButtons.RetryCancel:
-                        return SinglePass.Language.Properties.Resources.Cancel;
-                    case MaterialMessageBoxButtons.YesNo:
-                    case MaterialMessageBoxButtons.YesNoCancel:
-                        return SinglePass.Language.Properties.Resources.No;
-                    case MaterialMessageBoxButtons.OK:
-                    default:
-                        return string.Empty;
-                }
-            }
-        }
-
-        public bool Button2Visible
-        {
-            get
-            {
-                switch (_materialMessageBoxButtons)
-                {
-                    case MaterialMessageBoxButtons.AbortRetryIgnore:
-                    case MaterialMessageBoxButtons.OKCancel:
-                    case MaterialMessageBoxButtons.RetryCancel:
-                    case MaterialMessageBoxButtons.YesNo:
-                    case MaterialMessageBoxButtons.YesNoCancel:
-                        return true;
-                    case MaterialMessageBoxButtons.OK:
-                    default:
-                        return false;
-                }
-            }
-        }
-
-        public bool Button2IsCancel
-        {
-            get
-            {
-                return _materialMessageBoxButtons switch
-                {
-                    MaterialMessageBoxButtons.AbortRetryIgnore => false,
-                    MaterialMessageBoxButtons.OK => false,
-                    MaterialMessageBoxButtons.OKCancel => true,
-                    MaterialMessageBoxButtons.RetryCancel => true,
-                    MaterialMessageBoxButtons.YesNo => true,
-                    MaterialMessageBoxButtons.YesNoCancel => false,
-                    _ => false,
-                };
-            }
-        }
-
-        public string Button3Text
-        {
-            get
-            {
-                switch (_materialMessageBoxButtons)
-                {
-                    case MaterialMessageBoxButtons.AbortRetryIgnore:
-                        return SinglePass.Language.Properties.Resources.Ignore;
-                    case MaterialMessageBoxButtons.YesNoCancel:
-                        return SinglePass.Language.Properties.Resources.Cancel;
-                    case MaterialMessageBoxButtons.OK:
-                    case MaterialMessageBoxButtons.OKCancel:
-                    case MaterialMessageBoxButtons.RetryCancel:
-                    case MaterialMessageBoxButtons.YesNo:
-                    default:
-                        return string.Empty;
-                }
-            }
-        }
-
-        public bool Button3Visible
-        {
-            get
-            {
-                switch (_materialMessageBoxButtons)
-                {
-                    case MaterialMessageBoxButtons.AbortRetryIgnore:
-                    case MaterialMessageBoxButtons.YesNoCancel:
-                        return true;
-                    case MaterialMessageBoxButtons.OKCancel:
-                    case MaterialMessageBoxButtons.RetryCancel:
-                    case MaterialMessageBoxButtons.YesNo:
-                    case MaterialMessageBoxButtons.OK:
-                    default:
-                        return false;
-                }
-            }
-        }
-
-        public bool Button3IsCancel
-        {
-            get
-            {
-                return _materialMessageBoxButtons switch
-                {
-                    MaterialMessageBoxButtons.AbortRetryIgnore => true,
-                    MaterialMessageBoxButtons.OK => false,
-                    MaterialMessageBoxButtons.OKCancel => false,
-                    MaterialMessageBoxButtons.RetryCancel => false,
-                    MaterialMessageBoxButtons.YesNo => false,
-                    MaterialMessageBoxButtons.YesNoCancel => true,
-                    _ => false,
-                };
-            }
-        }
-
-        private readonly string _dialogIdentifier;
-        private readonly MaterialMessageBoxButtons _materialMessageBoxButtons;
-
-        public MaterialMessageBoxViewModel(
-            string header,
-            string content,
-            MaterialMessageBoxButtons buttons,
-            string dialogIdentifier,
-            PackIconKind? packIconKind = null)
-        {
-            _header = header;
-            _content = content;
-            _materialMessageBoxButtons = buttons;
-            _dialogIdentifier = dialogIdentifier;
-            _iconKind = packIconKind;
-        }
-
-        private void Button1Action()
-        {
-            MaterialDialogResult result = MaterialDialogResult.None;
-            switch (_materialMessageBoxButtons)
-            {
-                case MaterialMessageBoxButtons.AbortRetryIgnore:
-                    result = MaterialDialogResult.Abort;
-                    break;
-                case MaterialMessageBoxButtons.OK:
-                case MaterialMessageBoxButtons.OKCancel:
-                    result = MaterialDialogResult.OK;
-                    break;
-                case MaterialMessageBoxButtons.RetryCancel:
-                    result = MaterialDialogResult.Retry;
-                    break;
-                case MaterialMessageBoxButtons.YesNo:
-                case MaterialMessageBoxButtons.YesNoCancel:
-                    result = MaterialDialogResult.Yes;
-                    break;
-            }
-
-            if (DialogHost.IsDialogOpen(_dialogIdentifier))
-                DialogHost.Close(_dialogIdentifier, result);
-        }
-
-        private void Button2Action()
-        {
-            MaterialDialogResult result = MaterialDialogResult.None;
-            switch (_materialMessageBoxButtons)
-            {
-                case MaterialMessageBoxButtons.AbortRetryIgnore:
-                    result = MaterialDialogResult.Retry;
-                    break;
-                case MaterialMessageBoxButtons.OKCancel:
-                    result = MaterialDialogResult.Cancel;
-                    break;
-                case MaterialMessageBoxButtons.RetryCancel:
-                    result = MaterialDialogResult.Cancel;
-                    break;
-                case MaterialMessageBoxButtons.YesNo:
-                case MaterialMessageBoxButtons.YesNoCancel:
-                    result = MaterialDialogResult.No;
-                    break;
-            }
-
-            if (DialogHost.IsDialogOpen(_dialogIdentifier))
-                DialogHost.Close(_dialogIdentifier, result);
-        }
-
-        private void Button3Action()
-        {
-            MaterialDialogResult result = MaterialDialogResult.None;
-            switch (_materialMessageBoxButtons)
-            {
-                case MaterialMessageBoxButtons.AbortRetryIgnore:
-                    result = MaterialDialogResult.Ignore;
-                    break;
-                case MaterialMessageBoxButtons.YesNoCancel:
-                    result = MaterialDialogResult.Cancel;
-                    break;
-            }
-
-            if (DialogHost.IsDialogOpen(_dialogIdentifier))
-                DialogHost.Close(_dialogIdentifier, result);
-        }
     }
 }

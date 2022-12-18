@@ -36,7 +36,6 @@ namespace SinglePass.WPF.Views.Windows
                     Top = windowSettings.Top;
                     Width = windowSettings.Width;
                     Height = windowSettings.Height;
-                    WindowState = windowSettings.WindowState;
                 }
             }
 
@@ -144,6 +143,11 @@ namespace SinglePass.WPF.Views.Windows
                 // Save settings and wait to avoid file corruptions
                 _appSettingsService.Save().Wait();
             }
+        }
+
+        private void MaterialWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            WindowState = _appSettingsService.MainWindowSettings?.WindowState ?? WindowState.Normal;
         }
     }
 }

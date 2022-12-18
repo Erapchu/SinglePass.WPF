@@ -200,11 +200,10 @@ namespace SinglePass.WPF.ViewModels
         private async Task Add()
         {
             var newCredVM = _credentialViewModelFactory.ProvideNew(Credential.CreateNew());
-            var result = await CredentialDialog.ShowAsync(
+            var result = CredentialEditDialog.ShowDialog(
                 newCredVM,
-                DialogIdentifiers.MainWindowName,
                 CredentialDetailsMode.New);
-            if (result == MaterialDialogResult.Cancel)
+            if (result != MaterialDialogResult.OK)
                 return;
 
             var dateTimeNow = DateTime.Now;
@@ -294,11 +293,10 @@ namespace SinglePass.WPF.ViewModels
                 return;
 
             var tempCredentialVM = SelectedCredentialVM.Clone();
-            var result = await CredentialDialog.ShowAsync(
+            var result = CredentialEditDialog.ShowDialog(
                 tempCredentialVM,
-                DialogIdentifiers.MainWindowName,
                 CredentialDetailsMode.Edit);
-            if (result == MaterialDialogResult.Cancel)
+            if (result != MaterialDialogResult.OK)
                 return;
 
             var dateTimeNow = DateTime.Now;
@@ -316,12 +314,12 @@ namespace SinglePass.WPF.ViewModels
             if (SelectedCredentialVM is null)
                 return;
 
-            var result = await MaterialMessageBox.ShowAsync(
+            var result = MaterialMessageBox.ShowDialog(
                 SinglePass.Language.Properties.Resources.DeleteItem,
                 string.Format(SinglePass.Language.Properties.Resources.Name0, SelectedCredentialVM.NameFieldVM.Value),
                 MaterialMessageBoxButtons.YesNo,
-                DialogIdentifiers.MainWindowName,
                 PackIconKind.Delete);
+
             if (result == MaterialDialogResult.Yes)
             {
                 await _credentialsCryptoService.DeleteCredential(SelectedCredentialVM.Model);

@@ -67,17 +67,16 @@
             Orientation="Horizontal">
             <Button
                 Margin="0 0 8 0"
-                md:ElevationAssist.Elevation="Dp5"
+                md:ButtonProgressAssist.IsIndeterminate="True"
+                md:ButtonProgressAssist.IsIndicatorVisible="{Binding Loading}"
+                Command="{Binding LoadCredentialsCommand}"
+                Content="{x:Static properties:Resources.Enter}"
+                IsDefault="True"
+                Style="{StaticResource MaterialDesignFlatButton}" />
+            <Button
                 Content="{x:Static properties:Resources.Exit}"
                 IsCancel="True"
                 Style="{StaticResource MaterialDesignFlatButton}" />
-            <Button
-                md:ButtonProgressAssist.IsIndeterminate="True"
-                md:ButtonProgressAssist.IsIndicatorVisible="{Binding Loading}"
-                md:ElevationAssist.Elevation="Dp5"
-                Command="{Binding LoadCredentialsCommand}"
-                Content="{x:Static properties:Resources.Enter}"
-                IsDefault="True" />
         </StackPanel>
     </Grid>
 </controls:MaterialWindow>

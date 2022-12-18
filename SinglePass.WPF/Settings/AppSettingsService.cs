@@ -1,7 +1,6 @@
 ﻿using AsyncKeyedLock;
 using Microsoft.Extensions.Logging;
 using SinglePass.WPF.Helpers;
-using SinglePass.WPF.Helpers.Threading;
 using SinglePass.WPF.Hotkeys;
 using System;
 using System.IO;
@@ -76,9 +75,11 @@ namespace SinglePass.WPF.Settings
         public async Task Save()
         {
             // Use local lock instead of interprocess lock - only one instance of app will work with this file
-            using var locker = await _asyncKeyedLocker.LockAsync(Constants.CommonSettingsFilePath).ConfigureAwait(false);
-            using var fileStream = new FileStream(Constants.CommonSettingsFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
-            await JsonSerializer.SerializeAsync(fileStream, Settings).ConfigureAwait(false);
+            using (await _asyncKeyedLocker.LockAsync(Constants.CommonSettingsFilePath).ConfigureAwait(false))
+            {
+                using var fileStream = new FileStream(Constants.CommonSettingsFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
+                await JsonSerializer.SerializeAsync(fileStream, Settings).ConfigureAwait(false);
+            }
             _logger.LogInformation("Settings saved to file");
         }
     }

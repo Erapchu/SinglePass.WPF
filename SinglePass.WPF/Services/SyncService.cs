@@ -132,7 +132,7 @@ namespace SinglePass.WPF.Services
                 SyncStateChanged?.Invoke(SinglePass.Language.Properties.Resources.Uploading);
 
                 // Additional lock to ensure file not used by other thread
-                using var locker = await _asyncKeyedLocker.LockAsync(Constants.PasswordsFilePath);
+                using var locker = await _asyncKeyedLocker.LockAsync(Constants.PasswordsFilePath).ConfigureAwait(false);
                 using var fileStream = File.Open(Constants.PasswordsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                 // Ensure begining
                 fileStream.Seek(0, SeekOrigin.Begin);

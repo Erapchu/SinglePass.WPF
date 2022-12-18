@@ -75,7 +75,7 @@ namespace SinglePass.WPF.Services
                 try
                 {
                     // Access to file
-                    using var locker = await _asyncKeyedLocker.LockAsync(Constants.PasswordsFilePath);
+                    using var locker = await _asyncKeyedLocker.LockAsync(Constants.PasswordsFilePath).ConfigureAwait(false);
                     using var fileStream = new FileStream(Constants.PasswordsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                     // Just to ensure
                     fileStream.Seek(0, SeekOrigin.Begin);
@@ -212,7 +212,7 @@ namespace SinglePass.WPF.Services
                 try
                 {
                     // Access to file
-                    using var locker = await _asyncKeyedLocker.LockAsync(Constants.PasswordsFilePath);
+                    using var locker = await _asyncKeyedLocker.LockAsync(Constants.PasswordsFilePath).ConfigureAwait(false);
                     using var fileStream = new FileStream(Constants.PasswordsFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
                     // Just to ensure
                     fileStream.Seek(0, SeekOrigin.Begin);

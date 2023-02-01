@@ -49,6 +49,7 @@ jobs:
       if: runner.os == 'Windows'
       run: | 
         echo "The operating system on the runner is $env:currentDirectory ."
+        Set-Location -Path Get-Location\SinglePass.WPF
         Get-ChildItem -Force
     
     - name: Archive production artifacts

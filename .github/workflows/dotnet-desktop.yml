@@ -39,17 +39,20 @@ jobs:
       
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Restore the application
-      run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
+      run: |
+       msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
+       $currentDirectory = Get-Location
       env:
         Configuration: ${{ matrix.configuration }}
+        
     - name: condition 1
       if: runner.os == 'Windows'
-      run: echo "The operating system on the runner is $env:GITHUB_ACTION_PATH."
+      run: echo "The operating system on the runner is $currentDirectory ."
+      working-directory: scripts
     
     - name: Archive production artifacts
       uses: actions/upload-artifact@v3
       with:
         name: build result
-        path: | 
-          $env:GITHUB_ACTION_PATH\SinglePass.WPF\bin\
+        path: env:GITHUB_ACTION_PATH\SinglePass.WPF\bin\
     

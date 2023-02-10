@@ -42,7 +42,7 @@ jobs:
     - name: Restore and build
       run: |
        msbuild $env:Project_Path /t:Restore /p:Configuration=$env:Configuration
-       msbuild $env:Project_Path /t:Publish /p:Configuration=$env:Configuration;RuntimeIdentifier=win-x64;SelfContained=true;PublishReadyToRun=True;PublishSingleFile=true
+       msbuild $env:Project_Path /t:Publish /p:Configuration=$env:Configuration /p:RuntimeIdentifier=win-x64 /p:SelfContained=true /p:PublishReadyToRun=True /p:PublishSingleFile=true
       env:
         Configuration: ${{ matrix.configuration }}
     

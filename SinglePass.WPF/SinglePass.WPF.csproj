@@ -7,6 +7,11 @@
     <ApplicationIcon>Resources\pass-man.ico</ApplicationIcon>
     <AssemblyVersion>1.0.1.0</AssemblyVersion>
 	<ResolveComReferenceSilent>True</ResolveComReferenceSilent>
+	  
+	<!--ReadyToRun uses Composite mode by default https://github.com/dotnet/wpf/issues/7282-->
+	<!--Composite image crashes the app https://github.com/dotnet/runtime/issues/65879-->
+	<!--Track: https://github.com/dotnet/sdk/pull/25963-->
+	<PublishReadyToRunComposite>false</PublishReadyToRunComposite>
   </PropertyGroup>
 
   <ItemGroup>

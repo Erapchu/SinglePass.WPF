@@ -64,10 +64,19 @@ namespace SinglePass.WPF.Controls
             base.OnApplyTemplate();
         }
 
-        private void CloseButtonClickHandler(object sender, RoutedEventArgs args) => Close();
+        private void CloseButtonClickHandler(object sender, RoutedEventArgs args)
+        {
+            Close();
+        }
 
-        private void MaximizeRestoreButtonClickHandler(object sender, RoutedEventArgs args) => WindowState = (WindowState == WindowState.Normal) ? WindowState.Maximized : WindowState.Normal;
+        private void MaximizeRestoreButtonClickHandler(object sender, RoutedEventArgs args)
+        {
+            WindowState = (WindowState == WindowState.Normal) ? WindowState.Maximized : WindowState.Normal;
+        }
 
-        private void MinimizeButtonClickHandler(object sender, RoutedEventArgs args) => WindowState = WindowState.Minimized;
+        private void MinimizeButtonClickHandler(object sender, RoutedEventArgs args)
+        {
+            WindowState = WindowState.Minimized;
+        }
     }
 }

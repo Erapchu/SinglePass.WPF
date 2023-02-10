@@ -13,13 +13,14 @@ jobs:
 
     strategy:
       matrix:
-        configuration: [Debug, Release]
+        configuration: [Release]
 
     runs-on: windows-latest  # For a list of available runner types, refer to
                              # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
         
     env:
       Solution_Name: SinglePass.WPF.sln
+      Project_Path: .\SinglePass.WPF\SinglePass.WPF.csproj
       
     steps:
     - name: Checkout
@@ -31,30 +32,23 @@ jobs:
     - name: Install .NET Core
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 7.0.x
         
     # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.0.2
       
-    # Restore the application to populate the obj folder with RuntimeIdentifiers
-    - name: Restore the application
+    # Restore the application to populate the obj folder with RuntimeIdentifiers + Build
+    - name: Restore and build
       run: |
-       msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
-       msbuild $env:Solution_Name /p:Configuration=$env:Configuration
+       msbuild $env:Project_Path /t:Restore /p:Configuration=$env:Configuration
+       msbuild $env:Project_Path /t:Publish /p:Configuration=$env:Configuration /p:RuntimeIdentifier=win-x64 /p:SelfContained=true /p:PublishReadyToRun=True /p:PublishSingleFile=true
       env:
         Configuration: ${{ matrix.configuration }}
-        
-    - name: condition 1
-      if: runner.os == 'Windows'
-      run: | 
-        echo "The operating system on the runner is $env:currentDirectory ."
-        cd .\SinglePass.WPF\
-        Get-ChildItem -Force
     
     - name: Archive production artifacts
       uses: actions/upload-artifact@v3
       with:
         name: build result
-        path: .\SinglePass.WPF\bin\
+        path: .\SinglePass.WPF\bin\Release\net7.0-windows\win-x64\publish\
     

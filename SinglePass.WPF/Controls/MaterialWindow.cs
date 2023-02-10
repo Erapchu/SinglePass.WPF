@@ -1,5 +1,11 @@
-﻿using System.Windows;
+﻿using MaterialDesignThemes.Wpf;
+using Microsoft.Extensions.DependencyInjection;
+using SinglePass.WPF.Helpers;
+using SinglePass.WPF.Services;
+using System;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Interop;
 
 namespace SinglePass.WPF.Controls
 {
@@ -23,6 +29,20 @@ namespace SinglePass.WPF.Controls
         {
             get => (Visibility)GetValue(CaptionVisibilityProperty);
             set => SetValue(CaptionVisibilityProperty, value);
+        }
+
+        private IntPtr _handle;
+        public IntPtr Handle
+        {
+            get
+            {
+                if (_handle == IntPtr.Zero)
+                {
+                    _handle = new WindowInteropHelper(this).EnsureHandle();
+                }
+
+                return _handle;
+            }
         }
 
         static MaterialWindow()
@@ -62,6 +82,15 @@ namespace SinglePass.WPF.Controls
                 _closeButton.Click += CloseButtonClickHandler;
 
             base.OnApplyTemplate();
+        }
+
+        protected override void OnInitialized(EventArgs e)
+        {
+            base.OnInitialized(e);
+
+            var themeService = (System.Windows.Application.Current as App).Services.GetService<ThemeService>();
+            var darkModeEnabled = themeService.ThemeMode == BaseTheme.Dark;
+            DarkTitleBarHelper.UseImmersiveDarkMode(Handle, darkModeEnabled);
         }
 
         private void CloseButtonClickHandler(object sender, RoutedEventArgs args)

@@ -1,4 +1,5 @@
 ﻿using MaterialDesignThemes.Wpf;
+using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Settings;
 using System;
 using System.Linq;
@@ -34,6 +35,8 @@ namespace SinglePass.WPF.Services
                 }
                 theme.SetBaseTheme(newBaseTheme);
                 _bundledThemeDictionary.SetTheme(theme);
+
+                DarkTitleBarHelper.UseImmersiveDarkModeWholeApp(newBaseTheme == Theme.Dark);
             }
         }
 

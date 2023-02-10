@@ -3,7 +3,7 @@ name: .NET Core Desktop
 
 on:
   push:
-    branches: [ "master", "develop" ]
+    branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
 

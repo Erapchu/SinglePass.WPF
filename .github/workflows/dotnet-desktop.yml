@@ -3,7 +3,7 @@ name: .NET Core Desktop
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "develop" ]
   pull_request:
     branches: [ "master" ]
 
@@ -20,6 +20,7 @@ jobs:
         
     env:
       Solution_Name: SinglePass.WPF.sln
+      Project_Path: .\SinglePass.WPF\SinglePass.WPF.csproj
       
     steps:
     - name: Checkout
@@ -31,7 +32,7 @@ jobs:
     - name: Install .NET Core
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 7.0.x
         
     # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
     - name: Setup MSBuild.exe
@@ -40,8 +41,8 @@ jobs:
     # Restore the application to populate the obj folder with RuntimeIdentifiers + Build
     - name: Restore and build
       run: |
-       msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
-       msbuild $env:Solution_Name /p:Configuration=$env:Configuration
+       msbuild $env:Project_Path /t:Restore /p:Configuration=$env:Configuration
+       msbuild $env:Project_Path /t:Publish /p:Configuration=$env:Configuration;RuntimeIdentifier=win-x64;SelfContained=true;PublishReadyToRun=True;PublishSingleFile=true
       env:
         Configuration: ${{ matrix.configuration }}
     
@@ -49,5 +50,5 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: build result
-        path: .\SinglePass.WPF\bin\
+        path: .\SinglePass.WPF\bin\Release\net7.0-windows\win-x64\publish\
     

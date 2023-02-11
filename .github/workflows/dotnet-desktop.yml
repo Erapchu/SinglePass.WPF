@@ -63,10 +63,6 @@ jobs:
         TAG_NAME: ${{ github.ref }}
       with:
         script: |
-          if (!github.ref) {
-            core.setFailed("The environment variable github.ref is not defined.")
-            return;
-          }
           try {
             const response = await github.rest.repos.createRelease({
               draft: false,

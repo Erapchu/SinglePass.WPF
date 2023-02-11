@@ -41,8 +41,19 @@ jobs:
           branch: master
           # Optional, defaults to all types
           event: push
+          # Optional, will use specified workflow run
+          #run_id: 1122334455
+          # Optional, run number from the workflow
+          #run_number: 34
+          # Optional, uploaded artifact name,
+          # will download all artifacts if not specified
+          # and extract them into respective subdirectories
+          # https://github.com/actions/download-artifact#download-all-artifacts
+          #name: artifact_name
           # Optional, a directory where to extract artifact(s), defaults to the current directory
           path: ./artifacts/
+          # Optional, defaults to current repo
+          #repo: ${{ github.repository }}
           # Optional, check the workflow run to whether it has an artifact
           # then will get the last available artifact from the previous workflow
           # default false, just try to download from the last one
@@ -65,13 +76,12 @@ jobs:
         with:
           draft: false
           prerelease: false
-          generate_release_notes: true
           release_name: ${{ steps.version.outputs.version }}
           tag_name: ${{ github.ref }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
-      - name: Upload windows artifact
+      - name: Upload artifact
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ github.token }}

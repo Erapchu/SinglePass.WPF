@@ -79,6 +79,13 @@ jobs:
             core.setFailed(error.message);
           }
 
+    - name: Check artifacts
+      if: runner.os == 'Windows'
+      run: | 
+        Get-ChildItem -Force
+        cd .\artifacts\
+        Get-ChildItem -Force
+
     - name: Upload artifact
       uses: actions/upload-release-asset@v1
       with:

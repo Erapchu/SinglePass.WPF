@@ -11,8 +11,9 @@ jobs:
     runs-on: windows-latest  # For a list of available runner types, refer to
                              # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
     env:
-      Solution_Name: SinglePass.WPF.sln
-      Project_Path: .\SinglePass.WPF\SinglePass.WPF.csproj
+      SOLUTION_NAME: SinglePass.WPF.sln
+      PROJECT_PATH: .\SinglePass.WPF\SinglePass.WPF.csproj
+      CONFIGURATION: Release
       
     steps:
     - name: Checkout
@@ -33,16 +34,12 @@ jobs:
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Restore
       run: |
-       msbuild $env:Project_Path /t:Restore /p:Configuration=$env:Configuration
-      env:
-        Configuration: Release
+       msbuild $env:PROJECT_PATH /t:Restore /p:Configuration=$env:CONFIGURATION
 
     # Build the application to populate the bin folder
     - name: Build
       run: |
-       msbuild $env:Project_Path /t:Publish /p:Configuration=$env:Configuration /p:RuntimeIdentifier=win-x64 /p:SelfContained=true /p:PublishReadyToRun=True /p:PublishSingleFile=true
-      env:
-        Configuration: Release
+       msbuild $env:PROJECT_PATH /t:Publish /p:Configuration=$env:CONFIGURATION /p:RuntimeIdentifier=win-x64 /p:SelfContained=true /p:PublishReadyToRun=True /p:PublishSingleFile=true
     
     # Upload artifacts
     - name: Archive production artifacts

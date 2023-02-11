@@ -59,7 +59,7 @@ jobs:
     - name: "Create release"
       uses: "actions/github-script@v6.4.0"
       env:
-        RELEASE_NAME: ${{ github.ref }}
+        RELEASE_NAME: ${{ steps.version.outputs.version }}
         TAG_NAME: ${{ github.ref }}
       with:
         script: |
@@ -82,7 +82,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-release-asset@v1
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        upload_url: ${{ process.env.RELEASE_UPLOAD_URL }}
         asset_path: .\artifacts\build result.zip
         asset_name: build result.zip
         asset_content_type: application/zip

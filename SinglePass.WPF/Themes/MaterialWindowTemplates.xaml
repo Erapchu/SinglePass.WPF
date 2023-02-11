@@ -8,7 +8,7 @@
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
 
     <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="pack://application:,,,/SinglePass.WPF;component/Themes/IconControlStyle.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/SinglePass.WPF;component/Themes/IconControlStyle.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
     <converters:CaptionVisibilityConverter x:Key="CaptionVisibilityConverter" />
@@ -114,8 +114,7 @@
                     <Border
                         x:Name="MainWindowBorder"
                         Background="{TemplateBinding Background}"
-                        BorderBrush="{DynamicResource PrimaryHueMidBrush}"
-                        BorderThickness="1">
+                        BorderThickness="0">
                         <Grid>
                             <!--  Caption panel with window buttons, title and icon  -->
                             <Grid VerticalAlignment="Top" Panel.ZIndex="1">

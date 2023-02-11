@@ -1,23 +1,15 @@
-
 name: .NET Core Desktop
 
 on:
   push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+    tags:
+      - 'v*'
 
 jobs:
 
   build:
-
-    strategy:
-      matrix:
-        configuration: [Release]
-
     runs-on: windows-latest  # For a list of available runner types, refer to
                              # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
-        
     env:
       Solution_Name: SinglePass.WPF.sln
       Project_Path: .\SinglePass.WPF\SinglePass.WPF.csproj
@@ -38,17 +30,36 @@ jobs:
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.0.2
       
-    # Restore the application to populate the obj folder with RuntimeIdentifiers + Build
-    - name: Restore and build
+    # Restore the application to populate the obj folder with RuntimeIdentifiers
+    - name: Restore
       run: |
        msbuild $env:Project_Path /t:Restore /p:Configuration=$env:Configuration
+      env:
+        Configuration: Release
+
+    # Build the application to populate the bin folder
+    - name: Build
+      run: |
        msbuild $env:Project_Path /t:Publish /p:Configuration=$env:Configuration /p:RuntimeIdentifier=win-x64 /p:SelfContained=true /p:PublishReadyToRun=True /p:PublishSingleFile=true
       env:
-        Configuration: ${{ matrix.configuration }}
+        Configuration: Release
     
     - name: Archive production artifacts
       uses: actions/upload-artifact@v3
       with:
         name: build result
         path: .\SinglePass.WPF\bin\Release\net7.0-windows\win-x64\publish\
-    
+
+    - name: Display structure of downloaded files
+        run: dir
+        working-directory: .\artifacts\
+
+  release:
+    name: "Release"
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - name: "Create release"
+        uses: "Erapchu/SinglePass.WPF/.github/workflows/create-release.yml"
+        with:
+          github-token: "${{ github.token }}"

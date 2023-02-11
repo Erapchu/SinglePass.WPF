@@ -60,8 +60,9 @@ jobs:
     - name: Create release
       uses: "actions/github-script@v6.4.0"
       env:
-        RELEASE_NAME: ${{ steps.version.outputs.version }}
+        RELEASE_NAME: ${{ github.ref_name }}
         TAG_NAME: ${{ github.ref }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         script: |
           try {
@@ -83,6 +84,8 @@ jobs:
     # Upload artifacts to release
     - name: Upload artifact
       uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ env.RELEASE_UPLOAD_URL }}
         asset_path: .\build_result.zip

@@ -1,0 +1,48 @@
+name: Check pull-requests
+
+on:
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    strategy:
+        matrix:
+          configuration: [Debug, Release]
+
+    runs-on: windows-latest  # For a list of available runner types, refer to
+                             # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
+    
+    env:
+      SOLUTION_NAME: SinglePass.WPF.sln
+      PROJECT_PATH: .\SinglePass.WPF\SinglePass.WPF.csproj
+      
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    # Install the .NET Core workload
+    - name: Install .NET Core
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 7.0.x
+        
+    # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v1.0.2
+      
+    # Restore the application to populate the obj folder with RuntimeIdentifiers
+    - name: Restore
+      run: |
+       msbuild $env:PROJECT_PATH /t:Restore /p:Configuration=$env:CONFIGURATION
+      env:
+        Configuration: ${{ matrix.configuration }}
+
+    # Build the application to populate the bin folder
+    - name: Build
+      run: |
+       msbuild $env:PROJECT_PATH /t:Build /p:Configuration=$env:CONFIGURATION /p:RuntimeIdentifier=win-x64
+      env:
+        Configuration: ${{ matrix.configuration }}

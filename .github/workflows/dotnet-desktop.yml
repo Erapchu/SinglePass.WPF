@@ -51,12 +51,6 @@ jobs:
         name: build_result
         path: .\SinglePass.WPF\bin\Release\net7.0-windows\win-x64\publish\
 
-    # Display artifacts
-    - name: Display artifacts
-      run: |
-        cd .\artifacts\
-        dir
-
     # Create .zip from artifacts
     - name: Create .zip artifacts
       run: |

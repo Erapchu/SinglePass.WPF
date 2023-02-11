@@ -71,7 +71,7 @@ jobs:
           # Or a workflow status:
           #   "completed", "in_progress", "queued"
           # Use the empty string ("") to ignore status or conclusion in the search
-          #workflow_conclusion: success
+          workflow_conclusion: in_progress
           # Optional, will get head commit SHA
           #pr: ${{github.event.pull_request.number}}
           # Optional, no need to specify if PR is

@@ -82,7 +82,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-release-asset@v1
       with:
-        upload_url: ${{ process.env.RELEASE_UPLOAD_URL }}
+        upload_url: ${{ env.RELEASE_UPLOAD_URL }}
         asset_path: .\artifacts\build result.zip
         asset_name: build result.zip
         asset_content_type: application/zip

@@ -53,7 +53,7 @@ jobs:
     - name: Download artifact
       uses: actions/download-artifact@v3
       with:
-        name: build result.zip
+        name: build result
         path: .\artifacts\
 
     - name: "Create release"

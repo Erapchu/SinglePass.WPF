@@ -51,7 +51,8 @@ jobs:
         path: .\SinglePass.WPF\bin\Release\net7.0-windows\win-x64\publish\
 
     - name: Display structure of downloaded files
-        run: dir
+        run: |
+          dir
         working-directory: .\artifacts\
 
   release:

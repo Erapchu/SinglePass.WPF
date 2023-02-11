@@ -50,12 +50,35 @@ jobs:
         name: build result
         path: .\SinglePass.WPF\bin\Release\net7.0-windows\win-x64\publish\
 
-  release:
-    name: "Release"
-    runs-on: "ubuntu-latest"
-
+  publish:
+    runs-on: ubuntu-latest
     steps:
-      - name: "Create release"
-        uses: "Erapchu/SinglePass.WPF/.github/workflows/create-release.yml"
-        with:
-          github-token: "${{ github.token }}"
+      - name: "Determine tag"
+      if: "${{ github.event_name }} == 'push' && ${{ github.ref_type }} == 'tag'"
+      run: "echo \"RELEASE_TAG=${GITHUB_REF#refs/tags/}\" >> $GITHUB_ENV"
+      shell: "bash"
+
+    - name: "Create release"
+      uses: "actions/github-script@v6.4.0"
+      with:
+        github-token: "${{ secrets.GITHUB_TOKEN }}"
+        script: |
+          if (!process.env.RELEASE_TAG) {
+            core.setFailed("The environment variable RELEASE_TAG is not defined.")
+            return;
+          }
+          try {
+            const response = await github.rest.repos.createRelease({
+              draft: false,
+              generate_release_notes: true,
+              name: process.env.RELEASE_TAG,
+              owner: context.repo.owner,
+              prerelease: false,
+              repo: context.repo.repo,
+              tag_name: process.env.RELEASE_TAG,
+            });
+            core.exportVariable('RELEASE_ID', response.data.id);
+            core.exportVariable('RELEASE_UPLOAD_URL', response.data.upload_url);
+          } catch (error) {
+            core.setFailed(error.message);
+          }

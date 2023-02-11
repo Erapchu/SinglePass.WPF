@@ -53,10 +53,10 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - name: "Determine tag"
-        if: "${{ github.event_name }} == 'push' && ${{ github.ref_type }} == 'tag'"
-        run: "echo \"RELEASE_TAG=${GITHUB_REF#refs/tags/}\" >> $GITHUB_ENV"
-        shell: "bash"
+    - name: "Determine tag"
+      if: "${{ github.event_name }} == 'push' && ${{ github.ref_type }} == 'tag'"
+      run: "echo \"RELEASE_TAG=${GITHUB_REF#refs/tags/}\" >> $GITHUB_ENV"
+      shell: "bash"
 
     - name: "Create release"
       uses: "actions/github-script@v6.4.0"

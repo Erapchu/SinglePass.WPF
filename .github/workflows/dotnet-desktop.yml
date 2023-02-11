@@ -50,11 +50,6 @@ jobs:
         name: build result
         path: .\SinglePass.WPF\bin\Release\net7.0-windows\win-x64\publish\
 
-    - name: Display structure of downloaded files
-        run: |
-          dir
-        working-directory: .\artifacts\
-
   release:
     name: "Release"
     runs-on: "ubuntu-latest"

@@ -9,7 +9,8 @@
 	<ResolveComReferenceSilent>True</ResolveComReferenceSilent>
     <PublishReadyToRun>True</PublishReadyToRun>
     <PublishSingleFile>True</PublishSingleFile>
-	  
+	<RuntimeIdentifier>win-x64</RuntimeIdentifier> 
+      
 	<!--ReadyToRun uses Composite mode by default https://github.com/dotnet/wpf/issues/7282-->
 	<!--Composite image crashes the app https://github.com/dotnet/runtime/issues/65879-->
 	<!--Track: https://github.com/dotnet/sdk/pull/25963-->
@@ -34,16 +35,16 @@
 
   <ItemGroup>
     <PackageReference Include="AsyncKeyedLock" Version="6.2.0" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.1.0" />
     <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="1.1.0" />
     <PackageReference Include="MaterialDesignThemes" Version="4.6.1" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="NHotkey.Wpf" Version="2.1.0" />
-    <PackageReference Include="NLog" Version="5.0.2" />
-    <PackageReference Include="NLog.Extensions.Logging" Version="5.0.2" />
+    <PackageReference Include="NLog" Version="5.1.2" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="5.2.2" />
     <PackageReference Include="Unidecode.NET" Version="2.1.0" />
   </ItemGroup>
 

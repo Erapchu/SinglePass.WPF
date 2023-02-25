@@ -1,26 +1,19 @@
-
-name: .NET Core Desktop
+name: Build and create release
 
 on:
   push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+    tags:
+      - 'v*'
 
 jobs:
 
   build:
-
-    strategy:
-      matrix:
-        configuration: [Release]
-
     runs-on: windows-latest  # For a list of available runner types, refer to
                              # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
-        
     env:
-      Solution_Name: SinglePass.WPF.sln
-      Project_Path: .\SinglePass.WPF\SinglePass.WPF.csproj
+      SOLUTION_NAME: SinglePass.WPF.sln
+      PROJECT_PATH: .\SinglePass.WPF\SinglePass.WPF.csproj
+      CONFIGURATION: Release
       
     steps:
     - name: Checkout
@@ -36,19 +29,75 @@ jobs:
         
     # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
     - name: Setup MSBuild.exe
-      uses: microsoft/setup-msbuild@v1.0.2
+      uses: microsoft/setup-msbuild@v1.3.1
       
-    # Restore the application to populate the obj folder with RuntimeIdentifiers + Build
-    - name: Restore and build
+    # Restore the application to populate the obj folder with RuntimeIdentifiers
+    - name: Restore
       run: |
-       msbuild $env:Project_Path /t:Restore /p:Configuration=$env:Configuration
-       msbuild $env:Project_Path /t:Publish /p:Configuration=$env:Configuration /p:RuntimeIdentifier=win-x64 /p:SelfContained=true /p:PublishReadyToRun=True /p:PublishSingleFile=true
-      env:
-        Configuration: ${{ matrix.configuration }}
+       msbuild $env:PROJECT_PATH /t:Restore /p:Configuration=$env:CONFIGURATION
+
+    # Build the application to populate the bin folder
+    - name: Build
+      run: |
+       msbuild $env:PROJECT_PATH /t:Publish /p:Configuration=$env:CONFIGURATION /p:RuntimeIdentifier=win-x64 /p:SelfContained=true /p:PublishReadyToRun=True /p:PublishSingleFile=true
     
+    # Upload artifacts
     - name: Archive production artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: build result
+        name: build_result
         path: .\SinglePass.WPF\bin\Release\net7.0-windows\win-x64\publish\
-    
+
+    # Create .zip from artifacts
+    - name: Create .zip artifacts
+      run: |
+        Compress-Archive -Path '.\SinglePass.WPF\bin\Release\net7.0-windows\win-x64\publish\' -DestinationPath '.\build_result.zip'
+
+    # Use script because we need to automate generate_release_notes
+    - name: Create release
+      uses: "actions/github-script@v6.4.0"
+      env:
+        RELEASE_NAME: ${{ github.ref_name }}
+        TAG_NAME: ${{ github.ref }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        script: |
+          try {
+            const response = await github.rest.repos.createRelease({
+              draft: false,
+              generate_release_notes: true,
+              name: process.env.RELEASE_NAME,
+              owner: context.repo.owner,
+              prerelease: false,
+              repo: context.repo.repo,
+              tag_name: process.env.TAG_NAME,
+            });
+            core.exportVariable('RELEASE_ID', response.data.id);
+            core.exportVariable('RELEASE_UPLOAD_URL', response.data.upload_url);
+          } catch (error) {
+            core.setFailed(error.message);
+          }
+
+    # Upload artifacts to release
+    - name: Upload artifact
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ env.RELEASE_UPLOAD_URL }}
+        asset_path: .\build_result.zip
+        asset_name: build_result.zip
+        asset_content_type: application/zip
+          
+
+
+      # - name: Create release
+      #   uses: actions/create-release@v1
+      #   id: create_release
+      #   with:
+      #     draft: false
+      #     prerelease: false
+      #     release_name: ${{ steps.version.outputs.version }}
+      #     tag_name: ${{ github.ref }}
+      #   env:
+      #     GITHUB_TOKEN: ${{ github.token }}

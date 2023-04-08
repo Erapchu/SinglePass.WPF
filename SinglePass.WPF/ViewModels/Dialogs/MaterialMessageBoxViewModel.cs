@@ -5,8 +5,7 @@ using System;
 
 namespace SinglePass.WPF.ViewModels.Dialogs
 {
-    [INotifyPropertyChanged]
-    public partial class MaterialMessageBoxViewModel
+    public partial class MaterialMessageBoxViewModel : ObservableObject
     {
         #region Design time instance
         private static readonly Lazy<MaterialMessageBoxViewModel> _lazyDesignTime = new(CreateDesignTime);

@@ -11,8 +11,7 @@ using System.Threading.Tasks;
 
 namespace SinglePass.WPF.ViewModels
 {
-    [INotifyPropertyChanged]
-    public partial class MainWindowViewModel
+    public partial class MainWindowViewModel : ObservableObject
     {
         #region Design time instance
         private static readonly Lazy<MainWindowViewModel> _lazy = new(GetDesignTimeVM);

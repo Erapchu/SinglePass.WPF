@@ -5,8 +5,7 @@ using System;
 
 namespace SinglePass.WPF.ViewModels.Dialogs
 {
-    [INotifyPropertyChanged]
-    public partial class CredentialEditViewModel
+    public partial class CredentialEditViewModel : ObservableObject
     {
         public event Action<MaterialDialogResult?> Accept;
 
@@ -19,7 +18,7 @@ namespace SinglePass.WPF.ViewModels.Dialogs
         [ObservableProperty]
         private CredentialDetailsMode _mode;
 
-        public string CaptionText => _mode switch
+        public string CaptionText => Mode switch
         {
             CredentialDetailsMode.Edit => SinglePass.Language.Properties.Resources.Edit,
             CredentialDetailsMode.New => SinglePass.Language.Properties.Resources.NewItem,

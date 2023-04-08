@@ -2,7 +2,6 @@
 using CommunityToolkit.Mvvm.Input;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Extensions.Logging;
-using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Hotkeys;
 using SinglePass.WPF.Services;
 using SinglePass.WPF.Settings;
@@ -13,8 +12,7 @@ using System.Threading.Tasks;
 
 namespace SinglePass.WPF.ViewModels
 {
-    [INotifyPropertyChanged]
-    public partial class SettingsViewModel
+    public partial class SettingsViewModel : ObservableObject
     {
         #region Design time instance
         private static readonly Lazy<SettingsViewModel> _lazy = new(GetDesignTimeVM);

@@ -14,8 +14,7 @@ using Unidecode.NET;
 
 namespace SinglePass.WPF.ViewModels
 {
-    [INotifyPropertyChanged]
-    public partial class PopupViewModel
+    public partial class PopupViewModel : ObservableObject
     {
         #region Design time instance
         private static readonly Lazy<PopupViewModel> _lazy = new(GetDesignTimeVM);

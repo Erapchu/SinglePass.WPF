@@ -16,8 +16,7 @@ using System.Windows.Media;
 
 namespace SinglePass.WPF.ViewModels
 {
-    [INotifyPropertyChanged]
-    public partial class CloudSyncViewModel
+    public partial class CloudSyncViewModel : ObservableObject
     {
         #region Design time instance
         private static readonly Lazy<CloudSyncViewModel> _lazy = new(GetDesignTimeVM);

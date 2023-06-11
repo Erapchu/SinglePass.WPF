@@ -52,32 +52,42 @@ namespace SinglePass.WPF.Views.Windows
             IsClosed = true;
         }
 
-        private void MaterialWindow_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        private void MaterialWindow_Loaded(object sender, RoutedEventArgs e)
         {
             Application.Current.Dispatcher.InvokeAsync(() => SearchTextBox.Focus());
         }
 
-        private void MaterialWindow_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        private void MaterialWindow_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            var isCtrlDown = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
-            var isEnterDown = e.Key == Key.Enter;
-
-            if (isEnterDown)
+            if (e.Key == Key.Escape)
             {
-                if (isCtrlDown)
-                {
-                    // This is Ctrl + Enter
-                    ViewModel.SetAndCloseCommand.Execute(ViewModel.SelectedCredentialVM.PasswordFieldVM);
-                }
-                else
-                {
-                    // This is Enter
-                    ViewModel.SetAndCloseCommand.Execute(ViewModel.SelectedCredentialVM.LoginFieldVM);
-                }
+                Close();
+                return;
             }
 
-            if (e.Key == System.Windows.Input.Key.Escape)
-                Close();
+            if (e.Key == Key.Enter)
+            {
+                // Enter
+                ViewModel.SetFullAndCloseCommand.Execute(ViewModel.SelectedCredentialVM);
+                return;
+            }
+
+            if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
+            {
+                // Ctrl+1
+                if (e.Key == Key.NumPad1 || e.Key == Key.D1)
+                {
+                    ViewModel.SetAndCloseCommand.Execute(ViewModel.SelectedCredentialVM.LoginFieldVM);
+                    return;
+                }
+
+                // Ctrl+2
+                if (e.Key == Key.NumPad2 || e.Key == Key.D2)
+                {
+                    ViewModel.SetAndCloseCommand.Execute(ViewModel.SelectedCredentialVM.PasswordFieldVM);
+                    return;
+                }
+            }
         }
 
         private void MaterialWindow_Closed(object sender, EventArgs e)

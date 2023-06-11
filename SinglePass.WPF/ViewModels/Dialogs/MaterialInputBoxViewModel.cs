@@ -5,8 +5,7 @@ using System;
 
 namespace SinglePass.WPF.ViewModels.Dialogs
 {
-    [INotifyPropertyChanged]
-    public partial class MaterialInputBoxViewModel
+    public partial class MaterialInputBoxViewModel : ObservableObject
     {
         private static readonly Lazy<MaterialInputBoxViewModel> _lazy = new(() => new MaterialInputBoxViewModel());
         public static MaterialInputBoxViewModel DesignTimeInstance => _lazy.Value;

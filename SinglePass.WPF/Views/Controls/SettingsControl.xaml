@@ -185,10 +185,10 @@
                         VerticalAlignment="Center"
                         Opacity="0.5">
                         <Run FontWeight="Bold" Text="Enter" />
-                        <Run Text="{x:Static properties:Resources.ToPasteLogin}" />
+                        <Run Text="{x:Static properties:Resources.ToPasteCombination}" />
                         <LineBreak />
-                        <Run FontWeight="Bold" Text="Ctrl + Enter" />
-                        <Run Text="{x:Static properties:Resources.ToPastePassword}" />
+                        <Run FontWeight="Bold" Text="Ctrl + '#'" />
+                        <Run Text="{x:Static properties:Resources.ToPasteLoginOrPassword}" />
                     </TextBlock>
                 </Grid>
             </GroupBox>

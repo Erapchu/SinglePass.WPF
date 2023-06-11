@@ -21,8 +21,7 @@ using Unidecode.NET;
 
 namespace SinglePass.WPF.ViewModels
 {
-    [INotifyPropertyChanged]
-    public partial class PasswordsViewModel
+    public partial class PasswordsViewModel : ObservableObject
     {
         #region Design time instance
         private static readonly Lazy<PasswordsViewModel> _lazy = new(GetDesignTimeVM);

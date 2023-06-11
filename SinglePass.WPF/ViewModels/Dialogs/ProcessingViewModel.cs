@@ -6,8 +6,7 @@ using System.Threading;
 
 namespace SinglePass.WPF.ViewModels.Dialogs
 {
-    [INotifyPropertyChanged]
-    public partial class ProcessingViewModel
+    public partial class ProcessingViewModel : ObservableObject
     {
         #region Design time instance
         private static readonly Lazy<ProcessingViewModel> _lazy = new(GetDesignTimeVM);

@@ -52,6 +52,12 @@ namespace SinglePass.WPF
                 _configuration = BuildConfiguration();
                 Services = ConfigureServices(_configuration);
             }
+            else
+            {
+                // Show main window and shutdown process
+                InterprocessHelper.ShowMainWindow();
+                Environment.Exit(0);
+            }
         }
 
         private static IServiceProvider ConfigureServices(IConfiguration configuration)
@@ -138,42 +144,34 @@ namespace SinglePass.WPF
             // Override culture
             //SinglePass.Language.Properties.Resources.Culture = new System.Globalization.CultureInfo("en-US");
 
-            if (IsFirstInstance)
+            var hiw = new HiddenInterprocessWindow();
+            hiw.InitWithoutShowing();
+
+            Constants.EnsurePaths();
+
+            // Resolve theme
+            var themeService = Services.GetService<ThemeService>();
+            themeService.Init();
+
+            // Login
+            using (var loginScope = Services.CreateScope())
             {
-                var hiw = new HiddenInterprocessWindow();
-                hiw.InitWithoutShowing();
+                var loginWindow = loginScope.ServiceProvider.GetService<LoginWindow>();
+                bool? dialogResult = loginWindow.ShowDialog(); // Stop here
 
-                Constants.EnsurePaths();
-
-                // Resolve theme
-                var themeService = Services.GetService<ThemeService>();
-                themeService.Init();
-
-                // Login
-                using (var loginScope = Services.CreateScope())
+                if (dialogResult != true)
                 {
-                    var loginWindow = loginScope.ServiceProvider.GetService<LoginWindow>();
-                    bool? dialogResult = loginWindow.ShowDialog(); // Stop here
-
-                    if (dialogResult != true)
-                    {
-                        Shutdown();
-                        return;
-                    }
+                    Shutdown();
+                    return;
                 }
-
-                // Create tray icon
-                _trayIcon = new TrayIcon();
-
-                // Open main window
-                var mainWindow = Services.GetService<MainWindow>();
-                mainWindow.Show();
             }
-            else
-            {
-                InterprocessHelper.ShowMainWindow();
-                Shutdown();
-            }
+
+            // Create tray icon
+            _trayIcon = new TrayIcon();
+
+            // Open main window
+            var mainWindow = Services.GetService<MainWindow>();
+            mainWindow.Show();
         }
 
         private void Application_Exit(object sender, ExitEventArgs e)

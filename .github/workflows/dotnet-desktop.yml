@@ -29,7 +29,7 @@ jobs:
        msbuild $env:PROJECT_PATH /t:Publish /p:Configuration=$env:CONFIGURATION /p:RuntimeIdentifier=win-x64 /p:SelfContained=true /p:PublishReadyToRun=true /p:PublishSingleFile=true
     - name: Create .zip artifacts
       run: |
-        Compress-Archive -Path '.\SinglePass.WPF\bin\Release\net7.0-windows\win-x64\publish\' -DestinationPath '.\build_result.zip'
+        Compress-Archive -Path '.\SinglePass.WPF\bin\Release\net7.0-windows\win-x64\publish\' -DestinationPath '.\SinglePass.WPF.zip'
     - name: Create release
       uses: "actions/github-script@v6.4.0"
       env:
@@ -59,8 +59,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ env.RELEASE_UPLOAD_URL }}
-        asset_path: .\build_result.zip
-        asset_name: build_result.zip
+        asset_path: .\SinglePass.WPF.zip
+        asset_name: SinglePass.WPF.zip
         asset_content_type: application/zip
 
       # - name: Create release

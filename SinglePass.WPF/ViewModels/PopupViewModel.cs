@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Unidecode.NET;
@@ -72,6 +73,72 @@ namespace SinglePass.WPF.ViewModels
         private void Close()
         {
             Accept?.Invoke();
+        }
+
+        [RelayCommand]
+        private void SetFullAndClose(CredentialViewModel credentialViewModel)
+        {
+            try
+            {
+                Accept?.Invoke();
+
+                WindowsClipboard.SetText(credentialViewModel.LoginFieldVM.Value);
+
+                INPUT[] inputs = new INPUT[4];
+
+                // Ctrl+V
+                inputs[0].type = WindowsKeyboard.INPUT_KEYBOARD;
+                inputs[0].U.ki.wVk = WindowsKeyboard.VK_CONTROL;
+
+                inputs[1].type = WindowsKeyboard.INPUT_KEYBOARD;
+                inputs[1].U.ki.wVk = WindowsKeyboard.VK_V;
+
+                inputs[2].type = WindowsKeyboard.INPUT_KEYBOARD;
+                inputs[2].U.ki.wVk = WindowsKeyboard.VK_V;
+                inputs[2].U.ki.dwFlags = WindowsKeyboard.KEYEVENTF_KEYUP;
+
+                inputs[3].type = WindowsKeyboard.INPUT_KEYBOARD;
+                inputs[3].U.ki.wVk = WindowsKeyboard.VK_CONTROL;
+                inputs[3].U.ki.dwFlags = WindowsKeyboard.KEYEVENTF_KEYUP;
+
+                var uSent = WindowsKeyboard.SendInput((uint)inputs.Length, inputs, INPUT.Size);
+
+                // Pause between Ctrl+V and set clipboard
+                Thread.Sleep(100);
+
+                WindowsClipboard.SetText(credentialViewModel.PasswordFieldVM.Value);
+
+                inputs = new INPUT[6];
+
+                // Tab
+                inputs[0].type = WindowsKeyboard.INPUT_KEYBOARD;
+                inputs[0].U.ki.wVk = WindowsKeyboard.VK_TAB;
+
+                inputs[1].type = WindowsKeyboard.INPUT_KEYBOARD;
+                inputs[1].U.ki.wVk = WindowsKeyboard.VK_TAB;
+                inputs[1].U.ki.dwFlags = WindowsKeyboard.KEYEVENTF_KEYUP;
+
+                // Ctrl+V
+                inputs[2].type = WindowsKeyboard.INPUT_KEYBOARD;
+                inputs[2].U.ki.wVk = WindowsKeyboard.VK_CONTROL;
+
+                inputs[3].type = WindowsKeyboard.INPUT_KEYBOARD;
+                inputs[3].U.ki.wVk = WindowsKeyboard.VK_V;
+
+                inputs[4].type = WindowsKeyboard.INPUT_KEYBOARD;
+                inputs[4].U.ki.wVk = WindowsKeyboard.VK_V;
+                inputs[4].U.ki.dwFlags = WindowsKeyboard.KEYEVENTF_KEYUP;
+
+                inputs[5].type = WindowsKeyboard.INPUT_KEYBOARD;
+                inputs[5].U.ki.wVk = WindowsKeyboard.VK_CONTROL;
+                inputs[5].U.ki.dwFlags = WindowsKeyboard.KEYEVENTF_KEYUP;
+
+                uSent = WindowsKeyboard.SendInput((uint)inputs.Length, inputs, INPUT.Size);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, null);
+            }
         }
 
         [RelayCommand]

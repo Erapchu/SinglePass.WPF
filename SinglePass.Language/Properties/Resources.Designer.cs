@@ -700,20 +700,20 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to to paste login.
+        ///   Looks up a localized string similar to to paste combination.
         /// </summary>
-        public static string ToPasteLogin {
+        public static string ToPasteCombination {
             get {
-                return ResourceManager.GetString("ToPasteLogin", resourceCulture);
+                return ResourceManager.GetString("ToPasteCombination", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to to paste password.
+        ///   Looks up a localized string similar to to paste login or password.
         /// </summary>
-        public static string ToPastePassword {
+        public static string ToPasteLoginOrPassword {
             get {
-                return ResourceManager.GetString("ToPastePassword", resourceCulture);
+                return ResourceManager.GetString("ToPasteLoginOrPassword", resourceCulture);
             }
         }
         

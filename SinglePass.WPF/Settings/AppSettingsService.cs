@@ -1,10 +1,10 @@
 ﻿using AsyncKeyedLock;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Hotkeys;
 using System;
 using System.IO;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace SinglePass.WPF.Settings
@@ -62,8 +62,9 @@ namespace SinglePass.WPF.Settings
                 // Read existing
                 try
                 {
-                    using var fileStream = new FileStream(Constants.CommonSettingsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                    Settings = JsonSerializer.Deserialize<AppSettings>(fileStream);
+                    using var fileStream = File.OpenText(Constants.CommonSettingsFilePath);
+                    var serializer = JsonSerializer.CreateDefault();
+                    Settings = (AppSettings)serializer.Deserialize(fileStream, typeof(AppSettings));
                 }
                 catch (Exception ex)
                 {
@@ -77,8 +78,9 @@ namespace SinglePass.WPF.Settings
             // Use local lock instead of interprocess lock - only one instance of app will work with this file
             using (await _asyncKeyedLocker.LockAsync(Constants.CommonSettingsFilePath).ConfigureAwait(false))
             {
-                using var fileStream = new FileStream(Constants.CommonSettingsFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
-                await JsonSerializer.SerializeAsync(fileStream, Settings).ConfigureAwait(false);
+                using var fileStream = File.CreateText(Constants.CommonSettingsFilePath);
+                var serializer = JsonSerializer.CreateDefault();
+                serializer.Serialize(fileStream, Settings);
             }
             _logger.LogInformation("Settings saved to file");
         }

@@ -10,6 +10,8 @@ namespace SinglePass.WPF.Helpers
     {
         public const int IDI_APPLICATION = 0x7F00;
 
+        public const int HTMAXBUTTON = 9;
+
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         public static extern IntPtr LoadImage(IntPtr hinst, IntPtr lpszName, uint uType, int cxDesired, int cyDesired, uint fuLoad);
 
@@ -244,6 +246,8 @@ namespace SinglePass.WPF.Helpers
             /// An application sends the WM_COPYDATA message to pass data to another application.
             /// </summary>
             WM_COPYDATA = 0x004A,
+            
+            WM_NCHITTEST = 0x0084,
 
             /// <summary>
             /// Used to define private messages for use by private window classes, usually of the form WM_USER+x, where x is an integer value.

@@ -1,8 +1,10 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Microsoft.Extensions.DependencyInjection;
+using SinglePass.WPF.Extensions;
 using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Services;
 using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
@@ -81,6 +83,8 @@ namespace SinglePass.WPF.Controls
             if (_closeButton != null)
                 _closeButton.Click += CloseButtonClickHandler;
 
+            Loaded += OnLoaded;
+
             base.OnApplyTemplate();
         }
 
@@ -91,6 +95,44 @@ namespace SinglePass.WPF.Controls
             var themeService = (System.Windows.Application.Current as App).Services.GetService<ThemeService>();
             var darkModeEnabled = themeService.ThemeMode == BaseTheme.Dark;
             DarkTitleBarHelper.UseImmersiveDarkMode(Handle, darkModeEnabled);
+        }
+
+        protected virtual void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            HwndSource source = PresentationSource.FromVisual(this) as HwndSource;
+            source.AddHook(WndProc);
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            HwndSource source = PresentationSource.FromVisual(this) as HwndSource;
+            source.RemoveHook(WndProc);
+
+            Loaded -= OnLoaded;
+
+            base.OnClosing(e);
+        }
+
+        private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            // Handle messages...
+
+            var message = (WinApiProvider.SystemWindowsMessages)msg;
+
+            switch (message)
+            {
+                case WinApiProvider.SystemWindowsMessages.WM_NCHITTEST:
+                    {
+                        if (_maximizeRestoreButton.IsMouseOverElement(lParam))
+                        {
+                            handled = true;
+                            return WinApiProvider.HTMAXBUTTON;
+                        }
+                        break;
+                    }
+            }
+
+            return IntPtr.Zero;
         }
 
         private void CloseButtonClickHandler(object sender, RoutedEventArgs args)

@@ -5,7 +5,7 @@
     <TargetFramework>net7.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Resources\pass-man.ico</ApplicationIcon>
-    <AssemblyVersion>1.0.7.0</AssemblyVersion>
+    <AssemblyVersion>1.0.8.0</AssemblyVersion>
 	<ResolveComReferenceSilent>True</ResolveComReferenceSilent>
     <PublishReadyToRun>True</PublishReadyToRun>
     <PublishSingleFile>True</PublishSingleFile>
@@ -35,7 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AsyncKeyedLock" Version="6.2.1" />
+    <PackageReference Include="AsyncKeyedLock" Version="6.2.2" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.0" />
     <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="1.1.0" />
     <PackageReference Include="MaterialDesignThemes" Version="4.8.0" />

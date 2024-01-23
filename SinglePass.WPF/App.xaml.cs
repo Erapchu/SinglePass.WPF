@@ -116,7 +116,11 @@ namespace SinglePass.WPF
             services.AddSingleton<ImageService>();
             services.AddSingleton<CredentialViewModelFactory>();
             services.AddSingleton<AddressBarExtractor>();
-            services.AddSingleton<AsyncKeyedLocker<string>>();
+            services.AddSingleton(new AsyncKeyedLocker<string>(o =>
+            {
+                o.PoolSize = 20;
+                o.PoolInitialFill = 1;
+            }));
 
             // favicons
             services.AddSingleton<IFavIconCollector, FavIconCollector>();

@@ -70,6 +70,10 @@ namespace SinglePass.WPF.Settings
                 {
                     _logger.LogError(ex, null);
                 }
+                finally
+                {
+                    Settings ??= new AppSettings();
+                }
             }
         }
 

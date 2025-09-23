@@ -4,7 +4,9 @@ using Newtonsoft.Json;
 using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Hotkeys;
 using System;
+using System.Globalization;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace SinglePass.WPF.Settings
@@ -14,7 +16,8 @@ namespace SinglePass.WPF.Settings
         private readonly AsyncKeyedLocker<string> _asyncKeyedLocker;
         private readonly ILogger<AppSettingsService> _logger;
 
-        public AppSettings Settings { get; } = new();
+        private AppSettings _settings = new();
+        public AppSettings Settings => _settings;
 
         public MaterialDesignThemes.Wpf.BaseTheme ThemeMode
         {
@@ -56,37 +59,89 @@ namespace SinglePass.WPF.Settings
         {
             _asyncKeyedLocker = asyncKeyedLocker;
             _logger = logger;
+            var path = Constants.CommonSettingsFilePath;
 
-            if (File.Exists(Constants.CommonSettingsFilePath))
+            if (!File.Exists(path))
+                return;
+
+            // Read existing
+            try
             {
-                // Read existing
+                using var fileStream = File.OpenText(path);
+                var serializer = JsonSerializer.Create(new JsonSerializerSettings
+                {
+                    TypeNameHandling = TypeNameHandling.None,
+                    Culture = CultureInfo.InvariantCulture
+                });
+                var loaded = serializer.Deserialize(fileStream, typeof(AppSettings)) as AppSettings;
+                _settings = loaded ?? new AppSettings();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to read settings from {Path}", path);
                 try
                 {
-                    using var fileStream = File.OpenText(Constants.CommonSettingsFilePath);
-                    var serializer = JsonSerializer.CreateDefault();
-                    Settings = (AppSettings)serializer.Deserialize(fileStream, typeof(AppSettings));
+                    File.Move(path, path + ".corrupt", overwrite: true);
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, null);
-                }
-                finally
-                {
-                    Settings ??= new AppSettings();
-                }
+                catch { /* best effort */ }
+                _settings ??= new AppSettings();
             }
         }
 
         public async Task Save()
         {
-            // Use local lock instead of interprocess lock - only one instance of app will work with this file
-            using (await _asyncKeyedLocker.LockAsync(Constants.CommonSettingsFilePath).ConfigureAwait(false))
+            var path = Constants.CommonSettingsFilePath;
+
+            var tmp = path + ".tmp";
+            var bak = path + ".bak";
+
+            using (await _asyncKeyedLocker.LockAsync(path).ConfigureAwait(false))
             {
-                using var fileStream = File.CreateText(Constants.CommonSettingsFilePath);
-                var serializer = JsonSerializer.CreateDefault();
-                serializer.Serialize(fileStream, Settings);
+                try
+                {
+                    // Запись атомарно: tmp -> replace/move
+                    await using (var fs = new FileStream(
+                        tmp, FileMode.Create, FileAccess.Write, FileShare.None,
+                        4096, FileOptions.WriteThrough | FileOptions.SequentialScan))
+                    {
+                        using var sw = new StreamWriter(fs, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+                        var serializer = JsonSerializer.Create(new JsonSerializerSettings
+                        {
+                            Formatting = Formatting.Indented,
+                            TypeNameHandling = TypeNameHandling.None,
+                            Culture = CultureInfo.InvariantCulture,
+                            // Converters = { new HotkeyJsonConverter() } // если нужен кастом
+                        });
+                        serializer.Serialize(sw, Settings); // _settings — приватное поле
+                        await sw.FlushAsync().ConfigureAwait(false);
+                        await fs.FlushAsync().ConfigureAwait(false);
+                    }
+
+                    if (File.Exists(path))
+                    {
+                        // делаем резервную копию старого
+                        try { File.Copy(path, bak, overwrite: true); } catch { /* best effort */ }
+                    }
+
+                    // На современных ФС можно File.Replace, иначе — Move с overwrite
+                    if (OperatingSystem.IsWindows())
+                        File.Replace(tmp, path, bak, ignoreMetadataErrors: true);
+                    else
+                    {
+                        if (File.Exists(path)) File.Delete(path);
+                        File.Move(tmp, path);
+                    }
+
+                    _logger.LogInformation("Settings saved to {Path}", path);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to save settings");
+                    // если tmp остался — пробуем убрать
+                    try { if (File.Exists(tmp)) File.Delete(tmp); } catch { }
+                    throw;
+                }
             }
-            _logger.LogInformation("Settings saved to file");
         }
     }
 }

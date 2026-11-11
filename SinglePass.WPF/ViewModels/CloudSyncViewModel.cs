@@ -36,19 +36,19 @@ namespace SinglePass.WPF.ViewModels
         private readonly SyncService _syncService;
 
         [ObservableProperty]
-        private bool _mergeProcessing;
+        public partial bool MergeProcessing { get; set; }
 
         [ObservableProperty]
-        private bool _uploadProcessing;
+        public partial bool UploadProcessing { get; set; }
 
         [ObservableProperty]
-        private bool _fetchingUserInfo;
+        public partial bool FetchingUserInfo { get; set; }
 
         [ObservableProperty]
-        private ImageSource _googleProfileImage;
+        public partial ImageSource GoogleProfileImage { get; set; }
 
         [ObservableProperty]
-        private string _googleUserName;
+        public partial string GoogleUserName { get; set; }
 
         public event Action SyncCompleted;
 

@@ -11,7 +11,7 @@ using System.Windows.Media;
 namespace SinglePass.WPF.ViewModels
 {
     [DebuggerDisplay("{Model}")]
-    public class CredentialViewModel : ObservableRecipient
+    public partial class CredentialViewModel : ObservableRecipient
     {
         #region Design time instance
         private static readonly Lazy<CredentialViewModel> _lazy = new(GetDesignTimeVM);
@@ -49,12 +49,8 @@ namespace SinglePass.WPF.ViewModels
             set => Model.CreationTime = value;
         }
 
-        private bool _passwordVisible;
-        public bool PasswordVisible
-        {
-            get => _passwordVisible;
-            set => SetProperty(ref _passwordVisible, value);
-        }
+        [ObservableProperty]
+        public partial bool PasswordVisible { get; set; }
 
         private ImageSource _favIcon;
         public ImageSource FavIcon
@@ -105,7 +101,7 @@ namespace SinglePass.WPF.ViewModels
             var cloneModel = Model.Clone();
             var cloneVM = new CredentialViewModel(cloneModel, _favIconCollector)
             {
-                _passwordVisible = _passwordVisible,
+                PasswordVisible = PasswordVisible,
             };
             return cloneVM;
         }

@@ -34,17 +34,17 @@ namespace SinglePass.WPF.ViewModels
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(ChangePasswordCommand))]
-        private string _newPassword;
+        public partial string NewPassword { get; set; }
 
         [ObservableProperty]
-        private string _newPasswordHelperText;
+        public partial string NewPasswordHelperText { get; set; }
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(ChangeHelperPopupHotkeyCommand))]
-        private Hotkey _showPopupHotkey;
+        public partial Hotkey ShowPopupHotkey { get; set; }
 
         [ObservableProperty]
-        private AppTheme _themeMode;
+        public partial AppTheme ThemeMode { get; set; }
 
         private SettingsViewModel() { }
 
@@ -55,14 +55,14 @@ namespace SinglePass.WPF.ViewModels
             ILogger<SettingsViewModel> logger,
             HotkeysService hotkeysService)
         {
+            ThemeMode = appSettingsService.ThemeMode;
+            ShowPopupHotkey = appSettingsService.ShowPopupHotkey;
+
             _themeService = themeService;
             _appSettingsService = appSettingsService;
             _credentialsCryptoService = credentialsCryptoService;
             _logger = logger;
             _hotkeysService = hotkeysService;
-
-            _themeMode = _appSettingsService.ThemeMode;
-            _showPopupHotkey = _appSettingsService.ShowPopupHotkey;
         }
 
         [RelayCommand(CanExecute = nameof(CanChangePassword))]

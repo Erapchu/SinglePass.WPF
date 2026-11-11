@@ -50,27 +50,15 @@ namespace SinglePass.WPF.ViewModels
 
         public ObservableCollectionDelayed<CredentialViewModel> DisplayedCredentials { get; private set; } = new();
 
-        private CredentialViewModel _selectedCredentialVM;
-        public CredentialViewModel SelectedCredentialVM
-        {
-            get => _selectedCredentialVM;
-            set
-            {
-                SetProperty(ref _selectedCredentialVM, value);
-                CredentialSelected?.Invoke(value);
-            }
-        }
+        [ObservableProperty]
+        public partial CredentialViewModel SelectedCredentialVM { get; set; }
 
-        private string _searchText;
-        public string SearchText
-        {
-            get => _searchText;
-            set
-            {
-                SetProperty(ref _searchText, value);
-                _ = DisplayCredentialsAsync();
-            }
-        }
+        partial void OnSelectedCredentialVMChanged(CredentialViewModel value) => CredentialSelected?.Invoke(value);
+
+        [ObservableProperty]
+        public partial string SearchText { get; set; }
+
+        partial void OnSearchTextChanged(string value) => _ = DisplayCredentialsAsync();
 
         private SortType _sort;
         public SortType Sort => _sort;
@@ -107,7 +95,7 @@ namespace SinglePass.WPF.ViewModels
         }
 
         [ObservableProperty]
-        private bool _isPasswordVisible;
+        public partial bool IsPasswordVisible { get; set; }
 
         private PasswordsViewModel() { }
 
@@ -185,9 +173,13 @@ namespace SinglePass.WPF.ViewModels
                 var selection = keepSelection ? SelectedCredentialVM : null;
                 DisplayedCredentials = new ObservableCollectionDelayed<CredentialViewModel>(filtered);
                 OnPropertyChanged(nameof(DisplayedCredentials));
-                SelectedCredentialVM = selection != null && filtered.Contains(selection)
+                var newSelection = selection != null && filtered.Contains(selection)
                     ? selection
                     : DisplayedCredentials.FirstOrDefault();
+                if (ReferenceEquals(SelectedCredentialVM, newSelection))
+                    CredentialSelected?.Invoke(newSelection);
+                else
+                    SelectedCredentialVM = newSelection;
             }
             catch (Exception ex)
             {

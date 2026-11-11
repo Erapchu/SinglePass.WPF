@@ -10,11 +10,11 @@ namespace SinglePass.WPF.ViewModels.Dialogs
         public event Action<DialogChoice?> Accept;
 
         [ObservableProperty]
-        private CredentialViewModel _credentialViewModel;
+        public partial CredentialViewModel CredentialViewModel { get; set; }
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CaptionText))]
-        private CredentialDetailsMode _mode;
+        public partial CredentialDetailsMode Mode { get; set; }
 
         public string CaptionText => Mode switch
         {

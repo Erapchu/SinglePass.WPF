@@ -26,13 +26,13 @@ namespace SinglePass.WPF.ViewModels.Dialogs
         public MessageDialogButtons Buttons { get; set; }
 
         [ObservableProperty]
-        private string _header;
+        public partial string Header { get; set; }
 
         [ObservableProperty]
-        private string _content;
+        public partial string Content { get; set; }
 
         [ObservableProperty]
-        private string _glyph;
+        public partial string Glyph { get; set; }
 
         public bool IconVisible => !string.IsNullOrEmpty(Glyph);
 

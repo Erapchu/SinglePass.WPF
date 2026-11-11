@@ -37,21 +37,15 @@ namespace SinglePass.WPF.ViewModels
         public ObservableCollectionDelayed<CredentialViewModel> DisplayedCredentials { get; private set; } = new();
 
         [ObservableProperty]
-        private CredentialViewModel _selectedCredentialVM;
+        public partial CredentialViewModel SelectedCredentialVM { get; set; }
 
         [ObservableProperty]
-        private bool _isLoading;
+        public partial bool IsLoading { get; set; }
 
-        private string _searchText;
-        public string SearchText
-        {
-            get => _searchText;
-            set
-            {
-                SetProperty(ref _searchText, value);
-                _ = DisplayCredentialsAsync();
-            }
-        }
+        [ObservableProperty]
+        public partial string SearchText { get; set; }
+
+        partial void OnSearchTextChanged(string value) => _ = DisplayCredentialsAsync();
 
         public IntPtr ForegroundHWND { get; set; }
 

@@ -10,7 +10,7 @@
     Title="{x:Static properties:Resources.Authorize}"
     Icon="/SinglePass.WPF;component/Resources/pass-man.ico"
     Width="400"
-    SizeToContent="Height"
+    Height="240"
     ResizeMode="NoResize"
     d:DataContext="{x:Static vm:LoginWindowViewModel.DesignTimeInstance}"
     Activated="Window_Activated"
@@ -22,9 +22,24 @@
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </Window.Resources>
-    <StackPanel Margin="24">
-        <Label Padding="0,0,0,6" Content="{Binding HintText}" Target="{Binding ElementName=LoginPasswordBox}" />
-        <PasswordBox x:Name="LoginPasswordBox" MaxLength="32" PasswordChanged="PasswordBox_PasswordChanged">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="12" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <DockPanel Margin="0,0,0,6">
+            <TextBlock
+                DockPanel.Dock="Right"
+                Margin="12,0,0,0"
+                VerticalAlignment="Center"
+                Text="{x:Static properties:Resources.CAPSLOCKEnabled}"
+                Visibility="{Binding IsCapsLockEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <Label Padding="0" Content="{Binding HintText}" Target="{Binding ElementName=LoginPasswordBox}" />
+        </DockPanel>
+        <PasswordBox x:Name="LoginPasswordBox" Grid.Row="1" MaxLength="32" PasswordChanged="PasswordBox_PasswordChanged">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="GotFocus">
                     <i:InvokeCommandAction Command="{Binding RefreshCapsLockCommand}" />
@@ -34,17 +49,14 @@
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </PasswordBox>
-        <TextBlock Margin="0,6,0,0" Text="{Binding HelperText}" TextWrapping="Wrap" />
-        <TextBlock
-            Margin="0,4,0,0"
-            Text="{x:Static properties:Resources.CAPSLOCKEnabled}"
-            Visibility="{Binding IsCapsLockEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        <TextBlock Grid.Row="2" Margin="0,6,0,0" VerticalAlignment="Top" Text="{Binding HelperText}" TextWrapping="Wrap" />
         <ProgressBar
+            Grid.Row="3"
             Height="4"
-            Margin="0,8,0,0"
+            VerticalAlignment="Bottom"
             IsIndeterminate="True"
             Visibility="{Binding Loading, Converter={StaticResource BooleanToVisibilityConverter}}" />
-        <StackPanel Margin="0,16,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
+        <StackPanel Grid.Row="4" Margin="0,12,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
             <Button
                 Margin="0,0,8,0"
                 Command="{Binding LoadCredentialsCommand}"
@@ -53,5 +65,5 @@
                 Style="{DynamicResource AccentButtonStyle}" />
             <Button Content="{x:Static properties:Resources.Exit}" IsCancel="True" />
         </StackPanel>
-    </StackPanel>
+    </Grid>
 </Window>

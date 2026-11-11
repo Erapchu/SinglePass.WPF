@@ -34,7 +34,7 @@
                             Margin="8,0,0,0"
                             Command="{Binding ChangePasswordCommand}"
                             Content="{x:Static properties:Resources.Change}" />
-                        <PasswordBox x:Name="NewPasswordBox" MaxLength="32" PasswordChanged="PasswordBox_PasswordChanged" />
+                        <PasswordBox FontFamily="{StaticResource PasswordFontFamily}" FontSize="{StaticResource PasswordFontSize}" x:Name="NewPasswordBox" MaxLength="32" PasswordChanged="PasswordBox_PasswordChanged" />
                     </DockPanel>
                     <TextBlock Margin="0,4,0,0" Text="{Binding NewPasswordHelperText}" TextWrapping="Wrap" />
                 </StackPanel>

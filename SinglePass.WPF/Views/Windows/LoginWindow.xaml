@@ -39,7 +39,7 @@
                 Visibility="{Binding IsCapsLockEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <Label Padding="0" Content="{Binding HintText}" Target="{Binding ElementName=LoginPasswordBox}" />
         </DockPanel>
-        <PasswordBox x:Name="LoginPasswordBox" Grid.Row="1" MaxLength="32" PasswordChanged="PasswordBox_PasswordChanged">
+        <PasswordBox FontFamily="{StaticResource PasswordFontFamily}" FontSize="{StaticResource PasswordFontSize}" x:Name="LoginPasswordBox" Grid.Row="1" MaxLength="32" PasswordChanged="PasswordBox_PasswordChanged">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="GotFocus">
                     <i:InvokeCommandAction Command="{Binding RefreshCapsLockCommand}" />

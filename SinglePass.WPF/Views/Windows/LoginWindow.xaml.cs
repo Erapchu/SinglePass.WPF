@@ -62,6 +62,7 @@ namespace SinglePass.WPF.Views.Windows
         private void Window_Closed(object sender, System.EventArgs e)
         {
             ViewModel.Accept -= LoginWindowViewModel_Accept;
+            ViewModel.CancelLogin();
         }
 
         private void Window_Activated(object sender, System.EventArgs e)

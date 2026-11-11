@@ -16,7 +16,7 @@ namespace SinglePass.WPF.Settings
         private readonly AsyncKeyedLocker<string> _asyncKeyedLocker;
         private readonly ILogger<AppSettingsService> _logger;
 
-        private AppSettings _settings = new();
+        private readonly AppSettings _settings;
         public AppSettings Settings => _settings;
 
         public AppTheme ThemeMode
@@ -67,14 +67,20 @@ namespace SinglePass.WPF.Settings
             set => Settings.DetailsPaneRatio = value;
         }
 
-        public AppSettingsService(AsyncKeyedLocker<string> asyncKeyedLocker, ILogger<AppSettingsService> logger)
+        public AppSettingsService(AppSettings settings, AsyncKeyedLocker<string> asyncKeyedLocker, ILogger<AppSettingsService> logger)
         {
+            _settings = settings;
             _asyncKeyedLocker = asyncKeyedLocker;
             _logger = logger;
+        }
+
+        internal static AppSettings Load(out Exception readError)
+        {
+            readError = null;
             var path = Constants.CommonSettingsFilePath;
 
             if (!File.Exists(path))
-                return;
+                return new AppSettings();
 
             // Read existing
             try
@@ -86,17 +92,17 @@ namespace SinglePass.WPF.Settings
                     Culture = CultureInfo.InvariantCulture
                 });
                 var loaded = serializer.Deserialize(fileStream, typeof(AppSettings)) as AppSettings;
-                _settings = loaded ?? new AppSettings();
+                return loaded ?? new AppSettings();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to read settings from {Path}", path);
+                readError = ex;
                 try
                 {
                     File.Move(path, path + ".corrupt", overwrite: true);
                 }
                 catch { /* best effort */ }
-                _settings ??= new AppSettings();
+                return new AppSettings();
             }
         }
 

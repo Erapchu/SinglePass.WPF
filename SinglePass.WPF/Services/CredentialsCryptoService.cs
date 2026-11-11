@@ -58,8 +58,6 @@ namespace SinglePass.WPF.Services
             _asyncKeyedLocker = asyncKeyedLocker;
         }
 
-        internal bool CredentialsFileExists() => File.Exists(Constants.PasswordsFilePath);
-
         public void SetPassword(string password)
         {
             PasswordSecure = SecureStringHelper.MakeSecureString(password);

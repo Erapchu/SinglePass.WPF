@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SinglePass.WPF.Services;
 using System;
@@ -12,14 +13,13 @@ namespace SinglePass.WPF.ViewModels
     public class LoginWindowViewModel : ObservableRecipient
     {
         #region Design time instance
-        private static readonly Lazy<LoginWindowViewModel> _lazy = new Lazy<LoginWindowViewModel>(() => new LoginWindowViewModel(null, null));
+        private static readonly Lazy<LoginWindowViewModel> _lazy = new(() => new LoginWindowViewModel(null, true));
         public static LoginWindowViewModel DesignTimeInstance => _lazy.Value;
         #endregion
 
         public event Action Accept;
 
-        private readonly CredentialsCryptoService _credentialsCryptoService;
-        private readonly ILogger<LoginWindowViewModel> _logger;
+        private readonly Func<Task<IServiceProvider>> _prepareServices;
         private CancellationTokenSource _cancellationTokenSource;
 
         private AsyncRelayCommand _loadCredentialsCommand;
@@ -48,16 +48,15 @@ namespace SinglePass.WPF.ViewModels
 
         public string Password { get; set; }
 
-        public LoginWindowViewModel(
-            CredentialsCryptoService credentialsCryptoService,
-            ILogger<LoginWindowViewModel> logger)
+        internal LoginWindowViewModel(Func<Task<IServiceProvider>> prepareServices, bool credentialsFileExists)
         {
-            _credentialsCryptoService = credentialsCryptoService;
-            _logger = logger;
-            HintText = credentialsCryptoService is not null && !credentialsCryptoService.CredentialsFileExists()
+            _prepareServices = prepareServices;
+            HintText = !credentialsFileExists
                 ? SinglePass.Language.Properties.Resources.NewPassword
                 : SinglePass.Language.Properties.Resources.Password;
         }
+
+        internal void CancelLogin() => _cancellationTokenSource?.Cancel();
 
         public async Task LoadCredentialsAsync()
         {
@@ -72,6 +71,7 @@ namespace SinglePass.WPF.ViewModels
                 HelperText = string.Empty;
             }
 
+            ILogger<LoginWindowViewModel> logger = null;
             try
             {
                 Loading = true;
@@ -79,12 +79,16 @@ namespace SinglePass.WPF.ViewModels
                 _cancellationTokenSource = new();
                 var cancellationToken = _cancellationTokenSource.Token;
 
-                var result = await _credentialsCryptoService.LoadCredentialsAsync(password);
+                var services = await _prepareServices();
+                cancellationToken.ThrowIfCancellationRequested();
+                logger = services.GetRequiredService<ILogger<LoginWindowViewModel>>();
+                var credentialsCryptoService = services.GetRequiredService<CredentialsCryptoService>();
+                var result = await credentialsCryptoService.LoadCredentialsAsync(password);
                 cancellationToken.ThrowIfCancellationRequested();
 
                 if (result is CredentialLoadResult.Loaded or CredentialLoadResult.FileNotFound)
                 {
-                    _credentialsCryptoService.SetPassword(password);
+                    credentialsCryptoService.SetPassword(password);
                     Accept?.Invoke();
                 }
                 else
@@ -93,7 +97,8 @@ namespace SinglePass.WPF.ViewModels
             catch (OperationCanceledException) { }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Empty);
+                // Startup failures are reported by App.
+                logger?.LogError(ex, string.Empty);
             }
             finally
             {

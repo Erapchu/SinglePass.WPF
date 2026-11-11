@@ -5,17 +5,10 @@ namespace SinglePass.WPF.Services
 {
     public class ThemeService
     {
-        private readonly AppSettingsService _appSettingsService;
-
-        public ThemeService(AppSettingsService appSettingsService)
-        {
-            _appSettingsService = appSettingsService;
-        }
-
-        public void Init() => Apply(_appSettingsService.ThemeMode);
+        public void Apply(AppTheme theme) => ApplyTheme(theme);
 
 #pragma warning disable WPF0001 // WPF exposes Fluent theme switching through this API.
-        public void Apply(AppTheme theme)
+        internal static void ApplyTheme(AppTheme theme)
         {
             Application.Current.ThemeMode = theme switch
             {

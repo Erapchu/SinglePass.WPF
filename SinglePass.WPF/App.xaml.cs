@@ -1,4 +1,4 @@
-﻿using AsyncKeyedLock;
+using AsyncKeyedLock;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,11 +18,14 @@ using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels;
 using SinglePass.WPF.ViewModels.Dialogs;
 using SinglePass.WPF.Views;
-using SinglePass.WPF.Views.Dialogs;
 using SinglePass.WPF.Views.Windows;
 using System;
+using System.Diagnostics;
+using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace SinglePass.WPF
 {
@@ -31,13 +34,10 @@ namespace SinglePass.WPF
     /// </summary>
     public partial class App : System.Windows.Application
     {
-        private readonly IConfiguration _configuration;
         private readonly Mutex _mutex;
 
-        private TrayIcon _trayIcon;
-
         private bool IsFirstInstance { get; }
-        public IServiceProvider Services { get; }
+        public IServiceProvider Services { get; private set; }
 
         public App()
         {
@@ -47,12 +47,7 @@ namespace SinglePass.WPF
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
 
-            if (IsFirstInstance)
-            {
-                _configuration = BuildConfiguration();
-                Services = ConfigureServices(_configuration);
-            }
-            else
+            if (!IsFirstInstance)
             {
                 // Show main window and shutdown process
                 InterprocessHelper.ShowMainWindow();
@@ -60,7 +55,7 @@ namespace SinglePass.WPF
             }
         }
 
-        private static IServiceProvider ConfigureServices(IConfiguration configuration)
+        private static ServiceProvider ConfigureServices(IConfiguration configuration, AppSettings settings)
         {
             var services = new ServiceCollection();
 
@@ -86,19 +81,11 @@ namespace SinglePass.WPF
             services.AddSingleton<CloudServiceProvider>();
 
             // Windows
-            services.AddScoped<LoginWindow>();
-            services.AddScoped<LoginWindowViewModel>();
-
             services.AddScoped<MainWindow>();
             services.AddScoped<MainWindowViewModel>();
             services.AddScoped<PasswordsViewModel>();
             services.AddScoped<CloudSyncViewModel>();
             services.AddScoped<SettingsViewModel>();
-            services.AddTransient<MaterialInputBoxContent>();
-            services.AddTransient<MaterialInputBoxViewModel>();
-
-            services.AddTransient<MaterialMessageBoxDialogWindow>();
-            services.AddTransient<MaterialMessageBoxViewModel>();
 
             services.AddTransient<CredentialEditDialogWindow>();
             services.AddTransient<CredentialEditViewModel>();
@@ -110,6 +97,7 @@ namespace SinglePass.WPF
             // Main services
             services.AddSingleton<CredentialsCryptoService>();
             services.AddSingleton<ThemeService>();
+            services.AddSingleton(settings);
             services.AddSingleton<AppSettingsService>();
             services.AddSingleton<SyncService>();
             services.AddSingleton<HotkeysService>();
@@ -143,56 +131,97 @@ namespace SinglePass.WPF
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            InitializeComponent();
-
             // Override culture
             //SinglePass.Language.Properties.Resources.Culture = new System.Globalization.CultureInfo("en-US");
 
-            var hiw = new HiddenInterprocessWindow();
-            hiw.InitWithoutShowing();
-
             Constants.EnsurePaths();
+            var settings = AppSettingsService.Load(out var settingsReadError);
+            ThemeService.ApplyTheme(settings.ThemeMode);
 
-            // Resolve theme
-            var themeService = Services.GetService<ThemeService>();
-            themeService.Init();
+            var preparation = new Lazy<Task<IServiceProvider>>(() => PrepareLoginAsync(settings, settingsReadError));
+            var loginViewModel = new LoginWindowViewModel(
+                () => preparation.Value, File.Exists(Constants.PasswordsFilePath));
+            var loginWindow = new LoginWindow(loginViewModel);
 
-            // Login
-            using (var loginScope = Services.CreateScope())
+            async void OnLoginContentRendered(object sender, EventArgs args)
             {
-                var loginWindow = loginScope.ServiceProvider.GetService<LoginWindow>();
-                bool? dialogResult = loginWindow.ShowDialog(); // Stop here
-
-                if (dialogResult != true)
+                loginWindow.ContentRendered -= OnLoginContentRendered;
+                try
                 {
-                    Shutdown();
-                    return;
+                    await preparation.Value;
+                }
+                catch (Exception ex)
+                {
+                    Trace.TraceError("SinglePass startup failed: {0}", ex);
+                    if (loginWindow.IsVisible)
+                    {
+                        MessageBox.Show(loginWindow, ex.Message, Constants.AppName, MessageBoxButton.OK, MessageBoxImage.Error);
+                        loginWindow.Close();
+                    }
                 }
             }
 
-            // Create tray icon
-            _trayIcon = new TrayIcon();
+            loginWindow.ContentRendered += OnLoginContentRendered;
+            if (loginWindow.ShowDialog() != true)
+            {
+                Shutdown();
+                return;
+            }
 
-            // Open main window
-            var mainWindow = Services.GetService<MainWindow>();
+            var hiw = new HiddenInterprocessWindow();
+            var traySource = hiw.InitWithoutShowing();
+
+            var mainWindow = Services.GetRequiredService<MainWindow>();
+            MainWindow = mainWindow;
+
+            var trayIcon = new TrayIcon(traySource, mainWindow, Services.GetRequiredService<ILogger<TrayIcon>>());
+            hiw.Closing += (_, _) => trayIcon.Dispose();
             mainWindow.Show();
+        }
+
+        private async Task<IServiceProvider> PrepareLoginAsync(AppSettings settings, Exception settingsReadError)
+        {
+            await Dispatcher.Yield(DispatcherPriority.ContextIdle);
+            Services = await Task.Run(() =>
+            {
+                var configuration = BuildConfiguration();
+                var services = ConfigureServices(configuration, settings);
+                try
+                {
+                    if (settingsReadError is not null)
+                    {
+                        services.GetRequiredService<ILogger<AppSettingsService>>()
+                            .LogError(settingsReadError, "Failed to read settings from {Path}", Constants.CommonSettingsFilePath);
+                    }
+
+                    services.GetRequiredService<ILogger<LoginWindowViewModel>>();
+                    services.GetRequiredService<CredentialsCryptoService>();
+                    return services;
+                }
+                catch
+                {
+                    services.Dispose();
+                    throw;
+                }
+            });
+            return Services;
         }
 
         private void Application_Exit(object sender, ExitEventArgs e)
         {
-            var logger = Services.GetService<ILogger<App>>();
+            var logger = Services?.GetService<ILogger<App>>();
             logger?.LogInformation("The application is shutting down...{0}", Environment.NewLine);
         }
 
         private void Current_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
-            var logger = Services.GetService<ILogger<App>>();
+            var logger = Services?.GetService<ILogger<App>>();
             logger?.LogError(e.Exception, "Dispatcher unhandled exception");
         }
 
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            var logger = Services.GetService<ILogger<App>>();
+            var logger = Services?.GetService<ILogger<App>>();
             logger?.LogError(e.ExceptionObject as Exception, "Domain unhandled exception");
         }
     }

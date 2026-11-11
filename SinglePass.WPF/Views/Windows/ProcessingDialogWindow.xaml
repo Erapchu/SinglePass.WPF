@@ -1,0 +1,16 @@
+<Window
+    x:Class="SinglePass.WPF.Views.Windows.ProcessingDialogWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:properties="clr-namespace:SinglePass.Language.Properties;assembly=SinglePass.Language"
+    Width="400"
+    SizeToContent="Height"
+    ResizeMode="NoResize"
+    ShowInTaskbar="False"
+    WindowStartupLocation="CenterOwner">
+    <StackPanel Margin="24">
+        <TextBlock x:Name="MessageText" TextWrapping="Wrap" />
+        <ProgressBar Height="4" Margin="0,16,0,0" IsIndeterminate="True" />
+        <Button Margin="0,20,0,0" HorizontalAlignment="Right" Content="{x:Static properties:Resources.Cancel}" IsCancel="True" />
+    </StackPanel>
+</Window>

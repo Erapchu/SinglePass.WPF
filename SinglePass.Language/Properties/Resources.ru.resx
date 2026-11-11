@@ -354,4 +354,13 @@
   <data name="Theme" xml:space="preserve">
     <value>Тема</value>
   </data>
+  <data name="ClearSearch" xml:space="preserve">
+    <value>Очистить поиск</value>
+  </data>
+  <data name="ClearHotkey" xml:space="preserve">
+    <value>Сбросить сочетание клавиш</value>
+  </data>
+  <data name="NoCredentials" xml:space="preserve">
+    <value>Нет записей</value>
+  </data>
 </root>

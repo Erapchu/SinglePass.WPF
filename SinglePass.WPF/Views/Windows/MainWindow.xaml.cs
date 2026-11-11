@@ -4,7 +4,10 @@ using SinglePass.WPF.ViewModels;
 using SinglePass.WPF.Views.Controls;
 using System;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 
 namespace SinglePass.WPF.Views.Windows
@@ -46,6 +49,41 @@ namespace SinglePass.WPF.Views.Windows
             _statusTimer.Tick += StatusTimer_Tick;
 
             DataContext = mainViewModel;
+        }
+
+        private void Navigation_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.OriginalSource != sender || e.RemovedItems.Count == 0 || e.AddedItems.Count == 0 ||
+                !IsVisible || !SystemParameters.ClientAreaAnimation)
+                return;
+
+            var duration = TimeSpan.FromMilliseconds(160);
+            var easing = new QuadraticEase { EasingMode = EasingMode.EaseOut };
+            NavigationContent.BeginAnimation(OpacityProperty, new DoubleAnimation(0.85, 1, duration)
+            {
+                EasingFunction = easing,
+                FillBehavior = FillBehavior.Stop
+            });
+            NavigationOffset.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(8, 0, duration)
+            {
+                EasingFunction = easing,
+                FillBehavior = FillBehavior.Stop
+            });
+
+            var navigation = (ListView)sender;
+            if (navigation.ItemContainerGenerator.ContainerFromItem(e.AddedItems[0]) is ListViewItem item)
+            {
+                var scale = new ScaleTransform();
+                item.RenderTransformOrigin = new Point(0.5, 0.5);
+                item.RenderTransform = scale;
+                var selectionAnimation = new DoubleAnimation(0.97, 1, duration)
+                {
+                    EasingFunction = easing,
+                    FillBehavior = FillBehavior.Stop
+                };
+                scale.BeginAnimation(ScaleTransform.ScaleXProperty, selectionAnimation);
+                scale.BeginAnimation(ScaleTransform.ScaleYProperty, selectionAnimation);
+            }
         }
 
         private void MainViewModel_ScrollIntoViewRequired(CredentialViewModel credVM)

@@ -55,12 +55,19 @@
             ItemTemplate="{StaticResource NavigationItemTemplate}"
             ItemsSource="{Binding NavigationItems}"
             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-            SelectedItem="{Binding SelectedNavigationItem}" />
-        <ContentControl
-            Grid.Column="1"
-            HorizontalContentAlignment="Stretch"
-            VerticalContentAlignment="Stretch"
-            Content="{Binding SelectedNavigationItem.Content}" />
+            SelectedItem="{Binding SelectedNavigationItem}"
+            SelectionChanged="Navigation_SelectionChanged" />
+        <Grid Grid.Column="1" ClipToBounds="True">
+            <ContentControl
+                x:Name="NavigationContent"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                Content="{Binding SelectedNavigationItem.Content}">
+                <ContentControl.RenderTransform>
+                    <TranslateTransform x:Name="NavigationOffset" />
+                </ContentControl.RenderTransform>
+            </ContentControl>
+        </Grid>
         <Border
             x:Name="StatusBanner"
             Grid.Column="1"

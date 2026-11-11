@@ -61,6 +61,12 @@ namespace SinglePass.WPF.Settings
             set => Settings.PasswordColumnWidths = value;
         }
 
+        public double DetailsPaneRatio
+        {
+            get => Settings.DetailsPaneRatio;
+            set => Settings.DetailsPaneRatio = value;
+        }
+
         public AppSettingsService(AsyncKeyedLocker<string> asyncKeyedLocker, ILogger<AppSettingsService> logger)
         {
             _asyncKeyedLocker = asyncKeyedLocker;

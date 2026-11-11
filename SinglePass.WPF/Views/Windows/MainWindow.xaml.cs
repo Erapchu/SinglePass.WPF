@@ -138,6 +138,13 @@ namespace SinglePass.WPF.Views.Windows
                 saveRequired = true;
             }
 
+            var detailsPaneRatio = ViewModel.PasswordsVM.DetailsPaneRatio;
+            if (detailsPaneRatio != _appSettingsService.DetailsPaneRatio)
+            {
+                _appSettingsService.DetailsPaneRatio = detailsPaneRatio;
+                saveRequired = true;
+            }
+
             // Avoid minimized state
             if (WindowState != WindowState.Minimized)
             {

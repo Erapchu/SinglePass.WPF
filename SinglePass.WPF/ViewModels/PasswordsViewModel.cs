@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace SinglePass.WPF.ViewModels
@@ -78,6 +79,9 @@ namespace SinglePass.WPF.ViewModels
         public OrderType Order => _order;
 
         public PasswordColumnWidths ColumnWidths { get; } = new();
+        public GridLength PasswordListPaneWidth { get; set; } = new(1, GridUnitType.Star);
+        public GridLength DetailsPaneWidth { get; set; } = new(1, GridUnitType.Star);
+        public double DetailsPaneRatio => DetailsPaneWidth.Value / (PasswordListPaneWidth.Value + DetailsPaneWidth.Value);
 
         private int _displayRequest;
 
@@ -120,6 +124,13 @@ namespace SinglePass.WPF.ViewModels
 
             _sort = _appSettingsService.Sort;
             _order = _appSettingsService.Order;
+
+            var detailsPaneRatio = _appSettingsService.DetailsPaneRatio;
+            if (detailsPaneRatio is > 0 and < 1)
+            {
+                PasswordListPaneWidth = new GridLength(1 - detailsPaneRatio, GridUnitType.Star);
+                DetailsPaneWidth = new GridLength(detailsPaneRatio, GridUnitType.Star);
+            }
 
             if (_appSettingsService.PasswordColumnWidths is { } saved)
             {

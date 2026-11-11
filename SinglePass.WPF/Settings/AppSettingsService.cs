@@ -55,6 +55,12 @@ namespace SinglePass.WPF.Settings
             set => Settings.Order = value;
         }
 
+        public PasswordColumnWidths PasswordColumnWidths
+        {
+            get => Settings.PasswordColumnWidths;
+            set => Settings.PasswordColumnWidths = value;
+        }
+
         public AppSettingsService(AsyncKeyedLocker<string> asyncKeyedLocker, ILogger<AppSettingsService> logger)
         {
             _asyncKeyedLocker = asyncKeyedLocker;

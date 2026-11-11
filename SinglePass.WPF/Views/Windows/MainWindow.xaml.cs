@@ -131,6 +131,13 @@ namespace SinglePass.WPF.Views.Windows
                 saveRequired = true;
             }
 
+            var columnWidths = ViewModel.PasswordsVM.ColumnWidths;
+            if (columnWidths != _appSettingsService.PasswordColumnWidths)
+            {
+                _appSettingsService.PasswordColumnWidths = columnWidths with { };
+                saveRequired = true;
+            }
+
             // Avoid minimized state
             if (WindowState != WindowState.Minimized)
             {

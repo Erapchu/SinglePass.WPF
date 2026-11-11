@@ -77,6 +77,8 @@ namespace SinglePass.WPF.ViewModels
         private OrderType _order;
         public OrderType Order => _order;
 
+        public PasswordColumnWidths ColumnWidths { get; } = new();
+
         private int _displayRequest;
 
         public string NameSortIndicator => GetSortIndicator(SortType.Name);
@@ -118,7 +120,17 @@ namespace SinglePass.WPF.ViewModels
 
             _sort = _appSettingsService.Sort;
             _order = _appSettingsService.Order;
+
+            if (_appSettingsService.PasswordColumnWidths is { } saved)
+            {
+                ColumnWidths.Name = RestoreWidth(saved.Name, ColumnWidths.Name);
+                ColumnWidths.Website = RestoreWidth(saved.Website, ColumnWidths.Website);
+                ColumnWidths.Modified = RestoreWidth(saved.Modified, ColumnWidths.Modified);
+            }
         }
+
+        private static double RestoreWidth(double saved, double fallback) =>
+            double.IsNaN(saved) || (double.IsFinite(saved) && saved >= 0) ? saved : fallback;
 
         public void ReloadCredentials()
         {

@@ -32,6 +32,33 @@ namespace SinglePass.WPF.Views.Windows
             ViewModel.Password = passwordBox.Password;
         }
 
+        private void ShowPassword_Changed(object sender, RoutedEventArgs e)
+        {
+            if (ShowPasswordButton.IsChecked == true)
+            {
+                RevealedPassword.Text = LoginPasswordBox.Password;
+                RevealedPassword.Visibility = Visibility.Visible;
+                LoginPasswordBox.Visibility = Visibility.Collapsed;
+                PasswordLabel.Target = RevealedPassword;
+                RevealedPassword.Focus();
+                RevealedPassword.CaretIndex = RevealedPassword.Text.Length;
+            }
+            else
+            {
+                LoginPasswordBox.Visibility = Visibility.Visible;
+                RevealedPassword.Visibility = Visibility.Collapsed;
+                RevealedPassword.Clear();
+                PasswordLabel.Target = LoginPasswordBox;
+                LoginPasswordBox.Focus();
+            }
+        }
+
+        private void RevealedPassword_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (ShowPasswordButton.IsChecked == true && LoginPasswordBox.Password != RevealedPassword.Text)
+                LoginPasswordBox.Password = RevealedPassword.Text;
+        }
+
         private void Window_Closed(object sender, System.EventArgs e)
         {
             ViewModel.Accept -= LoginWindowViewModel_Accept;

@@ -37,9 +37,9 @@
                 VerticalAlignment="Center"
                 Text="{x:Static properties:Resources.CAPSLOCKEnabled}"
                 Visibility="{Binding IsCapsLockEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
-            <Label Padding="0" Content="{Binding HintText}" Target="{Binding ElementName=LoginPasswordBox}" />
+            <Label x:Name="PasswordLabel" Padding="0" Content="{Binding HintText}" Target="{Binding ElementName=LoginPasswordBox}" />
         </DockPanel>
-        <PasswordBox FontFamily="{StaticResource PasswordFontFamily}" FontSize="{StaticResource PasswordFontSize}" x:Name="LoginPasswordBox" Grid.Row="1" MaxLength="32" PasswordChanged="PasswordBox_PasswordChanged">
+        <DockPanel Grid.Row="1">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="GotFocus">
                     <i:InvokeCommandAction Command="{Binding RefreshCapsLockCommand}" />
@@ -48,7 +48,44 @@
                     <i:InvokeCommandAction Command="{Binding RefreshCapsLockCommand}" PassEventArgsToCommand="True" />
                 </i:EventTrigger>
             </i:Interaction.Triggers>
-        </PasswordBox>
+            <ToggleButton
+                x:Name="ShowPasswordButton"
+                DockPanel.Dock="Right"
+                Margin="4,0,0,0"
+                Padding="8,4"
+                AutomationProperties.Name="{x:Static properties:Resources.ShowHidePassword}"
+                Checked="ShowPassword_Changed"
+                Unchecked="ShowPassword_Changed"
+                ToolTip="{x:Static properties:Resources.ShowHidePassword}">
+                <TextBlock>
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource SymbolText}">
+                            <Setter Property="Text" Value="&#xE890;" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsChecked, ElementName=ShowPasswordButton}" Value="True">
+                                    <Setter Property="Text" Value="&#xED1A;" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </ToggleButton>
+            <Grid>
+                <PasswordBox
+                    x:Name="LoginPasswordBox"
+                    FontFamily="{StaticResource PasswordFontFamily}"
+                    FontSize="{StaticResource PasswordFontSize}"
+                    MaxLength="32"
+                    PasswordChanged="PasswordBox_PasswordChanged" />
+                <TextBox
+                    x:Name="RevealedPassword"
+                    FontFamily="{StaticResource PasswordFontFamily}"
+                    FontSize="{StaticResource PasswordFontSize}"
+                    MaxLength="32"
+                    TextChanged="RevealedPassword_TextChanged"
+                    Visibility="Collapsed" />
+            </Grid>
+        </DockPanel>
         <TextBlock Grid.Row="2" Margin="0,6,0,0" VerticalAlignment="Top" Text="{Binding HelperText}" TextWrapping="Wrap" />
         <ProgressBar
             Grid.Row="3"

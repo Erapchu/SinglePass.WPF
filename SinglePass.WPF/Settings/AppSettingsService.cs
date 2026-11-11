@@ -16,10 +16,10 @@ namespace SinglePass.WPF.Settings
         private readonly AsyncKeyedLocker<string> _asyncKeyedLocker;
         private readonly ILogger<AppSettingsService> _logger;
 
-        private AppSettings _settings = new();
+        private readonly AppSettings _settings;
         public AppSettings Settings => _settings;
 
-        public MaterialDesignThemes.Wpf.BaseTheme ThemeMode
+        public AppTheme ThemeMode
         {
             get => Settings.ThemeMode;
             set => Settings.ThemeMode = value;
@@ -55,14 +55,32 @@ namespace SinglePass.WPF.Settings
             set => Settings.Order = value;
         }
 
-        public AppSettingsService(AsyncKeyedLocker<string> asyncKeyedLocker, ILogger<AppSettingsService> logger)
+        public PasswordColumnWidths PasswordColumnWidths
         {
+            get => Settings.PasswordColumnWidths;
+            set => Settings.PasswordColumnWidths = value;
+        }
+
+        public double DetailsPaneRatio
+        {
+            get => Settings.DetailsPaneRatio;
+            set => Settings.DetailsPaneRatio = value;
+        }
+
+        public AppSettingsService(AppSettings settings, AsyncKeyedLocker<string> asyncKeyedLocker, ILogger<AppSettingsService> logger)
+        {
+            _settings = settings;
             _asyncKeyedLocker = asyncKeyedLocker;
             _logger = logger;
+        }
+
+        internal static AppSettings Load(out Exception readError)
+        {
+            readError = null;
             var path = Constants.CommonSettingsFilePath;
 
             if (!File.Exists(path))
-                return;
+                return new AppSettings();
 
             // Read existing
             try
@@ -74,17 +92,17 @@ namespace SinglePass.WPF.Settings
                     Culture = CultureInfo.InvariantCulture
                 });
                 var loaded = serializer.Deserialize(fileStream, typeof(AppSettings)) as AppSettings;
-                _settings = loaded ?? new AppSettings();
+                return loaded ?? new AppSettings();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to read settings from {Path}", path);
+                readError = ex;
                 try
                 {
                     File.Move(path, path + ".corrupt", overwrite: true);
                 }
                 catch { /* best effort */ }
-                _settings ??= new AppSettings();
+                return new AppSettings();
             }
         }
 
@@ -124,13 +142,10 @@ namespace SinglePass.WPF.Settings
                     }
 
                     // На современных ФС можно File.Replace, иначе — Move с overwrite
-                    if (OperatingSystem.IsWindows())
+                    if (OperatingSystem.IsWindows() && File.Exists(path))
                         File.Replace(tmp, path, bak, ignoreMetadataErrors: true);
                     else
-                    {
-                        if (File.Exists(path)) File.Delete(path);
-                        File.Move(tmp, path);
-                    }
+                        File.Move(tmp, path, overwrite: true);
 
                     _logger.LogInformation("Settings saved to {Path}", path);
                 }

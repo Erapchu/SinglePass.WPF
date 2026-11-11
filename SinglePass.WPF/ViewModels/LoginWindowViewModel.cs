@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SinglePass.WPF.Services;
 using System;
@@ -12,22 +13,17 @@ namespace SinglePass.WPF.ViewModels
     public class LoginWindowViewModel : ObservableRecipient
     {
         #region Design time instance
-        private static readonly Lazy<LoginWindowViewModel> _lazy = new Lazy<LoginWindowViewModel>(() => new LoginWindowViewModel(null, null));
+        private static readonly Lazy<LoginWindowViewModel> _lazy = new(() => new LoginWindowViewModel(null, true));
         public static LoginWindowViewModel DesignTimeInstance => _lazy.Value;
         #endregion
 
         public event Action Accept;
 
-        private readonly CredentialsCryptoService _credentialsCryptoService;
-        private readonly ILogger<LoginWindowViewModel> _logger;
+        private readonly Func<Task<IServiceProvider>> _prepareServices;
         private CancellationTokenSource _cancellationTokenSource;
-        private bool _credentialsFileExist;
 
         private AsyncRelayCommand _loadCredentialsCommand;
         public AsyncRelayCommand LoadCredentialsCommand => _loadCredentialsCommand ??= new AsyncRelayCommand(LoadCredentialsAsync);
-
-        private AsyncRelayCommand _loadingCommand;
-        public AsyncRelayCommand LoadingCommand => _loadingCommand ??= new AsyncRelayCommand(LoadingAsync);
 
         private RelayCommand<KeyEventArgs> _refreshCapsLockCommand;
         public RelayCommand<KeyEventArgs> RefreshCapsLockCommand => _refreshCapsLockCommand ??= new RelayCommand<KeyEventArgs>(RefreshCapsLock);
@@ -46,28 +42,26 @@ namespace SinglePass.WPF.ViewModels
             set => SetProperty(ref _helperText, value);
         }
 
-        private string _hintText = SinglePass.Language.Properties.Resources.Password;
-        public string HintText
-        {
-            get => _hintText;
-            set => SetProperty(ref _hintText, value);
-        }
+        public string HintText { get; }
 
         public bool IsCapsLockEnabled => Console.CapsLock;
 
         public string Password { get; set; }
 
-        public LoginWindowViewModel(
-            CredentialsCryptoService credentialsCryptoService,
-            ILogger<LoginWindowViewModel> logger)
+        internal LoginWindowViewModel(Func<Task<IServiceProvider>> prepareServices, bool credentialsFileExists)
         {
-            _credentialsCryptoService = credentialsCryptoService;
-            _logger = logger;
+            _prepareServices = prepareServices;
+            HintText = !credentialsFileExists
+                ? SinglePass.Language.Properties.Resources.NewPassword
+                : SinglePass.Language.Properties.Resources.Password;
         }
+
+        internal void CancelLogin() => _cancellationTokenSource?.Cancel();
 
         public async Task LoadCredentialsAsync()
         {
-            if (string.IsNullOrWhiteSpace(Password) || Password.Length < 8)
+            var password = Password;
+            if (string.IsNullOrWhiteSpace(password) || password.Length < 8)
             {
                 HelperText = SinglePass.Language.Properties.Resources.Minimum8Characters;
                 return;
@@ -77,50 +71,38 @@ namespace SinglePass.WPF.ViewModels
                 HelperText = string.Empty;
             }
 
+            ILogger<LoginWindowViewModel> logger = null;
             try
             {
                 Loading = true;
-                if (!_credentialsFileExist)
+                _cancellationTokenSource?.Cancel();
+                _cancellationTokenSource = new();
+                var cancellationToken = _cancellationTokenSource.Token;
+
+                var services = await _prepareServices();
+                cancellationToken.ThrowIfCancellationRequested();
+                logger = services.GetRequiredService<ILogger<LoginWindowViewModel>>();
+                var credentialsCryptoService = services.GetRequiredService<CredentialsCryptoService>();
+                var result = await credentialsCryptoService.LoadCredentialsAsync(password);
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (result is CredentialLoadResult.Loaded or CredentialLoadResult.FileNotFound)
                 {
-                    _credentialsCryptoService.SetPassword(Password);
+                    credentialsCryptoService.SetPassword(password);
                     Accept?.Invoke();
                 }
                 else
-                {
-                    _cancellationTokenSource?.Cancel();
-                    _cancellationTokenSource = new();
-                    var cancellationToken = _cancellationTokenSource.Token;
-
-                    _credentialsCryptoService.SetPassword(Password);
-                    var loadingResult = await _credentialsCryptoService.LoadCredentialsAsync();
-                    cancellationToken.ThrowIfCancellationRequested();
-                    if (!loadingResult)
-                    {
-                        HelperText = SinglePass.Language.Properties.Resources.PasswordIsIncorrect;
-                    }
-                    else
-                    {
-                        Accept?.Invoke();
-                    }
-                }
+                    HelperText = SinglePass.Language.Properties.Resources.PasswordIsIncorrect;
             }
             catch (OperationCanceledException) { }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Empty);
+                // Startup failures are reported by App.
+                logger?.LogError(ex, string.Empty);
             }
             finally
             {
                 Loading = false;
-            }
-        }
-
-        private async Task LoadingAsync()
-        {
-            _credentialsFileExist = await _credentialsCryptoService.IsCredentialsFileExistAsync();
-            if (!_credentialsFileExist)
-            {
-                HintText = SinglePass.Language.Properties.Resources.NewPassword;
             }
         }
 

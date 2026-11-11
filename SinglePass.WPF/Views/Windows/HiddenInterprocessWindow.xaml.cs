@@ -17,12 +17,12 @@ namespace SinglePass.WPF.Views.Windows
             InitializeComponent();
         }
 
-        public void InitWithoutShowing()
+        public HwndSource InitWithoutShowing()
         {
-            // Like PresentationSource.FromVisual(this) as HwndSource
             var handle = new WindowInteropHelper(this).EnsureHandle();
             HwndSource source = HwndSource.FromHwnd(handle);
             source.AddHook(WndProc);
+            return source;
         }
 
         private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)

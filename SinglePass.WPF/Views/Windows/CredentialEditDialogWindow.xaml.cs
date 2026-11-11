@@ -1,4 +1,4 @@
-﻿using SinglePass.WPF.Controls;
+﻿using System.Windows;
 using SinglePass.WPF.ViewModels.Dialogs;
 
 namespace SinglePass.WPF.Views.Windows
@@ -6,10 +6,10 @@ namespace SinglePass.WPF.Views.Windows
     /// <summary>
     /// Interaction logic for CredentialEditDialogWindow.xaml
     /// </summary>
-    public partial class CredentialEditDialogWindow : MaterialWindow
+    public partial class CredentialEditDialogWindow : Window
     {
         public CredentialEditViewModel ViewModel { get; }
-        public MaterialDialogResult? Result { get; private set; }
+        public DialogChoice? Result { get; private set; }
 
         public CredentialEditDialogWindow()
         {
@@ -25,7 +25,7 @@ namespace SinglePass.WPF.Views.Windows
             DataContext = ViewModel;
         }
 
-        private void CredentialEditViewModel_Accept(MaterialDialogResult? result)
+        private void CredentialEditViewModel_Accept(DialogChoice? result)
         {
             Result = result;
             DialogResult = true;

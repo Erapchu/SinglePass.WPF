@@ -9,7 +9,7 @@ namespace SinglePass.WPF.Views.Helpers
 {
     public static class CredentialEditDialog
     {
-        public static MaterialDialogResult ShowDialog(
+        public static DialogChoice ShowDialog(
             CredentialViewModel credentialViewModel,
             CredentialDetailsMode mode)
         {
@@ -23,7 +23,7 @@ namespace SinglePass.WPF.Views.Helpers
             dialogWindow.ShowDialog();
             var result = dialogWindow.Result;
 
-            return result is null ? MaterialDialogResult.None : (MaterialDialogResult)result;
+            return result is null ? DialogChoice.None : (DialogChoice)result;
         }
     }
 }

@@ -14,6 +14,13 @@ using System.Threading.Tasks;
 
 namespace SinglePass.WPF.Services
 {
+    internal enum CredentialLoadResult
+    {
+        Loaded,
+        FileNotFound,
+        Failed
+    }
+
     public class CredentialsCryptoService
     {
         private readonly object _credentialsLock = new();
@@ -51,11 +58,6 @@ namespace SinglePass.WPF.Services
             _asyncKeyedLocker = asyncKeyedLocker;
         }
 
-        public Task<bool> IsCredentialsFileExistAsync()
-        {
-            return Task.FromResult(File.Exists(Constants.PasswordsFilePath));
-        }
-
         public void SetPassword(string password)
         {
             PasswordSecure = SecureStringHelper.MakeSecureString(password);
@@ -66,23 +68,32 @@ namespace SinglePass.WPF.Services
             return SecureStringHelper.GetString(PasswordSecure);
         }
 
-        public Task<bool> LoadCredentialsAsync()
+        internal Task<CredentialLoadResult> LoadCredentialsAsync(string password)
         {
             return Task.Run(async () =>
             {
                 _logger.LogInformation("Loading credentials from file...");
-                bool success = false;
                 try
                 {
-                    // Access to file
                     using var locker = await _asyncKeyedLocker.LockAsync(Constants.PasswordsFilePath).ConfigureAwait(false);
-                    using var fileStream = new FileStream(Constants.PasswordsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                    // Just to ensure
-                    fileStream.Seek(0, SeekOrigin.Begin);
+                    FileStream fileStream;
+                    try
+                    {
+                        fileStream = File.OpenRead(Constants.PasswordsFilePath);
+                    }
+                    catch (FileNotFoundException)
+                    {
+                        return CredentialLoadResult.FileNotFound;
+                    }
 
-                    Credentials = _cryptoService.DecryptFromStream<List<Credential>>(fileStream, GetPassword());
-                    success = true;
-                    _logger.LogInformation($"Credentials loaded from file, count: {Credentials.Count}");
+                    using (fileStream)
+                    {
+                        var credentials = _cryptoService.DecryptFromStream<List<Credential>>(fileStream, password)
+                            ?? throw new JsonException("The credentials file does not contain a list of credentials.");
+                        Credentials = credentials;
+                        _logger.LogInformation("Credentials loaded from file, count: {Count}", credentials.Count);
+                        return CredentialLoadResult.Loaded;
+                    }
                 }
                 catch (JsonException jex)
                 {
@@ -97,7 +108,7 @@ namespace SinglePass.WPF.Services
                     _logger.LogError(ex, string.Empty);
                 }
 
-                return success;
+                return CredentialLoadResult.Failed;
             });
         }
 

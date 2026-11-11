@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace SinglePass.WPF.Views.Controls
@@ -13,7 +14,7 @@ namespace SinglePass.WPF.Views.Controls
             InitializeComponent();
         }
 
-        private async void UserControl_IsVisibleChanged(object sender, System.Windows.DependencyPropertyChangedEventArgs e)
+        private async void UserControl_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (e.NewValue is bool v && v)
             {

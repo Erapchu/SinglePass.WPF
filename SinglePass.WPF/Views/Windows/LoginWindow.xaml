@@ -1,48 +1,45 @@
-﻿<controls:MaterialWindow
+﻿<Window
     x:Class="SinglePass.WPF.Views.Windows.LoginWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:controls="clr-namespace:SinglePass.WPF.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-    xmlns:local="clr-namespace:SinglePass.WPF.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:properties="clr-namespace:SinglePass.Language.Properties;assembly=SinglePass.Language"
     xmlns:vm="clr-namespace:SinglePass.WPF.ViewModels"
     Title="{x:Static properties:Resources.Authorize}"
+    Icon="/SinglePass.WPF;component/Resources/pass-man.ico"
     Width="400"
-    Height="300"
-    MinWidth="300"
-    MinHeight="200"
+    Height="240"
+    ResizeMode="NoResize"
     d:DataContext="{x:Static vm:LoginWindowViewModel.DesignTimeInstance}"
-    Activated="MaterialWindow_Activated"
-    Closed="MaterialWindow_Closed"
+    Activated="Window_Activated"
+    Closed="Window_Closed"
     FocusManager.FocusedElement="{Binding ElementName=LoginPasswordBox}"
     UseLayoutRounding="True"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
     <Window.Resources>
-        <ResourceDictionary>
-            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-        </ResourceDictionary>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </Window.Resources>
-    <i:Interaction.Triggers>
-        <i:EventTrigger EventName="Loaded">
-            <i:InvokeCommandAction Command="{Binding LoadingCommand}" />
-        </i:EventTrigger>
-    </i:Interaction.Triggers>
-    <Grid>
-        <PasswordBox
-            x:Name="LoginPasswordBox"
-            Width="300"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            md:HintAssist.HelperText="{Binding HelperText}"
-            md:HintAssist.Hint="{Binding HintText}"
-            MaxLength="32"
-            PasswordChanged="PasswordBox_PasswordChanged"
-            Style="{StaticResource MaterialDesignOutlinedPasswordBox}">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="12" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <DockPanel Margin="0,0,0,6">
+            <TextBlock
+                DockPanel.Dock="Right"
+                Margin="12,0,0,0"
+                VerticalAlignment="Center"
+                Text="{x:Static properties:Resources.CAPSLOCKEnabled}"
+                Visibility="{Binding IsCapsLockEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <Label x:Name="PasswordLabel" Padding="0" Content="{Binding HintText}" Target="{Binding ElementName=LoginPasswordBox}" />
+        </DockPanel>
+        <DockPanel Grid.Row="1">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="GotFocus">
                     <i:InvokeCommandAction Command="{Binding RefreshCapsLockCommand}" />
@@ -51,32 +48,59 @@
                     <i:InvokeCommandAction Command="{Binding RefreshCapsLockCommand}" PassEventArgsToCommand="True" />
                 </i:EventTrigger>
             </i:Interaction.Triggers>
-        </PasswordBox>
-        <TextBlock
-            Margin="10"
-            HorizontalAlignment="Left"
+            <ToggleButton
+                x:Name="ShowPasswordButton"
+                DockPanel.Dock="Right"
+                Margin="4,0,0,0"
+                Padding="8,4"
+                AutomationProperties.Name="{x:Static properties:Resources.ShowHidePassword}"
+                Checked="ShowPassword_Changed"
+                Unchecked="ShowPassword_Changed"
+                ToolTip="{x:Static properties:Resources.ShowHidePassword}">
+                <TextBlock>
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource SymbolText}">
+                            <Setter Property="Text" Value="&#xE890;" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsChecked, ElementName=ShowPasswordButton}" Value="True">
+                                    <Setter Property="Text" Value="&#xED1A;" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </ToggleButton>
+            <Grid>
+                <PasswordBox
+                    x:Name="LoginPasswordBox"
+                    FontFamily="{StaticResource PasswordFontFamily}"
+                    FontSize="{StaticResource PasswordFontSize}"
+                    MaxLength="32"
+                    PasswordChanged="PasswordBox_PasswordChanged" />
+                <TextBox
+                    x:Name="RevealedPassword"
+                    FontFamily="{StaticResource PasswordFontFamily}"
+                    FontSize="{StaticResource PasswordFontSize}"
+                    MaxLength="32"
+                    TextChanged="RevealedPassword_TextChanged"
+                    Visibility="Collapsed" />
+            </Grid>
+        </DockPanel>
+        <TextBlock Grid.Row="2" Margin="0,6,0,0" VerticalAlignment="Top" Text="{Binding HelperText}" TextWrapping="Wrap" />
+        <ProgressBar
+            Grid.Row="3"
+            Height="4"
             VerticalAlignment="Bottom"
-            Opacity="0.5"
-            Text="{x:Static properties:Resources.CAPSLOCKEnabled}"
-            TextAlignment="Right"
-            Visibility="{Binding IsCapsLockEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
-        <StackPanel
-            Margin="16"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Bottom"
-            Orientation="Horizontal">
+            IsIndeterminate="True"
+            Visibility="{Binding Loading, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        <StackPanel Grid.Row="4" Margin="0,12,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
             <Button
-                Margin="0 0 8 0"
-                md:ButtonProgressAssist.IsIndeterminate="True"
-                md:ButtonProgressAssist.IsIndicatorVisible="{Binding Loading}"
+                Margin="0,0,8,0"
                 Command="{Binding LoadCredentialsCommand}"
                 Content="{x:Static properties:Resources.Enter}"
                 IsDefault="True"
-                Style="{StaticResource MaterialDesignFlatButton}" />
-            <Button
-                Content="{x:Static properties:Resources.Exit}"
-                IsCancel="True"
-                Style="{StaticResource MaterialDesignFlatButton}" />
+                Style="{DynamicResource AccentButtonStyle}" />
+            <Button Content="{x:Static properties:Resources.Exit}" IsCancel="True" />
         </StackPanel>
     </Grid>
-</controls:MaterialWindow>
+</Window>

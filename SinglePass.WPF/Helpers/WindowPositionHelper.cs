@@ -1,55 +1,65 @@
-﻿using System.Drawing;
-using System.Linq;
+﻿using System;
+using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Forms;
+using static SinglePass.WPF.Helpers.WinApiProvider;
 
 namespace SinglePass.WPF.Helpers
 {
     public static class WindowPositionHelper
     {
-        /// <summary>
-        /// Checks window position on any screen.
-        /// </summary>
-        /// <param name="rect">Rectangle.</param>
-        /// <returns>True if any working area of screens contains window adjustments, otherwise false.</returns>
         public static bool CheckIsOnAnyScreen(Rect rect)
         {
-            bool result = false;
-            try
+            var intersects = false;
+            EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero, (monitor, _, _, _) =>
             {
-                var rectangle = new Rectangle((int)rect.X, (int)rect.Y, (int)rect.Width, (int)rect.Height);
-                result = Screen.AllScreens.Any(s => s.WorkingArea.IntersectsWith(rectangle));
-                return result;
-            }
-            catch
-            {
-                //ErrorHandler.Instance.HandleException(ex);
-                return result;
-            }
+                intersects = TryGetWorkArea(monitor, out var area)
+                    && rect.Left < area.right && rect.Right > area.left
+                    && rect.Top < area.bottom && rect.Bottom > area.top;
+                return !intersects;
+            }, IntPtr.Zero);
+
+            return intersects;
         }
 
-        /// <summary>
-        /// Shifts window to nearest screen if it's out of it.
-        /// </summary>
-        /// <param name="window">Target window.</param>
         public static void ShiftWindowToScreen(Window window)
         {
-            var windowPoint = new System.Drawing.Point((int)window.Left, (int)window.Top);
-            Screen activeScreen = Screen.FromPoint(windowPoint);
+            var monitor = DpiUtilities.GetNearestMonitorFromPoint((int)window.Left, (int)window.Top);
+            if (!TryGetWorkArea(monitor, out var area))
+                return;
 
-            var windowRight = window.Left + window.Width;
-            var screenRight = activeScreen.WorkingArea.X + activeScreen.WorkingArea.Width;
-            if (windowRight > screenRight)
-            {
-                window.Left = screenRight - window.Width;
-            }
+            if (window.Left + window.Width > area.right)
+                window.Left = area.right - window.Width;
 
-            var windowBottom = window.Top + window.Height;
-            var screenBottom = activeScreen.WorkingArea.Y + activeScreen.WorkingArea.Height;
-            if (windowBottom > screenBottom)
-            {
-                window.Top = screenBottom - window.Height;
-            }
+            if (window.Top + window.Height > area.bottom)
+                window.Top = area.bottom - window.Height;
         }
+
+        private static bool TryGetWorkArea(IntPtr monitor, out RECT area)
+        {
+            var info = new MonitorInfo { Size = (uint)Marshal.SizeOf<MonitorInfo>() };
+            var success = GetMonitorInfo(monitor, ref info);
+            area = info.WorkArea;
+            return success;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct MonitorInfo
+        {
+            public uint Size;
+            public RECT MonitorArea;
+            public RECT WorkArea;
+            public uint Flags;
+        }
+
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private delegate bool MonitorEnumerator(IntPtr monitor, IntPtr deviceContext, IntPtr bounds, IntPtr data);
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool EnumDisplayMonitors(IntPtr deviceContext, IntPtr clip, MonitorEnumerator callback, IntPtr data);
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool GetMonitorInfo(IntPtr monitor, ref MonitorInfo info);
     }
 }

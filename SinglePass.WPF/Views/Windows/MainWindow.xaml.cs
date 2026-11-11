@@ -1,20 +1,24 @@
-﻿using SinglePass.WPF.Controls;
-using SinglePass.WPF.Helpers;
+﻿using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels;
 using SinglePass.WPF.Views.Controls;
 using System;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Threading;
 
 namespace SinglePass.WPF.Views.Windows
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : MaterialWindow
+    public partial class MainWindow : Window
     {
         private readonly AppSettingsService _appSettingsService;
+        private readonly DispatcherTimer _statusTimer = new() { Interval = TimeSpan.FromSeconds(3) };
 
         private MainWindowViewModel ViewModel => DataContext as MainWindowViewModel;
 
@@ -41,9 +45,45 @@ namespace SinglePass.WPF.Views.Windows
 
             mainViewModel.CredentialSelected += Vm_CredentialSelected;
             mainViewModel.ScrollIntoViewRequired += MainViewModel_ScrollIntoViewRequired;
-            mainViewModel.PasswordsVM.EnqueueSnackbarMessage += PasswordsVM_EnqueueSnackbarMessage;
+            mainViewModel.PasswordsVM.StatusMessageRequested += ShowStatusMessage;
+            _statusTimer.Tick += StatusTimer_Tick;
 
             DataContext = mainViewModel;
+        }
+
+        private void Navigation_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.OriginalSource != sender || e.RemovedItems.Count == 0 || e.AddedItems.Count == 0 ||
+                !IsVisible || !SystemParameters.ClientAreaAnimation)
+                return;
+
+            var duration = TimeSpan.FromMilliseconds(160);
+            var easing = new QuadraticEase { EasingMode = EasingMode.EaseOut };
+            NavigationContent.BeginAnimation(OpacityProperty, new DoubleAnimation(0.85, 1, duration)
+            {
+                EasingFunction = easing,
+                FillBehavior = FillBehavior.Stop
+            });
+            NavigationOffset.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(8, 0, duration)
+            {
+                EasingFunction = easing,
+                FillBehavior = FillBehavior.Stop
+            });
+
+            var navigation = (ListView)sender;
+            if (navigation.ItemContainerGenerator.ContainerFromItem(e.AddedItems[0]) is ListViewItem item)
+            {
+                var scale = new ScaleTransform();
+                item.RenderTransformOrigin = new Point(0.5, 0.5);
+                item.RenderTransform = scale;
+                var selectionAnimation = new DoubleAnimation(0.97, 1, duration)
+                {
+                    EasingFunction = easing,
+                    FillBehavior = FillBehavior.Stop
+                };
+                scale.BeginAnimation(ScaleTransform.ScaleXProperty, selectionAnimation);
+                scale.BeginAnimation(ScaleTransform.ScaleYProperty, selectionAnimation);
+            }
         }
 
         private void MainViewModel_ScrollIntoViewRequired(CredentialViewModel credVM)
@@ -52,12 +92,18 @@ namespace SinglePass.WPF.Views.Windows
                 passwordsControl.CredentialsListBox.ScrollIntoView(credVM);
         }
 
-        private void PasswordsVM_EnqueueSnackbarMessage(string message)
+        private void ShowStatusMessage(string message)
         {
-            if (SnackbarMain.MessageQueue is { } messageQueue)
-            {
-                messageQueue.Enqueue(message);
-            }
+            StatusText.Text = message;
+            StatusBanner.Visibility = Visibility.Visible;
+            _statusTimer.Stop();
+            _statusTimer.Start();
+        }
+
+        private void StatusTimer_Tick(object sender, EventArgs e)
+        {
+            _statusTimer.Stop();
+            StatusBanner.Visibility = Visibility.Collapsed;
         }
 
         private void Vm_CredentialSelected(CredentialViewModel credVM)
@@ -69,7 +115,7 @@ namespace SinglePass.WPF.Views.Windows
             }
         }
 
-        private void MaterialWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             //TODO: Shutdown process on main window close or hide window and cancel depend on settings
             Hide();
@@ -85,7 +131,7 @@ namespace SinglePass.WPF.Views.Windows
                 e.Handled = true;
         }
 
-        private void MaterialWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (e.NewValue is bool visibility && visibility && ViewModel.SelectedNavigationItem?.Content is PasswordsControl passwordsControl)
             {
@@ -93,8 +139,11 @@ namespace SinglePass.WPF.Views.Windows
             }
         }
 
-        private void MaterialWindow_Closed(object sender, EventArgs e)
+        private void Window_Closed(object sender, EventArgs e)
         {
+            _statusTimer.Stop();
+            ViewModel.PasswordsVM.StatusMessageRequested -= ShowStatusMessage;
+
             var saveRequired = false;
             if (ViewModel.SettingsVM.ThemeMode != _appSettingsService.ThemeMode)
             {
@@ -117,6 +166,20 @@ namespace SinglePass.WPF.Views.Windows
             if (ViewModel.PasswordsVM.Order != _appSettingsService.Order)
             {
                 _appSettingsService.Order = ViewModel.PasswordsVM.Order;
+                saveRequired = true;
+            }
+
+            var columnWidths = ViewModel.PasswordsVM.ColumnWidths;
+            if (columnWidths != _appSettingsService.PasswordColumnWidths)
+            {
+                _appSettingsService.PasswordColumnWidths = columnWidths with { };
+                saveRequired = true;
+            }
+
+            var detailsPaneRatio = ViewModel.PasswordsVM.DetailsPaneRatio;
+            if (detailsPaneRatio != _appSettingsService.DetailsPaneRatio)
+            {
+                _appSettingsService.DetailsPaneRatio = detailsPaneRatio;
                 saveRequired = true;
             }
 
@@ -145,7 +208,7 @@ namespace SinglePass.WPF.Views.Windows
             }
         }
 
-        private void MaterialWindow_Loaded(object sender, RoutedEventArgs e)
+        private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             WindowState = _appSettingsService.MainWindowSettings?.WindowState ?? WindowState.Normal;
         }

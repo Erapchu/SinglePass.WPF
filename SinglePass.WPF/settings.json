@@ -31,7 +31,6 @@
         "archiveFileName": "${logDirArchive}/${logName}.{##}.log",
         "archiveNumbering": "DateAndSequence",
         "autoFlush": "true",
-        "concurrentWrites": "true",
         "createDirs": "true",
         "deleteOldFileOnStartup": "false",
         "encoding": "utf-8",

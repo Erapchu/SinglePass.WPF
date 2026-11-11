@@ -33,8 +33,6 @@ namespace SinglePass.WPF
         private readonly IConfiguration _configuration;
         private readonly Mutex _mutex;
 
-        private TrayIcon _trayIcon;
-
         private bool IsFirstInstance { get; }
         public IServiceProvider Services { get; }
 
@@ -144,7 +142,7 @@ namespace SinglePass.WPF
             Services.GetRequiredService<ThemeService>().Init();
 
             var hiw = new HiddenInterprocessWindow();
-            hiw.InitWithoutShowing();
+            var traySource = hiw.InitWithoutShowing();
 
             // Login
             using (var loginScope = Services.CreateScope())
@@ -159,12 +157,11 @@ namespace SinglePass.WPF
                 }
             }
 
-            // Create tray icon
-            _trayIcon = new TrayIcon();
-
-            // Open main window
             var mainWindow = Services.GetRequiredService<MainWindow>();
             MainWindow = mainWindow;
+
+            var trayIcon = new TrayIcon(traySource, mainWindow, Services.GetRequiredService<ILogger<TrayIcon>>());
+            hiw.Closing += (_, _) => trayIcon.Dispose();
             mainWindow.Show();
         }
 

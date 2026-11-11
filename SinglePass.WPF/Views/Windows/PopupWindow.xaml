@@ -27,11 +27,12 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <DataTemplate x:Key="CredentialDataTemplate" DataType="{x:Type vm:CredentialViewModel}">
             <DockPanel>
-                <Image Width="16" Height="16" Source="{Binding FavIcon}" />
+                <Image Width="16" Height="16" VerticalAlignment="Center" Source="{Binding FavIcon}" />
                 <StackPanel
                     DockPanel.Dock="Right"
+                    VerticalAlignment="Center"
                     Orientation="Horizontal"
-                    Visibility="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=ListBoxItem}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    Visibility="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=ListViewItem}, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Button
                         Margin="4,0,0,0"
                         Padding="4"
@@ -55,8 +56,8 @@
                            TextTrimming="CharacterEllipsis" ToolTip="{Binding NameFieldVM.Value}" />
             </DockPanel>
         </DataTemplate>
-        <Style x:Key="CredentialPopupItemStyle" TargetType="ListBoxItem">
-            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Style x:Key="CredentialPopupItemStyle" BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="ListViewItem">
+            <Setter Property="Padding" Value="12,0,6,0" />
             <Setter Property="MinHeight" Value="38" />
         </Style>
     </Window.Resources>
@@ -85,7 +86,7 @@
                 </i:Interaction.Triggers>
             </TextBox>
         </DockPanel>
-        <ListBox
+        <ListView
             x:Name="CredListBox"
             Grid.Row="2"
             ItemContainerStyle="{StaticResource CredentialPopupItemStyle}"

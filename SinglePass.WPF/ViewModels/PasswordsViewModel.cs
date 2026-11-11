@@ -72,25 +72,32 @@ namespace SinglePass.WPF.ViewModels
         }
 
         private SortType _sort;
-        public SortType Sort
-        {
-            get => _sort;
-            set
-            {
-                SetProperty(ref _sort, value);
-                _ = DisplayCredentialsAsync();
-            }
-        }
+        public SortType Sort => _sort;
 
         private OrderType _order;
-        public OrderType Order
+        public OrderType Order => _order;
+
+        private int _displayRequest;
+
+        public string NameSortIndicator => GetSortIndicator(SortType.Name);
+        public string WebsiteSortIndicator => GetSortIndicator(SortType.Website);
+        public string ModifiedSortIndicator => GetSortIndicator(SortType.Modified);
+
+        private string GetSortIndicator(SortType column) =>
+            Sort == column ? (Order == OrderType.Ascending ? "↑" : "↓") : string.Empty;
+
+        [RelayCommand]
+        private void SortBy(SortType column)
         {
-            get => _order;
-            set
-            {
-                SetProperty(ref _order, value);
-                _ = DisplayCredentialsAsync();
-            }
+            var order = Sort == column && Order == OrderType.Ascending
+                ? OrderType.Descending
+                : OrderType.Ascending;
+            _sort = column;
+            _order = order;
+            OnPropertyChanged(nameof(NameSortIndicator));
+            OnPropertyChanged(nameof(WebsiteSortIndicator));
+            OnPropertyChanged(nameof(ModifiedSortIndicator));
+            _ = DisplayCredentialsAsync(keepSelection: true);
         }
 
         [ObservableProperty]
@@ -128,40 +135,36 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
-        private async Task DisplayCredentialsAsync()
+        private async Task DisplayCredentialsAsync(bool keepSelection = false)
         {
+            var request = ++_displayRequest;
             try
             {
-                List<CredentialViewModel> filteredCredentials = null;
                 var filterText = SearchText;
-
-                if (string.IsNullOrEmpty(filterText))
+                var sort = Sort;
+                var order = Order;
+                var credentials = _credentialVMs.ToList();
+                var filtered = await Task.Run(() =>
                 {
-                    List<CredentialViewModel> tempList = null;
-                    await Task.Run(() =>
-                    {
-                        tempList = _credentialVMs.ToList();
-                        SortAndOrder(tempList);
-                    });
-                    filteredCredentials = tempList;
-                }
-                else
-                {
-                    filteredCredentials = await Task.Run(() =>
+                    if (!string.IsNullOrEmpty(filterText))
                     {
                         var search = new CredentialSearch(filterText);
-                        var fCreds = _credentialVMs.Where(search.Matches).ToList();
+                        credentials.RemoveAll(item => !search.Matches(item));
+                    }
 
-                        SortAndOrder(fCreds);
-                        return fCreds;
-                    });
-                }
+                    SortAndOrder(credentials, sort, order);
+                    return credentials;
+                });
 
-                DisplayedCredentials = new ObservableCollectionDelayed<CredentialViewModel>(filteredCredentials);
+                if (request != _displayRequest)
+                    return;
+
+                var selection = keepSelection ? SelectedCredentialVM : null;
+                DisplayedCredentials = new ObservableCollectionDelayed<CredentialViewModel>(filtered);
                 OnPropertyChanged(nameof(DisplayedCredentials));
-
-                // Selected credential always first according to search request
-                SelectedCredentialVM = DisplayedCredentials.FirstOrDefault();
+                SelectedCredentialVM = selection != null && filtered.Contains(selection)
+                    ? selection
+                    : DisplayedCredentials.FirstOrDefault();
             }
             catch (Exception ex)
             {
@@ -220,43 +223,20 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
-        private void SortAndOrder(List<CredentialViewModel> creds)
+        private static void SortAndOrder(List<CredentialViewModel> credentials, SortType sort, OrderType order)
         {
-            switch (Order)
+            Comparison<CredentialViewModel> compare = sort switch
             {
-                case OrderType.Ascending:
-                    {
-                        switch (Sort)
-                        {
-                            case SortType.Name:
-                                creds.Sort((a, b) => a.NameFieldVM.Value.CompareTo(b.NameFieldVM.Value));
-                                break;
-                            case SortType.Created:
-                                creds.Sort((a, b) => a.CreationTime.CompareTo(b.CreationTime));
-                                break;
-                            case SortType.Modified:
-                                creds.Sort((a, b) => a.LastModifiedTime.CompareTo(b.LastModifiedTime));
-                                break;
-                        }
-                    }
-                    break;
-                case OrderType.Descending:
-                    {
-                        switch (Sort)
-                        {
-                            case SortType.Name:
-                                creds.Sort((a, b) => b.NameFieldVM.Value.CompareTo(a.NameFieldVM.Value));
-                                break;
-                            case SortType.Created:
-                                creds.Sort((a, b) => b.CreationTime.CompareTo(a.CreationTime));
-                                break;
-                            case SortType.Modified:
-                                creds.Sort((a, b) => b.LastModifiedTime.CompareTo(a.LastModifiedTime));
-                                break;
-                        }
-                    }
-                    break;
-            }
+                SortType.Website => (a, b) => StringComparer.CurrentCultureIgnoreCase.Compare(a.SiteFieldVM.Value, b.SiteFieldVM.Value),
+                SortType.Created => (a, b) => a.CreationTime.CompareTo(b.CreationTime),
+                SortType.Modified => (a, b) => a.LastModifiedTime.CompareTo(b.LastModifiedTime),
+                _ => (a, b) => StringComparer.CurrentCulture.Compare(a.NameFieldVM.Value, b.NameFieldVM.Value)
+            };
+
+            if (order == OrderType.Descending)
+                credentials.Sort((a, b) => compare(b, a));
+            else
+                credentials.Sort(compare);
         }
 
         [RelayCommand]

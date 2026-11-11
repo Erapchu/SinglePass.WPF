@@ -22,10 +22,9 @@
     WindowStartupLocation="Manual"
     mc:Ignorable="d">
     <Window.Resources>
-        <Style x:Key="NavigationListBoxItem" TargetType="ListBoxItem">
+        <Style x:Key="NavigationListViewItem" BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="ListViewItem">
             <EventSetter Event="PreviewMouseDown" Handler="ListBoxItem_PreviewMouseDown" />
-            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-            <Setter Property="Padding" Value="10,8" />
+            <Setter Property="Padding" Value="12,7" />
         </Style>
         <DataTemplate x:Key="NavigationItemTemplate" DataType="{x:Type vm:NavigationItemViewModel}">
             <Grid>
@@ -48,11 +47,11 @@
             <ColumnDefinition Width="155" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <ListBox
+        <ListView
             Margin="0,0,8,0"
             Background="Transparent"
             BorderThickness="0"
-            ItemContainerStyle="{StaticResource NavigationListBoxItem}"
+            ItemContainerStyle="{StaticResource NavigationListViewItem}"
             ItemTemplate="{StaticResource NavigationItemTemplate}"
             ItemsSource="{Binding NavigationItems}"
             ScrollViewer.HorizontalScrollBarVisibility="Disabled"

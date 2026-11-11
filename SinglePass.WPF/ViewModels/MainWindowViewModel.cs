@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MaterialDesignThemes.Wpf;
 using SinglePass.WPF.Collections;
 using SinglePass.WPF.Views;
 using SinglePass.WPF.Views.Controls;
@@ -65,15 +64,15 @@ namespace SinglePass.WPF.ViewModels
             {
                 new NavigationItemViewModel(
                     SinglePass.Language.Properties.Resources.Passwords,
-                    PackIconKind.Password,
+                    "\uE72E",
                     () => new PasswordsControl() { DataContext = PasswordsVM }),
                 new NavigationItemViewModel(
                     SinglePass.Language.Properties.Resources.CloudSync,
-                    PackIconKind.Cloud,
+                    "\uE753",
                     () => new CloudSyncControl() { DataContext = CloudSyncVM }),
                 new NavigationItemViewModel(
                     SinglePass.Language.Properties.Resources.Settings,
-                    PackIconKind.Settings,
+                    "\uE713",
                     () => new SettingsControl() { DataContext = SettingsVM }),
             });
         }

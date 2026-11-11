@@ -5,7 +5,6 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:SinglePass.WPF.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:properties="clr-namespace:SinglePass.Language.Properties;assembly=SinglePass.Language"
     xmlns:tb="http://www.hardcodet.net/taskbar"
     xmlns:vm="clr-namespace:SinglePass.WPF.ViewModels"
@@ -15,9 +14,6 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ContextMenu x:Key="TaskbarContextMenu" MinWidth="150">
-                <ContextMenu.Resources>
-                    <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml" />
-                </ContextMenu.Resources>
                 <MenuItem
                     Command="{Binding ExitAppCommand}"
                     Header="{x:Static properties:Resources.Exit}"

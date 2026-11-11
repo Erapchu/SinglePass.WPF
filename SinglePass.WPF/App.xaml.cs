@@ -1,4 +1,4 @@
-﻿using AsyncKeyedLock;
+using AsyncKeyedLock;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,7 +18,6 @@ using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels;
 using SinglePass.WPF.ViewModels.Dialogs;
 using SinglePass.WPF.Views;
-using SinglePass.WPF.Views.Dialogs;
 using SinglePass.WPF.Views.Windows;
 using System;
 using System.Threading;
@@ -94,11 +93,6 @@ namespace SinglePass.WPF
             services.AddScoped<PasswordsViewModel>();
             services.AddScoped<CloudSyncViewModel>();
             services.AddScoped<SettingsViewModel>();
-            services.AddTransient<MaterialInputBoxContent>();
-            services.AddTransient<MaterialInputBoxViewModel>();
-
-            services.AddTransient<MaterialMessageBoxDialogWindow>();
-            services.AddTransient<MaterialMessageBoxViewModel>();
 
             services.AddTransient<CredentialEditDialogWindow>();
             services.AddTransient<CredentialEditViewModel>();
@@ -143,19 +137,14 @@ namespace SinglePass.WPF
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            InitializeComponent();
-
             // Override culture
             //SinglePass.Language.Properties.Resources.Culture = new System.Globalization.CultureInfo("en-US");
 
+            Constants.EnsurePaths();
+            Services.GetRequiredService<ThemeService>().Init();
+
             var hiw = new HiddenInterprocessWindow();
             hiw.InitWithoutShowing();
-
-            Constants.EnsurePaths();
-
-            // Resolve theme
-            var themeService = Services.GetService<ThemeService>();
-            themeService.Init();
 
             // Login
             using (var loginScope = Services.CreateScope())
@@ -174,7 +163,8 @@ namespace SinglePass.WPF
             _trayIcon = new TrayIcon();
 
             // Open main window
-            var mainWindow = Services.GetService<MainWindow>();
+            var mainWindow = Services.GetRequiredService<MainWindow>();
+            MainWindow = mainWindow;
             mainWindow.Show();
         }
 

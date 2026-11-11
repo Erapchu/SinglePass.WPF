@@ -21,13 +21,9 @@ namespace SinglePass.WPF.ViewModels
         private readonly CredentialsCryptoService _credentialsCryptoService;
         private readonly ILogger<LoginWindowViewModel> _logger;
         private CancellationTokenSource _cancellationTokenSource;
-        private bool _credentialsFileExist;
 
         private AsyncRelayCommand _loadCredentialsCommand;
         public AsyncRelayCommand LoadCredentialsCommand => _loadCredentialsCommand ??= new AsyncRelayCommand(LoadCredentialsAsync);
-
-        private AsyncRelayCommand _loadingCommand;
-        public AsyncRelayCommand LoadingCommand => _loadingCommand ??= new AsyncRelayCommand(LoadingAsync);
 
         private RelayCommand<KeyEventArgs> _refreshCapsLockCommand;
         public RelayCommand<KeyEventArgs> RefreshCapsLockCommand => _refreshCapsLockCommand ??= new RelayCommand<KeyEventArgs>(RefreshCapsLock);
@@ -46,12 +42,7 @@ namespace SinglePass.WPF.ViewModels
             set => SetProperty(ref _helperText, value);
         }
 
-        private string _hintText = SinglePass.Language.Properties.Resources.Password;
-        public string HintText
-        {
-            get => _hintText;
-            set => SetProperty(ref _hintText, value);
-        }
+        public string HintText { get; }
 
         public bool IsCapsLockEnabled => Console.CapsLock;
 
@@ -63,11 +54,15 @@ namespace SinglePass.WPF.ViewModels
         {
             _credentialsCryptoService = credentialsCryptoService;
             _logger = logger;
+            HintText = credentialsCryptoService is not null && !credentialsCryptoService.CredentialsFileExists()
+                ? SinglePass.Language.Properties.Resources.NewPassword
+                : SinglePass.Language.Properties.Resources.Password;
         }
 
         public async Task LoadCredentialsAsync()
         {
-            if (string.IsNullOrWhiteSpace(Password) || Password.Length < 8)
+            var password = Password;
+            if (string.IsNullOrWhiteSpace(password) || password.Length < 8)
             {
                 HelperText = SinglePass.Language.Properties.Resources.Minimum8Characters;
                 return;
@@ -80,29 +75,20 @@ namespace SinglePass.WPF.ViewModels
             try
             {
                 Loading = true;
-                if (!_credentialsFileExist)
+                _cancellationTokenSource?.Cancel();
+                _cancellationTokenSource = new();
+                var cancellationToken = _cancellationTokenSource.Token;
+
+                var result = await _credentialsCryptoService.LoadCredentialsAsync(password);
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (result is CredentialLoadResult.Loaded or CredentialLoadResult.FileNotFound)
                 {
-                    _credentialsCryptoService.SetPassword(Password);
+                    _credentialsCryptoService.SetPassword(password);
                     Accept?.Invoke();
                 }
                 else
-                {
-                    _cancellationTokenSource?.Cancel();
-                    _cancellationTokenSource = new();
-                    var cancellationToken = _cancellationTokenSource.Token;
-
-                    _credentialsCryptoService.SetPassword(Password);
-                    var loadingResult = await _credentialsCryptoService.LoadCredentialsAsync();
-                    cancellationToken.ThrowIfCancellationRequested();
-                    if (!loadingResult)
-                    {
-                        HelperText = SinglePass.Language.Properties.Resources.PasswordIsIncorrect;
-                    }
-                    else
-                    {
-                        Accept?.Invoke();
-                    }
-                }
+                    HelperText = SinglePass.Language.Properties.Resources.PasswordIsIncorrect;
             }
             catch (OperationCanceledException) { }
             catch (Exception ex)
@@ -112,15 +98,6 @@ namespace SinglePass.WPF.ViewModels
             finally
             {
                 Loading = false;
-            }
-        }
-
-        private async Task LoadingAsync()
-        {
-            _credentialsFileExist = await _credentialsCryptoService.IsCredentialsFileExistAsync();
-            if (!_credentialsFileExist)
-            {
-                HintText = SinglePass.Language.Properties.Resources.NewPassword;
             }
         }
 

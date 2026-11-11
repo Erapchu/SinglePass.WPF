@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MaterialDesignThemes.Wpf;
 using Microsoft.Extensions.Logging;
 using SinglePass.WPF.Collections;
 using SinglePass.WPF.Enums;
@@ -48,7 +47,7 @@ namespace SinglePass.WPF.ViewModels
 
         public event Action<CredentialViewModel> CredentialSelected;
         public event Action<CredentialViewModel> ScrollIntoViewRequired;
-        public event Action<string> EnqueueSnackbarMessage;
+        public event Action<string> StatusMessageRequested;
 
         public ObservableCollectionDelayed<CredentialViewModel> DisplayedCredentials { get; private set; } = new();
 
@@ -202,7 +201,7 @@ namespace SinglePass.WPF.ViewModels
             var result = CredentialEditDialog.ShowDialog(
                 newCredVM,
                 CredentialDetailsMode.New);
-            if (result != MaterialDialogResult.OK)
+            if (result != DialogChoice.OK)
                 return;
 
             var dateTimeNow = DateTime.Now;
@@ -295,7 +294,7 @@ namespace SinglePass.WPF.ViewModels
             var result = CredentialEditDialog.ShowDialog(
                 tempCredentialVM,
                 CredentialDetailsMode.Edit);
-            if (result != MaterialDialogResult.OK)
+            if (result != DialogChoice.OK)
                 return;
 
             var dateTimeNow = DateTime.Now;
@@ -313,13 +312,13 @@ namespace SinglePass.WPF.ViewModels
             if (SelectedCredentialVM is null)
                 return;
 
-            var result = MaterialMessageBox.ShowDialog(
+            var result = MessageDialog.ShowDialog(
                 SinglePass.Language.Properties.Resources.DeleteItem,
                 string.Format(SinglePass.Language.Properties.Resources.Name0, SelectedCredentialVM.NameFieldVM.Value),
-                MaterialMessageBoxButtons.YesNo,
-                PackIconKind.Delete);
+                MessageDialogButtons.YesNo,
+                "\uE74D");
 
-            if (result == MaterialDialogResult.Yes)
+            if (result == DialogChoice.Yes)
             {
                 await _credentialsCryptoService.DeleteCredential(SelectedCredentialVM.Model);
                 _credentialVMs.Remove(SelectedCredentialVM);
@@ -343,7 +342,7 @@ namespace SinglePass.WPF.ViewModels
             try
             {
                 WindowsClipboard.SetText(data);
-                EnqueueSnackbarMessage?.Invoke(SinglePass.Language.Properties.Resources.TextCopied);
+                StatusMessageRequested?.Invoke(SinglePass.Language.Properties.Resources.TextCopied);
             }
             catch (Exception ex)
             {

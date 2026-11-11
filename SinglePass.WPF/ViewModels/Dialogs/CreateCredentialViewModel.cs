@@ -7,15 +7,13 @@ namespace SinglePass.WPF.ViewModels.Dialogs
 {
     public partial class CredentialEditViewModel : ObservableObject
     {
-        public event Action<MaterialDialogResult?> Accept;
+        public event Action<DialogChoice?> Accept;
 
         [ObservableProperty]
         private CredentialViewModel _credentialViewModel;
 
         [ObservableProperty]
-        private string _dialogIdentifier;
-
-        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CaptionText))]
         private CredentialDetailsMode _mode;
 
         public string CaptionText => Mode switch
@@ -33,7 +31,7 @@ namespace SinglePass.WPF.ViewModels.Dialogs
         [RelayCommand]
         private void Cancel()
         {
-            Accept?.Invoke(MaterialDialogResult.None);
+            Accept?.Invoke(DialogChoice.None);
         }
 
         [RelayCommand]
@@ -43,7 +41,7 @@ namespace SinglePass.WPF.ViewModels.Dialogs
             if (CredentialViewModel.NameFieldVM.HasErrors)
                 return;
 
-            Accept?.Invoke(MaterialDialogResult.OK);
+            Accept?.Invoke(DialogChoice.OK);
         }
     }
 }

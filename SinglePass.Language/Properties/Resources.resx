@@ -334,4 +334,13 @@
   <data name="Theme" xml:space="preserve">
     <value>Theme</value>
   </data>
+  <data name="ClearSearch" xml:space="preserve">
+    <value>Clear search</value>
+  </data>
+  <data name="ClearHotkey" xml:space="preserve">
+    <value>Clear shortcut</value>
+  </data>
+  <data name="NoCredentials" xml:space="preserve">
+    <value>No credentials</value>
+  </data>
 </root>

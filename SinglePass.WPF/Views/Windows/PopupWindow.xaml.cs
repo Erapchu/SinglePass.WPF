@@ -1,5 +1,4 @@
-﻿using SinglePass.WPF.Controls;
-using SinglePass.WPF.ViewModels;
+﻿using SinglePass.WPF.ViewModels;
 using System;
 using System.Windows;
 using System.Windows.Input;
@@ -9,7 +8,7 @@ namespace SinglePass.WPF.Views.Windows
     /// <summary>
     /// Interaction logic for PopupWindow.xaml
     /// </summary>
-    public partial class PopupWindow : MaterialWindow
+    public partial class PopupWindow : Window
     {
         public bool IsClosed { get; private set; }
 
@@ -52,12 +51,18 @@ namespace SinglePass.WPF.Views.Windows
             IsClosed = true;
         }
 
-        private void MaterialWindow_Loaded(object sender, RoutedEventArgs e)
+        private void ClearSearch_Click(object sender, RoutedEventArgs e)
+        {
+            SearchTextBox.Clear();
+            SearchTextBox.Focus();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Application.Current.Dispatcher.InvokeAsync(() => SearchTextBox.Focus());
         }
 
-        private void MaterialWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Escape)
             {
@@ -90,7 +95,7 @@ namespace SinglePass.WPF.Views.Windows
             }
         }
 
-        private void MaterialWindow_Closed(object sender, EventArgs e)
+        private void Window_Closed(object sender, EventArgs e)
         {
             ViewModel.Accept -= PopupViewModel_Accept;
             ViewModel.ScrollIntoViewRequired -= PopupViewModel_ScrollIntoViewRequired;

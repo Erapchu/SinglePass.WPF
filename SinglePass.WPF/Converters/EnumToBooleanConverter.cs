@@ -17,7 +17,7 @@ namespace SinglePass.WPF.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return parameter;
+            return value is true ? parameter : Binding.DoNothing;
         }
     }
 }

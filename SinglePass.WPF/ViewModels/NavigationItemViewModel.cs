@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using MaterialDesignThemes.Wpf;
 using System;
 using System.Windows.Controls;
 
@@ -7,7 +6,6 @@ namespace SinglePass.WPF.ViewModels
 {
     public class NavigationItemViewModel : ObservableRecipient
     {
-        private bool _loading;
         private readonly Lazy<Control> _lazyContent;
 
         /// <summary>
@@ -16,18 +14,9 @@ namespace SinglePass.WPF.ViewModels
         public string Name { get; }
 
         /// <summary>
-        /// Icon kind.
+        /// Navigation icon.
         /// </summary>
-        public PackIconKind IconKind { get; }
-
-        /// <summary>
-        /// Indicates loading of some content.
-        /// </summary>
-        public bool Loading
-        {
-            get => _loading;
-            set => SetProperty(ref _loading, value);
-        }
+        public string Glyph { get; }
 
         /// <summary>
         /// Visible content.
@@ -47,10 +36,10 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
-        public NavigationItemViewModel(string name, PackIconKind icon, Func<Control> createContent)
+        public NavigationItemViewModel(string name, string glyph, Func<Control> createContent)
         {
             Name = name;
-            IconKind = icon;
+            Glyph = glyph;
             _lazyContent = new Lazy<Control>(createContent);
         }
     }

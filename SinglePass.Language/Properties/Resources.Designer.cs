@@ -573,6 +573,12 @@ namespace SinglePass.Language.Properties {
             }
         }
         
+        public static string ClearSearch => ResourceManager.GetString("ClearSearch", resourceCulture);
+
+        public static string ClearHotkey => ResourceManager.GetString("ClearHotkey", resourceCulture);
+
+        public static string NoCredentials => ResourceManager.GetString("NoCredentials", resourceCulture);
+
         /// <summary>
         ///   Looks up a localized string similar to Search.
         /// </summary>

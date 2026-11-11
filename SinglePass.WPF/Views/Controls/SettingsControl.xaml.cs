@@ -1,8 +1,6 @@
-﻿using MaterialDesignThemes.Wpf;
-using SinglePass.WPF.ViewModels;
+﻿using SinglePass.WPF.ViewModels;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 
 namespace SinglePass.WPF.Views.Controls
 {
@@ -16,15 +14,6 @@ namespace SinglePass.WPF.Views.Controls
         public SettingsControl()
         {
             InitializeComponent();
-        }
-
-        private void UserControl_Loaded(object sender, RoutedEventArgs e)
-        {
-            var darkColor = BaseTheme.Dark.GetBaseTheme().MaterialDesignPaper;
-            var lightColor = BaseTheme.Light.GetBaseTheme().MaterialDesignPaper;
-
-            DarkButton.Background = new SolidColorBrush(darkColor);
-            LightButton.Background = new SolidColorBrush(lightColor);
         }
 
         private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)

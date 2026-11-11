@@ -1,48 +1,30 @@
-﻿<controls:MaterialWindow
+﻿<Window
     x:Class="SinglePass.WPF.Views.Windows.LoginWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:controls="clr-namespace:SinglePass.WPF.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-    xmlns:local="clr-namespace:SinglePass.WPF.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:properties="clr-namespace:SinglePass.Language.Properties;assembly=SinglePass.Language"
     xmlns:vm="clr-namespace:SinglePass.WPF.ViewModels"
     Title="{x:Static properties:Resources.Authorize}"
+    Icon="/SinglePass.WPF;component/Resources/pass-man.ico"
     Width="400"
-    Height="300"
-    MinWidth="300"
-    MinHeight="200"
+    SizeToContent="Height"
+    ResizeMode="NoResize"
     d:DataContext="{x:Static vm:LoginWindowViewModel.DesignTimeInstance}"
-    Activated="MaterialWindow_Activated"
-    Closed="MaterialWindow_Closed"
+    Activated="Window_Activated"
+    Closed="Window_Closed"
     FocusManager.FocusedElement="{Binding ElementName=LoginPasswordBox}"
     UseLayoutRounding="True"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
     <Window.Resources>
-        <ResourceDictionary>
-            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-        </ResourceDictionary>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </Window.Resources>
-    <i:Interaction.Triggers>
-        <i:EventTrigger EventName="Loaded">
-            <i:InvokeCommandAction Command="{Binding LoadingCommand}" />
-        </i:EventTrigger>
-    </i:Interaction.Triggers>
-    <Grid>
-        <PasswordBox
-            x:Name="LoginPasswordBox"
-            Width="300"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            md:HintAssist.HelperText="{Binding HelperText}"
-            md:HintAssist.Hint="{Binding HintText}"
-            MaxLength="32"
-            PasswordChanged="PasswordBox_PasswordChanged"
-            Style="{StaticResource MaterialDesignOutlinedPasswordBox}">
+    <StackPanel Margin="24">
+        <Label Padding="0,0,0,6" Content="{Binding HintText}" Target="{Binding ElementName=LoginPasswordBox}" />
+        <PasswordBox x:Name="LoginPasswordBox" MaxLength="32" PasswordChanged="PasswordBox_PasswordChanged">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="GotFocus">
                     <i:InvokeCommandAction Command="{Binding RefreshCapsLockCommand}" />
@@ -52,31 +34,24 @@
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </PasswordBox>
+        <TextBlock Margin="0,6,0,0" Text="{Binding HelperText}" TextWrapping="Wrap" />
         <TextBlock
-            Margin="10"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Bottom"
-            Opacity="0.5"
+            Margin="0,4,0,0"
             Text="{x:Static properties:Resources.CAPSLOCKEnabled}"
-            TextAlignment="Right"
             Visibility="{Binding IsCapsLockEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
-        <StackPanel
-            Margin="16"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Bottom"
-            Orientation="Horizontal">
+        <ProgressBar
+            Height="4"
+            Margin="0,8,0,0"
+            IsIndeterminate="True"
+            Visibility="{Binding Loading, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        <StackPanel Margin="0,16,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
             <Button
-                Margin="0 0 8 0"
-                md:ButtonProgressAssist.IsIndeterminate="True"
-                md:ButtonProgressAssist.IsIndicatorVisible="{Binding Loading}"
+                Margin="0,0,8,0"
                 Command="{Binding LoadCredentialsCommand}"
                 Content="{x:Static properties:Resources.Enter}"
                 IsDefault="True"
-                Style="{StaticResource MaterialDesignFlatButton}" />
-            <Button
-                Content="{x:Static properties:Resources.Exit}"
-                IsCancel="True"
-                Style="{StaticResource MaterialDesignFlatButton}" />
+                Style="{DynamicResource AccentButtonStyle}" />
+            <Button Content="{x:Static properties:Resources.Exit}" IsCancel="True" />
         </StackPanel>
-    </Grid>
-</controls:MaterialWindow>
+    </StackPanel>
+</Window>

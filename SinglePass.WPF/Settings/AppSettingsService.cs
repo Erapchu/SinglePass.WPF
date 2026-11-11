@@ -19,7 +19,7 @@ namespace SinglePass.WPF.Settings
         private AppSettings _settings = new();
         public AppSettings Settings => _settings;
 
-        public MaterialDesignThemes.Wpf.BaseTheme ThemeMode
+        public AppTheme ThemeMode
         {
             get => Settings.ThemeMode;
             set => Settings.ThemeMode = value;
@@ -124,13 +124,10 @@ namespace SinglePass.WPF.Settings
                     }
 
                     // На современных ФС можно File.Replace, иначе — Move с overwrite
-                    if (OperatingSystem.IsWindows())
+                    if (OperatingSystem.IsWindows() && File.Exists(path))
                         File.Replace(tmp, path, bak, ignoreMetadataErrors: true);
                     else
-                    {
-                        if (File.Exists(path)) File.Delete(path);
-                        File.Move(tmp, path);
-                    }
+                        File.Move(tmp, path, overwrite: true);
 
                     _logger.LogInformation("Settings saved to {Path}", path);
                 }

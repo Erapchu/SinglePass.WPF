@@ -1,20 +1,21 @@
-﻿using SinglePass.WPF.Controls;
-using SinglePass.WPF.Helpers;
+﻿using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels;
 using SinglePass.WPF.Views.Controls;
 using System;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace SinglePass.WPF.Views.Windows
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : MaterialWindow
+    public partial class MainWindow : Window
     {
         private readonly AppSettingsService _appSettingsService;
+        private readonly DispatcherTimer _statusTimer = new() { Interval = TimeSpan.FromSeconds(3) };
 
         private MainWindowViewModel ViewModel => DataContext as MainWindowViewModel;
 
@@ -41,7 +42,8 @@ namespace SinglePass.WPF.Views.Windows
 
             mainViewModel.CredentialSelected += Vm_CredentialSelected;
             mainViewModel.ScrollIntoViewRequired += MainViewModel_ScrollIntoViewRequired;
-            mainViewModel.PasswordsVM.EnqueueSnackbarMessage += PasswordsVM_EnqueueSnackbarMessage;
+            mainViewModel.PasswordsVM.StatusMessageRequested += ShowStatusMessage;
+            _statusTimer.Tick += StatusTimer_Tick;
 
             DataContext = mainViewModel;
         }
@@ -52,12 +54,18 @@ namespace SinglePass.WPF.Views.Windows
                 passwordsControl.CredentialsListBox.ScrollIntoView(credVM);
         }
 
-        private void PasswordsVM_EnqueueSnackbarMessage(string message)
+        private void ShowStatusMessage(string message)
         {
-            if (SnackbarMain.MessageQueue is { } messageQueue)
-            {
-                messageQueue.Enqueue(message);
-            }
+            StatusText.Text = message;
+            StatusBanner.Visibility = Visibility.Visible;
+            _statusTimer.Stop();
+            _statusTimer.Start();
+        }
+
+        private void StatusTimer_Tick(object sender, EventArgs e)
+        {
+            _statusTimer.Stop();
+            StatusBanner.Visibility = Visibility.Collapsed;
         }
 
         private void Vm_CredentialSelected(CredentialViewModel credVM)
@@ -69,7 +77,7 @@ namespace SinglePass.WPF.Views.Windows
             }
         }
 
-        private void MaterialWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             //TODO: Shutdown process on main window close or hide window and cancel depend on settings
             Hide();
@@ -85,7 +93,7 @@ namespace SinglePass.WPF.Views.Windows
                 e.Handled = true;
         }
 
-        private void MaterialWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (e.NewValue is bool visibility && visibility && ViewModel.SelectedNavigationItem?.Content is PasswordsControl passwordsControl)
             {
@@ -93,8 +101,11 @@ namespace SinglePass.WPF.Views.Windows
             }
         }
 
-        private void MaterialWindow_Closed(object sender, EventArgs e)
+        private void Window_Closed(object sender, EventArgs e)
         {
+            _statusTimer.Stop();
+            ViewModel.PasswordsVM.StatusMessageRequested -= ShowStatusMessage;
+
             var saveRequired = false;
             if (ViewModel.SettingsVM.ThemeMode != _appSettingsService.ThemeMode)
             {
@@ -145,7 +156,7 @@ namespace SinglePass.WPF.Views.Windows
             }
         }
 
-        private void MaterialWindow_Loaded(object sender, RoutedEventArgs e)
+        private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             WindowState = _appSettingsService.MainWindowSettings?.WindowState ?? WindowState.Normal;
         }

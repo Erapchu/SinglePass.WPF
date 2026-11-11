@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MaterialDesignThemes.Wpf;
 using Microsoft.Extensions.Logging;
 using SinglePass.WPF.Hotkeys;
 using SinglePass.WPF.Services;
@@ -45,7 +44,7 @@ namespace SinglePass.WPF.ViewModels
         private Hotkey _showPopupHotkey;
 
         [ObservableProperty]
-        private BaseTheme _themeMode;
+        private AppTheme _themeMode;
 
         private SettingsViewModel() { }
 
@@ -93,11 +92,11 @@ namespace SinglePass.WPF.ViewModels
 
             if (success)
             {
-                MaterialMessageBox.ShowDialog(
+                MessageDialog.ShowDialog(
                     "Success",
                     "New password applied",
-                    MaterialMessageBoxButtons.OK,
-                    PackIconKind.Tick);
+                    MessageDialogButtons.OK,
+                    "\uE73E");
             }
         }
 
@@ -122,11 +121,6 @@ namespace SinglePass.WPF.ViewModels
             ShowPopupHotkey = Hotkey.Empty;
         }
 
-        [RelayCommand]
-        private void ChangeTheme(BaseTheme baseTheme)
-        {
-            _themeService.ThemeMode = baseTheme;
-            ThemeMode = baseTheme;
-        }
+        partial void OnThemeModeChanged(AppTheme value) => _themeService?.Apply(value);
     }
 }

@@ -1,4 +1,4 @@
-﻿using SinglePass.WPF.Controls;
+﻿using System.Windows;
 using SinglePass.WPF.ViewModels;
 using System.Windows.Controls;
 
@@ -7,7 +7,7 @@ namespace SinglePass.WPF.Views.Windows
     /// <summary>
     /// Interaction logic for LoginWindow.xaml
     /// </summary>
-    public partial class LoginWindow : MaterialWindow
+    public partial class LoginWindow : Window
     {
         private LoginWindowViewModel ViewModel => DataContext as LoginWindowViewModel;
 
@@ -32,12 +32,12 @@ namespace SinglePass.WPF.Views.Windows
             ViewModel.Password = passwordBox.Password;
         }
 
-        private void MaterialWindow_Closed(object sender, System.EventArgs e)
+        private void Window_Closed(object sender, System.EventArgs e)
         {
             ViewModel.Accept -= LoginWindowViewModel_Accept;
         }
 
-        private void MaterialWindow_Activated(object sender, System.EventArgs e)
+        private void Window_Activated(object sender, System.EventArgs e)
         {
             ViewModel.RefreshCapsLockCommand.Execute(null);
         }

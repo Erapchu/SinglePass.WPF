@@ -16,12 +16,6 @@ namespace SinglePass.WPF.Views.Controls
             InitializeComponent();
         }
 
-        private void ClearSearch_Click(object sender, RoutedEventArgs e)
-        {
-            SearchTextBox.Clear();
-            SearchTextBox.Focus();
-        }
-
         private void SortPopup_Opened(object sender, System.EventArgs e)
         {
             SortByName.Focus();

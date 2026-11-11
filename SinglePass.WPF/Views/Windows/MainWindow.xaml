@@ -44,7 +44,7 @@
     </i:Interaction.Triggers>
     <Grid Margin="8">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="155" />
+            <ColumnDefinition Width="200" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <ListView

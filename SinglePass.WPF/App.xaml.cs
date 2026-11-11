@@ -20,9 +20,7 @@ using SinglePass.WPF.ViewModels.Dialogs;
 using SinglePass.WPF.Views;
 using SinglePass.WPF.Views.Windows;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -37,23 +35,12 @@ namespace SinglePass.WPF
     public partial class App : System.Windows.Application
     {
         private readonly Mutex _mutex;
-        private readonly string _startupTracePath;
-        private readonly List<string> _startupTrace;
-        private readonly long _startupTimestamp;
 
         private bool IsFirstInstance { get; }
         public IServiceProvider Services { get; private set; }
 
         public App()
         {
-            _startupTimestamp = Stopwatch.GetTimestamp();
-            _startupTracePath = Environment.GetEnvironmentVariable("SINGLEPASS_STARTUP_TRACE");
-            if (!string.IsNullOrWhiteSpace(_startupTracePath))
-            {
-                _startupTrace = new List<string>();
-                MarkStartup("App constructor");
-            }
-
             _mutex = new Mutex(true, "SinglePass_CBD9AADE-1A82-48A2-9F7F-4F0EAAABEA30", out bool isFirstInstance);
             IsFirstInstance = isFirstInstance;
 
@@ -144,33 +131,21 @@ namespace SinglePass.WPF
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            MarkStartup("Startup event");
             // Override culture
             //SinglePass.Language.Properties.Resources.Culture = new System.Globalization.CultureInfo("en-US");
 
             Constants.EnsurePaths();
-            MarkStartup("Paths ready");
             var settings = AppSettingsService.Load(out var settingsReadError);
-            MarkStartup("Settings loaded");
             ThemeService.ApplyTheme(settings.ThemeMode);
-            MarkStartup("Theme applied");
 
             var preparation = new Lazy<Task<IServiceProvider>>(() => PrepareLoginAsync(settings, settingsReadError));
             var loginViewModel = new LoginWindowViewModel(
                 () => preparation.Value, File.Exists(Constants.PasswordsFilePath));
             var loginWindow = new LoginWindow(loginViewModel);
-            MarkStartup("Login window created");
-            if (_startupTrace is not null)
-            {
-                loginWindow.SourceInitialized += (_, _) => MarkStartup("Login SourceInitialized");
-                loginWindow.Loaded += (_, _) => MarkStartup("Login Loaded");
-            }
 
             async void OnLoginContentRendered(object sender, EventArgs args)
             {
                 loginWindow.ContentRendered -= OnLoginContentRendered;
-                MarkStartup("Login ContentRendered");
-                WriteStartupTrace();
                 try
                 {
                     await preparation.Value;
@@ -187,7 +162,6 @@ namespace SinglePass.WPF
             }
 
             loginWindow.ContentRendered += OnLoginContentRendered;
-            MarkStartup("Before ShowDialog");
             if (loginWindow.ShowDialog() != true)
             {
                 Shutdown();
@@ -208,7 +182,6 @@ namespace SinglePass.WPF
         private async Task<IServiceProvider> PrepareLoginAsync(AppSettings settings, Exception settingsReadError)
         {
             await Dispatcher.Yield(DispatcherPriority.ContextIdle);
-            MarkStartup("Before configuration and DI");
             Services = await Task.Run(() =>
             {
                 var configuration = BuildConfiguration();
@@ -231,33 +204,7 @@ namespace SinglePass.WPF
                     throw;
                 }
             });
-            MarkStartup("Login ready");
-            WriteStartupTrace();
             return Services;
-        }
-
-        private void MarkStartup(string stage)
-        {
-            if (_startupTrace is null)
-                return;
-
-            var elapsed = Stopwatch.GetElapsedTime(_startupTimestamp).TotalMilliseconds;
-            _startupTrace.Add(elapsed.ToString("F3", CultureInfo.InvariantCulture) + "\t" + stage);
-        }
-
-        private void WriteStartupTrace()
-        {
-            if (_startupTrace is null)
-                return;
-
-            try
-            {
-                File.WriteAllLines(_startupTracePath, _startupTrace);
-            }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
-            {
-                Trace.TraceWarning("Could not write startup timings: {0}", ex.Message);
-            }
         }
 
         private void Application_Exit(object sender, ExitEventArgs e)

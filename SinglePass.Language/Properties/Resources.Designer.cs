@@ -19,7 +19,7 @@ namespace SinglePass.Language.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class Resources {
@@ -138,6 +138,24 @@ namespace SinglePass.Language.Properties {
         public static string ChangePassword {
             get {
                 return ResourceManager.GetString("ChangePassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Clear shortcut.
+        /// </summary>
+        public static string ClearHotkey {
+            get {
+                return ResourceManager.GetString("ClearHotkey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Clear search.
+        /// </summary>
+        public static string ClearSearch {
+            get {
+                return ResourceManager.GetString("ClearSearch", resourceCulture);
             }
         }
         
@@ -457,6 +475,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No credentials.
+        /// </summary>
+        public static string NoCredentials {
+            get {
+                return ResourceManager.GetString("NoCredentials", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to OK.
         /// </summary>
         public static string OK {
@@ -573,12 +600,6 @@ namespace SinglePass.Language.Properties {
             }
         }
         
-        public static string ClearSearch => ResourceManager.GetString("ClearSearch", resourceCulture);
-
-        public static string ClearHotkey => ResourceManager.GetString("ClearHotkey", resourceCulture);
-
-        public static string NoCredentials => ResourceManager.GetString("NoCredentials", resourceCulture);
-
         /// <summary>
         ///   Looks up a localized string similar to Search.
         /// </summary>

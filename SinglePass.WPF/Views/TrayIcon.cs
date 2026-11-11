@@ -5,6 +5,9 @@ using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using System.Windows.Interop;
 using static SinglePass.WPF.Helpers.WinApiProvider;
 
@@ -13,7 +16,7 @@ namespace SinglePass.WPF.Views
     internal sealed class TrayIcon : IDisposable
     {
         private const int NotifyCallback = 0x8001; // WM_APP + 1
-        private const int ContextMenu = 0x007B;
+        private const int ContextMenuNotification = 0x007B;
         private const int LeftButtonUp = 0x0202;
         private const int RightButtonUp = 0x0205;
         private const int Select = 0x0400;
@@ -28,9 +31,6 @@ namespace SinglePass.WPF.Views
         private const uint IconFlag = 0x02;
         private const uint TipFlag = 0x04;
         private const uint ShowTipFlag = 0x80;
-        private const uint ExitCommand = 1;
-        private const uint ReturnMenuCommand = 0x0100;
-        private const uint RightButtonMenu = 0x0002;
         private const int SmallIconWidth = 49;
         private const int SmallIconHeight = 50;
 
@@ -40,6 +40,8 @@ namespace SinglePass.WPF.Views
         private readonly Icon _icon;
         private readonly uint _taskbarCreated;
         private NotifyIconData _data;
+        private ContextMenu _menu;
+        private bool _returnFocusToTray;
         private bool _version4;
         private bool _disposed;
 
@@ -95,7 +97,7 @@ namespace SinglePass.WPF.Views
             {
                 if (notification is Select or KeySelect)
                     _mainWindow.BringToFrontAndActivate();
-                else if (notification == ContextMenu)
+                else if (notification == ContextMenuNotification)
                     ShowMenu(GetMenuPosition(wParam));
             }
             else if (notification == LeftButtonUp)
@@ -132,33 +134,33 @@ namespace SinglePass.WPF.Views
 
         private void ShowMenu(POINT point)
         {
-            var menu = CreatePopupMenu();
-            if (menu == IntPtr.Zero)
-                return;
+            _menu ??= CreateMenu();
+            var position = _source.CompositionTarget.TransformFromDevice.Transform(new System.Windows.Point(point.X, point.Y));
+            _menu.HorizontalOffset = position.X;
+            _menu.VerticalOffset = position.Y;
 
-            uint command;
-            try
+            _returnFocusToTray = false;
+            _menu.IsOpen = true;
+            if (PresentationSource.FromVisual(_menu) is HwndSource popupSource)
+                SetForegroundWindow(popupSource.Handle);
+            _menu.Focus();
+        }
+
+        private ContextMenu CreateMenu()
+        {
+            var menu = new ContextMenu { Placement = PlacementMode.AbsolutePoint };
+            var exit = new MenuItem { Header = SinglePass.Language.Properties.Resources.Exit };
+            exit.Click += (_, _) => Application.Current.Shutdown();
+            menu.Items.Add(exit);
+
+            menu.PreviewKeyDown += (_, e) => _returnFocusToTray = e.Key == Key.Escape;
+            menu.Closed += (_, _) =>
             {
-                if (!AppendMenu(menu, 0, ExitCommand, SinglePass.Language.Properties.Resources.Exit))
-                    return;
+                if (!_disposed && _returnFocusToTray)
+                    ShellNotifyIcon(SetFocus, ref _data);
+            };
 
-                // Make the owner foreground so clicking outside dismisses the menu.
-                SetForegroundWindow(_data.Window);
-                command = TrackPopupMenuEx(menu, ReturnMenuCommand | RightButtonMenu, point.X, point.Y, _data.Window, IntPtr.Zero);
-            }
-            finally
-            {
-                DestroyMenu(menu);
-            }
-
-            if (_disposed)
-                return;
-
-            PostMessage(_data.Window, 0, IntPtr.Zero, IntPtr.Zero);
-            if (command == ExitCommand)
-                Application.Current.Shutdown();
-            else
-                ShellNotifyIcon(SetFocus, ref _data);
+            return menu;
         }
 
         public void Dispose()
@@ -167,6 +169,8 @@ namespace SinglePass.WPF.Views
                 return;
 
             _disposed = true;
+            if (_menu is not null)
+                _menu.IsOpen = false;
             ShellNotifyIcon(Delete, ref _data);
             _source.RemoveHook(WindowProc);
             _icon.Dispose();
@@ -217,19 +221,5 @@ namespace SinglePass.WPF.Views
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool GetCursorPos(out POINT point);
-
-        [DllImport("user32.dll")]
-        private static extern IntPtr CreatePopupMenu();
-
-        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool AppendMenu(IntPtr menu, uint flags, UIntPtr command, string text);
-
-        [DllImport("user32.dll")]
-        private static extern uint TrackPopupMenuEx(IntPtr menu, uint flags, int x, int y, IntPtr owner, IntPtr parameters);
-
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool DestroyMenu(IntPtr menu);
     }
 }

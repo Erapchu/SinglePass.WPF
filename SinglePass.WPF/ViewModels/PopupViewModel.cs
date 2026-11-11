@@ -7,11 +7,9 @@ using SinglePass.WPF.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Unidecode.NET;
 
 namespace SinglePass.WPF.ViewModels
 {
@@ -250,31 +248,8 @@ namespace SinglePass.WPF.ViewModels
                 {
                     filteredCredentials = await Task.Run(() =>
                     {
-                        string transliteratedText = null;
-                        if (Regex.IsMatch(filterText, @"\p{IsCyrillic}"))
-                        {
-                            // there is at least one cyrillic character in the string
-                            transliteratedText = filterText.Unidecode();
-                        }
-                        var translitCompare = !string.IsNullOrWhiteSpace(transliteratedText);
-
-                        var fCreds = new List<CredentialViewModel>();
-                        foreach (var cred in _credentialVMs)
-                        {
-                            var nameValue = cred.NameFieldVM.Value;
-                            var loginValue = cred.LoginFieldVM.Value;
-                            var websiteValue = cred.SiteFieldVM.Value;
-                            var otherValue = cred.OtherFieldVM.Value;
-
-                            if (nameValue.IndexOf(filterText, StringComparison.OrdinalIgnoreCase) != -1
-                                || (loginValue != null && loginValue.IndexOf(filterText, StringComparison.OrdinalIgnoreCase) != -1)
-                                || (websiteValue != null && websiteValue.IndexOf(filterText, StringComparison.OrdinalIgnoreCase) != -1)
-                                || (otherValue != null && otherValue.IndexOf(filterText, StringComparison.OrdinalIgnoreCase) != -1)
-                                || (translitCompare && nameValue.IndexOf(transliteratedText, StringComparison.OrdinalIgnoreCase) != -1))
-                            {
-                                fCreds.Add(cred);
-                            }
-                        }
+                        var search = new CredentialSearch(filterText);
+                        var fCreds = _credentialVMs.Where(search.Matches).ToList();
 
                         return fCreds;
                     });

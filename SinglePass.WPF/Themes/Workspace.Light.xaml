@@ -1,0 +1,59 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <LinearGradientBrush x:Key="WorkspaceFrame" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Offset="0" Color="#ECF3FD" />
+        <GradientStop Offset="0.57" Color="#E6EDF8" />
+        <GradientStop Offset="1" Color="#DBE9FC" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="WorkspaceFrameStroke" Color="#A4B9D7" />
+    <LinearGradientBrush x:Key="WorkspacePanel" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Offset="0" Color="#F9FBFF" />
+        <GradientStop Offset="0.57" Color="#F1F6FE" />
+        <GradientStop Offset="1" Color="#EDF4FE" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="WorkspaceSidebar" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Offset="0" Color="#F4F8FE" />
+        <GradientStop Offset="0.57" Color="#E9F1FD" />
+        <GradientStop Offset="1" Color="#E2EDFC" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="WorkspaceDetail" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Offset="0" Color="#FFFFFF" />
+        <GradientStop Offset="0.57" Color="#F3F7FF" />
+        <GradientStop Offset="1" Color="#E9F0FE" />
+    </LinearGradientBrush>
+    <RadialGradientBrush x:Key="WorkspaceGlow" Center="0.79,0.83" GradientOrigin="0.79,0.83" RadiusX="0.59" RadiusY="0.62">
+        <GradientStop Offset="0" Color="#287997F4" />
+        <GradientStop Offset="1" Color="#00000000" />
+    </RadialGradientBrush>
+    <SolidColorBrush x:Key="WorkspaceWave" Color="#206195E4" />
+    <SolidColorBrush x:Key="WorkspaceWaveStroke" Color="#306195E4" />
+    <SolidColorBrush x:Key="WorkspacePanelStroke" Color="#C3D1E6" />
+    <SolidColorBrush x:Key="WorkspaceText" Color="#15243B" />
+    <SolidColorBrush x:Key="WorkspaceMuted" Color="#4B5D77" />
+    <SolidColorBrush x:Key="WorkspaceField" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="WorkspaceFieldStroke" Color="#A7B9D1" />
+    <SolidColorBrush x:Key="WorkspaceButton" Color="#EBF2FD" />
+    <SolidColorBrush x:Key="WorkspaceHover" Color="#DDEBFD" />
+    <SolidColorBrush x:Key="WorkspacePressed" Color="#CADDF8" />
+    <LinearGradientBrush x:Key="WorkspaceSelection" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Offset="0" Color="#D6EAFF" />
+        <GradientStop Offset="1" Color="#C5DEFD" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="WorkspaceSelectedText" Color="#142D51" />
+    <SolidColorBrush x:Key="WorkspaceAccent" Color="#0871CF" />
+    <LinearGradientBrush x:Key="WorkspacePrimary" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Offset="0" Color="#096CC6" />
+        <GradientStop Offset="1" Color="#0753AD" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="WorkspacePrimaryHover" Color="#0962BA" />
+    <SolidColorBrush x:Key="WorkspacePrimaryPressed" Color="#074A9B" />
+    <SolidColorBrush x:Key="WorkspacePrimaryText" Color="#FFFFFF" />
+    <LinearGradientBrush x:Key="WorkspaceBadge" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Offset="0" Color="#3D64AA" />
+        <GradientStop Offset="1" Color="#2C4988" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="WorkspaceBadgeText" Color="#F3F7FF" />
+    <SolidColorBrush x:Key="WorkspaceSplitter" Color="#9FB7DB" />
+    <SolidColorBrush x:Key="WorkspaceCloseHover" Color="#F8CAD0" />
+</ResourceDictionary>

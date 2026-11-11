@@ -21,7 +21,7 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </UserControl.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <Border Margin="8" Style="{StaticResource Card}">
+        <Border Style="{StaticResource WorkspacePanelStyle}">
             <StackPanel>
                 <TextBlock Margin="0,0,0,12" FontSize="16" FontWeight="SemiBold" Text="Google Drive" />
                 <Button
@@ -29,7 +29,7 @@
                     Command="{Binding LoginCommand}"
                     CommandParameter="{x:Static cloud:CloudType.GoogleDrive}"
                     Content="{x:Static properties:Resources.SignIn}"
-                    Style="{DynamicResource AccentButtonStyle}"
+                    Style="{StaticResource WorkspacePrimaryButtonStyle}"
                     Visibility="{Binding GoogleDriveEnabled, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                 <StackPanel Visibility="{Binding GoogleDriveEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <TextBlock

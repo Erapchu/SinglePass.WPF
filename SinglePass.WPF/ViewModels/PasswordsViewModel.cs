@@ -43,22 +43,13 @@ namespace SinglePass.WPF.ViewModels
         private readonly AppSettingsService _appSettingsService;
         private readonly CredentialViewModelFactory _credentialViewModelFactory;
 
-        public event Action<CredentialViewModel> CredentialSelected;
         public event Action<CredentialViewModel> ScrollIntoViewRequired;
         public event Action<string> StatusMessageRequested;
 
         public ObservableCollectionDelayed<CredentialViewModel> DisplayedCredentials { get; private set; } = new();
 
+        [ObservableProperty]
         private CredentialViewModel _selectedCredentialVM;
-        public CredentialViewModel SelectedCredentialVM
-        {
-            get => _selectedCredentialVM;
-            set
-            {
-                SetProperty(ref _selectedCredentialVM, value);
-                CredentialSelected?.Invoke(value);
-            }
-        }
 
         private string _searchText;
         public string SearchText
@@ -338,5 +329,27 @@ namespace SinglePass.WPF.ViewModels
                 Process.Start(new ProcessStartInfo("cmd", $"/c start {site}") { CreateNoWindow = true });
             }
         }
+
+        [RelayCommand(CanExecute = nameof(CanOpenOtherInBrowser))]
+        private void OpenOtherInBrowser(string value)
+        {
+            if (!TryGetWebAddress(value, out var address))
+                return;
+
+            try
+            {
+                Process.Start(new ProcessStartInfo(address.AbsoluteUri) { UseShellExecute = true });
+            }
+            catch (System.ComponentModel.Win32Exception ex)
+            {
+                _logger.LogError(ex, "Failed to open the web browser.");
+            }
+        }
+
+        private static bool CanOpenOtherInBrowser(string value) => TryGetWebAddress(value, out _);
+
+        private static bool TryGetWebAddress(string value, out Uri address) =>
+            Uri.TryCreate(value, UriKind.Absolute, out address)
+            && (address.Scheme == Uri.UriSchemeHttps || address.Scheme == Uri.UriSchemeHttp);
     }
 }

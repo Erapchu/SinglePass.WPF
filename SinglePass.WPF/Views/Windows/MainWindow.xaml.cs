@@ -3,8 +3,10 @@ using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels;
 using SinglePass.WPF.Views.Controls;
 using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace SinglePass.WPF.Views.Windows
@@ -14,8 +16,16 @@ namespace SinglePass.WPF.Views.Windows
     /// </summary>
     public partial class MainWindow : Window
     {
+        // Let Fluent resolve the system theme and notify the workspace when its colors change.
+        private static readonly DependencyProperty FluentTextBrushProperty = DependencyProperty.Register(
+            "FluentTextBrush",
+            typeof(Brush),
+            typeof(MainWindow),
+            new PropertyMetadata(null, (window, _) => ((MainWindow)window).UpdateWorkspacePalette()));
+
         private readonly AppSettingsService _appSettingsService;
         private readonly DispatcherTimer _statusTimer = new() { Interval = TimeSpan.FromSeconds(3) };
+        private ResourceDictionary _workspacePalette;
 
         private MainWindowViewModel ViewModel => DataContext as MainWindowViewModel;
 
@@ -24,6 +34,10 @@ namespace SinglePass.WPF.Views.Windows
             AppSettingsService appSettingsService)
         {
             InitializeComponent();
+
+            SetResourceReference(FluentTextBrushProperty, "TextFillColorPrimaryBrush");
+            UpdateWorkspacePalette();
+            SystemParameters.StaticPropertyChanged += SystemParameters_StaticPropertyChanged;
 
             _appSettingsService = appSettingsService;
 
@@ -40,13 +54,48 @@ namespace SinglePass.WPF.Views.Windows
                 }
             }
 
-            mainViewModel.CredentialSelected += Vm_CredentialSelected;
             mainViewModel.ScrollIntoViewRequired += MainViewModel_ScrollIntoViewRequired;
             mainViewModel.PasswordsVM.StatusMessageRequested += ShowStatusMessage;
             _statusTimer.Tick += StatusTimer_Tick;
 
             DataContext = mainViewModel;
         }
+
+        private void UpdateWorkspacePalette()
+        {
+            var theme = SystemParameters.HighContrast ? "Contrast"
+                : GetValue(FluentTextBrushProperty) is SolidColorBrush { Color.ScG: > 0.5f } ? "Dark" : "Light";
+            var source = new Uri($"/SinglePass.WPF;component/Themes/Workspace.{theme}.xaml", UriKind.Relative);
+            if (_workspacePalette?.Source == source)
+                return;
+
+            var palette = new ResourceDictionary { Source = source };
+            var dictionaries = Resources.MergedDictionaries;
+            if (_workspacePalette is null)
+                dictionaries.Add(palette);
+            else
+                dictionaries[dictionaries.IndexOf(_workspacePalette)] = palette;
+
+            _workspacePalette = palette;
+        }
+
+        private void SystemParameters_StaticPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(SystemParameters.HighContrast))
+                UpdateWorkspacePalette();
+        }
+
+        private void MinimizeWindow_Click(object sender, RoutedEventArgs e) => SystemCommands.MinimizeWindow(this);
+
+        private void ToggleMaximize_Click(object sender, RoutedEventArgs e)
+        {
+            if (WindowState == WindowState.Maximized)
+                SystemCommands.RestoreWindow(this);
+            else
+                SystemCommands.MaximizeWindow(this);
+        }
+
+        private void CloseWindow_Click(object sender, RoutedEventArgs e) => SystemCommands.CloseWindow(this);
 
         private void MainViewModel_ScrollIntoViewRequired(CredentialViewModel credVM)
         {
@@ -66,15 +115,6 @@ namespace SinglePass.WPF.Views.Windows
         {
             _statusTimer.Stop();
             StatusBanner.Visibility = Visibility.Collapsed;
-        }
-
-        private void Vm_CredentialSelected(CredentialViewModel credVM)
-        {
-            var passStringLength = credVM?.PasswordFieldVM?.Value?.Length ?? 0;
-            if (ViewModel.SelectedNavigationItem?.Content is PasswordsControl passwordsControl)
-            {
-                passwordsControl.CredentialsDetailsControl.PasswordFieldBox.Password = new string('*', passStringLength);
-            }
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -103,6 +143,7 @@ namespace SinglePass.WPF.Views.Windows
 
         private void Window_Closed(object sender, EventArgs e)
         {
+            SystemParameters.StaticPropertyChanged -= SystemParameters_StaticPropertyChanged;
             _statusTimer.Stop();
             ViewModel.PasswordsVM.StatusMessageRequested -= ShowStatusMessage;
 

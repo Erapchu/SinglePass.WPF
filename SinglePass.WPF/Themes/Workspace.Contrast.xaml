@@ -1,0 +1,34 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <SolidColorBrush x:Key="WorkspaceFrame" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+    <SolidColorBrush x:Key="WorkspaceFrameStroke" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+    <SolidColorBrush x:Key="WorkspacePanel" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+    <SolidColorBrush x:Key="WorkspaceSidebar" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+    <SolidColorBrush x:Key="WorkspaceDetail" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+    <RadialGradientBrush x:Key="WorkspaceGlow" Center="0.79,0.83" GradientOrigin="0.79,0.83" RadiusX="0.59" RadiusY="0.62">
+        <GradientStop Offset="0" Color="#00000000" />
+        <GradientStop Offset="1" Color="#00000000" />
+    </RadialGradientBrush>
+    <SolidColorBrush x:Key="WorkspaceWave" Color="#00000000" />
+    <SolidColorBrush x:Key="WorkspaceWaveStroke" Color="#00000000" />
+    <SolidColorBrush x:Key="WorkspacePanelStroke" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+    <SolidColorBrush x:Key="WorkspaceText" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+    <SolidColorBrush x:Key="WorkspaceMuted" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+    <SolidColorBrush x:Key="WorkspaceField" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+    <SolidColorBrush x:Key="WorkspaceFieldStroke" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+    <SolidColorBrush x:Key="WorkspaceButton" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+    <SolidColorBrush x:Key="WorkspaceHover" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+    <SolidColorBrush x:Key="WorkspacePressed" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+    <SolidColorBrush x:Key="WorkspaceSelection" Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
+    <SolidColorBrush x:Key="WorkspaceSelectedText" Color="{DynamicResource {x:Static SystemColors.HighlightTextColorKey}}" />
+    <SolidColorBrush x:Key="WorkspaceAccent" Color="{DynamicResource {x:Static SystemColors.HotTrackColorKey}}" />
+    <SolidColorBrush x:Key="WorkspacePrimary" Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
+    <SolidColorBrush x:Key="WorkspacePrimaryHover" Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
+    <SolidColorBrush x:Key="WorkspacePrimaryPressed" Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
+    <SolidColorBrush x:Key="WorkspacePrimaryText" Color="{DynamicResource {x:Static SystemColors.HighlightTextColorKey}}" />
+    <SolidColorBrush x:Key="WorkspaceBadge" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+    <SolidColorBrush x:Key="WorkspaceBadgeText" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+    <SolidColorBrush x:Key="WorkspaceSplitter" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+    <SolidColorBrush x:Key="WorkspaceCloseHover" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+</ResourceDictionary>

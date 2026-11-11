@@ -23,7 +23,6 @@ namespace SinglePass.WPF.ViewModels
         }
         #endregion
 
-        public event Action<CredentialViewModel> CredentialSelected;
         public event Action<CredentialViewModel> ScrollIntoViewRequired;
 
         public PasswordsViewModel PasswordsVM { get; }
@@ -56,7 +55,6 @@ namespace SinglePass.WPF.ViewModels
             CloudSyncVM = cloudsViewModel;
             SettingsVM = settingsViewModel;
 
-            PasswordsVM.CredentialSelected += PasswordsViewModel_CredentialSelected;
             PasswordsVM.ScrollIntoViewRequired += PasswordsVM_ScrollIntoViewRequired;
             CloudSyncVM.SyncCompleted += SettingsViewModel_SyncCompleted;
 
@@ -85,11 +83,6 @@ namespace SinglePass.WPF.ViewModels
         private void SettingsViewModel_SyncCompleted()
         {
             PasswordsVM.ReloadCredentials();
-        }
-
-        private void PasswordsViewModel_CredentialSelected(CredentialViewModel credVM)
-        {
-            CredentialSelected?.Invoke(credVM);
         }
 
         [RelayCommand]

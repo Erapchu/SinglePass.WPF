@@ -130,6 +130,21 @@
   <data name="Search" xml:space="preserve">
     <value>Search</value>
   </data>
+  <data name="CloseWindow" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="MaximizeWindow" xml:space="preserve">
+    <value>Maximize</value>
+  </data>
+  <data name="MinimizeWindow" xml:space="preserve">
+    <value>Minimize</value>
+  </data>
+  <data name="RestoreWindow" xml:space="preserve">
+    <value>Restore</value>
+  </data>
+  <data name="SearchHint" xml:space="preserve">
+    <value>Find a password, website, or note…</value>
+  </data>
   <data name="Edit" xml:space="preserve">
     <value>Edit</value>
   </data>

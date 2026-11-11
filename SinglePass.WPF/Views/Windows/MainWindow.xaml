@@ -5,26 +5,58 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:helpers="clr-namespace:SinglePass.WPF.Helpers"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:properties="clr-namespace:SinglePass.Language.Properties;assembly=SinglePass.Language"
+    xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:SinglePass.WPF.ViewModels"
     Title="{x:Static helpers:Constants.AppName}"
     Icon="/SinglePass.WPF;component/Resources/pass-man.ico"
-    Width="800"
-    Height="550"
-    MinWidth="620"
-    MinHeight="300"
+    Width="1180"
+    Height="660"
+    MinWidth="740"
+    MinHeight="420"
     d:DataContext="{x:Static vm:MainWindowViewModel.DesignTimeInstance}"
     Closed="Window_Closed"
     Closing="Window_Closing"
     IsVisibleChanged="Window_IsVisibleChanged"
     Loaded="Window_Loaded"
+    Background="Transparent"
+    FontFamily="Segoe UI"
+    FontSize="15"
+    Foreground="{DynamicResource WorkspaceText}"
     UseLayoutRounding="True"
     WindowStartupLocation="Manual"
     mc:Ignorable="d">
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="44" CornerRadius="15" GlassFrameThickness="0" UseAeroCaptionButtons="False" />
+    </shell:WindowChrome.WindowChrome>
+    <Window.Template>
+        <ControlTemplate TargetType="Window">
+            <AdornerDecorator>
+                <ContentPresenter />
+            </AdornerDecorator>
+        </ControlTemplate>
+    </Window.Template>
     <Window.Resources>
-        <Style x:Key="NavigationListViewItem" BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="ListViewItem">
+        <Style BasedOn="{StaticResource WorkspaceButtonStyle}" TargetType="Button" />
+        <Style BasedOn="{StaticResource WorkspaceLabelStyle}" TargetType="Label" />
+        <Style BasedOn="{StaticResource WorkspaceTextBoxStyle}" TargetType="TextBox" />
+        <Style BasedOn="{StaticResource WorkspacePasswordBoxStyle}" TargetType="PasswordBox" />
+        <Style x:Key="CaptionButtonStyle" BasedOn="{StaticResource WorkspaceButtonStyle}" TargetType="Button">
+            <Setter Property="Width" Value="44" />
+            <Setter Property="Height" Value="34" />
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="IsTabStop" Value="False" />
+            <Setter Property="shell:WindowChrome.IsHitTestVisibleInChrome" Value="True" />
+        </Style>
+        <Style x:Key="NavigationListViewItem" BasedOn="{StaticResource WorkspaceListItemStyle}" TargetType="ListViewItem">
             <EventSetter Event="PreviewMouseDown" Handler="ListBoxItem_PreviewMouseDown" />
-            <Setter Property="Padding" Value="12,7" />
+            <Setter Property="MinHeight" Value="44" />
+            <Setter Property="Margin" Value="0,0,0,5" />
+            <Setter Property="Padding" Value="12,6,5,6" />
         </Style>
         <DataTemplate x:Key="NavigationItemTemplate" DataType="{x:Type vm:NavigationItemViewModel}">
             <Grid>
@@ -32,7 +64,7 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Style="{StaticResource SymbolText}" Text="{Binding Glyph}" />
+                <TextBlock FontSize="21" Style="{StaticResource WorkspaceIconStyle}" Text="{Binding Glyph}" />
                 <TextBlock Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center" Text="{Binding Name}" TextWrapping="Wrap" />
             </Grid>
         </DataTemplate>
@@ -42,38 +74,124 @@
             <i:InvokeCommandAction Command="{Binding LoadingCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
-    <Grid Margin="8">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
-        <ListView
-            Margin="0,0,8,0"
-            Background="Transparent"
-            BorderThickness="0"
-            ItemContainerStyle="{StaticResource NavigationListViewItem}"
-            ItemTemplate="{StaticResource NavigationItemTemplate}"
-            ItemsSource="{Binding NavigationItems}"
-            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-            SelectedItem="{Binding SelectedNavigationItem}" />
-        <ContentControl
-            Grid.Column="1"
-            HorizontalContentAlignment="Stretch"
-            VerticalContentAlignment="Stretch"
-            Content="{Binding SelectedNavigationItem.Content}" />
-        <Border
-            x:Name="StatusBanner"
-            Grid.Column="1"
-            Margin="8"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Bottom"
-            Padding="14,8"
-            AutomationProperties.LiveSetting="Polite"
-            Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
-            IsHitTestVisible="False"
-            Style="{StaticResource Card}"
-            Visibility="Collapsed">
-            <TextBlock x:Name="StatusText" />
-        </Border>
-    </Grid>
+    <Border Background="{DynamicResource WorkspaceFrame}" BorderBrush="{DynamicResource WorkspaceFrameStroke}">
+        <Border.Style>
+            <Style TargetType="Border">
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="15" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType=Window}}" Value="Maximized">
+                        <Setter Property="Margin" Value="{x:Static SystemParameters.WindowResizeBorderThickness}" />
+                        <Setter Property="CornerRadius" Value="0" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="49" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <DockPanel Margin="15,4,5,0" LastChildFill="False">
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top">
+                    <Button AutomationProperties.Name="{x:Static properties:Resources.MinimizeWindow}"
+                            Click="MinimizeWindow_Click" Style="{StaticResource CaptionButtonStyle}"
+                            ToolTip="{x:Static properties:Resources.MinimizeWindow}">
+                        <TextBlock FontSize="12" Style="{StaticResource WorkspaceIconStyle}" Text="&#xE921;" />
+                    </Button>
+                    <Button Click="ToggleMaximize_Click">
+                        <Button.Style>
+                            <Style BasedOn="{StaticResource CaptionButtonStyle}" TargetType="Button">
+                                <Setter Property="AutomationProperties.Name" Value="{x:Static properties:Resources.MaximizeWindow}" />
+                                <Setter Property="ToolTip" Value="{x:Static properties:Resources.MaximizeWindow}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType=Window}}" Value="Maximized">
+                                        <Setter Property="AutomationProperties.Name" Value="{x:Static properties:Resources.RestoreWindow}" />
+                                        <Setter Property="ToolTip" Value="{x:Static properties:Resources.RestoreWindow}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <TextBlock FontSize="12">
+                            <TextBlock.Style>
+                                <Style BasedOn="{StaticResource WorkspaceIconStyle}" TargetType="TextBlock">
+                                    <Setter Property="Text" Value="&#xE922;" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType=Window}}" Value="Maximized">
+                                            <Setter Property="Text" Value="&#xE923;" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Button>
+                    <Button AutomationProperties.Name="{x:Static properties:Resources.CloseWindow}"
+                            Click="CloseWindow_Click" ToolTip="{x:Static properties:Resources.CloseWindow}">
+                        <Button.Style>
+                            <Style BasedOn="{StaticResource CaptionButtonStyle}" TargetType="Button">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource WorkspaceCloseHover}" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <TextBlock FontSize="12" Style="{StaticResource WorkspaceIconStyle}" Text="&#xE8BB;" />
+                    </Button>
+                </StackPanel>
+                <StackPanel Margin="0,0,0,5" VerticalAlignment="Center" Orientation="Horizontal">
+                    <Image Width="25" Height="25" Source="/SinglePass.WPF;component/Resources/pass-man.ico" />
+                    <TextBlock Margin="9,0,0,0" VerticalAlignment="Center" FontSize="17" FontWeight="SemiBold"
+                               Text="{x:Static helpers:Constants.AppName}" />
+                </StackPanel>
+            </DockPanel>
+            <Grid Grid.Row="1" Margin="6,0,6,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="18*" MinWidth="180" MaxWidth="210" />
+                    <ColumnDefinition Width="82*" />
+                </Grid.ColumnDefinitions>
+                <Border Margin="0,0,9,0" Padding="0" Background="{DynamicResource WorkspaceSidebar}" Style="{StaticResource WorkspacePanelStyle}">
+                    <Grid>
+                        <Viewbox Height="188" Margin="1,0,1,1" VerticalAlignment="Bottom" IsHitTestVisible="False" Stretch="Fill">
+                            <Canvas Width="195" Height="188">
+                                <Path Data="M0,19 C55,-11 123,21 195,121 L195,173 Q195,188 180,188 H15 Q0,188 0,173 Z"
+                                      Fill="{DynamicResource WorkspaceWave}" />
+                                <Path Data="M0,19 C55,-11 123,21 195,121" Stroke="{DynamicResource WorkspaceWaveStroke}" />
+                                <Path Data="M0,81 C54,52 116,79 194,168 L194,173 Q194,188 180,188 H15 Q0,188 0,173 Z"
+                                      Fill="{DynamicResource WorkspaceWave}" />
+                                <Path Data="M0,81 C54,52 116,79 194,168" Stroke="{DynamicResource WorkspaceWaveStroke}" />
+                                <Path Data="M24,185 C92,129 150,137 191,181 Q188,188 180,188 H24 Z"
+                                      Fill="{DynamicResource WorkspaceWave}" />
+                            </Canvas>
+                        </Viewbox>
+                        <ListView
+                            Margin="7,14,6,7"
+                            ItemContainerStyle="{StaticResource NavigationListViewItem}"
+                            ItemTemplate="{StaticResource NavigationItemTemplate}"
+                            ItemsSource="{Binding NavigationItems}"
+                            SelectedItem="{Binding SelectedNavigationItem}"
+                            Style="{StaticResource WorkspaceListStyle}" />
+                    </Grid>
+                </Border>
+                <ContentControl
+                    Grid.Column="1"
+                    HorizontalContentAlignment="Stretch"
+                    VerticalContentAlignment="Stretch"
+                    Content="{Binding SelectedNavigationItem.Content}" />
+                <Border
+                    x:Name="StatusBanner"
+                    Grid.Column="1"
+                    Margin="8"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    Padding="14,8"
+                    AutomationProperties.LiveSetting="Polite"
+                    IsHitTestVisible="False"
+                    Style="{StaticResource WorkspacePanelStyle}"
+                    Visibility="Collapsed">
+                    <TextBlock x:Name="StatusText" />
+                </Border>
+            </Grid>
+        </Grid>
+    </Border>
 </Window>

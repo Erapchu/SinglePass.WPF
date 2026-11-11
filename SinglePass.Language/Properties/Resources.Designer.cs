@@ -573,6 +573,16 @@ namespace SinglePass.Language.Properties {
             }
         }
         
+        public static string CloseWindow => ResourceManager.GetString("CloseWindow", resourceCulture);
+
+        public static string MaximizeWindow => ResourceManager.GetString("MaximizeWindow", resourceCulture);
+
+        public static string MinimizeWindow => ResourceManager.GetString("MinimizeWindow", resourceCulture);
+
+        public static string RestoreWindow => ResourceManager.GetString("RestoreWindow", resourceCulture);
+
+        public static string SearchHint => ResourceManager.GetString("SearchHint", resourceCulture);
+
         public static string ClearSearch => ResourceManager.GetString("ClearSearch", resourceCulture);
 
         public static string ClearHotkey => ResourceManager.GetString("ClearHotkey", resourceCulture);

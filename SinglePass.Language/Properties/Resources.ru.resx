@@ -150,6 +150,21 @@
   <data name="Search" xml:space="preserve">
     <value>Поиск</value>
   </data>
+  <data name="CloseWindow" xml:space="preserve">
+    <value>Закрыть</value>
+  </data>
+  <data name="MaximizeWindow" xml:space="preserve">
+    <value>Развернуть</value>
+  </data>
+  <data name="MinimizeWindow" xml:space="preserve">
+    <value>Свернуть</value>
+  </data>
+  <data name="RestoreWindow" xml:space="preserve">
+    <value>Восстановить</value>
+  </data>
+  <data name="SearchHint" xml:space="preserve">
+    <value>Найти пароль, сайт или заметку…</value>
+  </data>
   <data name="Settings" xml:space="preserve">
     <value>Настройки</value>
   </data>

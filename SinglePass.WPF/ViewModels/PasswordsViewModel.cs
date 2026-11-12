@@ -11,10 +11,13 @@ using SinglePass.WPF.ViewModels.Dialogs;
 using SinglePass.WPF.Views.Helpers;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace SinglePass.WPF.ViewModels
@@ -49,6 +52,7 @@ namespace SinglePass.WPF.ViewModels
         public event Action<string> StatusMessageRequested;
 
         public ObservableCollectionDelayed<CredentialViewModel> DisplayedCredentials { get; private set; } = new();
+        public ListCollectionView GroupedCredentials { get; private set; }
 
         [ObservableProperty]
         public partial CredentialViewModel SelectedCredentialVM { get; set; }
@@ -108,13 +112,16 @@ namespace SinglePass.WPF.ViewModels
         [ObservableProperty]
         public partial bool IsPasswordVisible { get; set; }
 
-        private PasswordsViewModel() { }
+        private PasswordsViewModel()
+        {
+            GroupedCredentials = CreateGroupedView(DisplayedCredentials, SortType.Name);
+        }
 
         public PasswordsViewModel(
             CredentialsCryptoService credentialsCryptoService,
             ILogger<PasswordsViewModel> logger,
             AppSettingsService appSettingsService,
-            CredentialViewModelFactory credentialViewModelFactory)
+            CredentialViewModelFactory credentialViewModelFactory) : this()
         {
             _credentialsCryptoService = credentialsCryptoService;
             _logger = logger;
@@ -166,8 +173,7 @@ namespace SinglePass.WPF.ViewModels
                         credentials.RemoveAll(item => !search.Matches(item));
                     }
 
-                    SortAndOrder(credentials, sort, order);
-                    return credentials;
+                    return SortAndOrder(credentials, sort, order);
                 });
 
                 if (request != _displayRequest)
@@ -175,7 +181,9 @@ namespace SinglePass.WPF.ViewModels
 
                 var selection = keepSelection ? SelectedCredentialVM : null;
                 DisplayedCredentials = new ObservableCollectionDelayed<CredentialViewModel>(filtered);
+                GroupedCredentials = CreateGroupedView(DisplayedCredentials, sort);
                 OnPropertyChanged(nameof(DisplayedCredentials));
+                OnPropertyChanged(nameof(GroupedCredentials));
                 var newSelection = selection != null && filtered.Contains(selection)
                     ? selection
                     : DisplayedCredentials.FirstOrDefault();
@@ -241,19 +249,50 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
-        private static void SortAndOrder(List<CredentialViewModel> credentials, SortType sort, OrderType order)
+        private static List<CredentialViewModel> SortAndOrder(List<CredentialViewModel> credentials, SortType sort, OrderType order)
         {
-            Comparison<CredentialViewModel> compare = sort switch
+            var sorted = sort switch
             {
-                SortType.Created => (a, b) => a.CreationTime.CompareTo(b.CreationTime),
-                SortType.Modified => (a, b) => a.LastModifiedTime.CompareTo(b.LastModifiedTime),
-                _ => (a, b) => StringComparer.CurrentCulture.Compare(a.NameFieldVM.Value, b.NameFieldVM.Value)
+                SortType.Created => credentials.OrderBy(item => item.CreationTime),
+                SortType.Modified => credentials.OrderBy(item => item.LastModifiedTime),
+                _ => credentials.OrderBy(GetInitial, StringComparer.CurrentCulture)
+                    .ThenBy(GetInitial, StringComparer.Ordinal)
+                    .ThenBy(item => item.NameFieldVM.Value, StringComparer.CurrentCulture)
             };
 
+            var result = sorted.ToList();
             if (order == OrderType.Descending)
-                credentials.Sort((a, b) => compare(b, a));
-            else
-                credentials.Sort(compare);
+                result.Reverse();
+
+            return result;
+        }
+
+        private static ListCollectionView CreateGroupedView(ObservableCollectionDelayed<CredentialViewModel> credentials, SortType sort)
+        {
+            var view = new ListCollectionView(credentials) { IsDataInGroupOrder = true };
+            view.GroupDescriptions.Add(new CredentialGroupDescription(sort));
+            return view;
+        }
+
+        private static string GetInitial(CredentialViewModel credential)
+        {
+            var name = credential.NameFieldVM.Value?.TrimStart();
+            return !string.IsNullOrEmpty(name) && char.IsLetter(name, 0)
+                ? StringInfo.GetNextTextElement(name).ToUpperInvariant().Normalize()
+                : "#";
+        }
+
+        private sealed class CredentialGroupDescription(SortType sort) : GroupDescription
+        {
+            public override object GroupNameFromItem(object item, int level, CultureInfo culture)
+            {
+                var credential = (CredentialViewModel)item;
+                if (sort == SortType.Name)
+                    return GetInitial(credential);
+
+                var date = sort == SortType.Created ? credential.CreationTime : credential.LastModifiedTime;
+                return date == default ? null : new DateTime(date.Year, date.Month, 1);
+            }
         }
 
         [RelayCommand]

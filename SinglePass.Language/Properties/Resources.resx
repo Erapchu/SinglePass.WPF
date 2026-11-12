@@ -358,4 +358,7 @@
   <data name="OldestFirst" xml:space="preserve">
     <value>Oldest first</value>
   </data>
+  <data name="NoDate" xml:space="preserve">
+    <value>No date</value>
+  </data>
 </root>

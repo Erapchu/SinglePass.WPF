@@ -378,4 +378,7 @@
   <data name="OldestFirst" xml:space="preserve">
     <value>Сначала старые</value>
   </data>
+  <data name="NoDate" xml:space="preserve">
+    <value>Без даты</value>
+  </data>
 </root>

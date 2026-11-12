@@ -511,6 +511,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No date.
+        /// </summary>
+        public static string NoDate {
+            get {
+                return ResourceManager.GetString("NoDate", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to OK.
         /// </summary>
         public static string OK {

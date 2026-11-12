@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace SinglePass.WPF.ViewModels
 {
@@ -46,6 +47,10 @@ namespace SinglePass.WPF.ViewModels
         private readonly List<CredentialViewModel> _credentialVMs = new();
         private readonly AppSettingsService _appSettingsService;
         private readonly CredentialViewModelFactory _credentialViewModelFactory;
+        private Task _initialLoad;
+
+        [ObservableProperty]
+        public partial bool HasLoadedCredentials { get; private set; }
 
         public event Action<CredentialViewModel> CredentialSelected;
         public event Action<CredentialViewModel> ScrollIntoViewRequired;
@@ -141,14 +146,37 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
-        public void ReloadCredentials()
+        public Task LoadInitialCredentialsAsync() => _initialLoad ??= LoadInitialCredentialsCoreAsync();
+
+        private async Task LoadInitialCredentialsCoreAsync()
         {
             try
             {
+                // Let WPF render the window before publishing the initial list.
+                await Dispatcher.Yield(DispatcherPriority.Background);
+                var credentials = await Task.Run(_credentialViewModelFactory.ProvideAllNew);
+                _credentialVMs.AddRange(credentials);
+                await DisplayCredentialsAsync();
+                HasLoadedCredentials = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, string.Empty);
+            }
+        }
+
+        public async Task ReloadCredentialsAsync()
+        {
+            try
+            {
+                if (_initialLoad is not null)
+                    await _initialLoad;
+
                 _credentialVMs.Clear();
                 _credentialVMs.AddRange(_credentialViewModelFactory.ProvideAllNew());
 
-                _ = DisplayCredentialsAsync();
+                await DisplayCredentialsAsync();
+                HasLoadedCredentials = true;
             }
             catch (Exception ex)
             {
@@ -201,6 +229,9 @@ namespace SinglePass.WPF.ViewModels
         [RelayCommand]
         private async Task Add()
         {
+            if (_initialLoad is not null)
+                await _initialLoad;
+
             var newCredVM = _credentialViewModelFactory.ProvideNew(Credential.CreateNew());
             var result = CredentialEditDialog.ShowDialog(
                 newCredVM,

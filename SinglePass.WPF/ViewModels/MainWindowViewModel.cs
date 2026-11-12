@@ -82,9 +82,9 @@ namespace SinglePass.WPF.ViewModels
             ScrollIntoViewRequired?.Invoke(credVM);
         }
 
-        private void SettingsViewModel_SyncCompleted()
+        private async void SettingsViewModel_SyncCompleted()
         {
-            PasswordsVM.ReloadCredentials();
+            await PasswordsVM.ReloadCredentialsAsync();
         }
 
         private void PasswordsViewModel_CredentialSelected(CredentialViewModel credVM)
@@ -95,11 +95,8 @@ namespace SinglePass.WPF.ViewModels
         [RelayCommand]
         private async Task LoadingAsync()
         {
-            // Delay to boost loading of the window
-            await Task.Delay(1);
-
             SelectedNavigationItem = NavigationItems.FirstOrDefault();
-            PasswordsVM.ReloadCredentials();
+            await PasswordsVM.LoadInitialCredentialsAsync();
         }
     }
 }

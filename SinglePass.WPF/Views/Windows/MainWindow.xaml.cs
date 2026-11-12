@@ -145,6 +145,12 @@ namespace SinglePass.WPF.Views.Windows
             ViewModel.PasswordsVM.StatusMessageRequested -= ShowStatusMessage;
 
             var saveRequired = false;
+            if (ViewModel.SettingsVM.Language != _appSettingsService.Language)
+            {
+                _appSettingsService.Language = ViewModel.SettingsVM.Language;
+                saveRequired = true;
+            }
+
             if (ViewModel.SettingsVM.ThemeMode != _appSettingsService.ThemeMode)
             {
                 _appSettingsService.ThemeMode = ViewModel.SettingsVM.ThemeMode;

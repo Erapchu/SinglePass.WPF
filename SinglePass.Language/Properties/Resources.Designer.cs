@@ -340,6 +340,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Language.
+        /// </summary>
+        public static string Language {
+            get {
+                return ResourceManager.GetString("Language", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Light.
         /// </summary>
         public static string Light {
@@ -456,6 +465,15 @@ namespace SinglePass.Language.Properties {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to New password applied.
+        /// </summary>
+        public static string NewPasswordApplied {
+            get {
+                return ResourceManager.GetString("NewPasswordApplied", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to No.
         /// </summary>
@@ -708,6 +726,15 @@ namespace SinglePass.Language.Properties {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to System default.
+        /// </summary>
+        public static string SystemLanguage {
+            get {
+                return ResourceManager.GetString("SystemLanguage", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Text copied!.
         /// </summary>

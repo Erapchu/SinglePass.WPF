@@ -12,6 +12,7 @@ using SinglePass.WPF.Authorization.TokenHolders;
 using SinglePass.WPF.Clouds.Services;
 using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Hotkeys;
+using SinglePass.WPF.Localization;
 using SinglePass.WPF.Options;
 using SinglePass.WPF.Services;
 using SinglePass.WPF.Settings;
@@ -131,11 +132,9 @@ namespace SinglePass.WPF
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            // Override culture
-            //SinglePass.Language.Properties.Resources.Culture = new System.Globalization.CultureInfo("en-US");
-
             Constants.EnsurePaths();
             var settings = AppSettingsService.Load(out var settingsReadError);
+            LocalizationManager.Instance.Apply(settings.Language);
             ThemeService.ApplyTheme(settings.ThemeMode);
 
             var preparation = new Lazy<Task<IServiceProvider>>(() => PrepareLoginAsync(settings, settingsReadError));

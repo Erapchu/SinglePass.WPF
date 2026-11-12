@@ -5,9 +5,9 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:properties="clr-namespace:SinglePass.Language.Properties;assembly=SinglePass.Language"
+    xmlns:loc="clr-namespace:SinglePass.WPF.Localization"
     xmlns:vm="clr-namespace:SinglePass.WPF.ViewModels"
-    Title="{x:Static properties:Resources.Authorize}"
+    Title="{Binding [Authorize], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
     Icon="/SinglePass.WPF;component/Resources/pass-man.ico"
     Width="400"
     Height="240"
@@ -35,7 +35,7 @@
                 DockPanel.Dock="Right"
                 Margin="12,0,0,0"
                 VerticalAlignment="Center"
-                Text="{x:Static properties:Resources.CAPSLOCKEnabled}"
+                Text="{Binding [CAPSLOCKEnabled], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
                 Visibility="{Binding IsCapsLockEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <Label x:Name="PasswordLabel" Padding="0" Content="{Binding HintText}" Target="{Binding ElementName=LoginPasswordBox}" />
         </DockPanel>
@@ -53,10 +53,10 @@
                 DockPanel.Dock="Right"
                 Margin="4,0,0,0"
                 Padding="8,4"
-                AutomationProperties.Name="{x:Static properties:Resources.ShowHidePassword}"
+                AutomationProperties.Name="{Binding [ShowHidePassword], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
                 Checked="ShowPassword_Changed"
                 Unchecked="ShowPassword_Changed"
-                ToolTip="{x:Static properties:Resources.ShowHidePassword}">
+                ToolTip="{Binding [ShowHidePassword], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}">
                 <TextBlock>
                     <TextBlock.Style>
                         <Style TargetType="TextBlock" BasedOn="{StaticResource SymbolText}">
@@ -97,10 +97,10 @@
             <Button
                 Margin="0,0,8,0"
                 Command="{Binding LoadCredentialsCommand}"
-                Content="{x:Static properties:Resources.Enter}"
+                Content="{Binding [Enter], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
                 IsDefault="True"
                 Style="{DynamicResource AccentButtonStyle}" />
-            <Button Content="{x:Static properties:Resources.Exit}" IsCancel="True" />
+            <Button Content="{Binding [Exit], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" IsCancel="True" />
         </StackPanel>
     </Grid>
 </Window>

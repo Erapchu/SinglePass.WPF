@@ -7,7 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:properties="clr-namespace:SinglePass.Language.Properties;assembly=SinglePass.Language"
+    xmlns:loc="clr-namespace:SinglePass.WPF.Localization"
     xmlns:vm="clr-namespace:SinglePass.WPF.ViewModels"
     d:DataContext="{x:Static vm:CloudSyncViewModel.DesignTimeInstance}"
     mc:Ignorable="d">
@@ -28,12 +28,12 @@
                     HorizontalAlignment="Left"
                     Command="{Binding LoginCommand}"
                     CommandParameter="{x:Static cloud:CloudType.GoogleDrive}"
-                    Content="{x:Static properties:Resources.SignIn}"
+                    Content="{Binding [SignIn], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
                     Style="{DynamicResource AccentButtonStyle}"
                     Visibility="{Binding GoogleDriveEnabled, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                 <StackPanel Visibility="{Binding GoogleDriveEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <TextBlock
-                        Text="{x:Static properties:Resources.Loading}"
+                        Text="{Binding [Loading], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
                         Visibility="{Binding FetchingUserInfo, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     <StackPanel
                         Margin="0,0,0,12"
@@ -51,17 +51,17 @@
                             Margin="0,0,8,4"
                             Command="{Binding SyncCredentialsCommand}"
                             CommandParameter="{x:Static cloud:CloudType.GoogleDrive}"
-                            Content="{x:Static properties:Resources.Sync}" />
+                            Content="{Binding [Sync], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
                         <Button
                             Margin="0,0,8,4"
                             Command="{Binding UploadCredentialsCommand}"
                             CommandParameter="{x:Static cloud:CloudType.GoogleDrive}"
-                            Content="{x:Static properties:Resources.Upload}" />
+                            Content="{Binding [Upload], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
                         <Button
                             Margin="0,0,0,4"
                             Command="{Binding LogoutCommand}"
                             CommandParameter="{x:Static cloud:CloudType.GoogleDrive}"
-                            Content="{x:Static properties:Resources.SignOut}" />
+                            Content="{Binding [SignOut], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
                     </WrapPanel>
                     <ProgressBar Height="4" Margin="0,8,0,0" IsIndeterminate="True">
                         <ProgressBar.Style>

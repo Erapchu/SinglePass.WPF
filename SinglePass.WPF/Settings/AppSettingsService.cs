@@ -25,6 +25,12 @@ namespace SinglePass.WPF.Settings
             set => Settings.ThemeMode = value;
         }
 
+        public string Language
+        {
+            get => Settings.Language;
+            set => Settings.Language = value;
+        }
+
         public bool GoogleDriveEnabled
         {
             get => Settings.GoogleDriveEnabled;

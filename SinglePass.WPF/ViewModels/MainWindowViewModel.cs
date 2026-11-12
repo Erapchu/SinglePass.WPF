@@ -63,15 +63,15 @@ namespace SinglePass.WPF.ViewModels
             NavigationItems = new ObservableCollectionDelayed<NavigationItemViewModel>(new List<NavigationItemViewModel>()
             {
                 new NavigationItemViewModel(
-                    SinglePass.Language.Properties.Resources.Passwords,
+                    nameof(SinglePass.Language.Properties.Resources.Passwords),
                     "\uE72E",
                     () => new PasswordsControl() { DataContext = PasswordsVM }),
                 new NavigationItemViewModel(
-                    SinglePass.Language.Properties.Resources.CloudSync,
+                    nameof(SinglePass.Language.Properties.Resources.CloudSync),
                     "\uE753",
                     () => new CloudSyncControl() { DataContext = CloudSyncVM }),
                 new NavigationItemViewModel(
-                    SinglePass.Language.Properties.Resources.Settings,
+                    nameof(SinglePass.Language.Properties.Resources.Settings),
                     "\uE713",
                     () => new SettingsControl() { DataContext = SettingsVM }),
             });

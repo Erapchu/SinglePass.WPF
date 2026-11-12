@@ -6,7 +6,7 @@
     xmlns:helpers="clr-namespace:SinglePass.WPF.Helpers"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:properties="clr-namespace:SinglePass.Language.Properties;assembly=SinglePass.Language"
+    xmlns:loc="clr-namespace:SinglePass.WPF.Localization"
     xmlns:vm="clr-namespace:SinglePass.WPF.ViewModels"
     Title="{x:Static helpers:Constants.AppName}"
     Width="260"
@@ -39,8 +39,8 @@
                         Padding="4"
                         Command="{Binding Data.SetAndCloseCommand, Source={StaticResource Proxy}}"
                         CommandParameter="{Binding LoginFieldVM}"
-                        AutomationProperties.Name="{x:Static properties:Resources.Login}"
-                        ToolTip="{x:Static properties:Resources.Login}">
+                        AutomationProperties.Name="{Binding [Login], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                        ToolTip="{Binding [Login], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}">
                         <TextBlock Style="{StaticResource SymbolText}" Text="&#xE77B;" />
                     </Button>
                     <Button
@@ -48,8 +48,8 @@
                         Padding="4"
                         Command="{Binding Data.SetAndCloseCommand, Source={StaticResource Proxy}}"
                         CommandParameter="{Binding PasswordFieldVM}"
-                        AutomationProperties.Name="{x:Static properties:Resources.Password}"
-                        ToolTip="{x:Static properties:Resources.Password}">
+                        AutomationProperties.Name="{Binding [Password], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                        ToolTip="{Binding [Password], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}">
                         <TextBlock Style="{StaticResource SymbolText}" Text="&#xE72E;" />
                     </Button>
                 </StackPanel>
@@ -73,10 +73,10 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Label Padding="0,0,0,6" Content="{x:Static properties:Resources.Search}" Target="{Binding ElementName=SearchTextBox}" />
+        <Label Padding="0,0,0,6" Content="{Binding [Search], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Target="{Binding ElementName=SearchTextBox}" />
         <DockPanel Grid.Row="1" Margin="0,0,0,8">
             <Button DockPanel.Dock="Right" Margin="4,0,0,0" Padding="6,4" Click="ClearSearch_Click"
-                    AutomationProperties.Name="{x:Static properties:Resources.ClearSearch}" ToolTip="{x:Static properties:Resources.ClearSearch}">
+                    AutomationProperties.Name="{Binding [ClearSearch], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" ToolTip="{Binding [ClearSearch], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}">
                 <TextBlock Style="{StaticResource SymbolText}" Text="&#xE711;" />
             </Button>
             <TextBox x:Name="SearchTextBox" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}">

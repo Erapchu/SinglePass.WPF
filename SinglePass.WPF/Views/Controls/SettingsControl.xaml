@@ -5,51 +5,62 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:properties="clr-namespace:SinglePass.Language.Properties;assembly=SinglePass.Language"
+    xmlns:loc="clr-namespace:SinglePass.WPF.Localization"
     xmlns:settings="clr-namespace:SinglePass.WPF.Settings"
     xmlns:vm="clr-namespace:SinglePass.WPF.ViewModels"
     d:DataContext="{x:Static vm:SettingsViewModel.DesignTimeInstance}"
     DataContextChanged="UserControl_DataContextChanged"
     mc:Ignorable="d">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </UserControl.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="8">
             <Border Margin="0,0,0,8" Style="{StaticResource Card}">
                 <StackPanel>
-                    <Label Padding="0,0,0,8" FontWeight="SemiBold" Content="{x:Static properties:Resources.Theme}" Target="{Binding ElementName=ThemeSelector}" />
+                    <Label Padding="0,0,0,8" FontWeight="SemiBold" Content="{Binding [Theme], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Target="{Binding ElementName=ThemeSelector}" />
                     <ComboBox x:Name="ThemeSelector" MinWidth="150" HorizontalAlignment="Left"
                               SelectedValue="{Binding ThemeMode, Mode=TwoWay}" SelectedValuePath="Tag">
-                        <ComboBoxItem Content="{x:Static properties:Resources.System}" Tag="{x:Static settings:AppTheme.Inherit}" />
-                        <ComboBoxItem Content="{x:Static properties:Resources.Light}" Tag="{x:Static settings:AppTheme.Light}" />
-                        <ComboBoxItem Content="{x:Static properties:Resources.Dark}" Tag="{x:Static settings:AppTheme.Dark}" />
+                        <ComboBoxItem Content="{Binding [System], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Tag="{x:Static settings:AppTheme.Inherit}" />
+                        <ComboBoxItem Content="{Binding [Light], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Tag="{x:Static settings:AppTheme.Light}" />
+                        <ComboBoxItem Content="{Binding [Dark], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Tag="{x:Static settings:AppTheme.Dark}" />
+                    </ComboBox>
+                    <Label Padding="0,12,0,8" FontWeight="SemiBold" Content="{Binding [Language], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Target="{Binding ElementName=LanguageSelector}" />
+                    <ComboBox x:Name="LanguageSelector" MinWidth="150" HorizontalAlignment="Left"
+                              SelectedValue="{Binding Language, Mode=TwoWay}" SelectedValuePath="Tag">
+                        <ComboBoxItem Content="{Binding [SystemLanguage], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Tag="system" />
+                        <ComboBoxItem Content="English" Tag="en" />
+                        <ComboBoxItem Content="Русский" Tag="ru" />
                     </ComboBox>
                 </StackPanel>
             </Border>
             <Border Margin="0,0,0,8" Style="{StaticResource Card}">
                 <StackPanel>
-                    <TextBlock Margin="0,0,0,8" FontWeight="SemiBold" Text="{x:Static properties:Resources.ChangePassword}" />
-                    <Label Padding="0,0,0,6" Content="{x:Static properties:Resources.NewPassword}" Target="{Binding ElementName=NewPasswordBox}" />
+                    <TextBlock Margin="0,0,0,8" FontWeight="SemiBold" Text="{Binding [ChangePassword], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
+                    <Label Padding="0,0,0,6" Content="{Binding [NewPassword], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Target="{Binding ElementName=NewPasswordBox}" />
                     <DockPanel>
                         <Button
                             DockPanel.Dock="Right"
                             Margin="8,0,0,0"
                             Command="{Binding ChangePasswordCommand}"
-                            Content="{x:Static properties:Resources.Change}" />
+                            Content="{Binding [Change], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
                         <PasswordBox FontFamily="{StaticResource PasswordFontFamily}" FontSize="{StaticResource PasswordFontSize}" x:Name="NewPasswordBox" MaxLength="32" PasswordChanged="PasswordBox_PasswordChanged" />
                     </DockPanel>
-                    <TextBlock Margin="0,4,0,0" Text="{Binding NewPasswordHelperText}" TextWrapping="Wrap" />
+                    <TextBlock Margin="0,4,0,0" Text="{Binding [Minimum8Characters], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                               Visibility="{Binding ShowPasswordLengthError, Converter={StaticResource BooleanToVisibilityConverter}}" TextWrapping="Wrap" />
                 </StackPanel>
             </Border>
             <Border Style="{StaticResource Card}">
                 <StackPanel>
-                    <TextBlock Margin="0,0,0,8" FontWeight="SemiBold" Text="{x:Static properties:Resources.Hotkeys}" />
-                    <Label Padding="0,0,0,6" Content="{x:Static properties:Resources.Popup}" Target="{Binding ElementName=PopupHotkeyBox}" />
+                    <TextBlock Margin="0,0,0,8" FontWeight="SemiBold" Text="{Binding [Hotkeys], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
+                    <Label Padding="0,0,0,6" Content="{Binding [Popup], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Target="{Binding ElementName=PopupHotkeyBox}" />
                     <DockPanel>
                         <Button
                             DockPanel.Dock="Right"
                             Margin="8,0,0,0"
                             Command="{Binding ClearShowPopupHotkeyCommand}"
-                            AutomationProperties.Name="{x:Static properties:Resources.ClearHotkey}"
-                            ToolTip="{x:Static properties:Resources.ClearHotkey}">
+                            AutomationProperties.Name="{Binding [ClearHotkey], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                            ToolTip="{Binding [ClearHotkey], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}">
                             <TextBlock Style="{StaticResource SymbolText}" Text="&#xE711;" />
                         </Button>
                         <TextBox x:Name="PopupHotkeyBox" IsReadOnly="True" Text="{Binding ShowPopupHotkey, Mode=OneWay}">
@@ -62,10 +73,10 @@
                     </DockPanel>
                     <TextBlock Margin="0,8,0,0" TextWrapping="Wrap">
                         <Run FontWeight="Bold" Text="Enter" />
-                        <Run Text="{x:Static properties:Resources.ToPasteCombination}" />
+                        <Run Text="{Binding [ToPasteCombination], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
                         <LineBreak />
                         <Run FontWeight="Bold" Text="Ctrl + '#'" />
-                        <Run Text="{x:Static properties:Resources.ToPasteLoginOrPassword}" />
+                        <Run Text="{Binding [ToPasteLoginOrPassword], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
                     </TextBlock>
                 </StackPanel>
             </Border>

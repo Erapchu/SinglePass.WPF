@@ -343,4 +343,13 @@
   <data name="NoCredentials" xml:space="preserve">
     <value>No credentials</value>
   </data>
+  <data name="Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="SystemLanguage" xml:space="preserve">
+    <value>System default</value>
+  </data>
+  <data name="NewPasswordApplied" xml:space="preserve">
+    <value>New password applied</value>
+  </data>
 </root>

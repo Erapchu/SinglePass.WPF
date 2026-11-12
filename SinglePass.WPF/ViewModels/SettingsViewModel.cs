@@ -1,7 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
+using SinglePass.Language.Properties;
 using SinglePass.WPF.Hotkeys;
+using SinglePass.WPF.Localization;
 using SinglePass.WPF.Services;
 using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels.Dialogs;
@@ -37,7 +39,7 @@ namespace SinglePass.WPF.ViewModels
         public partial string NewPassword { get; set; }
 
         [ObservableProperty]
-        public partial string NewPasswordHelperText { get; set; }
+        public partial bool ShowPasswordLengthError { get; set; }
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(ChangeHelperPopupHotkeyCommand))]
@@ -45,6 +47,9 @@ namespace SinglePass.WPF.ViewModels
 
         [ObservableProperty]
         public partial AppTheme ThemeMode { get; set; }
+
+        [ObservableProperty]
+        public partial string Language { get; set; } = "system";
 
         private SettingsViewModel() { }
 
@@ -56,6 +61,7 @@ namespace SinglePass.WPF.ViewModels
             HotkeysService hotkeysService)
         {
             ThemeMode = appSettingsService.ThemeMode;
+            Language = LocalizationManager.Normalize(appSettingsService.Language);
             ShowPopupHotkey = appSettingsService.ShowPopupHotkey;
 
             _themeService = themeService;
@@ -70,11 +76,11 @@ namespace SinglePass.WPF.ViewModels
         {
             if (string.IsNullOrWhiteSpace(NewPassword) || NewPassword.Length < 8)
             {
-                NewPasswordHelperText = "Minimum symbols count is 8";
+                ShowPasswordLengthError = true;
                 return;
             }
 
-            NewPasswordHelperText = string.Empty;
+            ShowPasswordLengthError = false;
             var success = false;
 
             try
@@ -93,8 +99,8 @@ namespace SinglePass.WPF.ViewModels
             if (success)
             {
                 MessageDialog.ShowDialog(
-                    "Success",
-                    "New password applied",
+                    Resources.Success,
+                    LocalizationManager.Instance["NewPasswordApplied"],
                     MessageDialogButtons.OK,
                     "\uE73E");
             }
@@ -120,6 +126,8 @@ namespace SinglePass.WPF.ViewModels
         {
             ShowPopupHotkey = Hotkey.Empty;
         }
+
+        partial void OnLanguageChanged(string value) => LocalizationManager.Instance.Apply(value);
 
         partial void OnThemeModeChanged(AppTheme value) => _themeService?.Apply(value);
     }

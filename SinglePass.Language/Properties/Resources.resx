@@ -352,4 +352,10 @@
   <data name="NewPasswordApplied" xml:space="preserve">
     <value>New password applied</value>
   </data>
+  <data name="NewestFirst" xml:space="preserve">
+    <value>Newest first</value>
+  </data>
+  <data name="OldestFirst" xml:space="preserve">
+    <value>Oldest first</value>
+  </data>
 </root>

@@ -66,32 +66,43 @@ namespace SinglePass.WPF.ViewModels
         private OrderType _order;
         public OrderType Order => _order;
 
-        public PasswordColumnWidths ColumnWidths { get; } = new();
         public GridLength PasswordListPaneWidth { get; set; } = new(1, GridUnitType.Star);
         public GridLength DetailsPaneWidth { get; set; } = new(1, GridUnitType.Star);
         public double DetailsPaneRatio => DetailsPaneWidth.Value / (PasswordListPaneWidth.Value + DetailsPaneWidth.Value);
 
         private int _displayRequest;
 
-        public string NameSortIndicator => GetSortIndicator(SortType.Name);
-        public string WebsiteSortIndicator => GetSortIndicator(SortType.Website);
-        public string ModifiedSortIndicator => GetSortIndicator(SortType.Modified);
-
-        private string GetSortIndicator(SortType column) =>
-            Sort == column ? (Order == OrderType.Ascending ? "↑" : "↓") : string.Empty;
+        public bool SortByName => Sort == SortType.Name;
+        public bool SortByCreated => Sort == SortType.Created;
+        public bool SortByModified => Sort == SortType.Modified;
+        public bool IsAscending => Order == OrderType.Ascending;
+        public bool IsDescending => Order == OrderType.Descending;
 
         [RelayCommand]
-        private void SortBy(SortType column)
+        private async Task SortByAsync(SortType sort)
         {
-            var order = Sort == column && Order == OrderType.Ascending
-                ? OrderType.Descending
-                : OrderType.Ascending;
-            _sort = column;
+            if (Sort == sort)
+                return;
+
+            _sort = sort;
+            OnPropertyChanged(nameof(Sort));
+            OnPropertyChanged(nameof(SortByName));
+            OnPropertyChanged(nameof(SortByCreated));
+            OnPropertyChanged(nameof(SortByModified));
+            await DisplayCredentialsAsync(keepSelection: true);
+        }
+
+        [RelayCommand]
+        private async Task OrderByAsync(OrderType order)
+        {
+            if (Order == order)
+                return;
+
             _order = order;
-            OnPropertyChanged(nameof(NameSortIndicator));
-            OnPropertyChanged(nameof(WebsiteSortIndicator));
-            OnPropertyChanged(nameof(ModifiedSortIndicator));
-            _ = DisplayCredentialsAsync(keepSelection: true);
+            OnPropertyChanged(nameof(Order));
+            OnPropertyChanged(nameof(IsAscending));
+            OnPropertyChanged(nameof(IsDescending));
+            await DisplayCredentialsAsync(keepSelection: true);
         }
 
         [ObservableProperty]
@@ -110,8 +121,10 @@ namespace SinglePass.WPF.ViewModels
             _appSettingsService = appSettingsService;
             _credentialViewModelFactory = credentialViewModelFactory;
 
-            _sort = _appSettingsService.Sort;
-            _order = _appSettingsService.Order;
+            _sort = _appSettingsService.Sort is SortType.Created or SortType.Modified
+                ? _appSettingsService.Sort
+                : SortType.Name;
+            _order = _appSettingsService.Order == OrderType.Descending ? OrderType.Descending : OrderType.Ascending;
 
             var detailsPaneRatio = _appSettingsService.DetailsPaneRatio;
             if (detailsPaneRatio is > 0 and < 1)
@@ -119,17 +132,7 @@ namespace SinglePass.WPF.ViewModels
                 PasswordListPaneWidth = new GridLength(1 - detailsPaneRatio, GridUnitType.Star);
                 DetailsPaneWidth = new GridLength(detailsPaneRatio, GridUnitType.Star);
             }
-
-            if (_appSettingsService.PasswordColumnWidths is { } saved)
-            {
-                ColumnWidths.Name = RestoreWidth(saved.Name, ColumnWidths.Name);
-                ColumnWidths.Website = RestoreWidth(saved.Website, ColumnWidths.Website);
-                ColumnWidths.Modified = RestoreWidth(saved.Modified, ColumnWidths.Modified);
-            }
         }
-
-        private static double RestoreWidth(double saved, double fallback) =>
-            double.IsNaN(saved) || (double.IsFinite(saved) && saved >= 0) ? saved : fallback;
 
         public void ReloadCredentials()
         {
@@ -242,7 +245,6 @@ namespace SinglePass.WPF.ViewModels
         {
             Comparison<CredentialViewModel> compare = sort switch
             {
-                SortType.Website => (a, b) => StringComparer.CurrentCultureIgnoreCase.Compare(a.SiteFieldVM.Value, b.SiteFieldVM.Value),
                 SortType.Created => (a, b) => a.CreationTime.CompareTo(b.CreationTime),
                 SortType.Modified => (a, b) => a.LastModifiedTime.CompareTo(b.LastModifiedTime),
                 _ => (a, b) => StringComparer.CurrentCulture.Compare(a.NameFieldVM.Value, b.NameFieldVM.Value)

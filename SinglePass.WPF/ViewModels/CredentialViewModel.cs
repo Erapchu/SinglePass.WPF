@@ -37,6 +37,25 @@ namespace SinglePass.WPF.ViewModels
         public PassFieldViewModel SiteFieldVM { get; }
         public ObservableCollection<PassFieldViewModel> AdditionalFields { get; }
 
+        public string WebsiteDomain
+        {
+            get
+            {
+                var site = SiteFieldVM.Value?.Trim();
+                if (string.IsNullOrEmpty(site))
+                    return null;
+
+                if (site.StartsWith("//", StringComparison.Ordinal))
+                    site = "https:" + site;
+                else if (!site.Contains("://", StringComparison.Ordinal))
+                    site = "https://" + site;
+
+                return Uri.TryCreate(site, UriKind.Absolute, out var uri) && !string.IsNullOrEmpty(uri.Host)
+                    ? uri.Host
+                    : null;
+            }
+        }
+
         public DateTime LastModifiedTime
         {
             get => Model.LastModifiedTime;
@@ -71,9 +90,9 @@ namespace SinglePass.WPF.ViewModels
         {
             get
             {
-                if (_favIcon32 is null)
-                    _favIconCollector.ScheduleGetImage(
-                        SiteFieldVM.Value,
+                if (_favIcon32 is null && WebsiteDomain is { } domain)
+                    _favIconCollector?.ScheduleGetImage(
+                        "https://" + domain,
                         (image) => SetProperty(ref _favIcon32, image, nameof(FavIcon32)),
                         32);
 
@@ -91,6 +110,11 @@ namespace SinglePass.WPF.ViewModels
             PasswordFieldVM = new PassFieldViewModel(credential.PasswordField);
             OtherFieldVM = new PassFieldViewModel(credential.OtherField);
             SiteFieldVM = new PassFieldViewModel(credential.SiteField);
+            SiteFieldVM.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(PassFieldViewModel.Value))
+                    OnPropertyChanged(nameof(WebsiteDomain));
+            };
             AdditionalFields = new ObservableCollection<PassFieldViewModel>(credential.AdditionalFields.Select(f => new PassFieldViewModel(f)));
             LastModifiedTime = credential.LastModifiedTime;
             CreationTime = credential.CreationTime;

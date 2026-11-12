@@ -372,4 +372,10 @@
   <data name="NewPasswordApplied" xml:space="preserve">
     <value>Новый пароль установлен</value>
   </data>
+  <data name="NewestFirst" xml:space="preserve">
+    <value>Сначала новые</value>
+  </data>
+  <data name="OldestFirst" xml:space="preserve">
+    <value>Сначала старые</value>
+  </data>
 </root>

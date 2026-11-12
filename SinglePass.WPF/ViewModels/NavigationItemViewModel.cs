@@ -21,6 +21,8 @@ namespace SinglePass.WPF.ViewModels
         /// </summary>
         public string Glyph { get; }
 
+        public bool DockAtBottom { get; init; }
+
         /// <summary>
         /// Visible content.
         /// </summary>

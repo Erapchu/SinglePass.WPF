@@ -73,7 +73,7 @@ namespace SinglePass.WPF.ViewModels
                 new NavigationItemViewModel(
                     nameof(SinglePass.Language.Properties.Resources.Settings),
                     "\uE713",
-                    () => new SettingsControl() { DataContext = SettingsVM }),
+                    () => new SettingsControl() { DataContext = SettingsVM }) { DockAtBottom = true },
             });
         }
 

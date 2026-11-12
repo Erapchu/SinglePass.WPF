@@ -7,6 +7,22 @@
     ShutdownMode="OnExplicitShutdown"
     Startup="Application_Startup">
     <Application.Resources>
+        <DrawingImage x:Key="DefaultFavIcon">
+            <DrawingImage.Drawing>
+                <GeometryDrawing>
+                    <GeometryDrawing.Pen>
+                        <Pen Brush="#7C7C7C" Thickness="1.6" />
+                    </GeometryDrawing.Pen>
+                    <GeometryDrawing.Geometry>
+                        <GeometryGroup>
+                            <EllipseGeometry Center="16,16" RadiusX="9.5" RadiusY="9.5" />
+                            <EllipseGeometry Center="16,16" RadiusX="4.4" RadiusY="9.5" />
+                            <PathGeometry Figures="M 8,11 Q 16,14 24,11 M 6.5,16 L 25.5,16 M 8,21 Q 16,18 24,21" />
+                        </GeometryGroup>
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+            </DrawingImage.Drawing>
+        </DrawingImage>
         <FontFamily x:Key="PasswordFontFamily">Consolas</FontFamily>
         <sys:Double x:Key="PasswordFontSize">14</sys:Double>
         <Style x:Key="SymbolText" TargetType="TextBlock">

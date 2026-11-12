@@ -46,10 +46,12 @@ namespace SinglePass.WPF.Services
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(imageUrlString) || setPropertyAction is null)
+                if (setPropertyAction is null ||
+                    !Uri.TryCreate(imageUrlString, UriKind.Absolute, out var imageUrl) ||
+                    string.IsNullOrEmpty(imageUrl.Host))
                     return;
 
-                var processingImageWrapper = new ProcessingImageWrapper(imageUrlString, setPropertyAction, size);
+                var processingImageWrapper = new ProcessingImageWrapper(imageUrl.Host, size, setPropertyAction);
 
                 if (_imagesCache.TryGetValue(processingImageWrapper, out ImageSource image))
                 {
@@ -100,31 +102,35 @@ namespace SinglePass.WPF.Services
                         // Set existing to UI
                         foreach (var processingWrapper in processingWrappers)
                         {
-                            ImageSource cachedImageSource;
-                            if (tempFavIconCacheFromDB.TryGetValue(processingWrapper, out FavIcon favIcon))
+                            try
                             {
-                                var imageSource = ImageSourceHelper.ToImageSource(favIcon.Bytes);
-                                processingWrapper.SetPropertyAction.Invoke(imageSource);
-                                cachedImageSource = imageSource;
-                            }
-                            else
-                            {
-                                // Download, set to DB, set to UI and save to temp local cache
-                                var bitmapImage = await _imageService.GetImageAsync(
+                                ImageSource image;
+                                if (tempFavIconCacheFromDB.TryGetValue(processingWrapper, out FavIcon favIcon))
+                                {
+                                    image = ImageSourceHelper.ToImageSource(favIcon.Bytes);
+                                    _imagesCache.TryAdd(processingWrapper, image);
+                                    processingWrapper.SetPropertyAction.Invoke(image);
+                                    continue;
+                                }
+
+                                image = await _imageService.GetImageAsync(
                                     string.Format(_favIconServiceUrl, processingWrapper.Host, processingWrapper.Size), cancellationToken);
+                                _imagesCache.TryAdd(processingWrapper, image);
+                                processingWrapper.SetPropertyAction.Invoke(image);
+
                                 var freshFavIcon = new FavIcon()
                                 {
-                                    Bytes = ImageSourceHelper.ToBytes(bitmapImage),
+                                    Bytes = ImageSourceHelper.ToBytes(image),
                                     Host = processingWrapper.Host,
                                     Size = processingWrapper.Size,
                                 };
                                 await favIconCacheService.Add(freshFavIcon);
                                 tempFavIconCacheFromDB.TryAdd(processingWrapper, freshFavIcon);
-                                processingWrapper.SetPropertyAction.Invoke(bitmapImage);
-                                cachedImageSource = bitmapImage;
                             }
-
-                            _imagesCache.TryAdd(processingWrapper, cachedImageSource);
+                            catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
+                            {
+                                _logger.LogError(ex, null);
+                            }
                         }
                     }
 
@@ -141,45 +147,18 @@ namespace SinglePass.WPF.Services
             }
         }
 
-        [DebuggerDisplay("{Size} - {_originalString}")]
+        [DebuggerDisplay("{Size} - {Host}")]
         private class ProcessingImageWrapper
         {
-            private readonly string _originalString;
-
             public Action<ImageSource> SetPropertyAction { get; }
             public int Size { get; }
+            public string Host { get; }
 
-            private string _host;
-            public string Host
+            public ProcessingImageWrapper(string host, int size, Action<ImageSource> setPropertyAction = null)
             {
-                get
-                {
-                    if (_host is null)
-                    {
-                        if (Uri.TryCreate(_originalString, UriKind.RelativeOrAbsolute, out Uri imageUrl))
-                        {
-                            _host = imageUrl.Host;
-                        }
-                    }
-
-                    return _host;
-                }
-            }
-
-            public ProcessingImageWrapper(string host, int size)
-            {
-                _host = host ?? throw new ArgumentNullException(nameof(host));
+                Host = host ?? throw new ArgumentNullException(nameof(host));
                 Size = size;
-            }
-
-            public ProcessingImageWrapper(string originalString, Action<ImageSource> setPropertyAction, int size = 16)
-            {
-                if (string.IsNullOrWhiteSpace(originalString))
-                    throw new ArgumentException($"'{nameof(originalString)}' cannot be null or empty.", nameof(originalString));
-
-                _originalString = originalString;
-                SetPropertyAction = setPropertyAction ?? throw new ArgumentNullException(nameof(setPropertyAction));
-                Size = size;
+                SetPropertyAction = setPropertyAction;
             }
 
             public override bool Equals(object obj)

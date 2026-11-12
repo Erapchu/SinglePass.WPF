@@ -27,7 +27,8 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <DataTemplate x:Key="CredentialDataTemplate" DataType="{x:Type vm:CredentialViewModel}">
             <DockPanel>
-                <Image Width="16" Height="16" VerticalAlignment="Center" Source="{Binding FavIcon}" />
+                <Image Width="16" Height="16" VerticalAlignment="Center"
+                       Source="{Binding FavIcon, TargetNullValue={StaticResource DefaultFavIcon}}" />
                 <StackPanel
                     DockPanel.Dock="Right"
                     VerticalAlignment="Center"

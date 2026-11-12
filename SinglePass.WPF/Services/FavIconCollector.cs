@@ -7,6 +7,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media;
@@ -23,13 +25,14 @@ namespace SinglePass.WPF.Services
         private const int _processingTimeout = 100;
         private const int _maxConcurrentDownloads = 4;
         private const int _favIconSize = 32;
-        private const string _favIconServiceUrl = "http://www.google.com/s2/favicons?domain_url={0}&sz={1}";
+        private const string _favIconServiceUrl = "https://www.google.com/s2/favicons?domain_url={0}&sz={1}&alt=404";
 
         private readonly RegeneratedList<ImageRequest> _processingImages = new();
         private readonly ILogger<FavIconCollector> _logger;
         private readonly ImageService _imageService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly CancellationTokenSource _processingCTS = new();
+        // A null entry means the provider returned 404 during this session.
         private readonly ConcurrentDictionary<string, ImageSource> _imagesCache = new();
 
         public FavIconCollector(
@@ -162,7 +165,7 @@ namespace SinglePass.WPF.Services
                 try
                 {
                     var host = group.Key;
-                    var url = string.Format(_favIconServiceUrl, host, _favIconSize);
+                    var url = string.Format(_favIconServiceUrl, Uri.EscapeDataString(host), _favIconSize);
                     var image = await _imageService.GetImageAsync(url, token);
                     _imagesCache.TryAdd(group.Key, image);
                     PublishImage(group, image);
@@ -170,6 +173,10 @@ namespace SinglePass.WPF.Services
                     using var scope = _serviceScopeFactory.CreateScope();
                     var cache = scope.ServiceProvider.GetRequiredService<FavIconCacheService>();
                     await cache.Add(new FavIcon { Host = host, Size = _favIconSize, Bytes = ImageSourceHelper.ToBytes(image) });
+                }
+                catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+                {
+                    _imagesCache.TryAdd(group.Key, null);
                 }
                 catch (Exception ex) when (!token.IsCancellationRequested)
                 {

@@ -83,9 +83,9 @@ namespace SinglePass.WPF.Services
 
         public string GetPassword() => SecureStringHelper.GetString(PasswordSecure);
 
-        internal static PasswordVault ReadVault(CryptoService cryptoService, Stream stream, string password)
+        internal static PasswordVault ReadVault(CryptoService cryptoService, Stream stream, string password, out bool isLegacy)
         {
-            var json = cryptoService.DecryptFromStream<JsonElement>(stream, password);
+            var json = cryptoService.DecryptFromStream<JsonElement>(stream, password, out isLegacy);
             if (json.ValueKind == JsonValueKind.Array)
                 return new PasswordVault { Credentials = json.Deserialize<List<Credential>>() };
 
@@ -108,10 +108,11 @@ namespace SinglePass.WPF.Services
             {
                 using var locker = await _asyncKeyedLocker.LockAsync(path).ConfigureAwait(false);
                 PasswordVault vault;
+                var needsRewrite = false;
                 try
                 {
                     using var stream = File.OpenRead(path);
-                    vault = ReadVault(_cryptoService, stream, password);
+                    vault = ReadVault(_cryptoService, stream, password, out needsRewrite);
                 }
                 catch (FileNotFoundException)
                 {
@@ -131,8 +132,11 @@ namespace SinglePass.WPF.Services
                     vault = vault with { Groups = groups, Assignments = assignments };
                     if (File.Exists(path) && !File.Exists(path + ".before-groups.bak"))
                         File.Copy(path, path + ".before-groups.bak", overwrite: false);
-                    WriteVault(vault, password);
+                    needsRewrite = true;
                 }
+
+                if (needsRewrite)
+                    WriteVault(vault, password);
 
                 _vault = vault;
                 if (_settings != null)
@@ -314,7 +318,10 @@ namespace SinglePass.WPF.Services
             try
             {
                 using (var stream = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
                     _cryptoService.EncryptToStream(vault, stream, password);
+                    stream.Flush(flushToDisk: true);
+                }
 
                 File.Move(tempPath, path, overwrite: true);
             }
@@ -337,20 +344,13 @@ namespace SinglePass.WPF.Services
                         return PasswordChangeResult.IncorrectCurrentPassword;
 
                     var newPasswordSecure = SecureStringHelper.MakeSecureString(newPassword);
-                    var tempPath = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
                     try
                     {
-                        using (var stream = new FileStream(tempPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
-                        {
-                            _cryptoService.EncryptToStream(_vault, stream, newPassword);
-                        }
-
-                        File.Move(tempPath, path, overwrite: true);
+                        WriteVault(_vault, newPassword);
                     }
                     catch
                     {
                         newPasswordSecure.Dispose();
-                        File.Delete(tempPath);
                         throw;
                     }
 

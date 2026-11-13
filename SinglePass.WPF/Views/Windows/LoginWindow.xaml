@@ -75,13 +75,11 @@
                     x:Name="LoginPasswordBox"
                     FontFamily="{StaticResource PasswordFontFamily}"
                     FontSize="{StaticResource PasswordFontSize}"
-                    MaxLength="32"
                     PasswordChanged="PasswordBox_PasswordChanged" />
                 <TextBox
                     x:Name="RevealedPassword"
                     FontFamily="{StaticResource PasswordFontFamily}"
                     FontSize="{StaticResource PasswordFontSize}"
-                    MaxLength="32"
                     TextChanged="RevealedPassword_TextChanged"
                     Visibility="Collapsed" />
             </Grid>

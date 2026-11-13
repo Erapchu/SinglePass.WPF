@@ -73,7 +73,8 @@ namespace SinglePass.WPF.Services
                     try
                     {
                         SyncStateChanged?.Invoke(SinglePass.Language.Properties.Resources.Decrypting);
-                        cloudCredentials = CredentialsCryptoService.ReadVault(_cryptoService, cloudFileStream, password);
+                        cloudCredentials = await Task.Run(() =>
+                            CredentialsCryptoService.ReadVault(_cryptoService, cloudFileStream, password, out _), token);
                     }
                     catch (Exception ex)
                     {

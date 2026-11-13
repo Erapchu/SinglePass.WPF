@@ -373,4 +373,49 @@
   <data name="NoDate" xml:space="preserve">
     <value>No date</value>
   </data>
+  <data name="AllPasswords" xml:space="preserve">
+    <value>All passwords</value>
+  </data>
+  <data name="PasswordGroups" xml:space="preserve">
+    <value>Groups</value>
+  </data>
+  <data name="AddPasswordGroup" xml:space="preserve">
+    <value>Add group</value>
+  </data>
+  <data name="DeletePasswordGroup" xml:space="preserve">
+    <value>Delete group</value>
+  </data>
+  <data name="DeletePasswordGroupConfirmation" xml:space="preserve">
+    <value>Delete “{0}”? Its passwords will be available in All passwords.</value>
+  </data>
+  <data name="SavePasswordGroupsFailed" xml:space="preserve">
+    <value>Couldn't save changes to password groups.</value>
+  </data>
+  <data name="GroupIcon" xml:space="preserve">
+    <value>Icon</value>
+  </data>
+  <data name="GroupIconFolder" xml:space="preserve">
+    <value>Folder</value>
+  </data>
+  <data name="GroupIconWork" xml:space="preserve">
+    <value>Work</value>
+  </data>
+  <data name="GroupIconHome" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="GroupIconFavorites" xml:space="preserve">
+    <value>Favorites</value>
+  </data>
+  <data name="GroupIconServers" xml:space="preserve">
+    <value>Servers</value>
+  </data>
+  <data name="GroupIconFinance" xml:space="preserve">
+    <value>Finance</value>
+  </data>
+  <data name="GroupIconShopping" xml:space="preserve">
+    <value>Shopping</value>
+  </data>
+  <data name="GroupIconTravel" xml:space="preserve">
+    <value>Travel</value>
+  </data>
 </root>

@@ -3,7 +3,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Media;
+using SinglePass.WPF.ViewModels;
 
 namespace SinglePass.WPF.Views.Controls
 {
@@ -12,11 +14,41 @@ namespace SinglePass.WPF.Views.Controls
     /// </summary>
     public partial class PasswordsControl : UserControl
     {
+        internal const string CredentialDragFormat = "SinglePass.CredentialId";
+
+        private CredentialViewModel _dragCredential;
+        private Point _dragStart;
         private ScrollViewer _credentialsScrollViewer;
 
         public PasswordsControl()
         {
             InitializeComponent();
+        }
+
+        private void CredentialsList_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            _dragStart = e.GetPosition(CredentialsListBox);
+            var row = ItemsControl.ContainerFromElement(CredentialsListBox, e.OriginalSource as DependencyObject) as ListViewItem;
+            _dragCredential = row?.Content as CredentialViewModel;
+        }
+
+        private void CredentialsList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e) => _dragCredential = null;
+
+        private void CredentialsList_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton != MouseButtonState.Pressed)
+                _dragCredential = null;
+            if (_dragCredential is not { } credential)
+                return;
+
+            var offset = e.GetPosition(CredentialsListBox) - _dragStart;
+            if (System.Math.Abs(offset.X) < SystemParameters.MinimumHorizontalDragDistance &&
+                System.Math.Abs(offset.Y) < SystemParameters.MinimumVerticalDragDistance)
+                return;
+
+            _dragCredential = null;
+            var data = new DataObject(CredentialDragFormat, credential.Model.Id.ToString("D"), autoConvert: false);
+            DragDrop.DoDragDrop(CredentialsListBox, data, DragDropEffects.Move);
         }
 
         private CollectionViewGroup FirstGroup =>

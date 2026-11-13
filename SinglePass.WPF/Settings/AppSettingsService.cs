@@ -106,7 +106,11 @@ namespace SinglePass.WPF.Settings
             }
         }
 
-        public async Task Save()
+        public Task Save() => SaveCore();
+
+        internal Task SavePasswordGroups(PasswordGroupSettings passwordGroups) => SaveCore(passwordGroups);
+
+        private async Task SaveCore(PasswordGroupSettings passwordGroups = null)
         {
             var path = Constants.CommonSettingsFilePath;
 
@@ -130,7 +134,7 @@ namespace SinglePass.WPF.Settings
                             Culture = CultureInfo.InvariantCulture,
                             // Converters = { new HotkeyJsonConverter() } // если нужен кастом
                         });
-                        serializer.Serialize(sw, Settings); // _settings — приватное поле
+                        serializer.Serialize(sw, passwordGroups == null ? Settings : Settings.WithPasswordGroups(passwordGroups));
                         await sw.FlushAsync().ConfigureAwait(false);
                         await fs.FlushAsync().ConfigureAwait(false);
                     }
@@ -146,6 +150,9 @@ namespace SinglePass.WPF.Settings
                         File.Replace(tmp, path, bak, ignoreMetadataErrors: true);
                     else
                         File.Move(tmp, path, overwrite: true);
+
+                    if (passwordGroups != null)
+                        Settings.PasswordGroups = passwordGroups;
 
                     _logger.LogInformation("Settings saved to {Path}", path);
                 }

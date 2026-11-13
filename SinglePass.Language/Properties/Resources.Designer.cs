@@ -70,6 +70,24 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Add group.
+        /// </summary>
+        public static string AddPasswordGroup {
+            get {
+                return ResourceManager.GetString("AddPasswordGroup", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to All passwords.
+        /// </summary>
+        public static string AllPasswords {
+            get {
+                return ResourceManager.GetString("AllPasswords", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Ascending.
         /// </summary>
         public static string Ascending {
@@ -268,6 +286,24 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Delete group.
+        /// </summary>
+        public static string DeletePasswordGroup {
+            get {
+                return ResourceManager.GetString("DeletePasswordGroup", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Delete “{0}”? Its passwords will be available in All passwords..
+        /// </summary>
+        public static string DeletePasswordGroupConfirmation {
+            get {
+                return ResourceManager.GetString("DeletePasswordGroupConfirmation", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Descending.
         /// </summary>
         public static string Descending {
@@ -330,6 +366,87 @@ namespace SinglePass.Language.Properties {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to Icon.
+        /// </summary>
+        public static string GroupIcon {
+            get {
+                return ResourceManager.GetString("GroupIcon", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Favorites.
+        /// </summary>
+        public static string GroupIconFavorites {
+            get {
+                return ResourceManager.GetString("GroupIconFavorites", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Finance.
+        /// </summary>
+        public static string GroupIconFinance {
+            get {
+                return ResourceManager.GetString("GroupIconFinance", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Folder.
+        /// </summary>
+        public static string GroupIconFolder {
+            get {
+                return ResourceManager.GetString("GroupIconFolder", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Home.
+        /// </summary>
+        public static string GroupIconHome {
+            get {
+                return ResourceManager.GetString("GroupIconHome", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Servers.
+        /// </summary>
+        public static string GroupIconServers {
+            get {
+                return ResourceManager.GetString("GroupIconServers", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Shopping.
+        /// </summary>
+        public static string GroupIconShopping {
+            get {
+                return ResourceManager.GetString("GroupIconShopping", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Travel.
+        /// </summary>
+        public static string GroupIconTravel {
+            get {
+                return ResourceManager.GetString("GroupIconTravel", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Work.
+        /// </summary>
+        public static string GroupIconWork {
+            get {
+                return ResourceManager.GetString("GroupIconWork", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Hotkeys.
         /// </summary>
@@ -601,6 +718,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Groups.
+        /// </summary>
+        public static string PasswordGroups {
+            get {
+                return ResourceManager.GetString("PasswordGroups", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Password is incorrect.
         /// </summary>
         public static string PasswordIsIncorrect {
@@ -681,6 +807,15 @@ namespace SinglePass.Language.Properties {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to Couldn&apos;t save changes to password groups..
+        /// </summary>
+        public static string SavePasswordGroupsFailed {
+            get {
+                return ResourceManager.GetString("SavePasswordGroupsFailed", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Search.
         /// </summary>

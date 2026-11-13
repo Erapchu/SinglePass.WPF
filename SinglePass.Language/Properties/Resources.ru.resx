@@ -393,4 +393,49 @@
   <data name="NoDate" xml:space="preserve">
     <value>Без даты</value>
   </data>
+  <data name="AllPasswords" xml:space="preserve">
+    <value>Все пароли</value>
+  </data>
+  <data name="PasswordGroups" xml:space="preserve">
+    <value>Группы</value>
+  </data>
+  <data name="AddPasswordGroup" xml:space="preserve">
+    <value>Добавить группу</value>
+  </data>
+  <data name="DeletePasswordGroup" xml:space="preserve">
+    <value>Удалить группу</value>
+  </data>
+  <data name="DeletePasswordGroupConfirmation" xml:space="preserve">
+    <value>Удалить группу «{0}»? Её пароли останутся в разделе «Все пароли».</value>
+  </data>
+  <data name="SavePasswordGroupsFailed" xml:space="preserve">
+    <value>Не удалось сохранить изменения групп.</value>
+  </data>
+  <data name="GroupIcon" xml:space="preserve">
+    <value>Иконка</value>
+  </data>
+  <data name="GroupIconFolder" xml:space="preserve">
+    <value>Папка</value>
+  </data>
+  <data name="GroupIconWork" xml:space="preserve">
+    <value>Работа</value>
+  </data>
+  <data name="GroupIconHome" xml:space="preserve">
+    <value>Дом</value>
+  </data>
+  <data name="GroupIconFavorites" xml:space="preserve">
+    <value>Избранное</value>
+  </data>
+  <data name="GroupIconServers" xml:space="preserve">
+    <value>Серверы</value>
+  </data>
+  <data name="GroupIconFinance" xml:space="preserve">
+    <value>Финансы</value>
+  </data>
+  <data name="GroupIconShopping" xml:space="preserve">
+    <value>Покупки</value>
+  </data>
+  <data name="GroupIconTravel" xml:space="preserve">
+    <value>Путешествия</value>
+  </data>
 </root>

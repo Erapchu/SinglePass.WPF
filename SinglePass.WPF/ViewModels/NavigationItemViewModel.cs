@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using SinglePass.WPF.Localization;
+using SinglePass.WPF.Models;
 using System;
 using System.ComponentModel;
 using System.Windows.Controls;
@@ -14,14 +15,21 @@ namespace SinglePass.WPF.ViewModels
         /// <summary>
         /// Name of settings item.
         /// </summary>
-        public string Name => LocalizationManager.Instance[_nameKey];
+        public string Name => Group?.Name ?? LocalizationManager.Instance[_nameKey];
 
         /// <summary>
         /// Navigation icon.
         /// </summary>
         public string Glyph { get; }
 
-        public bool DockAtBottom { get; init; }
+        public PasswordGroup Group { get; }
+
+        private bool _isSelected;
+        public bool IsSelected
+        {
+            get => _isSelected;
+            internal set => SetProperty(ref _isSelected, value);
+        }
 
         /// <summary>
         /// Visible content.
@@ -47,6 +55,13 @@ namespace SinglePass.WPF.ViewModels
             Glyph = glyph;
             _lazyContent = new Lazy<Control>(createContent);
             PropertyChangedEventManager.AddHandler(LocalizationManager.Instance, OnLanguageChanged, "Item[]");
+        }
+
+        public NavigationItemViewModel(PasswordGroup group, NavigationItemViewModel passwords)
+        {
+            Group = group;
+            Glyph = group.Icon;
+            _lazyContent = passwords._lazyContent;
         }
 
         private void OnLanguageChanged(object sender, PropertyChangedEventArgs e) => OnPropertyChanged(nameof(Name));

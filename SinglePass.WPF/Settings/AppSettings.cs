@@ -12,6 +12,14 @@ namespace SinglePass.WPF.Settings
         public SortType Sort { get; set; }
         public OrderType Order { get; set; }
         public double DetailsPaneRatio { get; set; } = 0.5;
+        public PasswordGroupSettings PasswordGroups { get; set; } = new();
+
+        internal AppSettings WithPasswordGroups(PasswordGroupSettings passwordGroups)
+        {
+            var copy = (AppSettings)MemberwiseClone();
+            copy.PasswordGroups = passwordGroups;
+            return copy;
+        }
 
         public AppSettings()
         {

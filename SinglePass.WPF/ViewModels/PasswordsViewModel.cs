@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using SinglePass.WPF.Collections;
 using SinglePass.WPF.Enums;
 using SinglePass.WPF.Helpers;
+using SinglePass.WPF.Localization;
 using SinglePass.WPF.Models;
 using SinglePass.WPF.Services;
 using SinglePass.WPF.Settings;
@@ -48,6 +49,12 @@ namespace SinglePass.WPF.ViewModels
         private readonly AppSettingsService _appSettingsService;
         private readonly CredentialViewModelFactory _credentialViewModelFactory;
         private Task _initialLoad;
+        private PasswordGroupSettings _groupSettings = new();
+        private Guid? _selectedGroupId;
+
+        public IReadOnlyList<PasswordGroup> PasswordGroups => _groupSettings.Groups;
+
+        internal bool IsSavingGroups { get; private set; }
 
         [ObservableProperty]
         public partial bool HasLoadedCredentials { get; private set; }
@@ -132,6 +139,7 @@ namespace SinglePass.WPF.ViewModels
             _logger = logger;
             _appSettingsService = appSettingsService;
             _credentialViewModelFactory = credentialViewModelFactory;
+            _groupSettings = appSettingsService.Settings.PasswordGroups ?? new();
 
             _sort = _appSettingsService.Sort is SortType.Created or SortType.Modified
                 ? _appSettingsService.Sort
@@ -147,6 +155,77 @@ namespace SinglePass.WPF.ViewModels
         }
 
         public Task LoadInitialCredentialsAsync() => _initialLoad ??= LoadInitialCredentialsCoreAsync();
+
+        internal void SelectGroup(Guid? groupId)
+        {
+            if (_selectedGroupId == groupId)
+                return;
+
+            _selectedGroupId = groupId;
+            _ = DisplayCredentialsAsync(keepSelection: true);
+        }
+
+        internal Task<bool> AddGroupAsync(PasswordGroup group) => SaveGroupsAsync(_groupSettings with
+        {
+            Groups = [.. PasswordGroups, group]
+        });
+
+        internal Task<bool> DeleteGroupAsync(PasswordGroup group) => SaveGroupsAsync(new PasswordGroupSettings
+        {
+            Groups = PasswordGroups.Where(item => item.Id != group.Id).ToList(),
+            Assignments = _groupSettings.Assignments.Where(pair => pair.Value != group.Id).ToDictionary()
+        });
+
+        internal bool CanMoveToGroup(Guid credentialId, Guid? groupId) =>
+            !IsSavingGroups &&
+            _credentialVMs.Any(item => item.Model.Id == credentialId) &&
+            (groupId == null || PasswordGroups.Any(group => group.Id == groupId)) &&
+            (_groupSettings.Assignments.TryGetValue(credentialId, out var currentGroupId)
+                ? currentGroupId != groupId
+                : groupId.HasValue);
+
+        internal async Task MoveToGroupAsync(Guid credentialId, Guid? groupId)
+        {
+            if (!CanMoveToGroup(credentialId, groupId))
+                return;
+
+            if (await SaveGroupAssignmentAsync(credentialId, groupId) && _selectedGroupId.HasValue)
+                await DisplayCredentialsAsync(keepSelection: true);
+        }
+
+        private Task<bool> SaveGroupAssignmentAsync(Guid credentialId, Guid? groupId)
+        {
+            var assignments = new Dictionary<Guid, Guid>(_groupSettings.Assignments);
+            if (groupId is { } targetId)
+                assignments[credentialId] = targetId;
+            else
+                assignments.Remove(credentialId);
+
+            return SaveGroupsAsync(_groupSettings with { Assignments = assignments });
+        }
+
+        private async Task<bool> SaveGroupsAsync(PasswordGroupSettings settings)
+        {
+            if (IsSavingGroups)
+                return false;
+
+            IsSavingGroups = true;
+            try
+            {
+                await _appSettingsService.SavePasswordGroups(settings);
+                _groupSettings = settings;
+                return true;
+            }
+            catch (Exception)
+            {
+                StatusMessageRequested?.Invoke(LocalizationManager.Instance["SavePasswordGroupsFailed"]);
+                return false;
+            }
+            finally
+            {
+                IsSavingGroups = false;
+            }
+        }
 
         private async Task LoadInitialCredentialsCoreAsync()
         {
@@ -193,8 +272,13 @@ namespace SinglePass.WPF.ViewModels
                 var sort = Sort;
                 var order = Order;
                 var credentials = _credentialVMs.ToList();
+                var groupId = _selectedGroupId;
+                var assignments = _groupSettings.Assignments;
                 var filtered = await Task.Run(() =>
                 {
+                    if (groupId.HasValue)
+                        credentials.RemoveAll(item => !assignments.TryGetValue(item.Model.Id, out var assignedGroupId) || assignedGroupId != groupId);
+
                     if (!string.IsNullOrEmpty(filterText))
                     {
                         var search = new CredentialSearch(filterText);
@@ -239,11 +323,14 @@ namespace SinglePass.WPF.ViewModels
             if (result != DialogChoice.OK)
                 return;
 
+            var groupId = _selectedGroupId;
             var dateTimeNow = DateTime.Now;
             newCredVM.CreationTime = dateTimeNow;
             newCredVM.LastModifiedTime = dateTimeNow;
             await _credentialsCryptoService.AddCredential(newCredVM.Model);
             _credentialVMs.Add(newCredVM);
+            if (groupId.HasValue && CanMoveToGroup(newCredVM.Model.Id, groupId))
+                await SaveGroupAssignmentAsync(newCredVM.Model.Id, groupId);
             await DisplayCredentialsAsync();
         }
 
@@ -329,10 +416,10 @@ namespace SinglePass.WPF.ViewModels
         [RelayCommand]
         private async Task Edit()
         {
-            if (SelectedCredentialVM is null)
+            if (SelectedCredentialVM is not { } credential)
                 return;
 
-            var tempCredentialVM = SelectedCredentialVM.Clone();
+            var tempCredentialVM = credential.Clone();
             var result = CredentialEditDialog.ShowDialog(
                 tempCredentialVM,
                 CredentialDetailsMode.Edit);
@@ -342,33 +429,36 @@ namespace SinglePass.WPF.ViewModels
             var dateTimeNow = DateTime.Now;
             tempCredentialVM.LastModifiedTime = dateTimeNow;
             await _credentialsCryptoService.EditCredential(tempCredentialVM.Model);
-            _credentialVMs.Remove(SelectedCredentialVM);
+            _credentialVMs.Remove(credential);
             _credentialVMs.Add(tempCredentialVM);
             await DisplayCredentialsAsync();
-            SelectedCredentialVM = tempCredentialVM;
+            if (DisplayedCredentials.Contains(tempCredentialVM))
+                SelectedCredentialVM = tempCredentialVM;
         }
 
         [RelayCommand]
         private async Task Delete()
         {
-            if (SelectedCredentialVM is null)
+            if (SelectedCredentialVM is not { } credential)
                 return;
 
             var result = MessageDialog.ShowDialog(
                 SinglePass.Language.Properties.Resources.DeleteItem,
-                string.Format(SinglePass.Language.Properties.Resources.Name0, SelectedCredentialVM.NameFieldVM.Value),
+                string.Format(SinglePass.Language.Properties.Resources.Name0, credential.NameFieldVM.Value),
                 MessageDialogButtons.YesNo,
                 "\uE74D");
 
             if (result == DialogChoice.Yes)
             {
-                await _credentialsCryptoService.DeleteCredential(SelectedCredentialVM.Model);
-                _credentialVMs.Remove(SelectedCredentialVM);
-                var dIndex = DisplayedCredentials.IndexOf(SelectedCredentialVM);
+                await _credentialsCryptoService.DeleteCredential(credential.Model);
+                _credentialVMs.Remove(credential);
+                if (_groupSettings.Assignments.ContainsKey(credential.Model.Id))
+                    await SaveGroupAssignmentAsync(credential.Model.Id, null);
+                var dIndex = DisplayedCredentials.IndexOf(credential);
                 var countAfterDeletion = DisplayedCredentials.Count - 1;
                 var sIndex = dIndex >= countAfterDeletion ? countAfterDeletion - 1 : dIndex;
                 await DisplayCredentialsAsync();
-                if (sIndex >= 0)
+                if (sIndex >= 0 && sIndex < DisplayedCredentials.Count)
                 {
                     SelectedCredentialVM = DisplayedCredentials.ElementAt(sIndex);
                 }

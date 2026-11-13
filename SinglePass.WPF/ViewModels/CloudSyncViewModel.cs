@@ -95,6 +95,12 @@ namespace SinglePass.WPF.ViewModels
             {
                 _logger.LogWarning($"Authorization process to {cloudType} has been cancelled.");
             }
+            catch (YandexCallbackUnavailableException ex)
+            {
+                _logger.LogError(ex, "Yandex Disk sign-in could not open the local callback");
+                var message = string.Format(LocalizationManager.Instance["YandexDiskCallbackUnavailable"], ex.Port);
+                MessageDialog.ShowDialog(SinglePass.Language.Properties.Resources.Error, message, MessageDialogButtons.OK, "\uEA39");
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, string.Empty);

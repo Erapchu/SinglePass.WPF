@@ -5,6 +5,7 @@ using SinglePass.WPF.Authorization.Responses;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Security.Principal;
@@ -18,7 +19,7 @@ namespace SinglePass.WPF.Authorization.Brokers
     {
         public string ClientId { get; init; }
         public string ClientSecret { get; init; }
-        public string RedirectUri { get; init; } = "http://localhost:53682/";
+        public string RedirectUri { get; init; } = "http://localhost:17682/";
     }
 
     public class YandexOAuthProvider : IOAuthProvider
@@ -67,7 +68,7 @@ namespace SinglePass.WPF.Authorization.Brokers
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             timeout.CancelAfter(TimeSpan.FromMinutes(5));
             timeout.Token.ThrowIfCancellationRequested();
-            using var listener = OAuthHelper.StartListener(redirectUri.AbsoluteUri);
+            using var listener = StartCallbackListener(redirectUri);
             using var browser = Process.Start(new ProcessStartInfo($"{OAuthEndpoint}/authorize?{query}")
             {
                 UseShellExecute = true
@@ -84,6 +85,18 @@ namespace SinglePass.WPF.Authorization.Brokers
                 ["code"] = callback.Code,
                 ["code_verifier"] = verifier
             }, cancellationToken).ConfigureAwait(false);
+        }
+
+        private static HttpListener StartCallbackListener(Uri redirectUri)
+        {
+            try
+            {
+                return OAuthHelper.StartListener(redirectUri.AbsoluteUri);
+            }
+            catch (HttpListenerException ex) when (ex.NativeErrorCode is 32 or 183 or 10048 or 10013)
+            {
+                throw new YandexCallbackUnavailableException(redirectUri.Port, ex);
+            }
         }
 
         public Task<OAuthInfo> RefreshTokenAsync(OAuthInfo oauthInfo, CancellationToken cancellationToken)
@@ -152,5 +165,11 @@ namespace SinglePass.WPF.Authorization.Brokers
 
         private static string Base64Url(byte[] bytes) =>
             Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+    }
+
+    internal sealed class YandexCallbackUnavailableException(int port, Exception innerException)
+        : Exception($"Unable to start the Yandex OAuth callback on local port {port}.", innerException)
+    {
+        public int Port { get; } = port;
     }
 }

@@ -474,4 +474,7 @@
   <data name="CloudSignOutFailed" xml:space="preserve">
     <value>Не удалось выйти из облачного аккаунта.</value>
   </data>
+  <data name="YandexDiskCallbackUnavailable" xml:space="preserve">
+    <value>Локальный порт {0} недоступен. Укажите свободный порт в Settings:YandexDiskConfig:RedirectUri и зарегистрируйте тот же адрес в Яндекс OAuth.</value>
+  </data>
 </root>

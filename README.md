@@ -33,7 +33,7 @@ Open **Settings → Cloud Sync** and sign in to Google Drive or Yandex Disk. **U
 
 #### Configure Yandex Disk
 
-1. Register a [Yandex OAuth application](https://oauth.yandex.ru/client/new/) with the redirect URI `http://localhost:53682/`. Grant application folder access (`cloud_api:disk.app_folder`), profile access (`login:info`) and avatar access (`login:avatar`).
+1. Register a [Yandex OAuth application](https://oauth.yandex.ru/client/new/id/) with the redirect URI `http://localhost:17682/`. Grant application folder access (`cloud_api:disk.app_folder`), profile access (`login:info`) and avatar access (`login:avatar`).
 2. Set the `Settings__YandexDiskConfig__ClientId` and `Settings__YandexDiskConfig__ClientSecret` environment variables for the SinglePass process, then restart SinglePass. To use another loopback port, register its exact URI and set `Settings__YandexDiskConfig__RedirectUri` to match.
 3. Sign in under **Settings → Cloud Sync → Yandex Disk**. Use the same OAuth application on each computer to access the same app folder.
 

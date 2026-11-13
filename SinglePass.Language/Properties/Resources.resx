@@ -454,4 +454,7 @@
   <data name="CloudSignOutFailed" xml:space="preserve">
     <value>Could not sign out of the cloud account.</value>
   </data>
+  <data name="YandexDiskCallbackUnavailable" xml:space="preserve">
+    <value>Local port {0} is unavailable. Set a free port in Settings:YandexDiskConfig:RedirectUri and register the same address in Yandex OAuth.</value>
+  </data>
 </root>

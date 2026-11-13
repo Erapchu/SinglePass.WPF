@@ -41,9 +41,17 @@ namespace SinglePass.WPF.Authorization.Helpers
         public static HttpListener StartListener(string redirectUri)
         {
             var listener = new HttpListener();
-            listener.Prefixes.Add(redirectUri);
-            listener.Start();
-            return listener;
+            try
+            {
+                listener.Prefixes.Add(redirectUri);
+                listener.Start();
+                return listener;
+            }
+            catch
+            {
+                listener.Close();
+                throw;
+            }
         }
 
         public static void OpenBrowser(string uri)

@@ -9,15 +9,19 @@ namespace SinglePass.WPF.Views.Windows
     public partial class PasswordGroupDialogWindow : Window
     {
         private sealed record GroupIcon(string Glyph, string Name);
+        private readonly PasswordGroup _existingGroup;
 
         public PasswordGroup Group { get; private set; }
 
-        public PasswordGroupDialogWindow()
+        public PasswordGroupDialogWindow() : this(null) { }
+
+        public PasswordGroupDialogWindow(PasswordGroup group)
         {
             InitializeComponent();
 
+            _existingGroup = group;
             var loc = LocalizationManager.Instance;
-            IconList.ItemsSource = new GroupIcon[]
+            GroupIcon[] icons =
             {
                 new("\uE8B7", loc["GroupIconFolder"]),
                 new("\uE821", loc["GroupIconWork"]),
@@ -28,7 +32,15 @@ namespace SinglePass.WPF.Views.Windows
                 new("\uE7BF", loc["GroupIconShopping"]),
                 new("\uE806", loc["GroupIconTravel"])
             };
-            IconList.SelectedIndex = 0;
+            IconList.ItemsSource = icons;
+            var iconIndex = Array.FindIndex(icons, icon => icon.Glyph == group?.Icon);
+            IconList.SelectedIndex = Math.Max(0, iconIndex);
+
+            if (group != null)
+            {
+                Title = loc["EditPasswordGroup"];
+                GroupNameTextBox.Text = group.Name;
+            }
         }
 
         private void GroupName_TextChanged(object sender, TextChangedEventArgs e)
@@ -43,7 +55,7 @@ namespace SinglePass.WPF.Views.Windows
             if (name.Length == 0 || IconList.SelectedItem is not GroupIcon icon)
                 return;
 
-            Group = new PasswordGroup(Guid.NewGuid(), name, icon.Glyph);
+            Group = new PasswordGroup(_existingGroup?.Id ?? Guid.NewGuid(), name, icon.Glyph);
             DialogResult = true;
         }
     }

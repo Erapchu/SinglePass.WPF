@@ -123,19 +123,34 @@
                                                 Content="{Binding}" ContentTemplate="{StaticResource NavigationItemTemplate}"
                                                 Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" />
                                         <Button Width="28" Height="28" Margin="0,0,4,0" Padding="0"
-                                                HorizontalAlignment="Right" Background="Transparent" BorderThickness="0" Click="DeleteGroup_Click"
-                                                AutomationProperties.Name="{Binding [DeletePasswordGroup], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
-                                                ToolTip="{Binding [DeletePasswordGroup], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}">
-                                            <TextBlock Style="{StaticResource SymbolText}" FontSize="13" Text="&#xE74D;" />
+                                                HorizontalAlignment="Right" Background="Transparent" BorderThickness="0" Click="GroupMenu_Click"
+                                                AutomationProperties.Name="{Binding [PasswordGroupActions], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                                                ToolTip="{Binding [PasswordGroupActions], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}">
+                                            <TextBlock Style="{StaticResource SymbolText}" FontSize="13" Text="&#xE712;" />
+                                            <Button.ContextMenu>
+                                                <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                                    <MenuItem Header="{Binding [Edit], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                                                              Click="EditGroup_Click" />
+                                                    <MenuItem Header="{Binding [Delete], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                                                              Click="DeleteGroup_Click" />
+                                                </ContextMenu>
+                                            </Button.ContextMenu>
                                             <Button.Style>
                                                 <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                                                    <Setter Property="Visibility" Value="Hidden" />
+                                                    <Setter Property="Opacity" Value="0" />
+                                                    <Setter Property="IsHitTestVisible" Value="False" />
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsMouseOver, ElementName=GroupRow}" Value="True">
-                                                            <Setter Property="Visibility" Value="Visible" />
+                                                            <Setter Property="Opacity" Value="1" />
+                                                            <Setter Property="IsHitTestVisible" Value="True" />
                                                         </DataTrigger>
-                                                        <DataTrigger Binding="{Binding IsKeyboardFocusWithin, ElementName=GroupRow}" Value="True">
-                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        <Trigger Property="IsKeyboardFocused" Value="True">
+                                                            <Setter Property="Opacity" Value="1" />
+                                                            <Setter Property="IsHitTestVisible" Value="True" />
+                                                        </Trigger>
+                                                        <DataTrigger Binding="{Binding ContextMenu.IsOpen, RelativeSource={RelativeSource Self}}" Value="True">
+                                                            <Setter Property="Opacity" Value="1" />
+                                                            <Setter Property="IsHitTestVisible" Value="True" />
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>

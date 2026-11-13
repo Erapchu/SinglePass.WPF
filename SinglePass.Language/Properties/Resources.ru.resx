@@ -402,6 +402,12 @@
   <data name="AddPasswordGroup" xml:space="preserve">
     <value>Добавить группу</value>
   </data>
+  <data name="EditPasswordGroup" xml:space="preserve">
+    <value>Изменить группу</value>
+  </data>
+  <data name="PasswordGroupActions" xml:space="preserve">
+    <value>Действия с группой</value>
+  </data>
   <data name="DeletePasswordGroup" xml:space="preserve">
     <value>Удалить группу</value>
   </data>

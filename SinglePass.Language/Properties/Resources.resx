@@ -382,6 +382,12 @@
   <data name="AddPasswordGroup" xml:space="preserve">
     <value>Add group</value>
   </data>
+  <data name="EditPasswordGroup" xml:space="preserve">
+    <value>Edit group</value>
+  </data>
+  <data name="PasswordGroupActions" xml:space="preserve">
+    <value>Group actions</value>
+  </data>
   <data name="DeletePasswordGroup" xml:space="preserve">
     <value>Delete group</value>
   </data>

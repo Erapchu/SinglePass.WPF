@@ -170,6 +170,11 @@ namespace SinglePass.WPF.ViewModels
             Groups = [.. PasswordGroups, group]
         });
 
+        internal Task<bool> EditGroupAsync(PasswordGroup group) => SaveGroupsAsync(_groupSettings with
+        {
+            Groups = PasswordGroups.Select(item => item.Id == group.Id ? group : item).ToList()
+        });
+
         internal Task<bool> DeleteGroupAsync(PasswordGroup group) => SaveGroupsAsync(new PasswordGroupSettings
         {
             Groups = PasswordGroups.Where(item => item.Id != group.Id).ToList(),

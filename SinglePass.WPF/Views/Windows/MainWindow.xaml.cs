@@ -83,6 +83,26 @@ namespace SinglePass.WPF.Views.Windows
                 await ViewModel.AddGroupAsync(dialog.Group);
         }
 
+        private void GroupMenu_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button { ContextMenu: { } menu } button)
+            {
+                menu.PlacementTarget = button;
+                menu.IsOpen = true;
+            }
+        }
+
+        private async void EditGroup_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel.PasswordsVM.IsSavingGroups ||
+                sender is not MenuItem { DataContext: NavigationItemViewModel { Group: { } group } item })
+                return;
+
+            var dialog = new PasswordGroupDialogWindow(group) { Owner = this };
+            if (dialog.ShowDialog() == true)
+                await ViewModel.EditGroupAsync(item, dialog.Group);
+        }
+
         private async void DeleteGroup_Click(object sender, RoutedEventArgs e)
         {
             if (ViewModel.PasswordsVM.IsSavingGroups ||

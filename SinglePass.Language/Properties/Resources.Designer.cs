@@ -340,6 +340,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Edit group.
+        /// </summary>
+        public static string EditPasswordGroup {
+            get {
+                return ResourceManager.GetString("EditPasswordGroup", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Enter.
         /// </summary>
         public static string Enter {
@@ -717,6 +726,15 @@ namespace SinglePass.Language.Properties {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to Group actions.
+        /// </summary>
+        public static string PasswordGroupActions {
+            get {
+                return ResourceManager.GetString("PasswordGroupActions", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Groups.
         /// </summary>

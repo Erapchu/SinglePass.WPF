@@ -20,9 +20,10 @@ namespace SinglePass.WPF.ViewModels
         /// <summary>
         /// Navigation icon.
         /// </summary>
-        public string Glyph { get; }
+        public string Glyph => Group?.Icon ?? _glyph;
 
-        public PasswordGroup Group { get; }
+        private readonly string _glyph;
+        public PasswordGroup Group { get; private set; }
 
         private bool _isSelected;
         public bool IsSelected
@@ -52,7 +53,7 @@ namespace SinglePass.WPF.ViewModels
         public NavigationItemViewModel(string nameKey, string glyph, Func<Control> createContent)
         {
             _nameKey = nameKey;
-            Glyph = glyph;
+            _glyph = glyph;
             _lazyContent = new Lazy<Control>(createContent);
             PropertyChangedEventManager.AddHandler(LocalizationManager.Instance, OnLanguageChanged, "Item[]");
         }
@@ -60,8 +61,14 @@ namespace SinglePass.WPF.ViewModels
         public NavigationItemViewModel(PasswordGroup group, NavigationItemViewModel passwords)
         {
             Group = group;
-            Glyph = group.Icon;
             _lazyContent = passwords._lazyContent;
+        }
+
+        internal void UpdateGroup(PasswordGroup group)
+        {
+            Group = group;
+            OnPropertyChanged(nameof(Name));
+            OnPropertyChanged(nameof(Glyph));
         }
 
         private void OnLanguageChanged(object sender, PropertyChangedEventArgs e) => OnPropertyChanged(nameof(Name));

@@ -86,6 +86,12 @@ namespace SinglePass.WPF.ViewModels
             Navigate(navigation);
         }
 
+        internal async Task EditGroupAsync(NavigationItemViewModel navigation, PasswordGroup group)
+        {
+            if (await PasswordsVM.EditGroupAsync(group))
+                navigation.UpdateGroup(group);
+        }
+
         internal async Task DeleteGroupAsync(NavigationItemViewModel navigation)
         {
             if (!await PasswordsVM.DeleteGroupAsync(navigation.Group))

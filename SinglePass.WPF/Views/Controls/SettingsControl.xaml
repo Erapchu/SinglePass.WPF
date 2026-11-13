@@ -1,7 +1,8 @@
-<UserControl
+﻿<UserControl
     x:Class="SinglePass.WPF.Views.Controls.SettingsControl"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:SinglePass.WPF.Views.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -64,6 +65,30 @@
                            Content="{Binding [ChangePassword], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Target="{Binding ElementName=ChangePasswordButton}" />
                 </DockPanel>
             </Border>
+            <Button
+                x:Name="CloudSyncButton"
+                MinHeight="64"
+                Margin="0,0,0,8"
+                Padding="16,10"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Center"
+                AutomationProperties.Name="{Binding [CloudSync], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                Command="{x:Static controls:SettingsControl.OpenCloudSyncCommand}">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Left" Width="20" Margin="0,0,16,0"
+                               FontSize="20" Style="{StaticResource SymbolText}" Text="&#xE753;" />
+                    <TextBlock DockPanel.Dock="Right" Margin="12,0,0,0"
+                               FontSize="12" Style="{StaticResource SymbolText}" Text="&#xE76C;" />
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock FontWeight="SemiBold" TextWrapping="Wrap"
+                                   Text="{Binding [CloudSync], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="Google Drive" />
+                    </StackPanel>
+                </DockPanel>
+            </Button>
             <Border Style="{StaticResource Card}">
                 <StackPanel>
                     <DockPanel Margin="0,0,0,8">

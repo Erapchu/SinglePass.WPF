@@ -2,9 +2,11 @@
     x:Class="SinglePass.WPF.Views.Windows.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:SinglePass.WPF.Views.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:helpers="clr-namespace:SinglePass.WPF.Helpers"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:loc="clr-namespace:SinglePass.WPF.Localization"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:SinglePass.WPF.ViewModels"
     Title="{x:Static helpers:Constants.AppName}"
@@ -43,6 +45,9 @@
             </Grid>
         </DataTemplate>
     </Window.Resources>
+    <Window.CommandBindings>
+        <CommandBinding Command="{x:Static controls:SettingsControl.OpenCloudSyncCommand}" Executed="OpenCloudSync_Executed" />
+    </Window.CommandBindings>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Loaded">
             <i:InvokeCommandAction Command="{Binding LoadingCommand}" />
@@ -69,17 +74,70 @@
                 </ItemsPanelTemplate>
             </ListView.ItemsPanel>
         </ListView>
-        <Grid Grid.Column="1" ClipToBounds="True">
+        <DockPanel Grid.Column="1" ClipToBounds="True">
+            <Grid x:Name="SettingsHeader" DockPanel.Dock="Top" Margin="8,4,8,8" Visibility="Collapsed">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Button
+                    x:Name="SettingsBreadcrumbButton"
+                    Height="39"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Top"
+                    AutomationProperties.Name="{Binding [Settings], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                    Background="Transparent"
+                    BorderBrush="Transparent"
+                    Click="SettingsBreadcrumbButton_Click"
+                    Visibility="{Binding Visibility, ElementName=CloudSyncBreadcrumb}" />
+                <TextBlock
+                    x:Name="SettingsHeading"
+                    Height="39"
+                    Padding="2,3,4,0"
+                    VerticalAlignment="Top"
+                    FontSize="24"
+                    FontWeight="SemiBold"
+                    IsHitTestVisible="False"
+                    Text="{Binding [Settings], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="AutomationProperties.HeadingLevel" Value="Level1" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Visibility, ElementName=CloudSyncBreadcrumb}" Value="Visible">
+                                    <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <Setter Property="AutomationProperties.HeadingLevel" Value="None" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                <DockPanel x:Name="CloudSyncBreadcrumb" Grid.Column="1" Visibility="Collapsed">
+                    <Grid DockPanel.Dock="Left" Height="39" Margin="8,0,12,0" VerticalAlignment="Top">
+                        <TextBlock Style="{StaticResource SymbolText}" Text="&#xE76C;" />
+                    </Grid>
+                    <TextBlock
+                        Padding="0,3,0,0"
+                        AutomationProperties.HeadingLevel="Level1"
+                        FontSize="24"
+                        FontWeight="SemiBold"
+                        Text="{Binding [CloudSync], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                        TextWrapping="Wrap" />
+                </DockPanel>
+            </Grid>
             <ContentControl
                 x:Name="NavigationContent"
                 HorizontalContentAlignment="Stretch"
-                VerticalContentAlignment="Stretch"
-                Content="{Binding SelectedNavigationItem.Content}">
+                VerticalContentAlignment="Stretch">
+                <ContentControl.Style>
+                    <Style TargetType="ContentControl">
+                        <Setter Property="Content" Value="{Binding SelectedNavigationItem.Content}" />
+                    </Style>
+                </ContentControl.Style>
                 <ContentControl.RenderTransform>
                     <TranslateTransform x:Name="NavigationOffset" />
                 </ContentControl.RenderTransform>
             </ContentControl>
-        </Grid>
+        </DockPanel>
         <Border
             x:Name="StatusBanner"
             Grid.Column="1"

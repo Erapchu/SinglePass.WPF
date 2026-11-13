@@ -160,15 +160,6 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Choose password group.
-        /// </summary>
-        public static string ChoosePasswordGroup {
-            get {
-                return ResourceManager.GetString("ChoosePasswordGroup", resourceCulture);
-            }
-        }
-
-        /// <summary>
         ///   Looks up a localized string similar to Clear shortcut.
         /// </summary>
         public static string ClearHotkey {
@@ -750,6 +741,15 @@ namespace SinglePass.Language.Properties {
         public static string PasswordGroupActions {
             get {
                 return ResourceManager.GetString("PasswordGroupActions", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Group:.
+        /// </summary>
+        public static string PasswordGroupLabel {
+            get {
+                return ResourceManager.GetString("PasswordGroupLabel", resourceCulture);
             }
         }
 

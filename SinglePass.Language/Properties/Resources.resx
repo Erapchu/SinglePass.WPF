@@ -385,8 +385,8 @@
   <data name="NoPasswordGroup" xml:space="preserve">
     <value>No group</value>
   </data>
-  <data name="ChoosePasswordGroup" xml:space="preserve">
-    <value>Choose password group</value>
+  <data name="PasswordGroupLabel" xml:space="preserve">
+    <value>Group:</value>
   </data>
   <data name="PasswordGroups" xml:space="preserve">
     <value>Groups</value>

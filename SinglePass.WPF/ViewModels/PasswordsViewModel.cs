@@ -84,20 +84,26 @@ namespace SinglePass.WPF.ViewModels
         public IEnumerable<GroupOption> GroupOptions =>
             new[] { Ungrouped }.Concat(PasswordGroups.Select(ToGroupOption));
 
-        public GroupOption CurrentGroupOption =>
-            SelectedCredentialVM is { } credential &&
-            _credentialsCryptoService?.GetGroupId(credential.Model.Id) is { } id &&
-            PasswordGroups.FirstOrDefault(group => group.Id == id) is { } group
-                ? ToGroupOption(group)
-                : Ungrouped;
+        public GroupOption CurrentGroupOption
+        {
+            get => SelectedCredentialVM is { } credential &&
+                _credentialsCryptoService?.GetGroupId(credential.Model.Id) is { } id &&
+                PasswordGroups.FirstOrDefault(group => group.Id == id) is { } group
+                    ? ToGroupOption(group)
+                    : Ungrouped;
+            set
+            {
+                if (value != null && value.Id != CurrentGroupOption.Id && SelectedCredentialVM is { } credential)
+                    _ = ChangeGroupAsync(credential.Model.Id, value.Id);
+            }
+        }
 
         private static GroupOption ToGroupOption(PasswordGroup group) => new(group.Id, group.Name, group.Icon);
 
-        [RelayCommand]
-        private async Task ChangeGroupAsync(GroupOption option)
+        private async Task ChangeGroupAsync(Guid credentialId, Guid? groupId)
         {
-            if (option != null && SelectedCredentialVM is { } credential)
-                await MoveToGroupAsync(credential.Model.Id, option.Id);
+            await MoveToGroupAsync(credentialId, groupId);
+            OnPropertyChanged(nameof(CurrentGroupOption));
         }
 
         [ObservableProperty]

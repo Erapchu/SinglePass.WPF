@@ -405,8 +405,8 @@
   <data name="NoPasswordGroup" xml:space="preserve">
     <value>Без группы</value>
   </data>
-  <data name="ChoosePasswordGroup" xml:space="preserve">
-    <value>Выбрать группу пароля</value>
+  <data name="PasswordGroupLabel" xml:space="preserve">
+    <value>Группа:</value>
   </data>
   <data name="PasswordGroups" xml:space="preserve">
     <value>Группы</value>

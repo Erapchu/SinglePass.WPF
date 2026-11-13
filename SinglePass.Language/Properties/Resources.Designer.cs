@@ -574,7 +574,7 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Other.
+        ///   Looks up a localized string similar to Notes.
         /// </summary>
         public static string Other {
             get {

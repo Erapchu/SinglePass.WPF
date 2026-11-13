@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.Logging;
 using SinglePass.Language.Properties;
 using SinglePass.WPF.Hotkeys;
 using SinglePass.WPF.Localization;
@@ -8,8 +7,9 @@ using SinglePass.WPF.Services;
 using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels.Dialogs;
 using SinglePass.WPF.Views.Helpers;
+using SinglePass.WPF.Views.Windows;
 using System;
-using System.Threading.Tasks;
+using System.Windows;
 
 namespace SinglePass.WPF.ViewModels
 {
@@ -29,17 +29,7 @@ namespace SinglePass.WPF.ViewModels
         private readonly ThemeService _themeService;
         private readonly AppSettingsService _appSettingsService;
         private readonly CredentialsCryptoService _credentialsCryptoService;
-        private readonly ILogger<SettingsViewModel> _logger;
         private readonly HotkeysService _hotkeysService;
-
-        public event Action NewPasswordIsSet;
-
-        [ObservableProperty]
-        [NotifyCanExecuteChangedFor(nameof(ChangePasswordCommand))]
-        public partial string NewPassword { get; set; }
-
-        [ObservableProperty]
-        public partial bool ShowPasswordLengthError { get; set; }
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(ChangeHelperPopupHotkeyCommand))]
@@ -57,7 +47,6 @@ namespace SinglePass.WPF.ViewModels
             ThemeService themeService,
             AppSettingsService appSettingsService,
             CredentialsCryptoService credentialsCryptoService,
-            ILogger<SettingsViewModel> logger,
             HotkeysService hotkeysService)
         {
             ThemeMode = appSettingsService.ThemeMode;
@@ -67,36 +56,18 @@ namespace SinglePass.WPF.ViewModels
             _themeService = themeService;
             _appSettingsService = appSettingsService;
             _credentialsCryptoService = credentialsCryptoService;
-            _logger = logger;
             _hotkeysService = hotkeysService;
         }
 
-        [RelayCommand(CanExecute = nameof(CanChangePassword))]
-        private async Task ChangePasswordAsync()
+        [RelayCommand]
+        private void ChangePassword()
         {
-            if (string.IsNullOrWhiteSpace(NewPassword) || NewPassword.Length < 8)
+            var dialog = new ChangePasswordDialogWindow(_credentialsCryptoService)
             {
-                ShowPasswordLengthError = true;
-                return;
-            }
+                Owner = Application.Current.MainWindow
+            };
 
-            ShowPasswordLengthError = false;
-            var success = false;
-
-            try
-            {
-                _credentialsCryptoService.SetPassword(NewPassword);
-                await _credentialsCryptoService.SaveCredentials();
-
-                NewPasswordIsSet?.Invoke();
-                success = true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, null);
-            }
-
-            if (success)
+            if (dialog.ShowDialog() == true)
             {
                 MessageDialog.ShowDialog(
                     Resources.Success,
@@ -104,11 +75,6 @@ namespace SinglePass.WPF.ViewModels
                     MessageDialogButtons.OK,
                     "\uE73E");
             }
-        }
-
-        private bool CanChangePassword()
-        {
-            return !string.IsNullOrWhiteSpace(NewPassword);
         }
 
         [RelayCommand]

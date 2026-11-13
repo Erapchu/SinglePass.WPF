@@ -181,7 +181,7 @@
     <value>Открыть в браузере</value>
   </data>
   <data name="Other" xml:space="preserve">
-    <value>Другое</value>
+    <value>Заметки</value>
   </data>
   <data name="ShowHidePassword" xml:space="preserve">
     <value>Показать/скрыть пароль</value>
@@ -368,6 +368,18 @@
   </data>
   <data name="SystemLanguage" xml:space="preserve">
     <value>Как в Windows</value>
+  </data>
+  <data name="CurrentPassword" xml:space="preserve">
+    <value>Текущий пароль</value>
+  </data>
+  <data name="CurrentPasswordIsIncorrect" xml:space="preserve">
+    <value>Текущий пароль введён неверно.</value>
+  </data>
+  <data name="PasswordTooLong" xml:space="preserve">
+    <value>Пароль должен занимать не более 32 байт в UTF-8.</value>
+  </data>
+  <data name="PasswordChangeFailed" xml:space="preserve">
+    <value>Не удалось сохранить новый пароль. Попробуйте ещё раз.</value>
   </data>
   <data name="NewPasswordApplied" xml:space="preserve">
     <value>Новый пароль установлен</value>

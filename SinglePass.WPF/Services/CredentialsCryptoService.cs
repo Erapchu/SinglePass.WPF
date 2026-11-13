@@ -21,6 +21,13 @@ namespace SinglePass.WPF.Services
         Failed
     }
 
+    internal enum PasswordChangeResult
+    {
+        Changed,
+        IncorrectCurrentPassword,
+        Failed
+    }
+
     public class CredentialsCryptoService
     {
         private readonly object _credentialsLock = new();
@@ -214,6 +221,46 @@ namespace SinglePass.WPF.Services
         {
             _credentials = newCredentials;
             await SaveCredentials();
+        }
+
+        internal Task<PasswordChangeResult> ChangePasswordAsync(string currentPassword, string newPassword)
+        {
+            return Task.Run(async () =>
+            {
+                try
+                {
+                    var path = Constants.PasswordsFilePath;
+                    using var locker = await _asyncKeyedLocker.LockAsync(path).ConfigureAwait(false);
+                    if (!string.Equals(currentPassword, GetPassword(), StringComparison.Ordinal))
+                        return PasswordChangeResult.IncorrectCurrentPassword;
+
+                    var newPasswordSecure = SecureStringHelper.MakeSecureString(newPassword);
+                    var tempPath = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
+                    try
+                    {
+                        using (var stream = new FileStream(tempPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+                        {
+                            _cryptoService.EncryptToStream(Credentials, stream, newPassword);
+                        }
+
+                        File.Move(tempPath, path, overwrite: true);
+                    }
+                    catch
+                    {
+                        newPasswordSecure.Dispose();
+                        File.Delete(tempPath);
+                        throw;
+                    }
+
+                    PasswordSecure = newPasswordSecure;
+                    return PasswordChangeResult.Changed;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to change the credentials password.");
+                    return PasswordChangeResult.Failed;
+                }
+            });
         }
 
         public Task SaveCredentials()

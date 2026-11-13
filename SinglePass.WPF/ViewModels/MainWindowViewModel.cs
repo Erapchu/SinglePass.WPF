@@ -67,10 +67,6 @@ namespace SinglePass.WPF.ViewModels
                     "\uE72E",
                     () => new PasswordsControl() { DataContext = PasswordsVM }),
                 new NavigationItemViewModel(
-                    nameof(SinglePass.Language.Properties.Resources.CloudSync),
-                    "\uE753",
-                    () => new CloudSyncControl() { DataContext = CloudSyncVM }),
-                new NavigationItemViewModel(
                     nameof(SinglePass.Language.Properties.Resources.Settings),
                     "\uE713",
                     () => new SettingsControl() { DataContext = SettingsVM }) { DockAtBottom = true },

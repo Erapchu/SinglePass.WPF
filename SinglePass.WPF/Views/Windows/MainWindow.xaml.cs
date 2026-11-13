@@ -19,6 +19,7 @@ namespace SinglePass.WPF.Views.Windows
     {
         private readonly AppSettingsService _appSettingsService;
         private readonly DispatcherTimer _statusTimer = new() { Interval = TimeSpan.FromSeconds(3) };
+        private CloudSyncControl _cloudSyncControl;
 
         private MainWindowViewModel ViewModel => DataContext as MainWindowViewModel;
 
@@ -53,23 +54,22 @@ namespace SinglePass.WPF.Views.Windows
 
         private void Navigation_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (e.OriginalSource != sender || e.RemovedItems.Count == 0 || e.AddedItems.Count == 0 ||
-                !IsVisible || !SystemParameters.ClientAreaAnimation)
+            if (e.OriginalSource != sender || e.AddedItems.Count == 0)
+                return;
+
+            if (NavigationContent.Content is CloudSyncControl)
+                CloseCloudSync();
+
+            SettingsHeader.Visibility = e.AddedItems[0] is NavigationItemViewModel { Content: SettingsControl }
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+
+            if (e.RemovedItems.Count == 0 || !IsVisible || !SystemParameters.ClientAreaAnimation)
                 return;
 
             var duration = TimeSpan.FromMilliseconds(160);
+            AnimateNavigation(new Vector(0, 8), 0.85, duration);
             var easing = new QuadraticEase { EasingMode = EasingMode.EaseOut };
-            NavigationContent.BeginAnimation(OpacityProperty, new DoubleAnimation(0.85, 1, duration)
-            {
-                EasingFunction = easing,
-                FillBehavior = FillBehavior.Stop
-            });
-            NavigationOffset.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(8, 0, duration)
-            {
-                EasingFunction = easing,
-                FillBehavior = FillBehavior.Stop
-            });
-
             var navigation = (ListView)sender;
             if (navigation.ItemContainerGenerator.ContainerFromItem(e.AddedItems[0]) is ListViewItem item)
             {
@@ -84,6 +84,55 @@ namespace SinglePass.WPF.Views.Windows
                 scale.BeginAnimation(ScaleTransform.ScaleXProperty, selectionAnimation);
                 scale.BeginAnimation(ScaleTransform.ScaleYProperty, selectionAnimation);
             }
+        }
+
+        private void OpenCloudSync_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (NavigationContent.Content is not SettingsControl)
+                return;
+
+            _cloudSyncControl ??= new CloudSyncControl { DataContext = ViewModel.CloudSyncVM };
+            NavigationContent.Content = _cloudSyncControl;
+            CloudSyncBreadcrumb.Visibility = Visibility.Visible;
+            AnimateSettingsPage(64);
+            Dispatcher.InvokeAsync(() => SettingsBreadcrumbButton.Focus(), DispatcherPriority.Loaded);
+        }
+
+        private void SettingsBreadcrumbButton_Click(object sender, RoutedEventArgs e)
+        {
+            CloseCloudSync();
+            AnimateSettingsPage(-64);
+
+            if (NavigationContent.Content is SettingsControl settings)
+                Dispatcher.InvokeAsync(() => settings.CloudSyncButton.Focus(), DispatcherPriority.Loaded);
+        }
+
+        private void CloseCloudSync()
+        {
+            // Clearing the local value restores the binding to the selected sidebar item.
+            NavigationContent.ClearValue(ContentControl.ContentProperty);
+            CloudSyncBreadcrumb.Visibility = Visibility.Collapsed;
+        }
+
+        private void AnimateSettingsPage(double horizontalOffset)
+        {
+            if (IsVisible && SystemParameters.ClientAreaAnimation)
+                AnimateNavigation(new Vector(horizontalOffset, 0), 0, TimeSpan.FromMilliseconds(250));
+        }
+
+        private void AnimateNavigation(Vector offset, double initialOpacity, TimeSpan duration)
+        {
+            var easing = new QuadraticEase { EasingMode = EasingMode.EaseOut };
+
+            DoubleAnimation CreateAnimation(double from, double to) => new(from, to, duration)
+            {
+                EasingFunction = easing,
+                FillBehavior = FillBehavior.Stop
+            };
+
+            NavigationContent.BeginAnimation(OpacityProperty, CreateAnimation(initialOpacity, 1));
+            NavigationOffset.BeginAnimation(TranslateTransform.XProperty, offset.X == 0 ? null : CreateAnimation(offset.X, 0));
+            NavigationOffset.BeginAnimation(TranslateTransform.YProperty, offset.Y == 0 ? null : CreateAnimation(offset.Y, 0));
         }
 
         private void MainViewModel_ScrollIntoViewRequired(CredentialViewModel credVM)

@@ -66,10 +66,11 @@ namespace SinglePass.WPF.Views.Windows
                 CloseCloudSync();
 
             var showSettings = ViewModel.SelectedNavigationItem == ViewModel.SettingsNavigation;
+            var pageChanged = showSettings != (SettingsHeader.Visibility == Visibility.Visible);
             SettingsHeader.Visibility = showSettings ? Visibility.Visible : Visibility.Collapsed;
             PasswordsHeading.Visibility = showSettings ? Visibility.Collapsed : Visibility.Visible;
 
-            if (IsVisible && SystemParameters.ClientAreaAnimation)
+            if (pageChanged && IsVisible && SystemParameters.ClientAreaAnimation)
                 AnimateNavigation(new Vector(0, 8), 0.85, TimeSpan.FromMilliseconds(160));
         }
 

@@ -78,6 +78,7 @@ namespace SinglePass.WPF.ViewModels
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsEditing))]
+        [NotifyPropertyChangedFor(nameof(IsAdding))]
         [NotifyCanExecuteChangedFor(nameof(EditCommand))]
         [NotifyCanExecuteChangedFor(nameof(DeleteCommand))]
         [NotifyCanExecuteChangedFor(nameof(CancelEditCommand))]
@@ -85,8 +86,12 @@ namespace SinglePass.WPF.ViewModels
         public partial CredentialViewModel DraftCredential { get; private set; }
 
         public bool IsEditing => DraftCredential != null;
+        public bool IsAdding => IsEditing && _isNewDraft;
+
+        private bool _isNewDraft;
 
         [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(AddCommand))]
         [NotifyCanExecuteChangedFor(nameof(EditCommand))]
         [NotifyCanExecuteChangedFor(nameof(DeleteCommand))]
         [NotifyCanExecuteChangedFor(nameof(CancelEditCommand))]
@@ -322,7 +327,7 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
-        private async Task DisplayCredentialsAsync(bool keepSelection = false)
+        private async Task DisplayCredentialsAsync(bool keepSelection = false, CredentialViewModel preferredSelection = null)
         {
             var request = ++_displayRequest;
             try
@@ -350,7 +355,7 @@ namespace SinglePass.WPF.ViewModels
                 if (request != _displayRequest)
                     return;
 
-                var selection = keepSelection ? SelectedCredentialVM : null;
+                var selection = preferredSelection ?? (keepSelection ? SelectedCredentialVM : null);
                 DisplayedCredentials = new ObservableCollectionDelayed<CredentialViewModel>(filtered);
                 GroupedCredentials = CreateGroupedView(DisplayedCredentials, sort);
                 OnPropertyChanged(nameof(DisplayedCredentials));
@@ -368,27 +373,19 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
-        [RelayCommand]
+        private bool CanAdd() => !IsSavingEdit;
+
+        [RelayCommand(CanExecute = nameof(CanAdd))]
         private async Task Add()
         {
             if (_initialLoad is not null)
                 await _initialLoad;
 
-            var newCredVM = _credentialViewModelFactory.ProvideNew(Credential.CreateNew());
-            var result = CredentialEditDialog.ShowDialog(
-                newCredVM,
-                CredentialDetailsMode.New);
-            if (result != DialogChoice.OK)
+            if (!CanAdd())
                 return;
 
-            var groupId = _selectedGroupId;
-            var dateTimeNow = DateTime.Now;
-            newCredVM.CreationTime = dateTimeNow;
-            newCredVM.LastModifiedTime = dateTimeNow;
-            if (!await SaveCredentialAsync(() => _credentialsCryptoService.AddCredential(newCredVM.Model, groupId)))
-                return;
-            _credentialVMs.Add(newCredVM);
-            await DisplayCredentialsAsync();
+            DraftCredential = null;
+            StartDraft(_credentialViewModelFactory.ProvideNew(Credential.CreateNew()), _selectedGroupId, isNew: true);
         }
 
         [RelayCommand]
@@ -478,9 +475,16 @@ namespace SinglePass.WPF.ViewModels
             if (SelectedCredentialVM is not { } credential)
                 return;
 
-            _originalGroupId = _draftGroupId = CurrentGroup.Id;
+            StartDraft(credential.Clone(), CurrentGroup.Id, isNew: false);
+        }
+
+        private void StartDraft(CredentialViewModel draft, Guid? groupId, bool isNew)
+        {
+            _isNewDraft = isNew;
+            _originalGroupId = isNew ? null : groupId;
+            _draftGroupId = groupId;
             OnPropertyChanged(nameof(DraftGroup));
-            DraftCredential = credential.Clone();
+            DraftCredential = draft;
         }
 
         private bool CanFinishEdit() => IsEditing && !IsSavingEdit;
@@ -500,21 +504,31 @@ namespace SinglePass.WPF.ViewModels
 
             var groupId = _draftGroupId;
             var changeGroup = _draftGroupId != _originalGroupId;
+            var isNew = IsAdding;
             IsSavingEdit = true;
             try
             {
                 draft.LastModifiedTime = DateTime.Now;
-                if (!await SaveCredentialAsync(() => _credentialsCryptoService.EditCredential(draft.Model, groupId, changeGroup)))
+                if (isNew)
+                    draft.CreationTime = draft.LastModifiedTime;
+
+                if (!await SaveCredentialAsync(() => isNew
+                        ? _credentialsCryptoService.AddCredential(draft.Model, groupId)
+                        : _credentialsCryptoService.EditCredential(draft.Model, groupId, changeGroup)))
                     return;
 
                 var index = _credentialVMs.FindIndex(item => item.Model.Id == draft.Model.Id);
                 if (index >= 0)
                     _credentialVMs[index] = draft;
+                else if (isNew)
+                    _credentialVMs.Add(draft);
 
-                if (ReferenceEquals(DraftCredential, draft))
+                var stillEditingDraft = ReferenceEquals(DraftCredential, draft);
+                if (stillEditingDraft)
                     DraftCredential = null;
 
-                await DisplayCredentialsAsync(keepSelection: true);
+                await DisplayCredentialsAsync(keepSelection: true,
+                    preferredSelection: isNew && stillEditingDraft ? draft : null);
             }
             finally
             {

@@ -157,7 +157,7 @@ namespace SinglePass.WPF.Services
                     return vault;
 
                 var updated = vault with { Credentials = [.. vault.Credentials, credential] };
-                return groupId.HasValue ? AssignGroup(updated, credential.Id, groupId) : updated;
+                return groupId.HasValue ? AssignGroupOrThrow(updated, credential.Id, groupId) : updated;
             });
         }
 
@@ -175,14 +175,7 @@ namespace SinglePass.WPF.Services
                 var credentials = vault.Credentials.ToList();
                 credentials[index] = credential;
                 var updated = vault with { Credentials = credentials };
-                if (!changeGroup)
-                    return updated;
-
-                var assigned = AssignGroup(updated, credential.Id, groupId);
-                if (ReferenceEquals(assigned, updated))
-                    throw new InvalidOperationException("The selected password group is no longer available.");
-
-                return assigned;
+                return changeGroup ? AssignGroupOrThrow(updated, credential.Id, groupId) : updated;
             });
         }
 
@@ -223,6 +216,15 @@ namespace SinglePass.WPF.Services
             vault.Credentials.Any(credential => credential.Id == credentialId)
                 ? AssignGroup(vault, credentialId, groupId)
                 : vault);
+
+        private static PasswordVault AssignGroupOrThrow(PasswordVault vault, Guid credentialId, Guid? groupId)
+        {
+            var assigned = AssignGroup(vault, credentialId, groupId);
+            if (ReferenceEquals(assigned, vault))
+                throw new InvalidOperationException("The selected password group is no longer available.");
+
+            return assigned;
+        }
 
         private static PasswordVault AssignGroup(PasswordVault vault, Guid credentialId, Guid? groupId)
         {

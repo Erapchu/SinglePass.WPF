@@ -17,7 +17,6 @@ using SinglePass.WPF.Options;
 using SinglePass.WPF.Services;
 using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels;
-using SinglePass.WPF.ViewModels.Dialogs;
 using SinglePass.WPF.Views;
 using SinglePass.WPF.Views.Windows;
 using System;
@@ -87,9 +86,6 @@ namespace SinglePass.WPF
             services.AddScoped<PasswordsViewModel>();
             services.AddScoped<CloudSyncViewModel>();
             services.AddScoped<SettingsViewModel>();
-
-            services.AddTransient<CredentialEditDialogWindow>();
-            services.AddTransient<CredentialEditViewModel>();
 
             // Popup
             services.AddTransient<PopupWindow>();

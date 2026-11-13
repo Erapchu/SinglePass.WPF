@@ -4,6 +4,7 @@ using SinglePass.WPF.Models;
 using SinglePass.WPF.Views.Controls;
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SinglePass.WPF.ViewModels
@@ -116,6 +117,24 @@ namespace SinglePass.WPF.ViewModels
 
         private async void SettingsViewModel_SyncCompleted()
         {
+            var groups = PasswordsVM.PasswordGroups.ToDictionary(group => group.Id);
+            foreach (var navigation in GroupNavigation.ToList())
+            {
+                if (groups.Remove(navigation.Group.Id, out var group))
+                {
+                    if (navigation.Group != group)
+                        navigation.UpdateGroup(group);
+                    continue;
+                }
+
+                if (SelectedNavigationItem == navigation)
+                    Navigate(AllPasswordsNavigation);
+                GroupNavigation.Remove(navigation);
+            }
+
+            foreach (var group in groups.Values)
+                GroupNavigation.Add(new NavigationItemViewModel(group, AllPasswordsNavigation));
+
             await PasswordsVM.ReloadCredentialsAsync();
         }
 

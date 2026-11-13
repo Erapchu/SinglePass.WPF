@@ -49,10 +49,9 @@ namespace SinglePass.WPF.ViewModels
         private readonly AppSettingsService _appSettingsService;
         private readonly CredentialViewModelFactory _credentialViewModelFactory;
         private Task _initialLoad;
-        private PasswordGroupSettings _groupSettings = new();
         private Guid? _selectedGroupId;
 
-        public IReadOnlyList<PasswordGroup> PasswordGroups => _groupSettings.Groups;
+        public IReadOnlyList<PasswordGroup> PasswordGroups => _credentialsCryptoService.PasswordGroups;
 
         internal bool IsSavingGroups { get; private set; }
 
@@ -139,7 +138,6 @@ namespace SinglePass.WPF.ViewModels
             _logger = logger;
             _appSettingsService = appSettingsService;
             _credentialViewModelFactory = credentialViewModelFactory;
-            _groupSettings = appSettingsService.Settings.PasswordGroups ?? new();
 
             _sort = _appSettingsService.Sort is SortType.Created or SortType.Modified
                 ? _appSettingsService.Sort
@@ -165,51 +163,31 @@ namespace SinglePass.WPF.ViewModels
             _ = DisplayCredentialsAsync(keepSelection: true);
         }
 
-        internal Task<bool> AddGroupAsync(PasswordGroup group) => SaveGroupsAsync(_groupSettings with
-        {
-            Groups = [.. PasswordGroups, group]
-        });
+        internal Task<bool> AddGroupAsync(PasswordGroup group) =>
+            SaveGroupsAsync(() => _credentialsCryptoService.SaveGroup(group, isNew: true));
 
-        internal Task<bool> EditGroupAsync(PasswordGroup group) => SaveGroupsAsync(_groupSettings with
-        {
-            Groups = PasswordGroups.Select(item => item.Id == group.Id ? group : item).ToList()
-        });
+        internal Task<bool> EditGroupAsync(PasswordGroup group) =>
+            SaveGroupsAsync(() => _credentialsCryptoService.SaveGroup(group, isNew: false));
 
-        internal Task<bool> DeleteGroupAsync(PasswordGroup group) => SaveGroupsAsync(new PasswordGroupSettings
-        {
-            Groups = PasswordGroups.Where(item => item.Id != group.Id).ToList(),
-            Assignments = _groupSettings.Assignments.Where(pair => pair.Value != group.Id).ToDictionary()
-        });
+        internal Task<bool> DeleteGroupAsync(PasswordGroup group) =>
+            SaveGroupsAsync(() => _credentialsCryptoService.DeleteGroup(group.Id));
 
         internal bool CanMoveToGroup(Guid credentialId, Guid? groupId) =>
             !IsSavingGroups &&
             _credentialVMs.Any(item => item.Model.Id == credentialId) &&
             (groupId == null || PasswordGroups.Any(group => group.Id == groupId)) &&
-            (_groupSettings.Assignments.TryGetValue(credentialId, out var currentGroupId)
-                ? currentGroupId != groupId
-                : groupId.HasValue);
+            _credentialsCryptoService.GetGroupId(credentialId) != groupId;
 
         internal async Task MoveToGroupAsync(Guid credentialId, Guid? groupId)
         {
             if (!CanMoveToGroup(credentialId, groupId))
                 return;
 
-            if (await SaveGroupAssignmentAsync(credentialId, groupId) && _selectedGroupId.HasValue)
+            if (await SaveGroupsAsync(() => _credentialsCryptoService.MoveCredential(credentialId, groupId)) && _selectedGroupId.HasValue)
                 await DisplayCredentialsAsync(keepSelection: true);
         }
 
-        private Task<bool> SaveGroupAssignmentAsync(Guid credentialId, Guid? groupId)
-        {
-            var assignments = new Dictionary<Guid, Guid>(_groupSettings.Assignments);
-            if (groupId is { } targetId)
-                assignments[credentialId] = targetId;
-            else
-                assignments.Remove(credentialId);
-
-            return SaveGroupsAsync(_groupSettings with { Assignments = assignments });
-        }
-
-        private async Task<bool> SaveGroupsAsync(PasswordGroupSettings settings)
+        private async Task<bool> SaveGroupsAsync(Func<Task> save)
         {
             if (IsSavingGroups)
                 return false;
@@ -217,12 +195,12 @@ namespace SinglePass.WPF.ViewModels
             IsSavingGroups = true;
             try
             {
-                await _appSettingsService.SavePasswordGroups(settings);
-                _groupSettings = settings;
+                await save();
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Failed to save password groups.");
                 StatusMessageRequested?.Invoke(LocalizationManager.Instance["SavePasswordGroupsFailed"]);
                 return false;
             }
@@ -278,7 +256,7 @@ namespace SinglePass.WPF.ViewModels
                 var order = Order;
                 var credentials = _credentialVMs.ToList();
                 var groupId = _selectedGroupId;
-                var assignments = _groupSettings.Assignments;
+                var assignments = _credentialsCryptoService?.GroupAssignments;
                 var filtered = await Task.Run(() =>
                 {
                     if (groupId.HasValue)
@@ -332,10 +310,9 @@ namespace SinglePass.WPF.ViewModels
             var dateTimeNow = DateTime.Now;
             newCredVM.CreationTime = dateTimeNow;
             newCredVM.LastModifiedTime = dateTimeNow;
-            await _credentialsCryptoService.AddCredential(newCredVM.Model);
+            if (!await SaveCredentialAsync(() => _credentialsCryptoService.AddCredential(newCredVM.Model, groupId)))
+                return;
             _credentialVMs.Add(newCredVM);
-            if (groupId.HasValue && CanMoveToGroup(newCredVM.Model.Id, groupId))
-                await SaveGroupAssignmentAsync(newCredVM.Model.Id, groupId);
             await DisplayCredentialsAsync();
         }
 
@@ -433,7 +410,8 @@ namespace SinglePass.WPF.ViewModels
 
             var dateTimeNow = DateTime.Now;
             tempCredentialVM.LastModifiedTime = dateTimeNow;
-            await _credentialsCryptoService.EditCredential(tempCredentialVM.Model);
+            if (!await SaveCredentialAsync(() => _credentialsCryptoService.EditCredential(tempCredentialVM.Model)))
+                return;
             _credentialVMs.Remove(credential);
             _credentialVMs.Add(tempCredentialVM);
             await DisplayCredentialsAsync();
@@ -455,10 +433,9 @@ namespace SinglePass.WPF.ViewModels
 
             if (result == DialogChoice.Yes)
             {
-                await _credentialsCryptoService.DeleteCredential(credential.Model);
+                if (!await SaveCredentialAsync(() => _credentialsCryptoService.DeleteCredential(credential.Model)))
+                    return;
                 _credentialVMs.Remove(credential);
-                if (_groupSettings.Assignments.ContainsKey(credential.Model.Id))
-                    await SaveGroupAssignmentAsync(credential.Model.Id, null);
                 var dIndex = DisplayedCredentials.IndexOf(credential);
                 var countAfterDeletion = DisplayedCredentials.Count - 1;
                 var sIndex = dIndex >= countAfterDeletion ? countAfterDeletion - 1 : dIndex;
@@ -467,6 +444,21 @@ namespace SinglePass.WPF.ViewModels
                 {
                     SelectedCredentialVM = DisplayedCredentials.ElementAt(sIndex);
                 }
+            }
+        }
+
+        private async Task<bool> SaveCredentialAsync(Func<Task> save)
+        {
+            try
+            {
+                await save();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to save the password vault.");
+                StatusMessageRequested?.Invoke(LocalizationManager.Instance["SavePasswordVaultFailed"]);
+                return false;
             }
         }
 

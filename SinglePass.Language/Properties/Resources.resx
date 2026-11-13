@@ -376,6 +376,12 @@
   <data name="AllPasswords" xml:space="preserve">
     <value>All passwords</value>
   </data>
+  <data name="PasswordGroupsSynchronized" xml:space="preserve">
+    <value>Password groups updated.</value>
+  </data>
+  <data name="SavePasswordVaultFailed" xml:space="preserve">
+    <value>Could not save the password vault.</value>
+  </data>
   <data name="PasswordGroups" xml:space="preserve">
     <value>Groups</value>
   </data>

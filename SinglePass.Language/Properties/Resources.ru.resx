@@ -396,6 +396,12 @@
   <data name="AllPasswords" xml:space="preserve">
     <value>Все пароли</value>
   </data>
+  <data name="PasswordGroupsSynchronized" xml:space="preserve">
+    <value>Группы паролей обновлены.</value>
+  </data>
+  <data name="SavePasswordVaultFailed" xml:space="preserve">
+    <value>Не удалось сохранить хранилище паролей.</value>
+  </data>
   <data name="PasswordGroups" xml:space="preserve">
     <value>Группы</value>
   </data>

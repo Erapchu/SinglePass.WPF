@@ -745,6 +745,15 @@ namespace SinglePass.Language.Properties {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Password groups updated..
+        /// </summary>
+        public static string PasswordGroupsSynchronized {
+            get {
+                return ResourceManager.GetString("PasswordGroupsSynchronized", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Password is incorrect.
         /// </summary>
         public static string PasswordIsIncorrect {
@@ -831,6 +840,15 @@ namespace SinglePass.Language.Properties {
         public static string SavePasswordGroupsFailed {
             get {
                 return ResourceManager.GetString("SavePasswordGroupsFailed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Could not save the password vault..
+        /// </summary>
+        public static string SavePasswordVaultFailed {
+            get {
+                return ResourceManager.GetString("SavePasswordVaultFailed", resourceCulture);
             }
         }
 

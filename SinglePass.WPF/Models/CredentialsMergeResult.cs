@@ -13,7 +13,8 @@ namespace SinglePass.WPF.Models
         public bool Success { get; init; }
         public IList<Credential> NewCredentials { get; } = new List<Credential>();
         public IList<Credential> ChangedCredentials { get; } = new List<Credential>();
-        public bool AnyChanges => NewCredentials.Count > 0 || ChangedCredentials.Count > 0;
+        internal bool GroupChanges { get; set; }
+        public bool AnyChanges => NewCredentials.Count > 0 || ChangedCredentials.Count > 0 || GroupChanges;
 
         public CredentialsMergeResult()
         {
@@ -42,7 +43,9 @@ namespace SinglePass.WPF.Models
                     sb.Append(string.Join(Environment.NewLine, ChangedCredentials.Select(c => c.NameField.Value)));
                     sb.AppendLine();
                 }
-                if (!newCreds && !changedCreds)
+                if (GroupChanges)
+                    sb.AppendLine(Localization.LocalizationManager.Instance["PasswordGroupsSynchronized"]);
+                if (!newCreds && !changedCreds && !GroupChanges)
                 {
                     sb.AppendLine(SinglePass.Language.Properties.Resources.NoAnyChanges);
                 }

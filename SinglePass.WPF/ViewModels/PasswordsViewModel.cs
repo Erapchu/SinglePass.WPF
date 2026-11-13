@@ -51,7 +51,7 @@ namespace SinglePass.WPF.ViewModels
         private Task _initialLoad;
         private Guid? _selectedGroupId;
 
-        public IReadOnlyList<PasswordGroup> PasswordGroups => _credentialsCryptoService.PasswordGroups;
+        public IReadOnlyList<PasswordGroup> PasswordGroups => _credentialsCryptoService?.PasswordGroups ?? [];
 
         internal bool IsSavingGroups { get; private set; }
 
@@ -68,7 +68,37 @@ namespace SinglePass.WPF.ViewModels
         [ObservableProperty]
         public partial CredentialViewModel SelectedCredentialVM { get; set; }
 
-        partial void OnSelectedCredentialVMChanged(CredentialViewModel value) => CredentialSelected?.Invoke(value);
+        partial void OnSelectedCredentialVMChanged(CredentialViewModel value)
+        {
+            OnPropertyChanged(nameof(CurrentGroupOption));
+            CredentialSelected?.Invoke(value);
+        }
+
+        public sealed record GroupOption(Guid? Id, string Name, string Icon)
+        {
+            public bool IsUngrouped => !Id.HasValue;
+        }
+
+        private static readonly GroupOption Ungrouped = new(null, null, "\uE8B7");
+
+        public IEnumerable<GroupOption> GroupOptions =>
+            new[] { Ungrouped }.Concat(PasswordGroups.Select(ToGroupOption));
+
+        public GroupOption CurrentGroupOption =>
+            SelectedCredentialVM is { } credential &&
+            _credentialsCryptoService?.GetGroupId(credential.Model.Id) is { } id &&
+            PasswordGroups.FirstOrDefault(group => group.Id == id) is { } group
+                ? ToGroupOption(group)
+                : Ungrouped;
+
+        private static GroupOption ToGroupOption(PasswordGroup group) => new(group.Id, group.Name, group.Icon);
+
+        [RelayCommand]
+        private async Task ChangeGroupAsync(GroupOption option)
+        {
+            if (option != null && SelectedCredentialVM is { } credential)
+                await MoveToGroupAsync(credential.Model.Id, option.Id);
+        }
 
         [ObservableProperty]
         public partial string SearchText { get; set; }
@@ -196,6 +226,8 @@ namespace SinglePass.WPF.ViewModels
             try
             {
                 await save();
+                OnPropertyChanged(nameof(GroupOptions));
+                OnPropertyChanged(nameof(CurrentGroupOption));
                 return true;
             }
             catch (Exception ex)
@@ -236,6 +268,8 @@ namespace SinglePass.WPF.ViewModels
 
                 _credentialVMs.Clear();
                 _credentialVMs.AddRange(_credentialViewModelFactory.ProvideAllNew());
+                OnPropertyChanged(nameof(GroupOptions));
+                OnPropertyChanged(nameof(CurrentGroupOption));
 
                 await DisplayCredentialsAsync();
                 HasLoadedCredentials = true;

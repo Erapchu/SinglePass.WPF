@@ -382,6 +382,12 @@
   <data name="SavePasswordVaultFailed" xml:space="preserve">
     <value>Could not save the password vault.</value>
   </data>
+  <data name="NoPasswordGroup" xml:space="preserve">
+    <value>No group</value>
+  </data>
+  <data name="ChoosePasswordGroup" xml:space="preserve">
+    <value>Choose password group</value>
+  </data>
   <data name="PasswordGroups" xml:space="preserve">
     <value>Groups</value>
   </data>

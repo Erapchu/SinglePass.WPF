@@ -402,6 +402,12 @@
   <data name="SavePasswordVaultFailed" xml:space="preserve">
     <value>Не удалось сохранить хранилище паролей.</value>
   </data>
+  <data name="NoPasswordGroup" xml:space="preserve">
+    <value>Без группы</value>
+  </data>
+  <data name="ChoosePasswordGroup" xml:space="preserve">
+    <value>Выбрать группу пароля</value>
+  </data>
   <data name="PasswordGroups" xml:space="preserve">
     <value>Группы</value>
   </data>

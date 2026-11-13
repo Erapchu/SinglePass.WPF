@@ -11,5 +11,14 @@ namespace SinglePass.WPF.Views.Controls
         {
             InitializeComponent();
         }
+
+        private void GroupPicker_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            if (sender is Button { ContextMenu: { } menu } button)
+            {
+                menu.PlacementTarget = button;
+                menu.IsOpen = true;
+            }
+        }
     }
 }

@@ -124,6 +124,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cancel.
+        /// </summary>
+        public static string CancelEdit {
+            get {
+                return ResourceManager.GetString("CancelEdit", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Can&apos;t merge credentials.
         /// </summary>
         public static string CanTMergeCredentials {

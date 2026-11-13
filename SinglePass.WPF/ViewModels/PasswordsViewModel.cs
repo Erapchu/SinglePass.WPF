@@ -70,9 +70,28 @@ namespace SinglePass.WPF.ViewModels
 
         partial void OnSelectedCredentialVMChanged(CredentialViewModel value)
         {
-            OnPropertyChanged(nameof(CurrentGroupIndex));
+            DraftCredential = null;
+            OnPropertyChanged(nameof(CurrentGroup));
+            EditCommand.NotifyCanExecuteChanged();
             CredentialSelected?.Invoke(value);
         }
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsEditing))]
+        [NotifyCanExecuteChangedFor(nameof(EditCommand))]
+        [NotifyCanExecuteChangedFor(nameof(DeleteCommand))]
+        [NotifyCanExecuteChangedFor(nameof(CancelEditCommand))]
+        [NotifyCanExecuteChangedFor(nameof(SaveEditCommand))]
+        public partial CredentialViewModel DraftCredential { get; private set; }
+
+        public bool IsEditing => DraftCredential != null;
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(EditCommand))]
+        [NotifyCanExecuteChangedFor(nameof(DeleteCommand))]
+        [NotifyCanExecuteChangedFor(nameof(CancelEditCommand))]
+        [NotifyCanExecuteChangedFor(nameof(SaveEditCommand))]
+        public partial bool IsSavingEdit { get; private set; }
 
         public sealed record GroupOption(Guid? Id, string Name, string Icon)
         {
@@ -83,24 +102,30 @@ namespace SinglePass.WPF.ViewModels
 
         public System.Collections.ObjectModel.ObservableCollection<GroupOption> GroupOptions { get; } = [Ungrouped];
 
-        public int CurrentGroupIndex
+        private Guid? _originalGroupId;
+        private Guid? _draftGroupId;
+
+        public GroupOption CurrentGroup => FindGroupOption(SelectedCredentialVM is { } credential
+            ? _credentialsCryptoService?.GetGroupId(credential.Model.Id)
+            : null);
+
+        public GroupOption DraftGroup
         {
-            get => SelectedCredentialVM is { } credential &&
-                _credentialsCryptoService?.GetGroupId(credential.Model.Id) is { } id &&
-                GroupOptions.FirstOrDefault(option => option.Id == id) is { } option
-                    ? GroupOptions.IndexOf(option)
-                    : 0;
+            get => FindGroupOption(_draftGroupId);
             set
             {
-                if (value >= 0 && value < GroupOptions.Count && value != CurrentGroupIndex && SelectedCredentialVM is { } credential)
-                    _ = ChangeGroupAsync(credential.Model.Id, GroupOptions[value].Id);
+                if (value == null || _draftGroupId == value.Id)
+                    return;
+
+                _draftGroupId = value.Id;
+                OnPropertyChanged();
             }
         }
 
+        private GroupOption FindGroupOption(Guid? id) => GroupOptions.FirstOrDefault(option => option.Id == id) ?? Ungrouped;
+
         private void RefreshGroupOptions()
         {
-            // Switch away from a deleted group before removing its item from the selector.
-            OnPropertyChanged(nameof(CurrentGroupIndex));
             var options = PasswordGroups.Select(ToGroupOption).ToHashSet();
             for (var index = GroupOptions.Count - 1; index > 0; index--)
                 if (!options.Remove(GroupOptions[index]))
@@ -109,16 +134,14 @@ namespace SinglePass.WPF.ViewModels
             foreach (var option in options)
                 GroupOptions.Add(option);
 
-            OnPropertyChanged(nameof(CurrentGroupIndex));
+            if (_draftGroupId.HasValue && FindGroupOption(_draftGroupId).IsUngrouped)
+                _draftGroupId = _originalGroupId;
+
+            OnPropertyChanged(nameof(CurrentGroup));
+            OnPropertyChanged(nameof(DraftGroup));
         }
 
         private static GroupOption ToGroupOption(PasswordGroup group) => new(group.Id, group.Name, group.Icon);
-
-        private async Task ChangeGroupAsync(Guid credentialId, Guid? groupId)
-        {
-            await MoveToGroupAsync(credentialId, groupId);
-            OnPropertyChanged(nameof(CurrentGroupIndex));
-        }
 
         [ObservableProperty]
         public partial string SearchText { get; set; }
@@ -332,9 +355,8 @@ namespace SinglePass.WPF.ViewModels
                 GroupedCredentials = CreateGroupedView(DisplayedCredentials, sort);
                 OnPropertyChanged(nameof(DisplayedCredentials));
                 OnPropertyChanged(nameof(GroupedCredentials));
-                var newSelection = selection != null && filtered.Contains(selection)
-                    ? selection
-                    : DisplayedCredentials.FirstOrDefault();
+                var newSelection = (selection == null ? null : filtered.Find(item => item.Model.Id == selection.Model.Id))
+                    ?? DisplayedCredentials.FirstOrDefault();
                 if (ReferenceEquals(SelectedCredentialVM, newSelection))
                     CredentialSelected?.Invoke(newSelection);
                 else
@@ -448,31 +470,59 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
-        [RelayCommand]
-        private async Task Edit()
+        private bool CanEdit() => SelectedCredentialVM != null && !IsEditing && !IsSavingEdit;
+
+        [RelayCommand(CanExecute = nameof(CanEdit))]
+        private void Edit()
         {
             if (SelectedCredentialVM is not { } credential)
                 return;
 
-            var tempCredentialVM = credential.Clone();
-            var result = CredentialEditDialog.ShowDialog(
-                tempCredentialVM,
-                CredentialDetailsMode.Edit);
-            if (result != DialogChoice.OK)
-                return;
-
-            var dateTimeNow = DateTime.Now;
-            tempCredentialVM.LastModifiedTime = dateTimeNow;
-            if (!await SaveCredentialAsync(() => _credentialsCryptoService.EditCredential(tempCredentialVM.Model)))
-                return;
-            _credentialVMs.Remove(credential);
-            _credentialVMs.Add(tempCredentialVM);
-            await DisplayCredentialsAsync();
-            if (DisplayedCredentials.Contains(tempCredentialVM))
-                SelectedCredentialVM = tempCredentialVM;
+            _originalGroupId = _draftGroupId = CurrentGroup.Id;
+            OnPropertyChanged(nameof(DraftGroup));
+            DraftCredential = credential.Clone();
         }
 
-        [RelayCommand]
+        private bool CanFinishEdit() => IsEditing && !IsSavingEdit;
+
+        [RelayCommand(CanExecute = nameof(CanFinishEdit))]
+        private void CancelEdit() => DraftCredential = null;
+
+        [RelayCommand(CanExecute = nameof(CanFinishEdit))]
+        private async Task SaveEdit()
+        {
+            if (DraftCredential is not { } draft)
+                return;
+
+            draft.NameFieldVM.ValidateValue();
+            if (draft.NameFieldVM.HasErrors)
+                return;
+
+            var groupId = _draftGroupId;
+            var changeGroup = _draftGroupId != _originalGroupId;
+            IsSavingEdit = true;
+            try
+            {
+                draft.LastModifiedTime = DateTime.Now;
+                if (!await SaveCredentialAsync(() => _credentialsCryptoService.EditCredential(draft.Model, groupId, changeGroup)))
+                    return;
+
+                var index = _credentialVMs.FindIndex(item => item.Model.Id == draft.Model.Id);
+                if (index >= 0)
+                    _credentialVMs[index] = draft;
+
+                if (ReferenceEquals(DraftCredential, draft))
+                    DraftCredential = null;
+
+                await DisplayCredentialsAsync(keepSelection: true);
+            }
+            finally
+            {
+                IsSavingEdit = false;
+            }
+        }
+
+        [RelayCommand(CanExecute = nameof(CanEdit))]
         private async Task Delete()
         {
             if (SelectedCredentialVM is not { } credential)

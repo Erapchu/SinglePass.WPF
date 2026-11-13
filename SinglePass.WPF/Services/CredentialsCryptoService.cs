@@ -161,7 +161,9 @@ namespace SinglePass.WPF.Services
             });
         }
 
-        public Task EditCredential(Credential credential)
+        public Task EditCredential(Credential credential) => EditCredential(credential, null, changeGroup: false);
+
+        internal Task EditCredential(Credential credential, Guid? groupId, bool changeGroup)
         {
             ArgumentNullException.ThrowIfNull(credential);
             return UpdateVault(vault =>
@@ -172,7 +174,15 @@ namespace SinglePass.WPF.Services
 
                 var credentials = vault.Credentials.ToList();
                 credentials[index] = credential;
-                return vault with { Credentials = credentials };
+                var updated = vault with { Credentials = credentials };
+                if (!changeGroup)
+                    return updated;
+
+                var assigned = AssignGroup(updated, credential.Id, groupId);
+                if (ReferenceEquals(assigned, updated))
+                    throw new InvalidOperationException("The selected password group is no longer available.");
+
+                return assigned;
             });
         }
 

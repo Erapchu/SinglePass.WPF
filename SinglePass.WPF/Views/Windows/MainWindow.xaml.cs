@@ -98,7 +98,20 @@ namespace SinglePass.WPF.Views.Windows
             Dispatcher.InvokeAsync(() => SettingsBreadcrumbButton.Focus(), DispatcherPriority.Loaded);
         }
 
-        private void SettingsBreadcrumbButton_Click(object sender, RoutedEventArgs e)
+        protected override void OnPreviewMouseDown(MouseButtonEventArgs e)
+        {
+            base.OnPreviewMouseDown(e);
+
+            if (e.ChangedButton == MouseButton.XButton1 && NavigationContent.Content is CloudSyncControl)
+            {
+                e.Handled = true;
+                ReturnToSettings();
+            }
+        }
+
+        private void SettingsBreadcrumbButton_Click(object sender, RoutedEventArgs e) => ReturnToSettings();
+
+        private void ReturnToSettings()
         {
             CloseCloudSync();
             AnimateSettingsPage(-64);

@@ -122,17 +122,16 @@ namespace SinglePass.WPF.Authorization.Brokers
 
         public async Task RevokeTokenAsync(OAuthInfo oAuthInfo, CancellationToken cancellationToken)
         {
-            var httpClient = _httpClientFactory.CreateClient();
+            // The revocation URL can contain the refresh token.
+            using var httpClient = _httpClientFactory.CreateClient(nameof(OAuthProvider));
             var nvc = OAuthHelper.GetHttpQSCollection();
             FillRevokeTokenContent(nvc);
             var tokenRevokeEndpoint = BuildTokenRevokeEndpoint(oAuthInfo);
-            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, tokenRevokeEndpoint)
+            using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, tokenRevokeEndpoint)
             {
                 Content = new StringContent(nvc.ToString(), Encoding.UTF8, OAuthHelper.ApplicationXWWW)
             };
-            var response = await httpClient.SendAsync(httpRequestMessage);
-            using var content = response.Content;
-            var json = await content.ReadAsStringAsync(cancellationToken);
+            using var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
         }
 
         private async Task<AuthorizationCodeResponseUrl> GetAuthCode(string redirectUri, CancellationToken cancellationToken)

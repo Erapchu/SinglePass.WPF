@@ -43,7 +43,7 @@ Application data is stored under `%LOCALAPPDATA%\SinglePass`:
 
 - `singlePass.dat` — encrypted credentials.
 - `commonSettings.json` — application settings.
-- `googleDrive.json` — Google Drive authorization data.
+- `googleDrive.token` — Google Drive authorization data protected by Windows for the current user. SinglePass migrates the former `googleDrive.json` and removes it after saving the protected token.
 - `yandexDisk.token` — Yandex Disk authorization data protected by Windows for the current user.
 - `Cache` — cached data; logs are stored in `Logs`.
 

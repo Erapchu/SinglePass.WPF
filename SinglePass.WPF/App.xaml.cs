@@ -74,8 +74,9 @@ namespace SinglePass.WPF
             // Clouds
             // Google
             services.Configure<GoogleDriveConfig>(configuration.GetSection("Settings:GoogleDriveConfig"));
+            services.AddHttpClient(nameof(OAuthProvider)).RemoveAllLoggers();
             services.AddTransient<GoogleOAuthProvider>();
-            services.AddTransient<GoogleDriveTokenHolder>();
+            services.AddSingleton<GoogleDriveTokenHolder>();
             services.AddTransient<GoogleDriveCloudService>();
 
             services.Configure<YandexDiskConfig>(configuration.GetSection("Settings:YandexDiskConfig"));
@@ -197,6 +198,7 @@ namespace SinglePass.WPF
 
                     services.GetRequiredService<ILogger<LoginWindowViewModel>>();
                     services.GetRequiredService<CredentialsCryptoService>();
+                    _ = services.GetRequiredService<GoogleDriveTokenHolder>().OAuthInfo;
                     return services;
                 }
                 catch

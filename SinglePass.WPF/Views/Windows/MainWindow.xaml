@@ -24,15 +24,45 @@
     WindowStartupLocation="Manual"
     mc:Ignorable="d">
     <Window.Resources>
-        <Style x:Key="NavigationListViewItem" BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="ListViewItem">
-            <EventSetter Event="PreviewMouseDown" Handler="ListBoxItem_PreviewMouseDown" />
-            <Setter Property="Padding" Value="12,7" />
-            <Setter Property="DockPanel.Dock" Value="Top" />
+        <Style x:Key="NavigationRow" TargetType="Border">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="CornerRadius" Value="5" />
+            <Setter Property="Margin" Value="0,0,0,2" />
             <Style.Triggers>
-                <DataTrigger Binding="{Binding DockAtBottom}" Value="True">
-                    <Setter Property="DockPanel.Dock" Value="Bottom" />
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+                </Trigger>
+                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
                 </DataTrigger>
             </Style.Triggers>
+        </Style>
+        <Style x:Key="NavigationButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+            <Setter Property="Padding" Value="12,7" />
+            <Setter Property="MinHeight" Value="38" />
+            <Setter Property="AutomationProperties.Name" Value="{Binding Name}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid Background="{TemplateBinding Background}">
+                            <Border x:Name="SelectionIndicator"
+                                    Width="3" Height="16"
+                                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                                    Background="{DynamicResource ListViewItemPillFillBrush}"
+                                    CornerRadius="2" IsHitTestVisible="False" Visibility="Collapsed" />
+                            <ContentPresenter Margin="{TemplateBinding Padding}" VerticalAlignment="Center"
+                                              TextElement.Foreground="{TemplateBinding Foreground}" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                <Setter TargetName="SelectionIndicator" Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
         <DataTemplate x:Key="NavigationItemTemplate" DataType="{x:Type vm:NavigationItemViewModel}">
             <Grid>
@@ -41,7 +71,7 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <TextBlock Style="{StaticResource SymbolText}" Text="{Binding Glyph}" />
-                <TextBlock Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center" Text="{Binding Name}" TextWrapping="Wrap" />
+                <TextBlock Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center" Text="{Binding Name}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Name}" />
             </Grid>
         </DataTemplate>
     </Window.Resources>
@@ -58,23 +88,87 @@
             <ColumnDefinition Width="200" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <ListView
-            Margin="0,0,8,0"
-            Background="Transparent"
-            BorderThickness="0"
-            ItemContainerStyle="{StaticResource NavigationListViewItem}"
-            ItemTemplate="{StaticResource NavigationItemTemplate}"
-            ItemsSource="{Binding NavigationItems}"
-            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-            SelectedItem="{Binding SelectedNavigationItem}"
-            SelectionChanged="Navigation_SelectionChanged">
-            <ListView.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <DockPanel LastChildFill="False" />
-                </ItemsPanelTemplate>
-            </ListView.ItemsPanel>
-        </ListView>
+        <DockPanel Margin="0,0,8,0">
+            <Border DockPanel.Dock="Top" DataContext="{Binding AllPasswordsNavigation}" Style="{StaticResource NavigationRow}"
+                    AllowDrop="True" DragOver="Group_DragOver" DragLeave="Group_DragLeave" Drop="Group_Drop">
+                <Button Style="{StaticResource NavigationButton}" Content="{Binding}" ContentTemplate="{StaticResource NavigationItemTemplate}"
+                        Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" />
+            </Border>
+            <StackPanel DockPanel.Dock="Bottom">
+                <Separator Margin="4,4,4,2" />
+                <Border DataContext="{Binding SettingsNavigation}" Style="{StaticResource NavigationRow}">
+                    <Button Style="{StaticResource NavigationButton}" Content="{Binding}" ContentTemplate="{StaticResource NavigationItemTemplate}"
+                            Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" />
+                </Border>
+            </StackPanel>
+            <DockPanel>
+                <DockPanel DockPanel.Dock="Top" Margin="12,6,4,4">
+                    <Button DockPanel.Dock="Right" Width="28" Height="28" Padding="0" Background="Transparent" BorderThickness="0" Click="AddGroup_Click"
+                            AutomationProperties.Name="{Binding [AddPasswordGroup], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                            ToolTip="{Binding [AddPasswordGroup], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}">
+                        <TextBlock Style="{StaticResource SymbolText}" FontSize="12" Text="&#xE710;" />
+                    </Button>
+                    <TextBlock VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                               Text="{Binding [PasswordGroups], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
+                </DockPanel>
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" Focusable="False">
+                    <ItemsControl ItemsSource="{Binding GroupNavigation}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border x:Name="GroupRow" Style="{StaticResource NavigationRow}"
+                                        AllowDrop="True" DragOver="Group_DragOver" DragLeave="Group_DragLeave" Drop="Group_Drop">
+                                    <Grid>
+                                        <Button Style="{StaticResource NavigationButton}" Padding="12,7,36,7"
+                                                Content="{Binding}" ContentTemplate="{StaticResource NavigationItemTemplate}"
+                                                Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" />
+                                        <Button Width="28" Height="28" Margin="0,0,4,0" Padding="0"
+                                                HorizontalAlignment="Right" Background="Transparent" BorderThickness="0" Click="GroupMenu_Click"
+                                                AutomationProperties.Name="{Binding [PasswordGroupActions], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                                                ToolTip="{Binding [PasswordGroupActions], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}">
+                                            <TextBlock Style="{StaticResource SymbolText}" FontSize="13" Text="&#xE712;" />
+                                            <Button.ContextMenu>
+                                                <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                                    <MenuItem Header="{Binding [Edit], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                                                              Click="EditGroup_Click" />
+                                                    <MenuItem Header="{Binding [Delete], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                                                              Click="DeleteGroup_Click" />
+                                                </ContextMenu>
+                                            </Button.ContextMenu>
+                                            <Button.Style>
+                                                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                                    <Setter Property="Opacity" Value="0" />
+                                                    <Setter Property="IsHitTestVisible" Value="False" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsMouseOver, ElementName=GroupRow}" Value="True">
+                                                            <Setter Property="Opacity" Value="1" />
+                                                            <Setter Property="IsHitTestVisible" Value="True" />
+                                                        </DataTrigger>
+                                                        <Trigger Property="IsKeyboardFocused" Value="True">
+                                                            <Setter Property="Opacity" Value="1" />
+                                                            <Setter Property="IsHitTestVisible" Value="True" />
+                                                        </Trigger>
+                                                        <DataTrigger Binding="{Binding ContextMenu.IsOpen, RelativeSource={RelativeSource Self}}" Value="True">
+                                                            <Setter Property="Opacity" Value="1" />
+                                                            <Setter Property="IsHitTestVisible" Value="True" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </DockPanel>
+        </DockPanel>
         <DockPanel Grid.Column="1" ClipToBounds="True">
+            <TextBlock x:Name="PasswordsHeading" DockPanel.Dock="Top" Margin="2,4,8,8" Height="39"
+                       Padding="0,3,0,0" FontSize="24" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
+                       AutomationProperties.HeadingLevel="Level1" Text="{Binding SelectedNavigationItem.Name}"
+                       ToolTip="{Binding SelectedNavigationItem.Name}" />
             <Grid x:Name="SettingsHeader" DockPanel.Dock="Top" Margin="8,4,8,8" Visibility="Collapsed">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />

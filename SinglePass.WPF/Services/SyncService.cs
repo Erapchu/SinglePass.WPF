@@ -65,7 +65,7 @@ namespace SinglePass.WPF.Services
                 }
 
                 // File exists
-                List<Credential> cloudCredentials = null;
+                PasswordVault cloudCredentials = null;
                 var password = _credentialsCryptoService.GetPassword();
 
                 do
@@ -73,7 +73,7 @@ namespace SinglePass.WPF.Services
                     try
                     {
                         SyncStateChanged?.Invoke(SinglePass.Language.Properties.Resources.Decrypting);
-                        cloudCredentials = _cryptoService.DecryptFromStream<List<Credential>>(cloudFileStream, password);
+                        cloudCredentials = CredentialsCryptoService.ReadVault(_cryptoService, cloudFileStream, password);
                     }
                     catch (Exception ex)
                     {

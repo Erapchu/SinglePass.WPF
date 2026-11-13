@@ -1,8 +1,12 @@
 ﻿using SinglePass.WPF.Helpers;
+using SinglePass.WPF.Localization;
 using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels;
+using SinglePass.WPF.ViewModels.Dialogs;
 using SinglePass.WPF.Views.Controls;
+using SinglePass.WPF.Views.Helpers;
 using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -47,43 +51,104 @@ namespace SinglePass.WPF.Views.Windows
             mainViewModel.CredentialSelected += Vm_CredentialSelected;
             mainViewModel.ScrollIntoViewRequired += MainViewModel_ScrollIntoViewRequired;
             mainViewModel.PasswordsVM.StatusMessageRequested += ShowStatusMessage;
+            mainViewModel.PropertyChanged += ViewModel_PropertyChanged;
             _statusTimer.Tick += StatusTimer_Tick;
 
             DataContext = mainViewModel;
         }
 
-        private void Navigation_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.OriginalSource != sender || e.AddedItems.Count == 0)
+            if (e.PropertyName != nameof(MainWindowViewModel.SelectedNavigationItem))
                 return;
 
-            if (NavigationContent.Content is CloudSyncControl)
+            if (CloudSyncBreadcrumb.Visibility == Visibility.Visible)
                 CloseCloudSync();
 
-            SettingsHeader.Visibility = e.AddedItems[0] is NavigationItemViewModel { Content: SettingsControl }
-                ? Visibility.Visible
-                : Visibility.Collapsed;
+            var showSettings = ViewModel.SelectedNavigationItem == ViewModel.SettingsNavigation;
+            var pageChanged = showSettings != (SettingsHeader.Visibility == Visibility.Visible);
+            SettingsHeader.Visibility = showSettings ? Visibility.Visible : Visibility.Collapsed;
+            PasswordsHeading.Visibility = showSettings ? Visibility.Collapsed : Visibility.Visible;
 
-            if (e.RemovedItems.Count == 0 || !IsVisible || !SystemParameters.ClientAreaAnimation)
+            if (pageChanged && IsVisible && SystemParameters.ClientAreaAnimation)
+                AnimateNavigation(new Vector(0, 8), 0.85, TimeSpan.FromMilliseconds(160));
+        }
+
+        private async void AddGroup_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel.PasswordsVM.IsSavingGroups)
                 return;
 
-            var duration = TimeSpan.FromMilliseconds(160);
-            AnimateNavigation(new Vector(0, 8), 0.85, duration);
-            var easing = new QuadraticEase { EasingMode = EasingMode.EaseOut };
-            var navigation = (ListView)sender;
-            if (navigation.ItemContainerGenerator.ContainerFromItem(e.AddedItems[0]) is ListViewItem item)
+            var dialog = new PasswordGroupDialogWindow { Owner = this };
+            if (dialog.ShowDialog() == true)
+                await ViewModel.AddGroupAsync(dialog.Group);
+        }
+
+        private void GroupMenu_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button { ContextMenu: { } menu } button)
             {
-                var scale = new ScaleTransform();
-                item.RenderTransformOrigin = new Point(0.5, 0.5);
-                item.RenderTransform = scale;
-                var selectionAnimation = new DoubleAnimation(0.97, 1, duration)
-                {
-                    EasingFunction = easing,
-                    FillBehavior = FillBehavior.Stop
-                };
-                scale.BeginAnimation(ScaleTransform.ScaleXProperty, selectionAnimation);
-                scale.BeginAnimation(ScaleTransform.ScaleYProperty, selectionAnimation);
+                menu.PlacementTarget = button;
+                menu.IsOpen = true;
             }
+        }
+
+        private async void EditGroup_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel.PasswordsVM.IsSavingGroups ||
+                sender is not MenuItem { DataContext: NavigationItemViewModel { Group: { } group } item })
+                return;
+
+            var dialog = new PasswordGroupDialogWindow(group) { Owner = this };
+            if (dialog.ShowDialog() == true)
+                await ViewModel.EditGroupAsync(item, dialog.Group);
+        }
+
+        private async void DeleteGroup_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel.PasswordsVM.IsSavingGroups ||
+                sender is not FrameworkElement { DataContext: NavigationItemViewModel { Group: { } group } item })
+                return;
+
+            var loc = LocalizationManager.Instance;
+            var choice = MessageDialog.ShowDialog(loc["DeletePasswordGroup"],
+                string.Format(loc["DeletePasswordGroupConfirmation"], group.Name), MessageDialogButtons.YesNo, "\uE74D");
+            if (choice == DialogChoice.Yes)
+                await ViewModel.DeleteGroupAsync(item);
+        }
+
+        private void Group_DragOver(object sender, DragEventArgs e)
+        {
+            var row = (Border)sender;
+            var canMove = TryGetGroupDrop(row, e, out _, out _);
+            e.Effects = canMove ? DragDropEffects.Move : DragDropEffects.None;
+            if (canMove)
+                row.SetResourceReference(Border.BackgroundProperty, "SubtleFillColorSecondaryBrush");
+            else
+                row.ClearValue(Border.BackgroundProperty);
+            e.Handled = true;
+        }
+
+        private void Group_DragLeave(object sender, DragEventArgs e) => ((Border)sender).ClearValue(Border.BackgroundProperty);
+
+        private async void Group_Drop(object sender, DragEventArgs e)
+        {
+            var row = (Border)sender;
+            row.ClearValue(Border.BackgroundProperty);
+            e.Handled = true;
+            var canMove = TryGetGroupDrop(row, e, out var credentialId, out var groupId);
+            e.Effects = canMove ? DragDropEffects.Move : DragDropEffects.None;
+            if (canMove)
+                await ViewModel.PasswordsVM.MoveToGroupAsync(credentialId, groupId);
+        }
+
+        private bool TryGetGroupDrop(Border row, DragEventArgs e, out Guid credentialId, out Guid? groupId)
+        {
+            credentialId = default;
+            groupId = (row.DataContext as NavigationItemViewModel)?.Group?.Id;
+            return e.AllowedEffects.HasFlag(DragDropEffects.Move) &&
+                e.Data.GetData(PasswordsControl.CredentialDragFormat, false) is string id &&
+                Guid.TryParse(id, out credentialId) && ViewModel.PasswordsVM.CanMoveToGroup(credentialId, groupId);
         }
 
         private void OpenCloudSync_Executed(object sender, ExecutedRoutedEventArgs e)
@@ -98,7 +163,20 @@ namespace SinglePass.WPF.Views.Windows
             Dispatcher.InvokeAsync(() => SettingsBreadcrumbButton.Focus(), DispatcherPriority.Loaded);
         }
 
-        private void SettingsBreadcrumbButton_Click(object sender, RoutedEventArgs e)
+        protected override void OnPreviewMouseDown(MouseButtonEventArgs e)
+        {
+            base.OnPreviewMouseDown(e);
+
+            if (e.ChangedButton == MouseButton.XButton1 && NavigationContent.Content is CloudSyncControl)
+            {
+                e.Handled = true;
+                ReturnToSettings();
+            }
+        }
+
+        private void SettingsBreadcrumbButton_Click(object sender, RoutedEventArgs e) => ReturnToSettings();
+
+        private void ReturnToSettings()
         {
             CloseCloudSync();
             AnimateSettingsPage(-64);
@@ -172,14 +250,6 @@ namespace SinglePass.WPF.Views.Windows
             e.Cancel = true;
         }
 
-        private void ListBoxItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            var anyCtrlPressed = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
-
-            if (anyCtrlPressed)
-                e.Handled = true;
-        }
-
         private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (e.NewValue is bool visibility && visibility && ViewModel.SelectedNavigationItem?.Content is PasswordsControl passwordsControl)
@@ -191,6 +261,7 @@ namespace SinglePass.WPF.Views.Windows
         private void Window_Closed(object sender, EventArgs e)
         {
             _statusTimer.Stop();
+            ViewModel.PropertyChanged -= ViewModel_PropertyChanged;
             ViewModel.PasswordsVM.StatusMessageRequested -= ShowStatusMessage;
 
             var saveRequired = false;

@@ -1,14 +1,13 @@
-﻿using AsyncKeyedLock;
+using AsyncKeyedLock;
 using Microsoft.Extensions.Logging;
 using SinglePass.WPF.Helpers;
-using SinglePass.WPF.Helpers.Threading;
+using SinglePass.WPF.Settings;
 using SinglePass.WPF.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security;
-using System.Security.Cryptography;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -30,39 +29,51 @@ namespace SinglePass.WPF.Services
 
     public class CredentialsCryptoService
     {
-        private readonly object _credentialsLock = new();
         private readonly ILogger<CredentialsCryptoService> _logger;
         private readonly CryptoService _cryptoService;
         private readonly AsyncKeyedLocker<string> _asyncKeyedLocker;
+        private readonly AppSettings _settings;
+        private volatile PasswordVault _vault = new();
 
-        private List<Credential> _credentials = new();
-        public List<Credential> Credentials
+        public List<Credential> Credentials => _vault.Credentials.ToList();
+
+        internal IReadOnlyList<PasswordGroup> PasswordGroups =>
+            _vault.Groups.Values.Where(change => !change.IsDeleted).Select(change => change.Group).ToList();
+
+        internal Dictionary<Guid, Guid> GroupAssignments
         {
             get
             {
-                lock (_credentialsLock)
-                {
-                    return _credentials.ToList();
-                }
+                var vault = _vault;
+                return vault.Assignments
+                    .Where(pair => pair.Value.GroupId is { } groupId &&
+                        vault.Groups.TryGetValue(groupId, out var group) && !group.IsDeleted)
+                    .ToDictionary(pair => pair.Key, pair => pair.Value.GroupId.Value);
             }
-            private set
-            {
-                lock (_credentialsLock)
-                {
-                    _credentials = value;
-                }
-            }
+        }
+
+        internal Guid? GetGroupId(Guid credentialId)
+        {
+            var vault = _vault;
+            return vault.Assignments.TryGetValue(credentialId, out var assignment) &&
+                assignment.GroupId is { } groupId &&
+                vault.Groups.TryGetValue(groupId, out var group) && !group.IsDeleted
+                ? groupId
+                : null;
         }
 
         private SecureString PasswordSecure { get; set; }
 
         public CredentialsCryptoService(
             ILogger<CredentialsCryptoService> logger,
-            CryptoService cryptoService, AsyncKeyedLocker<string> asyncKeyedLocker)
+            CryptoService cryptoService,
+            AsyncKeyedLocker<string> asyncKeyedLocker,
+            AppSettings settings = null)
         {
             _logger = logger;
             _cryptoService = cryptoService;
             _asyncKeyedLocker = asyncKeyedLocker;
+            _settings = settings;
         }
 
         public void SetPassword(string password)
@@ -70,157 +81,237 @@ namespace SinglePass.WPF.Services
             PasswordSecure = SecureStringHelper.MakeSecureString(password);
         }
 
-        public string GetPassword()
+        public string GetPassword() => SecureStringHelper.GetString(PasswordSecure);
+
+        internal static PasswordVault ReadVault(CryptoService cryptoService, Stream stream, string password)
         {
-            return SecureStringHelper.GetString(PasswordSecure);
+            var json = cryptoService.DecryptFromStream<JsonElement>(stream, password);
+            if (json.ValueKind == JsonValueKind.Array)
+                return new PasswordVault { Credentials = json.Deserialize<List<Credential>>() };
+
+            if (json.ValueKind != JsonValueKind.Object ||
+                !json.TryGetProperty(nameof(PasswordVault.Version), out var version) ||
+                !version.TryGetInt32(out var number) || number != 1)
+                throw new JsonException("Unsupported password vault format.");
+
+            var vault = json.Deserialize<PasswordVault>();
+            if (vault.Credentials == null || vault.Groups == null || vault.Assignments == null)
+                throw new JsonException("Incomplete password vault.");
+
+            return vault;
         }
 
-        internal Task<CredentialLoadResult> LoadCredentialsAsync(string password)
+        internal Task<CredentialLoadResult> LoadCredentialsAsync(string password) => Task.Run(async () =>
         {
-            return Task.Run(async () =>
+            var path = Constants.PasswordsFilePath;
+            try
             {
-                _logger.LogInformation("Loading credentials from file...");
+                using var locker = await _asyncKeyedLocker.LockAsync(path).ConfigureAwait(false);
+                PasswordVault vault;
                 try
                 {
-                    using var locker = await _asyncKeyedLocker.LockAsync(Constants.PasswordsFilePath).ConfigureAwait(false);
-                    FileStream fileStream;
-                    try
-                    {
-                        fileStream = File.OpenRead(Constants.PasswordsFilePath);
-                    }
-                    catch (FileNotFoundException)
-                    {
+                    using var stream = File.OpenRead(path);
+                    vault = ReadVault(_cryptoService, stream, password);
+                }
+                catch (FileNotFoundException)
+                {
+                    if (_settings?.PasswordGroups is not { Groups.Count: > 0 })
                         return CredentialLoadResult.FileNotFound;
-                    }
 
-                    using (fileStream)
-                    {
-                        var credentials = _cryptoService.DecryptFromStream<List<Credential>>(fileStream, password)
-                            ?? throw new JsonException("The credentials file does not contain a list of credentials.");
-                        Credentials = credentials;
-                        _logger.LogInformation("Credentials loaded from file, count: {Count}", credentials.Count);
-                        return CredentialLoadResult.Loaded;
-                    }
-                }
-                catch (JsonException jex)
-                {
-                    _logger.LogError(jex, "JSON exception raised");
-                }
-                catch (CryptographicException cex)
-                {
-                    _logger.LogError(cex, "Cryptographic exception raised");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, string.Empty);
+                    vault = new PasswordVault();
                 }
 
+                if (_settings?.PasswordGroups is { Groups.Count: > 0 } legacy && vault.Groups.Count == 0)
+                {
+                    var groups = legacy.Groups.ToDictionary(group => group.Id, group => new GroupChange(group, DateTimeOffset.MinValue));
+                    var credentials = vault.Credentials.Select(credential => credential.Id).ToHashSet();
+                    var assignments = legacy.Assignments
+                        .Where(pair => credentials.Contains(pair.Key) && groups.ContainsKey(pair.Value))
+                        .ToDictionary(pair => pair.Key, pair => new GroupAssignment(pair.Value, DateTimeOffset.MinValue));
+                    vault = vault with { Groups = groups, Assignments = assignments };
+                    if (File.Exists(path) && !File.Exists(path + ".before-groups.bak"))
+                        File.Copy(path, path + ".before-groups.bak", overwrite: false);
+                    WriteVault(vault, password);
+                }
+
+                _vault = vault;
+                if (_settings != null)
+                    _settings.PasswordGroups = null;
+                return CredentialLoadResult.Loaded;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to load the password vault.");
                 return CredentialLoadResult.Failed;
+            }
+        });
+
+        public Task AddCredential(Credential credential) => AddCredential(credential, null);
+
+        internal Task AddCredential(Credential credential, Guid? groupId)
+        {
+            ArgumentNullException.ThrowIfNull(credential);
+            return UpdateVault(vault =>
+            {
+                if (vault.Credentials.Contains(credential))
+                    return vault;
+
+                var updated = vault with { Credentials = [.. vault.Credentials, credential] };
+                return groupId.HasValue ? AssignGroupOrThrow(updated, credential.Id, groupId) : updated;
             });
         }
 
-        public async Task AddCredential(Credential credential)
+        public Task EditCredential(Credential credential) => EditCredential(credential, null, changeGroup: false);
+
+        internal Task EditCredential(Credential credential, Guid? groupId, bool changeGroup)
         {
-            if (credential is null)
+            ArgumentNullException.ThrowIfNull(credential);
+            return UpdateVault(vault =>
             {
-                throw new ArgumentNullException(nameof(credential));
-            }
-
-            lock (_credentialsLock)
-            {
-                var index = _credentials.IndexOf(credential);
-                if (index >= 0)
-                {
-                    // Shouldn't be
-                    _logger.LogWarning("Duplicate credential found.");
-                    return;
-                }
-
-                _credentials.Add(credential);
-            }
-
-            await SaveCredentials();
-        }
-
-        public async Task EditCredential(Credential credential)
-        {
-            if (credential is null)
-            {
-                throw new ArgumentNullException(nameof(credential));
-            }
-
-            lock (_credentialsLock)
-            {
-                var index = _credentials.IndexOf(credential);
+                var index = vault.Credentials.IndexOf(credential);
                 if (index < 0)
-                {
-                    _logger.LogWarning("Prevented attempt to edit non-existed credential.");
-                    return;
-                }
+                    return vault;
 
-                _credentials[index] = credential;
-            }
-
-            await SaveCredentials();
+                var credentials = vault.Credentials.ToList();
+                credentials[index] = credential;
+                var updated = vault with { Credentials = credentials };
+                return changeGroup ? AssignGroupOrThrow(updated, credential.Id, groupId) : updated;
+            });
         }
 
-        public async Task DeleteCredential(Credential credential)
+        public Task DeleteCredential(Credential credential)
         {
-            if (credential is null)
-            {
-                throw new ArgumentNullException(nameof(credential));
-            }
-
-            lock (_credentialsLock)
-            {
-                var index = _credentials.IndexOf(credential);
-                if (index < 0)
-                {
-                    _logger.LogWarning("Prevented attempt to delete non-existed credential.");
-                    return;
-                }
-
-                _credentials.RemoveAt(index);
-            }
-
-            await SaveCredentials();
+            ArgumentNullException.ThrowIfNull(credential);
+            return UpdateVault(vault => vault.Credentials.Contains(credential)
+                ? vault with { Credentials = vault.Credentials.Where(item => !item.Equals(credential)).ToList() }
+                : vault);
         }
 
-        public async Task<CredentialsMergeResult> Merge(List<Credential> mergingCreds)
+        internal Task SaveGroup(PasswordGroup group, bool isNew) => UpdateVault(vault =>
+        {
+            if (!isNew && (!vault.Groups.TryGetValue(group.Id, out var current) || current.IsDeleted))
+                return vault;
+
+            var groups = new Dictionary<Guid, GroupChange>(vault.Groups)
+            {
+                [group.Id] = new(group, DateTimeOffset.UtcNow)
+            };
+            return vault with { Groups = groups };
+        });
+
+        internal Task DeleteGroup(Guid groupId) => UpdateVault(vault =>
+        {
+            if (!vault.Groups.TryGetValue(groupId, out var group) || group.IsDeleted)
+                return vault;
+
+            // The tombstone invalidates links to this group without overwriting a concurrent move elsewhere.
+            var groups = new Dictionary<Guid, GroupChange>(vault.Groups)
+            {
+                [groupId] = new(null, DateTimeOffset.UtcNow, IsDeleted: true)
+            };
+            return vault with { Groups = groups };
+        });
+
+        internal Task MoveCredential(Guid credentialId, Guid? groupId) => UpdateVault(vault =>
+            vault.Credentials.Any(credential => credential.Id == credentialId)
+                ? AssignGroup(vault, credentialId, groupId)
+                : vault);
+
+        private static PasswordVault AssignGroupOrThrow(PasswordVault vault, Guid credentialId, Guid? groupId)
+        {
+            var assigned = AssignGroup(vault, credentialId, groupId);
+            if (ReferenceEquals(assigned, vault))
+                throw new InvalidOperationException("The selected password group is no longer available.");
+
+            return assigned;
+        }
+
+        private static PasswordVault AssignGroup(PasswordVault vault, Guid credentialId, Guid? groupId)
+        {
+            if (groupId is { } id && (!vault.Groups.TryGetValue(id, out var group) || group.IsDeleted))
+                return vault;
+
+            var assignments = new Dictionary<Guid, GroupAssignment>(vault.Assignments)
+            {
+                [credentialId] = new(groupId, DateTimeOffset.UtcNow)
+            };
+            return vault with { Assignments = assignments };
+        }
+
+        internal async Task<CredentialsMergeResult> Merge(PasswordVault incoming)
         {
             var result = CredentialsMergeResult.SuccessMergeResult;
-
-            foreach (var mergingCred in mergingCreds)
+            await UpdateVault(vault =>
             {
-                var existingIndex = _credentials.IndexOf(mergingCred);
-                if (existingIndex >= 0)
+                var credentials = vault.Credentials.ToList();
+                foreach (var credential in incoming.Credentials)
                 {
-                    // Update
-                    var currentCred = _credentials[existingIndex];
-                    if (currentCred.LastModifiedTime < mergingCred.LastModifiedTime)
+                    var index = credentials.IndexOf(credential);
+                    if (index < 0)
                     {
-                        _credentials[existingIndex] = mergingCred;
-                        result.ChangedCredentials.Add(currentCred);
+                        credentials.Add(credential);
+                        result.NewCredentials.Add(credential);
+                    }
+                    else if (credentials[index].LastModifiedTime < credential.LastModifiedTime)
+                    {
+                        result.ChangedCredentials.Add(credentials[index]);
+                        credentials[index] = credential;
                     }
                 }
-                else
+
+                var groups = new Dictionary<Guid, GroupChange>(vault.Groups);
+                foreach (var (id, change) in incoming.Groups)
                 {
-                    // New
-                    _credentials.Add(mergingCred);
-                    result.NewCredentials.Add(mergingCred);
+                    if (!groups.TryGetValue(id, out var local) ||
+                        !local.IsDeleted && (change.IsDeleted || change.ModifiedAt > local.ModifiedAt))
+                    {
+                        groups[id] = change;
+                        result.GroupChanges = true;
+                    }
                 }
-            }
 
-            if (result.AnyChanges)
-                await SaveCredentials();
+                var assignments = new Dictionary<Guid, GroupAssignment>(vault.Assignments);
+                foreach (var (id, assignment) in incoming.Assignments)
+                {
+                    if (!assignments.TryGetValue(id, out var local) || assignment.ModifiedAt > local.ModifiedAt)
+                    {
+                        assignments[id] = assignment;
+                        result.GroupChanges = true;
+                    }
+                }
 
+                return result.AnyChanges ? vault with { Credentials = credentials, Groups = groups, Assignments = assignments } : vault;
+            });
             return result;
         }
 
-        public async Task Replace(List<Credential> newCredentials)
+        private Task UpdateVault(Func<PasswordVault, PasswordVault> update) => Task.Run(async () =>
         {
-            _credentials = newCredentials;
-            await SaveCredentials();
+            using var locker = await _asyncKeyedLocker.LockAsync(Constants.PasswordsFilePath).ConfigureAwait(false);
+            var updated = update(_vault);
+            if (ReferenceEquals(updated, _vault))
+                return;
+
+            WriteVault(updated, GetPassword());
+            _vault = updated;
+        });
+
+        private void WriteVault(PasswordVault vault, string password)
+        {
+            var path = Constants.PasswordsFilePath;
+            var tempPath = path + ".tmp";
+            try
+            {
+                using (var stream = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                    _cryptoService.EncryptToStream(vault, stream, password);
+
+                File.Move(tempPath, path, overwrite: true);
+            }
+            catch
+            {
+                try { File.Delete(tempPath); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                throw;
+            }
         }
 
         internal Task<PasswordChangeResult> ChangePasswordAsync(string currentPassword, string newPassword)
@@ -240,7 +331,7 @@ namespace SinglePass.WPF.Services
                     {
                         using (var stream = new FileStream(tempPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
                         {
-                            _cryptoService.EncryptToStream(Credentials, stream, newPassword);
+                            _cryptoService.EncryptToStream(_vault, stream, newPassword);
                         }
 
                         File.Move(tempPath, path, overwrite: true);
@@ -263,29 +354,5 @@ namespace SinglePass.WPF.Services
             });
         }
 
-        public Task SaveCredentials()
-        {
-            return Task.Run(async () =>
-            {
-                try
-                {
-                    // Access to file
-                    using var locker = await _asyncKeyedLocker.LockAsync(Constants.PasswordsFilePath).ConfigureAwait(false);
-                    using var fileStream = new FileStream(Constants.PasswordsFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
-                    // Just to ensure
-                    fileStream.Seek(0, SeekOrigin.Begin);
-
-                    _cryptoService.EncryptToStream(Credentials, fileStream, GetPassword());
-                }
-                catch (JsonException jsex)
-                {
-                    _logger.LogWarning("Failed to serialize credentials settings to file due to exception: {0}", jsex);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, string.Empty);
-                }
-            });
-        }
     }
 }

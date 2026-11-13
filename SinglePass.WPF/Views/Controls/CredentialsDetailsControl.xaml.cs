@@ -1,4 +1,6 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Threading;
 
 namespace SinglePass.WPF.Views.Controls
 {
@@ -10,6 +12,21 @@ namespace SinglePass.WPF.Views.Controls
         public CredentialsDetailsControl()
         {
             InitializeComponent();
+        }
+
+        private void NameEditBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.NewValue is not true)
+                return;
+
+            Dispatcher.InvokeAsync(() =>
+            {
+                if (!NameEditBox.IsVisible)
+                    return;
+
+                EditScrollViewer.ScrollToTop();
+                NameEditBox.Focus();
+            }, DispatcherPriority.Input);
         }
     }
 }

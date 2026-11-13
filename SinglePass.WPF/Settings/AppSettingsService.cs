@@ -130,7 +130,7 @@ namespace SinglePass.WPF.Settings
                             Culture = CultureInfo.InvariantCulture,
                             // Converters = { new HotkeyJsonConverter() } // если нужен кастом
                         });
-                        serializer.Serialize(sw, Settings); // _settings — приватное поле
+                        serializer.Serialize(sw, Settings);
                         await sw.FlushAsync().ConfigureAwait(false);
                         await fs.FlushAsync().ConfigureAwait(false);
                     }

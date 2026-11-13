@@ -349,6 +349,18 @@
   <data name="SystemLanguage" xml:space="preserve">
     <value>System default</value>
   </data>
+  <data name="CurrentPassword" xml:space="preserve">
+    <value>Current password</value>
+  </data>
+  <data name="CurrentPasswordIsIncorrect" xml:space="preserve">
+    <value>The current password is incorrect.</value>
+  </data>
+  <data name="PasswordTooLong" xml:space="preserve">
+    <value>The password must fit in 32 UTF-8 bytes.</value>
+  </data>
+  <data name="PasswordChangeFailed" xml:space="preserve">
+    <value>Could not save the new password. Try again.</value>
+  </data>
   <data name="NewPasswordApplied" xml:space="preserve">
     <value>New password applied</value>
   </data>

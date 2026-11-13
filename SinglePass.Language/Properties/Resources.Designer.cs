@@ -214,6 +214,24 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Current password.
+        /// </summary>
+        public static string CurrentPassword {
+            get {
+                return ResourceManager.GetString("CurrentPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The current password is incorrect..
+        /// </summary>
+        public static string CurrentPasswordIsIncorrect {
+            get {
+                return ResourceManager.GetString("CurrentPasswordIsIncorrect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Dark.
         /// </summary>
         public static string Dark {
@@ -347,7 +365,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("Language", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Light.
         /// </summary>
@@ -455,7 +473,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("NewestFirst", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to New item.
         /// </summary>
@@ -482,7 +500,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("NewPasswordApplied", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to No.
         /// </summary>
@@ -518,7 +536,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("NoDate", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to OK.
         /// </summary>
@@ -536,7 +554,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("OldestFirst", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Open in browser.
         /// </summary>
@@ -574,6 +592,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Could not save the new password. Try again..
+        /// </summary>
+        public static string PasswordChangeFailed {
+            get {
+                return ResourceManager.GetString("PasswordChangeFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Password is incorrect.
         /// </summary>
         public static string PasswordIsIncorrect {
@@ -588,6 +615,15 @@ namespace SinglePass.Language.Properties {
         public static string Passwords {
             get {
                 return ResourceManager.GetString("Passwords", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The password must fit in 32 UTF-8 bytes..
+        /// </summary>
+        public static string PasswordTooLong {
+            get {
+                return ResourceManager.GetString("PasswordTooLong", resourceCulture);
             }
         }
         
@@ -761,7 +797,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("SystemLanguage", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Text copied!.
         /// </summary>

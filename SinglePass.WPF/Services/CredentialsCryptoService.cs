@@ -38,7 +38,7 @@ namespace SinglePass.WPF.Services
         public List<Credential> Credentials => _vault.Credentials.ToList();
 
         internal IReadOnlyList<PasswordGroup> PasswordGroups =>
-            _vault.Groups.Values.Where(change => change.Group != null).Select(change => change.Group).ToList();
+            _vault.Groups.Values.Where(change => !change.IsDeleted).Select(change => change.Group).ToList();
 
         internal Dictionary<Guid, Guid> GroupAssignments
         {
@@ -47,7 +47,7 @@ namespace SinglePass.WPF.Services
                 var vault = _vault;
                 return vault.Assignments
                     .Where(pair => pair.Value.GroupId is { } groupId &&
-                        vault.Groups.TryGetValue(groupId, out var group) && group.Group != null)
+                        vault.Groups.TryGetValue(groupId, out var group) && !group.IsDeleted)
                     .ToDictionary(pair => pair.Key, pair => pair.Value.GroupId.Value);
             }
         }
@@ -57,7 +57,7 @@ namespace SinglePass.WPF.Services
             var vault = _vault;
             return vault.Assignments.TryGetValue(credentialId, out var assignment) &&
                 assignment.GroupId is { } groupId &&
-                vault.Groups.TryGetValue(groupId, out var group) && group.Group != null
+                vault.Groups.TryGetValue(groupId, out var group) && !group.IsDeleted
                 ? groupId
                 : null;
         }
@@ -186,7 +186,7 @@ namespace SinglePass.WPF.Services
 
         internal Task SaveGroup(PasswordGroup group, bool isNew) => UpdateVault(vault =>
         {
-            if (!isNew && (!vault.Groups.TryGetValue(group.Id, out var current) || current.Group == null))
+            if (!isNew && (!vault.Groups.TryGetValue(group.Id, out var current) || current.IsDeleted))
                 return vault;
 
             var groups = new Dictionary<Guid, GroupChange>(vault.Groups)
@@ -198,11 +198,14 @@ namespace SinglePass.WPF.Services
 
         internal Task DeleteGroup(Guid groupId) => UpdateVault(vault =>
         {
-            if (!vault.Groups.TryGetValue(groupId, out var group) || group.Group == null)
+            if (!vault.Groups.TryGetValue(groupId, out var group) || group.IsDeleted)
                 return vault;
 
             // The tombstone invalidates links to this group without overwriting a concurrent move elsewhere.
-            var groups = new Dictionary<Guid, GroupChange>(vault.Groups) { [groupId] = new(null, DateTimeOffset.UtcNow) };
+            var groups = new Dictionary<Guid, GroupChange>(vault.Groups)
+            {
+                [groupId] = new(null, DateTimeOffset.UtcNow, IsDeleted: true)
+            };
             return vault with { Groups = groups };
         });
 
@@ -213,7 +216,7 @@ namespace SinglePass.WPF.Services
 
         private static PasswordVault AssignGroup(PasswordVault vault, Guid credentialId, Guid? groupId)
         {
-            if (groupId is { } id && (!vault.Groups.TryGetValue(id, out var group) || group.Group == null))
+            if (groupId is { } id && (!vault.Groups.TryGetValue(id, out var group) || group.IsDeleted))
                 return vault;
 
             var assignments = new Dictionary<Guid, GroupAssignment>(vault.Assignments)
@@ -248,7 +251,7 @@ namespace SinglePass.WPF.Services
                 foreach (var (id, change) in incoming.Groups)
                 {
                     if (!groups.TryGetValue(id, out var local) ||
-                        local.Group != null && (change.Group == null || change.ModifiedAt > local.ModifiedAt))
+                        !local.IsDeleted && (change.IsDeleted || change.ModifiedAt > local.ModifiedAt))
                     {
                         groups[id] = change;
                         result.GroupChanges = true;

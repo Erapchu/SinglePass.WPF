@@ -11,6 +11,6 @@ namespace SinglePass.WPF.Models
         public Dictionary<Guid, GroupAssignment> Assignments { get; init; } = new();
     }
 
-    internal sealed record GroupChange(PasswordGroup Group, DateTimeOffset ModifiedAt);
+    internal sealed record GroupChange(PasswordGroup Group, DateTimeOffset ModifiedAt, bool IsDeleted = false);
     internal sealed record GroupAssignment(Guid? GroupId, DateTimeOffset ModifiedAt);
 }

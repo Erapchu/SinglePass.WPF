@@ -251,18 +251,19 @@ namespace SinglePass.WPF.ViewModels
         internal Task<bool> DeleteGroupAsync(PasswordGroup group) =>
             SaveGroupsAsync(() => _credentialsCryptoService.DeleteGroup(group.Id));
 
-        internal bool CanMoveToGroup(Guid credentialId, Guid? groupId) =>
+        internal bool CanMoveToGroup(IReadOnlyCollection<Guid> credentialIds, Guid? groupId) =>
             !IsSavingGroups &&
-            _credentialVMs.Any(item => item.Model.Id == credentialId) &&
             (groupId == null || PasswordGroups.Any(group => group.Id == groupId)) &&
-            _credentialsCryptoService.GetGroupId(credentialId) != groupId;
+            credentialIds.Any(id => _credentialsCryptoService.GetGroupId(id) != groupId);
 
-        internal async Task MoveToGroupAsync(Guid credentialId, Guid? groupId)
+        internal Task MoveToGroupAsync(Guid credentialId, Guid? groupId) => MoveToGroupAsync([credentialId], groupId);
+
+        internal async Task MoveToGroupAsync(IReadOnlyCollection<Guid> credentialIds, Guid? groupId)
         {
-            if (!CanMoveToGroup(credentialId, groupId))
+            if (!CanMoveToGroup(credentialIds, groupId))
                 return;
 
-            if (await SaveGroupsAsync(() => _credentialsCryptoService.MoveCredential(credentialId, groupId)) && _selectedGroupId.HasValue)
+            if (await SaveGroupsAsync(() => _credentialsCryptoService.MoveCredentials(credentialIds, groupId)) && _selectedGroupId.HasValue)
                 await DisplayCredentialsAsync(keepSelection: true);
         }
 

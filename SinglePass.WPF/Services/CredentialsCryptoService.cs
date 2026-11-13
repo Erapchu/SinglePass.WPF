@@ -212,30 +212,41 @@ namespace SinglePass.WPF.Services
             return vault with { Groups = groups };
         });
 
-        internal Task MoveCredential(Guid credentialId, Guid? groupId) => UpdateVault(vault =>
-            vault.Credentials.Any(credential => credential.Id == credentialId)
-                ? AssignGroup(vault, credentialId, groupId)
-                : vault);
+        internal Task MoveCredentials(IReadOnlyCollection<Guid> credentialIds, Guid? groupId) => UpdateVault(vault =>
+        {
+            var existingIds = vault.Credentials.Select(credential => credential.Id).ToHashSet();
+            return AssignGroups(vault, credentialIds.Where(existingIds.Contains), groupId);
+        });
 
         private static PasswordVault AssignGroupOrThrow(PasswordVault vault, Guid credentialId, Guid? groupId)
         {
-            var assigned = AssignGroup(vault, credentialId, groupId);
-            if (ReferenceEquals(assigned, vault))
+            if (!IsGroupAvailable(vault, groupId))
                 throw new InvalidOperationException("The selected password group is no longer available.");
 
-            return assigned;
+            return AssignGroups(vault, [credentialId], groupId);
         }
 
-        private static PasswordVault AssignGroup(PasswordVault vault, Guid credentialId, Guid? groupId)
+        private static bool IsGroupAvailable(PasswordVault vault, Guid? groupId) =>
+            groupId is not { } id || (vault.Groups.TryGetValue(id, out var group) && !group.IsDeleted);
+
+        private static PasswordVault AssignGroups(PasswordVault vault, IEnumerable<Guid> credentialIds, Guid? groupId)
         {
-            if (groupId is { } id && (!vault.Groups.TryGetValue(id, out var group) || group.IsDeleted))
+            if (!IsGroupAvailable(vault, groupId))
                 return vault;
 
-            var assignments = new Dictionary<Guid, GroupAssignment>(vault.Assignments)
+            var assignments = new Dictionary<Guid, GroupAssignment>(vault.Assignments);
+            var change = new GroupAssignment(groupId, DateTimeOffset.UtcNow);
+            var changed = false;
+            foreach (var credentialId in credentialIds)
             {
-                [credentialId] = new(groupId, DateTimeOffset.UtcNow)
-            };
-            return vault with { Assignments = assignments };
+                if (assignments.GetValueOrDefault(credentialId)?.GroupId != groupId)
+                {
+                    assignments[credentialId] = change;
+                    changed = true;
+                }
+            }
+
+            return changed ? vault with { Assignments = assignments } : vault;
         }
 
         internal async Task<CredentialsMergeResult> Merge(PasswordVault incoming)

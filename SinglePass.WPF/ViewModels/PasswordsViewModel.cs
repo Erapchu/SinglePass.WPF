@@ -11,11 +11,15 @@ using SinglePass.WPF.ViewModels.Dialogs;
 using SinglePass.WPF.Views.Helpers;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace SinglePass.WPF.ViewModels
 {
@@ -43,34 +47,27 @@ namespace SinglePass.WPF.ViewModels
         private readonly List<CredentialViewModel> _credentialVMs = new();
         private readonly AppSettingsService _appSettingsService;
         private readonly CredentialViewModelFactory _credentialViewModelFactory;
+        private Task _initialLoad;
+
+        [ObservableProperty]
+        public partial bool HasLoadedCredentials { get; private set; }
 
         public event Action<CredentialViewModel> CredentialSelected;
         public event Action<CredentialViewModel> ScrollIntoViewRequired;
         public event Action<string> StatusMessageRequested;
 
         public ObservableCollectionDelayed<CredentialViewModel> DisplayedCredentials { get; private set; } = new();
+        public ListCollectionView GroupedCredentials { get; private set; }
 
-        private CredentialViewModel _selectedCredentialVM;
-        public CredentialViewModel SelectedCredentialVM
-        {
-            get => _selectedCredentialVM;
-            set
-            {
-                SetProperty(ref _selectedCredentialVM, value);
-                CredentialSelected?.Invoke(value);
-            }
-        }
+        [ObservableProperty]
+        public partial CredentialViewModel SelectedCredentialVM { get; set; }
 
-        private string _searchText;
-        public string SearchText
-        {
-            get => _searchText;
-            set
-            {
-                SetProperty(ref _searchText, value);
-                _ = DisplayCredentialsAsync();
-            }
-        }
+        partial void OnSelectedCredentialVMChanged(CredentialViewModel value) => CredentialSelected?.Invoke(value);
+
+        [ObservableProperty]
+        public partial string SearchText { get; set; }
+
+        partial void OnSearchTextChanged(string value) => _ = DisplayCredentialsAsync();
 
         private SortType _sort;
         public SortType Sort => _sort;
@@ -78,52 +75,68 @@ namespace SinglePass.WPF.ViewModels
         private OrderType _order;
         public OrderType Order => _order;
 
-        public PasswordColumnWidths ColumnWidths { get; } = new();
         public GridLength PasswordListPaneWidth { get; set; } = new(1, GridUnitType.Star);
         public GridLength DetailsPaneWidth { get; set; } = new(1, GridUnitType.Star);
         public double DetailsPaneRatio => DetailsPaneWidth.Value / (PasswordListPaneWidth.Value + DetailsPaneWidth.Value);
 
         private int _displayRequest;
 
-        public string NameSortIndicator => GetSortIndicator(SortType.Name);
-        public string WebsiteSortIndicator => GetSortIndicator(SortType.Website);
-        public string ModifiedSortIndicator => GetSortIndicator(SortType.Modified);
-
-        private string GetSortIndicator(SortType column) =>
-            Sort == column ? (Order == OrderType.Ascending ? "↑" : "↓") : string.Empty;
+        public bool SortByName => Sort == SortType.Name;
+        public bool SortByCreated => Sort == SortType.Created;
+        public bool SortByModified => Sort == SortType.Modified;
+        public bool IsAscending => Order == OrderType.Ascending;
+        public bool IsDescending => Order == OrderType.Descending;
 
         [RelayCommand]
-        private void SortBy(SortType column)
+        private async Task SortByAsync(SortType sort)
         {
-            var order = Sort == column && Order == OrderType.Ascending
-                ? OrderType.Descending
-                : OrderType.Ascending;
-            _sort = column;
+            if (Sort == sort)
+                return;
+
+            _sort = sort;
+            OnPropertyChanged(nameof(Sort));
+            OnPropertyChanged(nameof(SortByName));
+            OnPropertyChanged(nameof(SortByCreated));
+            OnPropertyChanged(nameof(SortByModified));
+            await DisplayCredentialsAsync(keepSelection: true);
+        }
+
+        [RelayCommand]
+        private async Task OrderByAsync(OrderType order)
+        {
+            if (Order == order)
+                return;
+
             _order = order;
-            OnPropertyChanged(nameof(NameSortIndicator));
-            OnPropertyChanged(nameof(WebsiteSortIndicator));
-            OnPropertyChanged(nameof(ModifiedSortIndicator));
-            _ = DisplayCredentialsAsync(keepSelection: true);
+            OnPropertyChanged(nameof(Order));
+            OnPropertyChanged(nameof(IsAscending));
+            OnPropertyChanged(nameof(IsDescending));
+            await DisplayCredentialsAsync(keepSelection: true);
         }
 
         [ObservableProperty]
-        private bool _isPasswordVisible;
+        public partial bool IsPasswordVisible { get; set; }
 
-        private PasswordsViewModel() { }
+        private PasswordsViewModel()
+        {
+            GroupedCredentials = CreateGroupedView(DisplayedCredentials, SortType.Name);
+        }
 
         public PasswordsViewModel(
             CredentialsCryptoService credentialsCryptoService,
             ILogger<PasswordsViewModel> logger,
             AppSettingsService appSettingsService,
-            CredentialViewModelFactory credentialViewModelFactory)
+            CredentialViewModelFactory credentialViewModelFactory) : this()
         {
             _credentialsCryptoService = credentialsCryptoService;
             _logger = logger;
             _appSettingsService = appSettingsService;
             _credentialViewModelFactory = credentialViewModelFactory;
 
-            _sort = _appSettingsService.Sort;
-            _order = _appSettingsService.Order;
+            _sort = _appSettingsService.Sort is SortType.Created or SortType.Modified
+                ? _appSettingsService.Sort
+                : SortType.Name;
+            _order = _appSettingsService.Order == OrderType.Descending ? OrderType.Descending : OrderType.Ascending;
 
             var detailsPaneRatio = _appSettingsService.DetailsPaneRatio;
             if (detailsPaneRatio is > 0 and < 1)
@@ -131,26 +144,39 @@ namespace SinglePass.WPF.ViewModels
                 PasswordListPaneWidth = new GridLength(1 - detailsPaneRatio, GridUnitType.Star);
                 DetailsPaneWidth = new GridLength(detailsPaneRatio, GridUnitType.Star);
             }
-
-            if (_appSettingsService.PasswordColumnWidths is { } saved)
-            {
-                ColumnWidths.Name = RestoreWidth(saved.Name, ColumnWidths.Name);
-                ColumnWidths.Website = RestoreWidth(saved.Website, ColumnWidths.Website);
-                ColumnWidths.Modified = RestoreWidth(saved.Modified, ColumnWidths.Modified);
-            }
         }
 
-        private static double RestoreWidth(double saved, double fallback) =>
-            double.IsNaN(saved) || (double.IsFinite(saved) && saved >= 0) ? saved : fallback;
+        public Task LoadInitialCredentialsAsync() => _initialLoad ??= LoadInitialCredentialsCoreAsync();
 
-        public void ReloadCredentials()
+        private async Task LoadInitialCredentialsCoreAsync()
         {
             try
             {
+                // Let WPF render the window before publishing the initial list.
+                await Dispatcher.Yield(DispatcherPriority.Background);
+                var credentials = await Task.Run(_credentialViewModelFactory.ProvideAllNew);
+                _credentialVMs.AddRange(credentials);
+                await DisplayCredentialsAsync();
+                HasLoadedCredentials = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, string.Empty);
+            }
+        }
+
+        public async Task ReloadCredentialsAsync()
+        {
+            try
+            {
+                if (_initialLoad is not null)
+                    await _initialLoad;
+
                 _credentialVMs.Clear();
                 _credentialVMs.AddRange(_credentialViewModelFactory.ProvideAllNew());
 
-                _ = DisplayCredentialsAsync();
+                await DisplayCredentialsAsync();
+                HasLoadedCredentials = true;
             }
             catch (Exception ex)
             {
@@ -175,8 +201,7 @@ namespace SinglePass.WPF.ViewModels
                         credentials.RemoveAll(item => !search.Matches(item));
                     }
 
-                    SortAndOrder(credentials, sort, order);
-                    return credentials;
+                    return SortAndOrder(credentials, sort, order);
                 });
 
                 if (request != _displayRequest)
@@ -184,10 +209,16 @@ namespace SinglePass.WPF.ViewModels
 
                 var selection = keepSelection ? SelectedCredentialVM : null;
                 DisplayedCredentials = new ObservableCollectionDelayed<CredentialViewModel>(filtered);
+                GroupedCredentials = CreateGroupedView(DisplayedCredentials, sort);
                 OnPropertyChanged(nameof(DisplayedCredentials));
-                SelectedCredentialVM = selection != null && filtered.Contains(selection)
+                OnPropertyChanged(nameof(GroupedCredentials));
+                var newSelection = selection != null && filtered.Contains(selection)
                     ? selection
                     : DisplayedCredentials.FirstOrDefault();
+                if (ReferenceEquals(SelectedCredentialVM, newSelection))
+                    CredentialSelected?.Invoke(newSelection);
+                else
+                    SelectedCredentialVM = newSelection;
             }
             catch (Exception ex)
             {
@@ -198,6 +229,9 @@ namespace SinglePass.WPF.ViewModels
         [RelayCommand]
         private async Task Add()
         {
+            if (_initialLoad is not null)
+                await _initialLoad;
+
             var newCredVM = _credentialViewModelFactory.ProvideNew(Credential.CreateNew());
             var result = CredentialEditDialog.ShowDialog(
                 newCredVM,
@@ -246,20 +280,50 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
-        private static void SortAndOrder(List<CredentialViewModel> credentials, SortType sort, OrderType order)
+        private static List<CredentialViewModel> SortAndOrder(List<CredentialViewModel> credentials, SortType sort, OrderType order)
         {
-            Comparison<CredentialViewModel> compare = sort switch
+            var sorted = sort switch
             {
-                SortType.Website => (a, b) => StringComparer.CurrentCultureIgnoreCase.Compare(a.SiteFieldVM.Value, b.SiteFieldVM.Value),
-                SortType.Created => (a, b) => a.CreationTime.CompareTo(b.CreationTime),
-                SortType.Modified => (a, b) => a.LastModifiedTime.CompareTo(b.LastModifiedTime),
-                _ => (a, b) => StringComparer.CurrentCulture.Compare(a.NameFieldVM.Value, b.NameFieldVM.Value)
+                SortType.Created => credentials.OrderBy(item => item.CreationTime),
+                SortType.Modified => credentials.OrderBy(item => item.LastModifiedTime),
+                _ => credentials.OrderBy(GetInitial, StringComparer.CurrentCulture)
+                    .ThenBy(GetInitial, StringComparer.Ordinal)
+                    .ThenBy(item => item.NameFieldVM.Value, StringComparer.CurrentCulture)
             };
 
+            var result = sorted.ToList();
             if (order == OrderType.Descending)
-                credentials.Sort((a, b) => compare(b, a));
-            else
-                credentials.Sort(compare);
+                result.Reverse();
+
+            return result;
+        }
+
+        private static ListCollectionView CreateGroupedView(ObservableCollectionDelayed<CredentialViewModel> credentials, SortType sort)
+        {
+            var view = new ListCollectionView(credentials) { IsDataInGroupOrder = true };
+            view.GroupDescriptions.Add(new CredentialGroupDescription(sort));
+            return view;
+        }
+
+        private static string GetInitial(CredentialViewModel credential)
+        {
+            var name = credential.NameFieldVM.Value?.TrimStart();
+            return !string.IsNullOrEmpty(name) && char.IsLetter(name, 0)
+                ? StringInfo.GetNextTextElement(name).ToUpperInvariant().Normalize()
+                : "#";
+        }
+
+        private sealed class CredentialGroupDescription(SortType sort) : GroupDescription
+        {
+            public override object GroupNameFromItem(object item, int level, CultureInfo culture)
+            {
+                var credential = (CredentialViewModel)item;
+                if (sort == SortType.Name)
+                    return GetInitial(credential);
+
+                var date = sort == SortType.Created ? credential.CreationTime : credential.LastModifiedTime;
+                return date == default ? null : new DateTime(date.Year, date.Month, 1);
+            }
         }
 
         [RelayCommand]

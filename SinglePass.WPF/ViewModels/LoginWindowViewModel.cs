@@ -10,7 +10,7 @@ using System.Windows.Input;
 
 namespace SinglePass.WPF.ViewModels
 {
-    public class LoginWindowViewModel : ObservableRecipient
+    public partial class LoginWindowViewModel : ObservableRecipient
     {
         #region Design time instance
         private static readonly Lazy<LoginWindowViewModel> _lazy = new(() => new LoginWindowViewModel(null, true));
@@ -28,19 +28,11 @@ namespace SinglePass.WPF.ViewModels
         private RelayCommand<KeyEventArgs> _refreshCapsLockCommand;
         public RelayCommand<KeyEventArgs> RefreshCapsLockCommand => _refreshCapsLockCommand ??= new RelayCommand<KeyEventArgs>(RefreshCapsLock);
 
-        private bool _loading;
-        public bool Loading
-        {
-            get => _loading;
-            set => SetProperty(ref _loading, value);
-        }
+        [ObservableProperty]
+        public partial bool Loading { get; set; }
 
-        private string _helperText;
-        public string HelperText
-        {
-            get => _helperText;
-            set => SetProperty(ref _helperText, value);
-        }
+        [ObservableProperty]
+        public partial string HelperText { get; set; }
 
         public string HintText { get; }
 

@@ -340,6 +340,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Language.
+        /// </summary>
+        public static string Language {
+            get {
+                return ResourceManager.GetString("Language", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Light.
         /// </summary>
         public static string Light {
@@ -439,6 +448,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Newest first.
+        /// </summary>
+        public static string NewestFirst {
+            get {
+                return ResourceManager.GetString("NewestFirst", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to New item.
         /// </summary>
         public static string NewItem {
@@ -456,6 +474,15 @@ namespace SinglePass.Language.Properties {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to New password applied.
+        /// </summary>
+        public static string NewPasswordApplied {
+            get {
+                return ResourceManager.GetString("NewPasswordApplied", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to No.
         /// </summary>
@@ -484,6 +511,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No date.
+        /// </summary>
+        public static string NoDate {
+            get {
+                return ResourceManager.GetString("NoDate", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to OK.
         /// </summary>
         public static string OK {
@@ -492,6 +528,15 @@ namespace SinglePass.Language.Properties {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to Oldest first.
+        /// </summary>
+        public static string OldestFirst {
+            get {
+                return ResourceManager.GetString("OldestFirst", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Open in browser.
         /// </summary>
@@ -708,6 +753,15 @@ namespace SinglePass.Language.Properties {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to System default.
+        /// </summary>
+        public static string SystemLanguage {
+            get {
+                return ResourceManager.GetString("SystemLanguage", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Text copied!.
         /// </summary>

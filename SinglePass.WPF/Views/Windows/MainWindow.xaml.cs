@@ -145,6 +145,12 @@ namespace SinglePass.WPF.Views.Windows
             ViewModel.PasswordsVM.StatusMessageRequested -= ShowStatusMessage;
 
             var saveRequired = false;
+            if (ViewModel.SettingsVM.Language != _appSettingsService.Language)
+            {
+                _appSettingsService.Language = ViewModel.SettingsVM.Language;
+                saveRequired = true;
+            }
+
             if (ViewModel.SettingsVM.ThemeMode != _appSettingsService.ThemeMode)
             {
                 _appSettingsService.ThemeMode = ViewModel.SettingsVM.ThemeMode;
@@ -166,13 +172,6 @@ namespace SinglePass.WPF.Views.Windows
             if (ViewModel.PasswordsVM.Order != _appSettingsService.Order)
             {
                 _appSettingsService.Order = ViewModel.PasswordsVM.Order;
-                saveRequired = true;
-            }
-
-            var columnWidths = ViewModel.PasswordsVM.ColumnWidths;
-            if (columnWidths != _appSettingsService.PasswordColumnWidths)
-            {
-                _appSettingsService.PasswordColumnWidths = columnWidths with { };
                 saveRequired = true;
             }
 

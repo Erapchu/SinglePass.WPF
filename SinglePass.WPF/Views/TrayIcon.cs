@@ -1,12 +1,14 @@
 using Microsoft.Extensions.Logging;
 using SinglePass.WPF.Extensions;
 using SinglePass.WPF.Helpers;
+using SinglePass.WPF.Localization;
 using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 using static SinglePass.WPF.Helpers.WinApiProvider;
@@ -149,7 +151,8 @@ namespace SinglePass.WPF.Views
         private ContextMenu CreateMenu()
         {
             var menu = new ContextMenu { Placement = PlacementMode.AbsolutePoint };
-            var exit = new MenuItem { Header = SinglePass.Language.Properties.Resources.Exit };
+            var exit = new MenuItem();
+            exit.SetBinding(MenuItem.HeaderProperty, new Binding("[Exit]") { Source = LocalizationManager.Instance });
             exit.Click += (_, _) => Application.Current.Shutdown();
             menu.Items.Add(exit);
 

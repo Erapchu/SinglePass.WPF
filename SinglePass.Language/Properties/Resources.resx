@@ -343,4 +343,22 @@
   <data name="NoCredentials" xml:space="preserve">
     <value>No credentials</value>
   </data>
+  <data name="Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="SystemLanguage" xml:space="preserve">
+    <value>System default</value>
+  </data>
+  <data name="NewPasswordApplied" xml:space="preserve">
+    <value>New password applied</value>
+  </data>
+  <data name="NewestFirst" xml:space="preserve">
+    <value>Newest first</value>
+  </data>
+  <data name="OldestFirst" xml:space="preserve">
+    <value>Oldest first</value>
+  </data>
+  <data name="NoDate" xml:space="preserve">
+    <value>No date</value>
+  </data>
 </root>

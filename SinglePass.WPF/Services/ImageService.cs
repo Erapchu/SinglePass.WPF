@@ -18,8 +18,9 @@ namespace SinglePass.WPF.Services
         public async Task<ImageSource> GetImageAsync(string imageUrl, CancellationToken cancellationToken)
         {
             var client = _httpClientFactory.CreateClient();
-            var request = new HttpRequestMessage(HttpMethod.Get, imageUrl);
+            using var request = new HttpRequestMessage(HttpMethod.Get, imageUrl);
             using var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
             using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
             var bitmapImage = new BitmapImage();
             bitmapImage.BeginInit();

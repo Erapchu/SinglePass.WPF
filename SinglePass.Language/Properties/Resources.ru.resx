@@ -363,4 +363,22 @@
   <data name="NoCredentials" xml:space="preserve">
     <value>Нет записей</value>
   </data>
+  <data name="Language" xml:space="preserve">
+    <value>Язык</value>
+  </data>
+  <data name="SystemLanguage" xml:space="preserve">
+    <value>Как в Windows</value>
+  </data>
+  <data name="NewPasswordApplied" xml:space="preserve">
+    <value>Новый пароль установлен</value>
+  </data>
+  <data name="NewestFirst" xml:space="preserve">
+    <value>Сначала новые</value>
+  </data>
+  <data name="OldestFirst" xml:space="preserve">
+    <value>Сначала старые</value>
+  </data>
+  <data name="NoDate" xml:space="preserve">
+    <value>Без даты</value>
+  </data>
 </root>

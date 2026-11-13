@@ -25,6 +25,12 @@
         <Style x:Key="NavigationListViewItem" BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="ListViewItem">
             <EventSetter Event="PreviewMouseDown" Handler="ListBoxItem_PreviewMouseDown" />
             <Setter Property="Padding" Value="12,7" />
+            <Setter Property="DockPanel.Dock" Value="Top" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding DockAtBottom}" Value="True">
+                    <Setter Property="DockPanel.Dock" Value="Bottom" />
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
         <DataTemplate x:Key="NavigationItemTemplate" DataType="{x:Type vm:NavigationItemViewModel}">
             <Grid>
@@ -56,7 +62,13 @@
             ItemsSource="{Binding NavigationItems}"
             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
             SelectedItem="{Binding SelectedNavigationItem}"
-            SelectionChanged="Navigation_SelectionChanged" />
+            SelectionChanged="Navigation_SelectionChanged">
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <DockPanel LastChildFill="False" />
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+        </ListView>
         <Grid Grid.Column="1" ClipToBounds="True">
             <ContentControl
                 x:Name="NavigationContent"

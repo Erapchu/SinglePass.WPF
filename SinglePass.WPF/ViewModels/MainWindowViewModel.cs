@@ -63,17 +63,17 @@ namespace SinglePass.WPF.ViewModels
             NavigationItems = new ObservableCollectionDelayed<NavigationItemViewModel>(new List<NavigationItemViewModel>()
             {
                 new NavigationItemViewModel(
-                    SinglePass.Language.Properties.Resources.Passwords,
+                    nameof(SinglePass.Language.Properties.Resources.Passwords),
                     "\uE72E",
                     () => new PasswordsControl() { DataContext = PasswordsVM }),
                 new NavigationItemViewModel(
-                    SinglePass.Language.Properties.Resources.CloudSync,
+                    nameof(SinglePass.Language.Properties.Resources.CloudSync),
                     "\uE753",
                     () => new CloudSyncControl() { DataContext = CloudSyncVM }),
                 new NavigationItemViewModel(
-                    SinglePass.Language.Properties.Resources.Settings,
+                    nameof(SinglePass.Language.Properties.Resources.Settings),
                     "\uE713",
-                    () => new SettingsControl() { DataContext = SettingsVM }),
+                    () => new SettingsControl() { DataContext = SettingsVM }) { DockAtBottom = true },
             });
         }
 
@@ -82,9 +82,9 @@ namespace SinglePass.WPF.ViewModels
             ScrollIntoViewRequired?.Invoke(credVM);
         }
 
-        private void SettingsViewModel_SyncCompleted()
+        private async void SettingsViewModel_SyncCompleted()
         {
-            PasswordsVM.ReloadCredentials();
+            await PasswordsVM.ReloadCredentialsAsync();
         }
 
         private void PasswordsViewModel_CredentialSelected(CredentialViewModel credVM)
@@ -95,11 +95,8 @@ namespace SinglePass.WPF.ViewModels
         [RelayCommand]
         private async Task LoadingAsync()
         {
-            // Delay to boost loading of the window
-            await Task.Delay(1);
-
             SelectedNavigationItem = NavigationItems.FirstOrDefault();
-            PasswordsVM.ReloadCredentials();
+            await PasswordsVM.LoadInitialCredentialsAsync();
         }
     }
 }

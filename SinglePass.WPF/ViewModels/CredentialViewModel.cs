@@ -11,7 +11,7 @@ using System.Windows.Media;
 namespace SinglePass.WPF.ViewModels
 {
     [DebuggerDisplay("{Model}")]
-    public class CredentialViewModel : ObservableRecipient
+    public partial class CredentialViewModel : ObservableRecipient
     {
         #region Design time instance
         private static readonly Lazy<CredentialViewModel> _lazy = new(GetDesignTimeVM);
@@ -37,6 +37,25 @@ namespace SinglePass.WPF.ViewModels
         public PassFieldViewModel SiteFieldVM { get; }
         public ObservableCollection<PassFieldViewModel> AdditionalFields { get; }
 
+        public string WebsiteDomain
+        {
+            get
+            {
+                var site = SiteFieldVM.Value?.Trim();
+                if (string.IsNullOrEmpty(site))
+                    return null;
+
+                if (site.StartsWith("//", StringComparison.Ordinal))
+                    site = "https:" + site;
+                else if (!site.Contains("://", StringComparison.Ordinal))
+                    site = "https://" + site;
+
+                return Uri.TryCreate(site, UriKind.Absolute, out var uri) && !string.IsNullOrEmpty(uri.Host)
+                    ? uri.Host
+                    : null;
+            }
+        }
+
         public DateTime LastModifiedTime
         {
             get => Model.LastModifiedTime;
@@ -49,39 +68,20 @@ namespace SinglePass.WPF.ViewModels
             set => Model.CreationTime = value;
         }
 
-        private bool _passwordVisible;
-        public bool PasswordVisible
-        {
-            get => _passwordVisible;
-            set => SetProperty(ref _passwordVisible, value);
-        }
+        [ObservableProperty]
+        public partial bool PasswordVisible { get; set; }
 
         private ImageSource _favIcon;
         public ImageSource FavIcon
         {
             get
             {
-                if (_favIcon is null)
-                    _favIconCollector.ScheduleGetImage(
-                        SiteFieldVM.Value,
+                if (_favIcon is null && WebsiteDomain is { } domain)
+                    _favIconCollector?.ScheduleGetImage(
+                        "https://" + domain,
                         (image) => SetProperty(ref _favIcon, image, nameof(FavIcon)));
 
                 return _favIcon;
-            }
-        }
-
-        private ImageSource _favIcon32;
-        public ImageSource FavIcon32
-        {
-            get
-            {
-                if (_favIcon32 is null)
-                    _favIconCollector.ScheduleGetImage(
-                        SiteFieldVM.Value,
-                        (image) => SetProperty(ref _favIcon32, image, nameof(FavIcon32)),
-                        32);
-
-                return _favIcon32;
             }
         }
 
@@ -95,6 +95,11 @@ namespace SinglePass.WPF.ViewModels
             PasswordFieldVM = new PassFieldViewModel(credential.PasswordField);
             OtherFieldVM = new PassFieldViewModel(credential.OtherField);
             SiteFieldVM = new PassFieldViewModel(credential.SiteField);
+            SiteFieldVM.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(PassFieldViewModel.Value))
+                    OnPropertyChanged(nameof(WebsiteDomain));
+            };
             AdditionalFields = new ObservableCollection<PassFieldViewModel>(credential.AdditionalFields.Select(f => new PassFieldViewModel(f)));
             LastModifiedTime = credential.LastModifiedTime;
             CreationTime = credential.CreationTime;
@@ -105,7 +110,7 @@ namespace SinglePass.WPF.ViewModels
             var cloneModel = Model.Clone();
             var cloneVM = new CredentialViewModel(cloneModel, _favIconCollector)
             {
-                _passwordVisible = _passwordVisible,
+                PasswordVisible = PasswordVisible,
             };
             return cloneVM;
         }

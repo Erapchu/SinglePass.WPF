@@ -25,6 +25,12 @@ namespace SinglePass.WPF.Settings
             set => Settings.ThemeMode = value;
         }
 
+        public string Language
+        {
+            get => Settings.Language;
+            set => Settings.Language = value;
+        }
+
         public bool GoogleDriveEnabled
         {
             get => Settings.GoogleDriveEnabled;
@@ -53,12 +59,6 @@ namespace SinglePass.WPF.Settings
         {
             get => Settings.Order;
             set => Settings.Order = value;
-        }
-
-        public PasswordColumnWidths PasswordColumnWidths
-        {
-            get => Settings.PasswordColumnWidths;
-            set => Settings.PasswordColumnWidths = value;
         }
 
         public double DetailsPaneRatio

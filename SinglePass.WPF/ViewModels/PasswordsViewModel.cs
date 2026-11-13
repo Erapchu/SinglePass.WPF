@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using SinglePass.WPF.Collections;
@@ -70,7 +70,7 @@ namespace SinglePass.WPF.ViewModels
 
         partial void OnSelectedCredentialVMChanged(CredentialViewModel value)
         {
-            OnPropertyChanged(nameof(CurrentGroupOption));
+            OnPropertyChanged(nameof(CurrentGroupIndex));
             CredentialSelected?.Invoke(value);
         }
 
@@ -81,21 +81,35 @@ namespace SinglePass.WPF.ViewModels
 
         private static readonly GroupOption Ungrouped = new(null, null, "\uE8B7");
 
-        public IEnumerable<GroupOption> GroupOptions =>
-            new[] { Ungrouped }.Concat(PasswordGroups.Select(ToGroupOption));
+        public System.Collections.ObjectModel.ObservableCollection<GroupOption> GroupOptions { get; } = [Ungrouped];
 
-        public GroupOption CurrentGroupOption
+        public int CurrentGroupIndex
         {
             get => SelectedCredentialVM is { } credential &&
                 _credentialsCryptoService?.GetGroupId(credential.Model.Id) is { } id &&
-                PasswordGroups.FirstOrDefault(group => group.Id == id) is { } group
-                    ? ToGroupOption(group)
-                    : Ungrouped;
+                GroupOptions.FirstOrDefault(option => option.Id == id) is { } option
+                    ? GroupOptions.IndexOf(option)
+                    : 0;
             set
             {
-                if (value != null && value.Id != CurrentGroupOption.Id && SelectedCredentialVM is { } credential)
-                    _ = ChangeGroupAsync(credential.Model.Id, value.Id);
+                if (value >= 0 && value < GroupOptions.Count && value != CurrentGroupIndex && SelectedCredentialVM is { } credential)
+                    _ = ChangeGroupAsync(credential.Model.Id, GroupOptions[value].Id);
             }
+        }
+
+        private void RefreshGroupOptions()
+        {
+            // Switch away from a deleted group before removing its item from the selector.
+            OnPropertyChanged(nameof(CurrentGroupIndex));
+            var options = PasswordGroups.Select(ToGroupOption).ToHashSet();
+            for (var index = GroupOptions.Count - 1; index > 0; index--)
+                if (!options.Remove(GroupOptions[index]))
+                    GroupOptions.RemoveAt(index);
+
+            foreach (var option in options)
+                GroupOptions.Add(option);
+
+            OnPropertyChanged(nameof(CurrentGroupIndex));
         }
 
         private static GroupOption ToGroupOption(PasswordGroup group) => new(group.Id, group.Name, group.Icon);
@@ -103,7 +117,7 @@ namespace SinglePass.WPF.ViewModels
         private async Task ChangeGroupAsync(Guid credentialId, Guid? groupId)
         {
             await MoveToGroupAsync(credentialId, groupId);
-            OnPropertyChanged(nameof(CurrentGroupOption));
+            OnPropertyChanged(nameof(CurrentGroupIndex));
         }
 
         [ObservableProperty]
@@ -174,6 +188,7 @@ namespace SinglePass.WPF.ViewModels
             _logger = logger;
             _appSettingsService = appSettingsService;
             _credentialViewModelFactory = credentialViewModelFactory;
+            RefreshGroupOptions();
 
             _sort = _appSettingsService.Sort is SortType.Created or SortType.Modified
                 ? _appSettingsService.Sort
@@ -232,8 +247,7 @@ namespace SinglePass.WPF.ViewModels
             try
             {
                 await save();
-                OnPropertyChanged(nameof(GroupOptions));
-                OnPropertyChanged(nameof(CurrentGroupOption));
+                RefreshGroupOptions();
                 return true;
             }
             catch (Exception ex)
@@ -274,8 +288,7 @@ namespace SinglePass.WPF.ViewModels
 
                 _credentialVMs.Clear();
                 _credentialVMs.AddRange(_credentialViewModelFactory.ProvideAllNew());
-                OnPropertyChanged(nameof(GroupOptions));
-                OnPropertyChanged(nameof(CurrentGroupOption));
+                RefreshGroupOptions();
 
                 await DisplayCredentialsAsync();
                 HasLoadedCredentials = true;

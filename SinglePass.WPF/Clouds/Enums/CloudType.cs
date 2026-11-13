@@ -2,6 +2,7 @@
 {
     public enum CloudType
     {
-        GoogleDrive
+        GoogleDrive,
+        YandexDisk
     }
 }

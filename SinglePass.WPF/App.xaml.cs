@@ -77,6 +77,12 @@ namespace SinglePass.WPF
             services.AddTransient<GoogleOAuthProvider>();
             services.AddTransient<GoogleDriveTokenHolder>();
             services.AddTransient<GoogleDriveCloudService>();
+
+            services.Configure<YandexDiskConfig>(configuration.GetSection("Settings:YandexDiskConfig"));
+            services.AddHttpClient(YandexDiskCloudService.HttpClientName).RemoveAllLoggers();
+            services.AddSingleton<YandexOAuthProvider>();
+            services.AddSingleton<YandexDiskTokenHolder>();
+            services.AddSingleton<YandexDiskCloudService>();
             services.AddTransient<CryptoService>();
             services.AddSingleton<CloudServiceProvider>();
 

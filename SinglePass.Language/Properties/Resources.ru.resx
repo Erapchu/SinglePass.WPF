@@ -459,4 +459,19 @@
   <data name="GroupIconTravel" xml:space="preserve">
     <value>Путешествия</value>
   </data>
+  <data name="YandexDisk" xml:space="preserve">
+    <value>Яндекс Диск</value>
+  </data>
+  <data name="CloudProviders" xml:space="preserve">
+    <value>Google Drive и Яндекс Диск</value>
+  </data>
+  <data name="YandexDiskOAuthNotConfigured" xml:space="preserve">
+    <value>Настройте Яндекс OAuth, чтобы войти в аккаунт.</value>
+  </data>
+  <data name="CloudSignInFailed" xml:space="preserve">
+    <value>Не удалось войти в облачный аккаунт.</value>
+  </data>
+  <data name="CloudSignOutFailed" xml:space="preserve">
+    <value>Не удалось выйти из облачного аккаунта.</value>
+  </data>
 </root>

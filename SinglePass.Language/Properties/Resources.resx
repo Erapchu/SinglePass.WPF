@@ -439,4 +439,19 @@
   <data name="GroupIconTravel" xml:space="preserve">
     <value>Travel</value>
   </data>
+  <data name="YandexDisk" xml:space="preserve">
+    <value>Yandex Disk</value>
+  </data>
+  <data name="CloudProviders" xml:space="preserve">
+    <value>Google Drive and Yandex Disk</value>
+  </data>
+  <data name="YandexDiskOAuthNotConfigured" xml:space="preserve">
+    <value>Configure Yandex OAuth to enable sign-in.</value>
+  </data>
+  <data name="CloudSignInFailed" xml:space="preserve">
+    <value>Could not sign in to the cloud account.</value>
+  </data>
+  <data name="CloudSignOutFailed" xml:space="preserve">
+    <value>Could not sign out of the cloud account.</value>
+  </data>
 </root>

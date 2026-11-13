@@ -10,6 +10,7 @@ using SinglePass.FavIcons.Repository;
 using SinglePass.WPF.Authorization.Brokers;
 using SinglePass.WPF.Authorization.TokenHolders;
 using SinglePass.WPF.Clouds.Services;
+using SinglePass.WPF.Extensions;
 using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Hotkeys;
 using SinglePass.WPF.Localization;
@@ -22,6 +23,7 @@ using SinglePass.WPF.Views.Windows;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -35,6 +37,11 @@ namespace SinglePass.WPF
     public partial class App : System.Windows.Application
     {
         private readonly Mutex _mutex;
+        private ServiceProvider _rootServices;
+        private IServiceScope _vaultScope;
+        private MainWindow _vaultWindow;
+        private LoginWindow _loginWindow;
+        private bool _locking;
 
         private bool IsFirstInstance { get; }
         public IServiceProvider Services { get; private set; }
@@ -99,14 +106,14 @@ namespace SinglePass.WPF
             services.AddTransient<PopupViewModel>();
 
             // Main services
-            services.AddSingleton<CredentialsCryptoService>();
+            services.AddScoped<CredentialsCryptoService>();
             services.AddSingleton<ThemeService>();
             services.AddSingleton(settings);
             services.AddSingleton<AppSettingsService>();
-            services.AddSingleton<SyncService>();
+            services.AddScoped<SyncService>();
             services.AddSingleton<HotkeysService>();
             services.AddSingleton<ImageService>();
-            services.AddSingleton<CredentialViewModelFactory>();
+            services.AddScoped<CredentialViewModelFactory>();
             services.AddSingleton<AddressBarExtractor>();
             services.AddSingleton(new AsyncKeyedLocker<string>(o =>
             {
@@ -144,6 +151,12 @@ namespace SinglePass.WPF
             var loginViewModel = new LoginWindowViewModel(
                 () => preparation.Value, File.Exists(Constants.PasswordsFilePath));
             var loginWindow = new LoginWindow(loginViewModel);
+            _loginWindow = loginWindow;
+
+            var hiw = new HiddenInterprocessWindow(ShowVault);
+            var traySource = hiw.InitWithoutShowing();
+            var autoLock = new VaultAutoLock(traySource, LockVault);
+            hiw.Closing += (_, _) => autoLock.Dispose();
 
             async void OnLoginContentRendered(object sender, EventArgs args)
             {
@@ -170,21 +183,98 @@ namespace SinglePass.WPF
                 return;
             }
 
-            var hiw = new HiddenInterprocessWindow();
-            var traySource = hiw.InitWithoutShowing();
-
-            var mainWindow = Services.GetRequiredService<MainWindow>();
-            MainWindow = mainWindow;
-
-            var trayIcon = new TrayIcon(traySource, mainWindow, Services.GetRequiredService<ILogger<TrayIcon>>());
+            _loginWindow = null;
+            var trayIcon = new TrayIcon(traySource, ShowVault, _rootServices.GetRequiredService<ILogger<TrayIcon>>());
             hiw.Closing += (_, _) => trayIcon.Dispose();
-            mainWindow.Show();
+            OpenVault();
+        }
+
+        private void OpenVault()
+        {
+            _vaultWindow = Services.GetRequiredService<MainWindow>();
+            MainWindow = _vaultWindow;
+            _vaultWindow.Show();
+        }
+
+        internal bool ShowUnlockIfLocked()
+        {
+            if (_vaultWindow != null)
+                return false;
+
+            ShowVault();
+            return true;
+        }
+
+        private void ShowVault()
+        {
+            if (_locking)
+                return;
+
+            if (_vaultWindow != null)
+            {
+                _vaultWindow.BringToFrontAndActivate();
+                return;
+            }
+
+            if (_loginWindow != null)
+            {
+                _loginWindow.Activate();
+                return;
+            }
+
+            _vaultScope = _rootServices.CreateScope();
+            Services = _vaultScope.ServiceProvider;
+            var login = new LoginWindow(new LoginWindowViewModel(() => Task.FromResult(Services), true));
+            _loginWindow = login;
+            var accepted = login.ShowDialog() == true;
+            _loginWindow = null;
+            if (accepted)
+                OpenVault();
+            else
+            {
+                _vaultScope.Dispose();
+                _vaultScope = null;
+                Services = null;
+            }
+        }
+
+        private async void LockVault()
+        {
+            if (_vaultWindow == null)
+            {
+                _loginWindow?.ResetForSessionLock();
+                return;
+            }
+
+            _locking = true;
+            var window = _vaultWindow;
+            _vaultWindow = null;
+            var scope = _vaultScope;
+            _vaultScope = null;
+            Services = null;
+            var clearVault = scope.ServiceProvider.GetRequiredService<CredentialsCryptoService>().LockAsync();
+            try
+            {
+                scope.ServiceProvider.GetService<SyncService>()?.CancelTransfers();
+                foreach (var popup in Windows.OfType<PopupWindow>().ToArray())
+                    if (!popup.IsClosed)
+                        popup.Close();
+
+                window.CloseForVaultLock();
+                MainWindow = null;
+                await clearVault;
+            }
+            finally
+            {
+                scope.Dispose();
+                _locking = false;
+            }
         }
 
         private async Task<IServiceProvider> PrepareLoginAsync(AppSettings settings, Exception settingsReadError)
         {
             await Dispatcher.Yield(DispatcherPriority.ContextIdle);
-            Services = await Task.Run(() =>
+            _rootServices = await Task.Run(() =>
             {
                 var configuration = BuildConfiguration();
                 var services = ConfigureServices(configuration, settings);
@@ -197,7 +287,6 @@ namespace SinglePass.WPF
                     }
 
                     services.GetRequiredService<ILogger<LoginWindowViewModel>>();
-                    services.GetRequiredService<CredentialsCryptoService>();
                     _ = services.GetRequiredService<GoogleDriveTokenHolder>().OAuthInfo;
                     return services;
                 }
@@ -207,24 +296,26 @@ namespace SinglePass.WPF
                     throw;
                 }
             });
+            _vaultScope = _rootServices.CreateScope();
+            Services = _vaultScope.ServiceProvider;
             return Services;
         }
 
         private void Application_Exit(object sender, ExitEventArgs e)
         {
-            var logger = Services?.GetService<ILogger<App>>();
+            var logger = _rootServices?.GetService<ILogger<App>>();
             logger?.LogInformation("The application is shutting down...{0}", Environment.NewLine);
         }
 
         private void Current_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
-            var logger = Services?.GetService<ILogger<App>>();
+            var logger = _rootServices?.GetService<ILogger<App>>();
             logger?.LogError(e.Exception, "Dispatcher unhandled exception");
         }
 
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            var logger = Services?.GetService<ILogger<App>>();
+            var logger = _rootServices?.GetService<ILogger<App>>();
             logger?.LogError(e.ExceptionObject as Exception, "Domain unhandled exception");
         }
     }

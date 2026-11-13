@@ -98,13 +98,16 @@ namespace SinglePass.WPF.ViewModels
             catch (YandexCallbackUnavailableException ex)
             {
                 _logger.LogError(ex, "Yandex Disk sign-in could not open the local callback");
+                if (_syncService.IsLocked)
+                    return;
                 var message = string.Format(LocalizationManager.Instance["YandexDiskCallbackUnavailable"], ex.Port);
                 MessageDialog.ShowDialog(SinglePass.Language.Properties.Resources.Error, message, MessageDialogButtons.OK, "\uEA39");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, string.Empty);
-                ShowAccountError("CloudSignInFailed");
+                if (!_syncService.IsLocked)
+                    ShowAccountError("CloudSignInFailed");
             }
         }
 
@@ -192,6 +195,8 @@ namespace SinglePass.WPF.ViewModels
             {
                 TransferInProgress = account.Transferring = true;
                 var mergeResult = await _syncService.Synchronize(cloudType, SyncPasswordRequired);
+                if (_syncService.IsLocked)
+                    return;
 
                 MessageDialog.ShowDialog(
                     mergeResult.Success
@@ -209,7 +214,8 @@ namespace SinglePass.WPF.ViewModels
             }
             finally
             {
-                SyncCompleted?.Invoke();
+                if (!_syncService.IsLocked)
+                    SyncCompleted?.Invoke();
                 TransferInProgress = account.Transferring = false;
             }
         }
@@ -225,6 +231,8 @@ namespace SinglePass.WPF.ViewModels
             {
                 TransferInProgress = account.Transferring = true;
                 var success = await _syncService.Upload(cloudType);
+                if (_syncService.IsLocked)
+                    return;
 
                 MessageDialog.ShowDialog(
                     success
@@ -244,7 +252,8 @@ namespace SinglePass.WPF.ViewModels
             }
             finally
             {
-                SyncCompleted?.Invoke();
+                if (!_syncService.IsLocked)
+                    SyncCompleted?.Invoke();
                 TransferInProgress = account.Transferring = false;
             }
         }

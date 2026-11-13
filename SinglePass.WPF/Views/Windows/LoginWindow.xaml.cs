@@ -24,6 +24,14 @@ namespace SinglePass.WPF.Views.Windows
             DialogResult = true;
         }
 
+        internal void ResetForSessionLock()
+        {
+            ViewModel.CancelLogin();
+            ShowPasswordButton.IsChecked = false;
+            LoginPasswordBox.Clear();
+            RevealedPassword.Clear();
+        }
+
         private void PasswordBox_PasswordChanged(object sender, System.Windows.RoutedEventArgs e)
         {
             if (sender is not PasswordBox passwordBox)

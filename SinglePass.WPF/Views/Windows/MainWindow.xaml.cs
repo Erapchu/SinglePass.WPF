@@ -241,8 +241,19 @@ namespace SinglePass.WPF.Views.Windows
             }
         }
 
+        private bool _closingForVaultLock;
+
+        internal void CloseForVaultLock()
+        {
+            _closingForVaultLock = true;
+            Close();
+        }
+
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            if (_closingForVaultLock)
+                return;
+
             //TODO: Shutdown process on main window close or hide window and cancel depend on settings
             Hide();
             ShowInTaskbar = false;

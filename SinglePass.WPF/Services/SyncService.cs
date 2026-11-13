@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace SinglePass.WPF.Services
 {
-    public class SyncService
+    public class SyncService : IDisposable
     {
         private readonly CloudServiceProvider _cloudServiceProvider;
         private readonly ILogger<SyncService> _logger;
@@ -21,8 +21,8 @@ namespace SinglePass.WPF.Services
         private readonly CryptoService _cryptoService;
         private readonly AsyncKeyedLocker<string> _asyncKeyedLocker;
         private readonly HashSet<CloudType> _syncClouds = new();
-        // TODO: implement IDisposable
         private readonly CancellationTokenSource _syncCTS = new();
+        internal bool IsLocked => _credentialsCryptoService.IsLocked;
 
         public event Action<string> SyncStateChanged;
 
@@ -59,6 +59,7 @@ namespace SinglePass.WPF.Services
 
                 SyncStateChanged?.Invoke(SinglePass.Language.Properties.Resources.DownloadingFile);
                 using var cloudFileStream = await cloudService.Download(Constants.PasswordsFileName, token);
+                token.ThrowIfCancellationRequested();
                 if (cloudFileStream is null)
                 {
                     throw new Exception("File doesn't exists on cloud");
@@ -76,13 +77,14 @@ namespace SinglePass.WPF.Services
                         cloudCredentials = await Task.Run(() =>
                             CredentialsCryptoService.ReadVault(_cryptoService, cloudFileStream, password, out _), token);
                     }
-                    catch (Exception ex)
+                    catch (Exception ex) when (ex is not OperationCanceledException)
                     {
                         _logger.LogError(ex, string.Empty);
                     }
 
                     if (cloudCredentials is null)
                     {
+                        token.ThrowIfCancellationRequested();
                         password = await userPasswordRequired();
                         if (password is null)
                             throw new Exception("Merge operation cancelled by user"); // Cancel operation
@@ -155,5 +157,9 @@ namespace SinglePass.WPF.Services
                 }
             }
         }
+
+        internal void CancelTransfers() => _syncCTS.Cancel();
+
+        public void Dispose() => _syncCTS.Dispose();
     }
 }

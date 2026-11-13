@@ -16,7 +16,6 @@ namespace SinglePass.WPF.Services
     internal enum CredentialLoadResult
     {
         Loaded,
-        FileNotFound,
         Failed
     }
 
@@ -33,7 +32,10 @@ namespace SinglePass.WPF.Services
         private readonly CryptoService _cryptoService;
         private readonly AsyncKeyedLocker<string> _asyncKeyedLocker;
         private readonly AppSettings _settings;
+        private readonly object _passwordLock = new();
         private volatile PasswordVault _vault = new();
+        private volatile bool _locked;
+        internal bool IsLocked => _locked;
 
         public List<Credential> Credentials => _vault.Credentials.ToList();
 
@@ -78,10 +80,36 @@ namespace SinglePass.WPF.Services
 
         public void SetPassword(string password)
         {
-            PasswordSecure = SecureStringHelper.MakeSecureString(password);
+            ReplacePassword(SecureStringHelper.MakeSecureString(password));
         }
 
-        public string GetPassword() => SecureStringHelper.GetString(PasswordSecure);
+        public string GetPassword()
+        {
+            lock (_passwordLock)
+                return SecureStringHelper.GetString(PasswordSecure);
+        }
+
+        private void ReplacePassword(SecureString password)
+        {
+            lock (_passwordLock)
+            {
+                PasswordSecure?.Dispose();
+                PasswordSecure = password;
+            }
+        }
+
+        internal async Task LockAsync()
+        {
+            _locked = true;
+            await ClearAsync().ConfigureAwait(false);
+        }
+
+        internal async Task ClearAsync()
+        {
+            using var locker = await _asyncKeyedLocker.LockAsync(Constants.PasswordsFilePath).ConfigureAwait(false);
+            _vault = new();
+            ReplacePassword(null);
+        }
 
         internal static PasswordVault ReadVault(CryptoService cryptoService, Stream stream, string password, out bool isLegacy)
         {
@@ -101,7 +129,7 @@ namespace SinglePass.WPF.Services
             return vault;
         }
 
-        internal Task<CredentialLoadResult> LoadCredentialsAsync(string password) => Task.Run(async () =>
+        internal Task<CredentialLoadResult> LoadCredentialsAsync(string password, bool allowCreate = false) => Task.Run(async () =>
         {
             var path = Constants.PasswordsFilePath;
             try
@@ -114,12 +142,10 @@ namespace SinglePass.WPF.Services
                     using var stream = File.OpenRead(path);
                     vault = ReadVault(_cryptoService, stream, password, out needsRewrite);
                 }
-                catch (FileNotFoundException)
+                catch (FileNotFoundException) when (allowCreate)
                 {
-                    if (_settings?.PasswordGroups is not { Groups.Count: > 0 })
-                        return CredentialLoadResult.FileNotFound;
-
                     vault = new PasswordVault();
+                    needsRewrite = true;
                 }
 
                 if (_settings?.PasswordGroups is { Groups.Count: > 0 } legacy && vault.Groups.Count == 0)
@@ -303,6 +329,9 @@ namespace SinglePass.WPF.Services
         private Task UpdateVault(Func<PasswordVault, PasswordVault> update) => Task.Run(async () =>
         {
             using var locker = await _asyncKeyedLocker.LockAsync(Constants.PasswordsFilePath).ConfigureAwait(false);
+            if (_locked)
+                throw new InvalidOperationException("The password vault is locked.");
+
             var updated = update(_vault);
             if (ReferenceEquals(updated, _vault))
                 return;
@@ -340,6 +369,9 @@ namespace SinglePass.WPF.Services
                 {
                     var path = Constants.PasswordsFilePath;
                     using var locker = await _asyncKeyedLocker.LockAsync(path).ConfigureAwait(false);
+                    if (_locked)
+                        return PasswordChangeResult.Failed;
+
                     if (!string.Equals(currentPassword, GetPassword(), StringComparison.Ordinal))
                         return PasswordChangeResult.IncorrectCurrentPassword;
 
@@ -354,7 +386,7 @@ namespace SinglePass.WPF.Services
                         throw;
                     }
 
-                    PasswordSecure = newPasswordSecure;
+                    ReplacePassword(newPasswordSecure);
                     return PasswordChangeResult.Changed;
                 }
                 catch (Exception ex)

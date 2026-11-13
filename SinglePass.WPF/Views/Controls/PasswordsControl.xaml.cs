@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -20,7 +20,7 @@ namespace SinglePass.WPF.Views.Controls
         }
 
         private CollectionViewGroup FirstGroup =>
-            CredentialsListBox.Items.Groups is { Count: > 0 } groups ? groups[0] as CollectionViewGroup : null;
+            CredentialsListBox.GroupAt(0);
 
         private void CredentialsList_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
@@ -45,28 +45,28 @@ namespace SinglePass.WPF.Views.Controls
             var group = FirstGroup;
             if (_credentialsScrollViewer is { IsVisible: true, VerticalOffset: > 0 } viewer &&
                 viewer.Template?.FindName("PART_ScrollContentPresenter", viewer) is ScrollContentPresenter viewport &&
-                FindGroupAtViewportTop(viewport, viewport) is { Content: CollectionViewGroup visibleGroup })
-                group = visibleGroup;
+                FindRowAtViewportTop(viewport, viewport) is { } row)
+                group = CredentialsListBox.GroupAt(CredentialsListBox.ItemContainerGenerator.IndexFromContainer(row));
 
             StickyGroupHeaderContent.Content = group;
             StickyGroupHeaderContent.Visibility = group == null ? Visibility.Hidden : Visibility.Visible;
         }
 
-        private static GroupItem FindGroupAtViewportTop(Visual parent, ScrollContentPresenter viewport)
+        private static ListViewItem FindRowAtViewportTop(Visual parent, ScrollContentPresenter viewport)
         {
-            // The virtualizing panel only provides containers for realized groups.
+            // Only realized rows are visited; no off-screen containers are created.
             for (var index = 0; index < VisualTreeHelper.GetChildrenCount(parent); index++)
             {
                 if (VisualTreeHelper.GetChild(parent, index) is not Visual child)
                     continue;
 
-                if (child is GroupItem group)
+                if (child is ListViewItem group)
                 {
                     var top = group.TranslatePoint(new Point(), viewport).Y;
-                    if (top <= 0 && top + group.ActualHeight > 0)
+                    if (top < viewport.ActualHeight && top + group.ActualHeight > 0)
                         return group;
                 }
-                else if (FindGroupAtViewportTop(child, viewport) is { } match)
+                else if (FindRowAtViewportTop(child, viewport) is { } match)
                 {
                     return match;
                 }

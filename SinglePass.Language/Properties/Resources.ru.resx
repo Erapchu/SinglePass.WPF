@@ -561,4 +561,10 @@
   <data name="GroupIconEducation" xml:space="preserve">
     <value>Образование</value>
   </data>
+  <data name="GroupIconHealth" xml:space="preserve">
+    <value>Здоровье</value>
+  </data>
+  <data name="GroupIconPhotos" xml:space="preserve">
+    <value>Фото</value>
+  </data>
 </root>

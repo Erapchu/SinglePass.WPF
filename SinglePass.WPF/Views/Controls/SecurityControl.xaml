@@ -8,8 +8,6 @@
         <StackPanel Margin="8">
             <Border Margin="0,0,0,8" Style="{StaticResource Card}">
                 <DockPanel>
-                    <TextBlock DockPanel.Dock="Left" Width="20" Margin="0,0,16,0"
-                               FontSize="20" Style="{StaticResource SymbolText}" Text="&#xE72E;" />
                     <Button x:Name="ChangePasswordButton" DockPanel.Dock="Right" Margin="12,0,0,0" VerticalAlignment="Center"
                             Command="{Binding ChangePasswordCommand}"
                             Content="{Binding [Change], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />

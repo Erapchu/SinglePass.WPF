@@ -4,6 +4,7 @@ using SinglePass.WPF.ViewModels;
 using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace SinglePass.WPF.Views.Controls
@@ -13,7 +14,7 @@ namespace SinglePass.WPF.Views.Controls
     /// </summary>
     public partial class CredentialsDetailsControl : UserControl
     {
-        private readonly DispatcherTimer _totpTimer = new() { Interval = TimeSpan.FromMilliseconds(250) };
+        private readonly DispatcherTimer _totpTimer = new() { Interval = TimeSpan.FromSeconds(1) };
 
         public CredentialsDetailsControl()
         {
@@ -28,21 +29,45 @@ namespace SinglePass.WPF.Views.Controls
         private void TotpDisplay_Unloaded(object sender, RoutedEventArgs e)
         {
             _totpTimer.Stop();
-            TotpCode.Clear();
-            TotpCountdown.Text = string.Empty;
+            TotpCode.Text = string.Empty;
+            TotpProgressArc.Data = null;
         }
 
         private void RefreshTotp()
         {
-            if (TotpCode == null || TotpCountdown == null || CopyTotpButton == null)
+            if (TotpCode == null || TotpProgressArc == null || CopyTotpButton == null)
                 return;
 
             var configuration = TotpDisplay.IsLoaded && TotpDisplay.IsVisible ? TotpDisplay.DataContext as TotpConfiguration : null;
-            var valid = TotpService.TryGetCode(configuration, DateTime.UtcNow, out var code, out var seconds);
-            TotpCode.Text = code ?? string.Empty;
-            TotpCountdown.Text = valid ? $"{seconds / 60}:{seconds % 60:00}" : string.Empty;
+            var now = DateTime.UtcNow;
+            var valid = TotpService.TryGetCode(configuration, now, out var code, out var seconds);
+            TotpCode.Text = valid ? code.Insert(code.Length / 2, " ") : string.Empty;
+            TotpCountdown.Visibility = valid ? Visibility.Visible : Visibility.Collapsed;
+            TotpProgressArc.Data = valid
+                ? CreateProgressArc((seconds - now.Millisecond / 1000.0) / configuration.PeriodSeconds)
+                : null;
             CopyTotpButton.IsEnabled = valid;
             _totpTimer.IsEnabled = valid;
+        }
+
+        private static Geometry CreateProgressArc(double fraction)
+        {
+            const double center = 8;
+            const double radius = 7;
+            if (fraction >= 1)
+                return new EllipseGeometry(new Point(center, center), radius, radius);
+
+            var angle = (1 - fraction) * 2 * Math.PI;
+            var start = new Point(center + radius * Math.Sin(angle), center - radius * Math.Cos(angle));
+            var geometry = new StreamGeometry();
+            using (var context = geometry.Open())
+            {
+                context.BeginFigure(start, isFilled: false, isClosed: false);
+                context.ArcTo(new Point(center, center - radius), new Size(radius, radius), 0, fraction > 0.5,
+                    SweepDirection.Clockwise, isStroked: true, isSmoothJoin: false);
+            }
+            geometry.Freeze();
+            return geometry;
         }
 
         private void TotpSetupBox_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e) =>

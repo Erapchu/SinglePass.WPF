@@ -458,7 +458,7 @@
     <value>Local port {0} is unavailable. Set a free port in Settings:YandexDiskConfig:RedirectUri and register the same address in Yandex OAuth.</value>
   </data>
   <data name="TotpCode" xml:space="preserve">
-    <value>Verification code</value>
+    <value>One-Time Password</value>
   </data>
   <data name="CopyTotp" xml:space="preserve">
     <value>Copy verification code</value>

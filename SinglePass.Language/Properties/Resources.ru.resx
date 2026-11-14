@@ -478,7 +478,7 @@
     <value>Локальный порт {0} недоступен. Укажите свободный порт в Settings:YandexDiskConfig:RedirectUri и зарегистрируйте тот же адрес в Яндекс OAuth.</value>
   </data>
   <data name="TotpCode" xml:space="preserve">
-    <value>Код двухфакторной аутентификации</value>
+    <value>Одноразовый пароль</value>
   </data>
   <data name="CopyTotp" xml:space="preserve">
     <value>Скопировать код</value>

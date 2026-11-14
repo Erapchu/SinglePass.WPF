@@ -85,7 +85,8 @@
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock FontWeight="SemiBold" TextWrapping="Wrap"
                                    Text="{Binding [CloudSync], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
-                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="Google Drive" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding [CloudProviders], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
                     </StackPanel>
                 </DockPanel>
             </Button>

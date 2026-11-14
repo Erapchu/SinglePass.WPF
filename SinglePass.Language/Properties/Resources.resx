@@ -439,4 +439,49 @@
   <data name="GroupIconTravel" xml:space="preserve">
     <value>Travel</value>
   </data>
+  <data name="YandexDisk" xml:space="preserve">
+    <value>Yandex Disk</value>
+  </data>
+  <data name="CloudProviders" xml:space="preserve">
+    <value>Google Drive and Yandex Disk</value>
+  </data>
+  <data name="YandexDiskOAuthNotConfigured" xml:space="preserve">
+    <value>Configure Yandex OAuth to enable sign-in.</value>
+  </data>
+  <data name="CloudSignInFailed" xml:space="preserve">
+    <value>Could not sign in to the cloud account.</value>
+  </data>
+  <data name="CloudSignOutFailed" xml:space="preserve">
+    <value>Could not sign out of the cloud account.</value>
+  </data>
+  <data name="YandexDiskCallbackUnavailable" xml:space="preserve">
+    <value>Local port {0} is unavailable. Set a free port in Settings:YandexDiskConfig:RedirectUri and register the same address in Yandex OAuth.</value>
+  </data>
+  <data name="TotpCode" xml:space="preserve">
+    <value>One-Time Password</value>
+  </data>
+  <data name="CopyTotp" xml:space="preserve">
+    <value>Copy verification code</value>
+  </data>
+  <data name="TotpSetup" xml:space="preserve">
+    <value>2FA setup key or otpauth link</value>
+  </data>
+  <data name="RemoveTotp" xml:space="preserve">
+    <value>Remove verification code</value>
+  </data>
+  <data name="InvalidTotp" xml:space="preserve">
+    <value>Enter a valid Base32 setup key or a supported TOTP link.</value>
+  </data>
+  <data name="PasteTotpQr" xml:space="preserve">
+    <value>Paste QR code</value>
+  </data>
+  <data name="NoTotpQrImage" xml:space="preserve">
+    <value>Copy a screenshot of the QR code to the clipboard first.</value>
+  </data>
+  <data name="InvalidTotpQr" xml:space="preserve">
+    <value>Could not read a valid TOTP QR code from the clipboard.</value>
+  </data>
+  <data name="TotpQrImported" xml:space="preserve">
+    <value>QR code read. Save the entry to apply it.</value>
+  </data>
 </root>

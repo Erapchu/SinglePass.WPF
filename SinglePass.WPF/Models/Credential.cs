@@ -14,6 +14,7 @@ namespace SinglePass.WPF.Models
         public PassField OtherField { get; set; } = new PassField() { Name = "Other" };
         public PassField SiteField { get; set; } = new PassField() { Name = "Site" };
         public List<PassField> AdditionalFields { get; set; } = new List<PassField>();
+        public TotpConfiguration Totp { get; set; }
         public DateTime LastModifiedTime { get; set; }
         public DateTime CreationTime { get; set; }
 
@@ -38,6 +39,7 @@ namespace SinglePass.WPF.Models
                 PasswordField = PasswordField.Clone(),
                 OtherField = OtherField.Clone(),
                 SiteField = SiteField.Clone(),
+                Totp = Totp,
                 LastModifiedTime = LastModifiedTime,
                 CreationTime = CreationTime
             };

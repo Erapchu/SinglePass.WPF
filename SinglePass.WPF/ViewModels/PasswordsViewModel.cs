@@ -251,18 +251,19 @@ namespace SinglePass.WPF.ViewModels
         internal Task<bool> DeleteGroupAsync(PasswordGroup group) =>
             SaveGroupsAsync(() => _credentialsCryptoService.DeleteGroup(group.Id));
 
-        internal bool CanMoveToGroup(Guid credentialId, Guid? groupId) =>
+        internal bool CanMoveToGroup(IReadOnlyCollection<Guid> credentialIds, Guid? groupId) =>
             !IsSavingGroups &&
-            _credentialVMs.Any(item => item.Model.Id == credentialId) &&
             (groupId == null || PasswordGroups.Any(group => group.Id == groupId)) &&
-            _credentialsCryptoService.GetGroupId(credentialId) != groupId;
+            credentialIds.Any(id => _credentialsCryptoService.GetGroupId(id) != groupId);
 
-        internal async Task MoveToGroupAsync(Guid credentialId, Guid? groupId)
+        internal Task MoveToGroupAsync(Guid credentialId, Guid? groupId) => MoveToGroupAsync([credentialId], groupId);
+
+        internal async Task MoveToGroupAsync(IReadOnlyCollection<Guid> credentialIds, Guid? groupId)
         {
-            if (!CanMoveToGroup(credentialId, groupId))
+            if (!CanMoveToGroup(credentialIds, groupId))
                 return;
 
-            if (await SaveGroupsAsync(() => _credentialsCryptoService.MoveCredential(credentialId, groupId)) && _selectedGroupId.HasValue)
+            if (await SaveGroupsAsync(() => _credentialsCryptoService.MoveCredentials(credentialIds, groupId)) && _selectedGroupId.HasValue)
                 await DisplayCredentialsAsync(keepSelection: true);
         }
 
@@ -502,6 +503,17 @@ namespace SinglePass.WPF.ViewModels
             if (draft.NameFieldVM.HasErrors)
                 return;
 
+            var originalTotp = draft.Model.Totp;
+            var totp = originalTotp;
+            if (draft.RemoveTotp)
+                totp = null;
+            else if (!string.IsNullOrWhiteSpace(draft.TotpSetupInput) &&
+                     !TotpService.TryParse(draft.TotpSetupInput, out totp))
+            {
+                draft.HasInvalidTotp = true;
+                return;
+            }
+
             var groupId = _draftGroupId;
             var changeGroup = _draftGroupId != _originalGroupId;
             var isNew = IsAdding;
@@ -509,13 +521,17 @@ namespace SinglePass.WPF.ViewModels
             try
             {
                 draft.LastModifiedTime = DateTime.Now;
+                draft.Model.Totp = totp;
                 if (isNew)
                     draft.CreationTime = draft.LastModifiedTime;
 
                 if (!await SaveCredentialAsync(() => isNew
                         ? _credentialsCryptoService.AddCredential(draft.Model, groupId)
                         : _credentialsCryptoService.EditCredential(draft.Model, groupId, changeGroup)))
+                {
+                    draft.Model.Totp = originalTotp;
                     return;
+                }
 
                 var index = _credentialVMs.FindIndex(item => item.Model.Id == draft.Model.Id);
                 if (index >= 0)
@@ -524,6 +540,8 @@ namespace SinglePass.WPF.ViewModels
                     _credentialVMs.Add(draft);
 
                 var stillEditingDraft = ReferenceEquals(DraftCredential, draft);
+                draft.TotpSetupInput = null;
+                draft.RemoveTotp = false;
                 if (stillEditingDraft)
                     DraftCredential = null;
 
@@ -597,17 +615,23 @@ namespace SinglePass.WPF.ViewModels
         }
 
         [RelayCommand]
-        private void OpenInBrowser()
+        private void CopyTotp()
         {
-            var uri = SelectedCredentialVM?.SiteFieldVM?.Value;
-            if (string.IsNullOrWhiteSpace(uri))
+            if (!IsEditing && TotpService.TryGetCode(SelectedCredentialVM?.Totp, DateTime.UtcNow, out var code, out _))
+                CopyToClipboard(code);
+        }
+
+        private static bool CanOpenInBrowser(Uri address) =>
+            address?.IsAbsoluteUri == true &&
+            (address.Scheme == Uri.UriSchemeHttp || address.Scheme == Uri.UriSchemeHttps);
+
+        [RelayCommand(CanExecute = nameof(CanOpenInBrowser))]
+        private void OpenInBrowser(Uri address)
+        {
+            if (!CanOpenInBrowser(address))
                 return;
 
-            uri = uri.Replace("&", "^&");
-            if (Uri.TryCreate(uri, UriKind.RelativeOrAbsolute, out var site))
-            {
-                Process.Start(new ProcessStartInfo("cmd", $"/c start {site}") { CreateNoWindow = true });
-            }
+            Process.Start(new ProcessStartInfo(address.AbsoluteUri) { UseShellExecute = true });
         }
     }
 }

@@ -136,19 +136,18 @@ namespace SinglePass.WPF.Views.Windows
             var row = (Border)sender;
             row.ClearValue(Border.BackgroundProperty);
             e.Handled = true;
-            var canMove = TryGetGroupDrop(row, e, out var credentialId, out var groupId);
+            var canMove = TryGetGroupDrop(row, e, out var credentialIds, out var groupId);
             e.Effects = canMove ? DragDropEffects.Move : DragDropEffects.None;
             if (canMove)
-                await ViewModel.PasswordsVM.MoveToGroupAsync(credentialId, groupId);
+                await ViewModel.PasswordsVM.MoveToGroupAsync(credentialIds, groupId);
         }
 
-        private bool TryGetGroupDrop(Border row, DragEventArgs e, out Guid credentialId, out Guid? groupId)
+        private bool TryGetGroupDrop(Border row, DragEventArgs e, out Guid[] credentialIds, out Guid? groupId)
         {
-            credentialId = default;
+            credentialIds = e.Data.GetData(PasswordsControl.CredentialDragFormat, false) as Guid[];
             groupId = (row.DataContext as NavigationItemViewModel)?.Group?.Id;
             return e.AllowedEffects.HasFlag(DragDropEffects.Move) &&
-                e.Data.GetData(PasswordsControl.CredentialDragFormat, false) is string id &&
-                Guid.TryParse(id, out credentialId) && ViewModel.PasswordsVM.CanMoveToGroup(credentialId, groupId);
+                credentialIds != null && ViewModel.PasswordsVM.CanMoveToGroup(credentialIds, groupId);
         }
 
         private void OpenCloudSync_Executed(object sender, ExecutedRoutedEventArgs e)
@@ -242,8 +241,19 @@ namespace SinglePass.WPF.Views.Windows
             }
         }
 
+        private bool _closingForVaultLock;
+
+        internal void CloseForVaultLock()
+        {
+            _closingForVaultLock = true;
+            Close();
+        }
+
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            if (_closingForVaultLock)
+                return;
+
             //TODO: Shutdown process on main window close or hide window and cancel depend on settings
             Hide();
             ShowInTaskbar = false;

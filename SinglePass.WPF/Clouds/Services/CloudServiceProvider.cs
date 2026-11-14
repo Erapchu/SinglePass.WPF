@@ -17,6 +17,7 @@ namespace SinglePass.WPF.Clouds.Services
             return cloudType switch
             {
                 CloudType.GoogleDrive => _serviceProvider.GetService(typeof(GoogleDriveCloudService)) as ICloudService,
+                CloudType.YandexDisk => _serviceProvider.GetService(typeof(YandexDiskCloudService)) as ICloudService,
                 _ => null,
             };
         }

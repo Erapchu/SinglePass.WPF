@@ -16,7 +16,6 @@ namespace SinglePass.WPF.Services
     internal enum CredentialLoadResult
     {
         Loaded,
-        FileNotFound,
         Failed
     }
 
@@ -33,7 +32,10 @@ namespace SinglePass.WPF.Services
         private readonly CryptoService _cryptoService;
         private readonly AsyncKeyedLocker<string> _asyncKeyedLocker;
         private readonly AppSettings _settings;
+        private readonly object _passwordLock = new();
         private volatile PasswordVault _vault = new();
+        private volatile bool _locked;
+        internal bool IsLocked => _locked;
 
         public List<Credential> Credentials => _vault.Credentials.ToList();
 
@@ -78,14 +80,40 @@ namespace SinglePass.WPF.Services
 
         public void SetPassword(string password)
         {
-            PasswordSecure = SecureStringHelper.MakeSecureString(password);
+            ReplacePassword(SecureStringHelper.MakeSecureString(password));
         }
 
-        public string GetPassword() => SecureStringHelper.GetString(PasswordSecure);
-
-        internal static PasswordVault ReadVault(CryptoService cryptoService, Stream stream, string password)
+        public string GetPassword()
         {
-            var json = cryptoService.DecryptFromStream<JsonElement>(stream, password);
+            lock (_passwordLock)
+                return SecureStringHelper.GetString(PasswordSecure);
+        }
+
+        private void ReplacePassword(SecureString password)
+        {
+            lock (_passwordLock)
+            {
+                PasswordSecure?.Dispose();
+                PasswordSecure = password;
+            }
+        }
+
+        internal async Task LockAsync()
+        {
+            _locked = true;
+            await ClearAsync().ConfigureAwait(false);
+        }
+
+        internal async Task ClearAsync()
+        {
+            using var locker = await _asyncKeyedLocker.LockAsync(Constants.PasswordsFilePath).ConfigureAwait(false);
+            _vault = new();
+            ReplacePassword(null);
+        }
+
+        internal static PasswordVault ReadVault(CryptoService cryptoService, Stream stream, string password, out bool isLegacy)
+        {
+            var json = cryptoService.DecryptFromStream<JsonElement>(stream, password, out isLegacy);
             if (json.ValueKind == JsonValueKind.Array)
                 return new PasswordVault { Credentials = json.Deserialize<List<Credential>>() };
 
@@ -101,24 +129,23 @@ namespace SinglePass.WPF.Services
             return vault;
         }
 
-        internal Task<CredentialLoadResult> LoadCredentialsAsync(string password) => Task.Run(async () =>
+        internal Task<CredentialLoadResult> LoadCredentialsAsync(string password, bool allowCreate = false) => Task.Run(async () =>
         {
             var path = Constants.PasswordsFilePath;
             try
             {
                 using var locker = await _asyncKeyedLocker.LockAsync(path).ConfigureAwait(false);
                 PasswordVault vault;
+                var needsRewrite = false;
                 try
                 {
                     using var stream = File.OpenRead(path);
-                    vault = ReadVault(_cryptoService, stream, password);
+                    vault = ReadVault(_cryptoService, stream, password, out needsRewrite);
                 }
-                catch (FileNotFoundException)
+                catch (FileNotFoundException) when (allowCreate)
                 {
-                    if (_settings?.PasswordGroups is not { Groups.Count: > 0 })
-                        return CredentialLoadResult.FileNotFound;
-
                     vault = new PasswordVault();
+                    needsRewrite = true;
                 }
 
                 if (_settings?.PasswordGroups is { Groups.Count: > 0 } legacy && vault.Groups.Count == 0)
@@ -131,8 +158,11 @@ namespace SinglePass.WPF.Services
                     vault = vault with { Groups = groups, Assignments = assignments };
                     if (File.Exists(path) && !File.Exists(path + ".before-groups.bak"))
                         File.Copy(path, path + ".before-groups.bak", overwrite: false);
-                    WriteVault(vault, password);
+                    needsRewrite = true;
                 }
+
+                if (needsRewrite)
+                    WriteVault(vault, password);
 
                 _vault = vault;
                 if (_settings != null)
@@ -212,30 +242,41 @@ namespace SinglePass.WPF.Services
             return vault with { Groups = groups };
         });
 
-        internal Task MoveCredential(Guid credentialId, Guid? groupId) => UpdateVault(vault =>
-            vault.Credentials.Any(credential => credential.Id == credentialId)
-                ? AssignGroup(vault, credentialId, groupId)
-                : vault);
+        internal Task MoveCredentials(IReadOnlyCollection<Guid> credentialIds, Guid? groupId) => UpdateVault(vault =>
+        {
+            var existingIds = vault.Credentials.Select(credential => credential.Id).ToHashSet();
+            return AssignGroups(vault, credentialIds.Where(existingIds.Contains), groupId);
+        });
 
         private static PasswordVault AssignGroupOrThrow(PasswordVault vault, Guid credentialId, Guid? groupId)
         {
-            var assigned = AssignGroup(vault, credentialId, groupId);
-            if (ReferenceEquals(assigned, vault))
+            if (!IsGroupAvailable(vault, groupId))
                 throw new InvalidOperationException("The selected password group is no longer available.");
 
-            return assigned;
+            return AssignGroups(vault, [credentialId], groupId);
         }
 
-        private static PasswordVault AssignGroup(PasswordVault vault, Guid credentialId, Guid? groupId)
+        private static bool IsGroupAvailable(PasswordVault vault, Guid? groupId) =>
+            groupId is not { } id || (vault.Groups.TryGetValue(id, out var group) && !group.IsDeleted);
+
+        private static PasswordVault AssignGroups(PasswordVault vault, IEnumerable<Guid> credentialIds, Guid? groupId)
         {
-            if (groupId is { } id && (!vault.Groups.TryGetValue(id, out var group) || group.IsDeleted))
+            if (!IsGroupAvailable(vault, groupId))
                 return vault;
 
-            var assignments = new Dictionary<Guid, GroupAssignment>(vault.Assignments)
+            var assignments = new Dictionary<Guid, GroupAssignment>(vault.Assignments);
+            var change = new GroupAssignment(groupId, DateTimeOffset.UtcNow);
+            var changed = false;
+            foreach (var credentialId in credentialIds)
             {
-                [credentialId] = new(groupId, DateTimeOffset.UtcNow)
-            };
-            return vault with { Assignments = assignments };
+                if (assignments.GetValueOrDefault(credentialId)?.GroupId != groupId)
+                {
+                    assignments[credentialId] = change;
+                    changed = true;
+                }
+            }
+
+            return changed ? vault with { Assignments = assignments } : vault;
         }
 
         internal async Task<CredentialsMergeResult> Merge(PasswordVault incoming)
@@ -288,6 +329,9 @@ namespace SinglePass.WPF.Services
         private Task UpdateVault(Func<PasswordVault, PasswordVault> update) => Task.Run(async () =>
         {
             using var locker = await _asyncKeyedLocker.LockAsync(Constants.PasswordsFilePath).ConfigureAwait(false);
+            if (_locked)
+                throw new InvalidOperationException("The password vault is locked.");
+
             var updated = update(_vault);
             if (ReferenceEquals(updated, _vault))
                 return;
@@ -299,17 +343,28 @@ namespace SinglePass.WPF.Services
         private void WriteVault(PasswordVault vault, string password)
         {
             var path = Constants.PasswordsFilePath;
-            var tempPath = path + ".tmp";
+            var tempPath = $"{path}.{Guid.NewGuid():N}.tmp";
+            var tempFileCreated = false;
             try
             {
-                using (var stream = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                using (var stream = new FileStream(tempPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+                {
+                    tempFileCreated = true;
                     _cryptoService.EncryptToStream(vault, stream, password);
+                    stream.Flush(flushToDisk: true);
+                }
 
-                File.Move(tempPath, path, overwrite: true);
+                if (File.Exists(path))
+                    File.Replace(tempPath, path, destinationBackupFileName: null, ignoreMetadataErrors: false);
+                else
+                    File.Move(tempPath, path);
             }
             catch
             {
-                try { File.Delete(tempPath); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                if (tempFileCreated)
+                {
+                    try { File.Delete(tempPath); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                }
                 throw;
             }
         }
@@ -322,28 +377,24 @@ namespace SinglePass.WPF.Services
                 {
                     var path = Constants.PasswordsFilePath;
                     using var locker = await _asyncKeyedLocker.LockAsync(path).ConfigureAwait(false);
+                    if (_locked)
+                        return PasswordChangeResult.Failed;
+
                     if (!string.Equals(currentPassword, GetPassword(), StringComparison.Ordinal))
                         return PasswordChangeResult.IncorrectCurrentPassword;
 
                     var newPasswordSecure = SecureStringHelper.MakeSecureString(newPassword);
-                    var tempPath = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
                     try
                     {
-                        using (var stream = new FileStream(tempPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
-                        {
-                            _cryptoService.EncryptToStream(_vault, stream, newPassword);
-                        }
-
-                        File.Move(tempPath, path, overwrite: true);
+                        WriteVault(_vault, newPassword);
                     }
                     catch
                     {
                         newPasswordSecure.Dispose();
-                        File.Delete(tempPath);
                         throw;
                     }
 
-                    PasswordSecure = newPasswordSecure;
+                    ReplacePassword(newPasswordSecure);
                     return PasswordChangeResult.Changed;
                 }
                 catch (Exception ex)

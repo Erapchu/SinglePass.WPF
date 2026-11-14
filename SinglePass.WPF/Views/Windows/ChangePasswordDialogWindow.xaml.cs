@@ -1,8 +1,6 @@
-using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Localization;
 using SinglePass.WPF.Services;
 using System.ComponentModel;
-using System.Text;
 using System.Windows;
 
 namespace SinglePass.WPF.Views.Windows
@@ -32,12 +30,6 @@ namespace SinglePass.WPF.Views.Windows
             if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 8)
             {
                 ShowError("Minimum8Characters");
-                return;
-            }
-
-            if (Encoding.UTF8.GetByteCount(newPassword) > AesCryptographyHelper.KeyLength)
-            {
-                ShowError("PasswordTooLong");
                 return;
             }
 

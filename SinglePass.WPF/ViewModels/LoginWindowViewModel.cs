@@ -20,6 +20,7 @@ namespace SinglePass.WPF.ViewModels
         public event Action Accept;
 
         private readonly Func<Task<IServiceProvider>> _prepareServices;
+        private readonly bool _allowCreate;
         private CancellationTokenSource _cancellationTokenSource;
 
         private AsyncRelayCommand _loadCredentialsCommand;
@@ -43,6 +44,7 @@ namespace SinglePass.WPF.ViewModels
         internal LoginWindowViewModel(Func<Task<IServiceProvider>> prepareServices, bool credentialsFileExists)
         {
             _prepareServices = prepareServices;
+            _allowCreate = !credentialsFileExists;
             HintText = !credentialsFileExists
                 ? SinglePass.Language.Properties.Resources.NewPassword
                 : SinglePass.Language.Properties.Resources.Password;
@@ -75,10 +77,12 @@ namespace SinglePass.WPF.ViewModels
                 cancellationToken.ThrowIfCancellationRequested();
                 logger = services.GetRequiredService<ILogger<LoginWindowViewModel>>();
                 var credentialsCryptoService = services.GetRequiredService<CredentialsCryptoService>();
-                var result = await credentialsCryptoService.LoadCredentialsAsync(password);
+                var result = await credentialsCryptoService.LoadCredentialsAsync(password, _allowCreate);
+                if (cancellationToken.IsCancellationRequested)
+                    await credentialsCryptoService.ClearAsync();
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if (result is CredentialLoadResult.Loaded or CredentialLoadResult.FileNotFound)
+                if (result == CredentialLoadResult.Loaded)
                 {
                     credentialsCryptoService.SetPassword(password);
                     Accept?.Invoke();

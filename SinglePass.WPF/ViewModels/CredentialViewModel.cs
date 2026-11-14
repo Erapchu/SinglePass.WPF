@@ -30,6 +30,19 @@ namespace SinglePass.WPF.ViewModels
         private readonly IFavIconCollector _favIconCollector;
 
         public Credential Model { get; }
+        public TotpConfiguration Totp => Model.Totp;
+
+        [ObservableProperty]
+        public partial string TotpSetupInput { get; set; }
+
+        [ObservableProperty]
+        public partial bool RemoveTotp { get; set; }
+
+        [ObservableProperty]
+        public partial bool HasInvalidTotp { get; set; }
+
+        partial void OnTotpSetupInputChanged(string value) => HasInvalidTotp = false;
+        partial void OnRemoveTotpChanged(bool value) => HasInvalidTotp = false;
         public PassFieldViewModel NameFieldVM { get; }
         public PassFieldViewModel LoginFieldVM { get; }
         public PassFieldViewModel PasswordFieldVM { get; }
@@ -45,15 +58,64 @@ namespace SinglePass.WPF.ViewModels
                 if (string.IsNullOrEmpty(site))
                     return null;
 
-                if (site.StartsWith("//", StringComparison.Ordinal))
-                    site = "https:" + site;
-                else if (!site.Contains("://", StringComparison.Ordinal))
-                    site = "https://" + site;
-
-                return Uri.TryCreate(site, UriKind.Absolute, out var uri) && !string.IsNullOrEmpty(uri.Host)
-                    ? uri.Host
-                    : null;
+                return ParseWebsite(site, out _)?.Host;
             }
+        }
+
+        public sealed record WebsiteDisplay(string Prefix, string Host, string Suffix, Uri Address);
+
+        public WebsiteDisplay Website
+        {
+            get
+            {
+                var site = SiteFieldVM.Value?.Trim() ?? string.Empty;
+                var address = ParseWebsite(site, out var authorityStart);
+                if (address == null || (address.Scheme != Uri.UriSchemeHttp && address.Scheme != Uri.UriSchemeHttps))
+                    return new WebsiteDisplay(site, string.Empty, string.Empty, null);
+
+                var authorityEnd = site.IndexOfAny(['/', '?', '#', '\\'], authorityStart);
+                if (authorityEnd < 0)
+                    authorityEnd = site.Length;
+
+                var authority = site.AsSpan(authorityStart, authorityEnd - authorityStart);
+                var hostStart = authority.LastIndexOf('@') + 1;
+                var hostAndPort = authority[hostStart..];
+                var hostLength = hostAndPort.StartsWith("[", StringComparison.Ordinal)
+                    ? hostAndPort.IndexOf(']') + 1
+                    : hostAndPort.IndexOf(':');
+                if (hostLength < 0)
+                    hostLength = hostAndPort.Length;
+
+                hostStart += authorityStart;
+                return new WebsiteDisplay(site[..hostStart], site.Substring(hostStart, hostLength),
+                    site[(hostStart + hostLength)..], address);
+            }
+        }
+
+        private static Uri ParseWebsite(string site, out int authorityStart)
+        {
+            authorityStart = 0;
+            if (string.IsNullOrEmpty(site))
+                return null;
+
+            if (site.StartsWith("//", StringComparison.Ordinal))
+            {
+                authorityStart = 2;
+                site = "https:" + site;
+            }
+            else
+            {
+                var schemeEnd = site.IndexOf("://", StringComparison.Ordinal);
+                var firstSeparator = site.IndexOfAny(['/', '?', '#', '\\']);
+                if (schemeEnd >= 0 && firstSeparator == schemeEnd + 1)
+                    authorityStart = schemeEnd + 3;
+                else
+                    site = "https://" + site;
+            }
+
+            return Uri.TryCreate(site, UriKind.Absolute, out var uri) && !string.IsNullOrEmpty(uri.Host)
+                ? uri
+                : null;
         }
 
         public DateTime LastModifiedTime
@@ -98,7 +160,10 @@ namespace SinglePass.WPF.ViewModels
             SiteFieldVM.PropertyChanged += (_, e) =>
             {
                 if (e.PropertyName == nameof(PassFieldViewModel.Value))
+                {
                     OnPropertyChanged(nameof(WebsiteDomain));
+                    OnPropertyChanged(nameof(Website));
+                }
             };
             AdditionalFields = new ObservableCollection<PassFieldViewModel>(credential.AdditionalFields.Select(f => new PassFieldViewModel(f)));
             LastModifiedTime = credential.LastModifiedTime;

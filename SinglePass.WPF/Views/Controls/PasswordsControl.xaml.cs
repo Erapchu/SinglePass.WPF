@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,9 +14,10 @@ namespace SinglePass.WPF.Views.Controls
     /// </summary>
     public partial class PasswordsControl : UserControl
     {
-        internal const string CredentialDragFormat = "SinglePass.CredentialId";
+        internal const string CredentialDragFormat = "SinglePass.CredentialIds";
 
         private CredentialViewModel _dragCredential;
+        private bool _deferSingleSelection;
         private Point _dragStart;
         private ScrollViewer _credentialsScrollViewer;
 
@@ -29,9 +31,26 @@ namespace SinglePass.WPF.Views.Controls
             _dragStart = e.GetPosition(CredentialsListBox);
             var row = ItemsControl.ContainerFromElement(CredentialsListBox, e.OriginalSource as DependencyObject) as ListViewItem;
             _dragCredential = row?.Content as CredentialViewModel;
+            _deferSingleSelection = _dragCredential != null && row.IsSelected &&
+                CredentialsListBox.SelectedItems.Count > 1 && Keyboard.Modifiers == ModifierKeys.None;
+            if (_deferSingleSelection)
+                e.Handled = true;
         }
 
-        private void CredentialsList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e) => _dragCredential = null;
+        private void CredentialsList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (_deferSingleSelection && _dragCredential is { } credential &&
+                ItemsControl.ContainerFromElement(CredentialsListBox, e.OriginalSource as DependencyObject)
+                    is ListViewItem row && ReferenceEquals(row.Content, credential))
+            {
+                CredentialsListBox.UnselectAll();
+                row.IsSelected = true;
+                row.Focus();
+            }
+
+            _dragCredential = null;
+            _deferSingleSelection = false;
+        }
 
         private void CredentialsList_PreviewMouseMove(object sender, MouseEventArgs e)
         {
@@ -46,7 +65,11 @@ namespace SinglePass.WPF.Views.Controls
                 return;
 
             _dragCredential = null;
-            var data = new DataObject(CredentialDragFormat, credential.Model.Id.ToString("D"), autoConvert: false);
+            _deferSingleSelection = false;
+            var ids = CredentialsListBox.SelectedItems.Contains(credential)
+                ? CredentialsListBox.SelectedItems.OfType<CredentialViewModel>().Select(item => item.Model.Id).ToArray()
+                : new[] { credential.Model.Id };
+            var data = new DataObject(CredentialDragFormat, ids, autoConvert: false);
             DragDrop.DoDragDrop(CredentialsListBox, data, DragDropEffects.Move);
         }
 

@@ -13,6 +13,10 @@ namespace SinglePass.WPF.Hotkeys
     {
         public static void PopupHotkeyHandler()
         {
+            var app = (App)Application.Current;
+            if (app.ShowUnlockIfLocked())
+                return;
+
             // Prevent duplicates
             if (IsAnyPopupWindowOpened())
             {
@@ -25,7 +29,7 @@ namespace SinglePass.WPF.Hotkeys
             {
                 var hwndFocus = info.hwndFocus;
                 var caretRect = GetAccessibleCaretRect(hwndFocus);
-                var popup = (System.Windows.Application.Current as App).Services.GetService(typeof(PopupWindow)) as PopupWindow;
+                var popup = app.Services.GetService(typeof(PopupWindow)) as PopupWindow;
 
                 if (!RectValid(caretRect))
                 {

@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using SinglePass.WPF.Extensions;
 using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Localization;
 using System;
@@ -37,7 +36,7 @@ namespace SinglePass.WPF.Views
         private const int SmallIconHeight = 50;
 
         private readonly HwndSource _source;
-        private readonly Window _mainWindow;
+        private readonly Action _showVault;
         private readonly ILogger<TrayIcon> _logger;
         private readonly Icon _icon;
         private readonly uint _taskbarCreated;
@@ -47,10 +46,10 @@ namespace SinglePass.WPF.Views
         private bool _version4;
         private bool _disposed;
 
-        public TrayIcon(HwndSource source, Window mainWindow, ILogger<TrayIcon> logger)
+        public TrayIcon(HwndSource source, Action showVault, ILogger<TrayIcon> logger)
         {
             _source = source;
-            _mainWindow = mainWindow;
+            _showVault = showVault;
             _logger = logger;
             _taskbarCreated = RegisterWindowMessage("TaskbarCreated");
 
@@ -98,13 +97,13 @@ namespace SinglePass.WPF.Views
             if (_version4)
             {
                 if (notification is Select or KeySelect)
-                    _mainWindow.BringToFrontAndActivate();
+                    _source.Dispatcher.InvokeAsync(_showVault);
                 else if (notification == ContextMenuNotification)
                     ShowMenu(GetMenuPosition(wParam));
             }
             else if (notification == LeftButtonUp)
             {
-                _mainWindow.BringToFrontAndActivate();
+                _source.Dispatcher.InvokeAsync(_showVault);
             }
             else if (notification == RightButtonUp && GetCursorPos(out var cursor))
             {

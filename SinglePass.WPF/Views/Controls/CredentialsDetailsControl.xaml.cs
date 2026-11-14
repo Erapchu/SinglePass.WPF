@@ -1,7 +1,10 @@
 ﻿using SinglePass.WPF.Models;
 using SinglePass.WPF.Services;
+using SinglePass.WPF.Localization;
 using SinglePass.WPF.ViewModels;
 using System;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -15,6 +18,7 @@ namespace SinglePass.WPF.Views.Controls
     public partial class CredentialsDetailsControl : UserControl
     {
         private readonly DispatcherTimer _totpTimer = new() { Interval = TimeSpan.FromSeconds(1) };
+        private bool _readingTotpQr;
 
         public CredentialsDetailsControl()
         {
@@ -70,15 +74,58 @@ namespace SinglePass.WPF.Views.Controls
             return geometry;
         }
 
-        private void TotpSetupBox_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e) =>
+        private void TotpSetupBox_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
             ((PasswordBox)sender).Clear();
+            TotpQrStatus?.SetCurrentValue(TextBlock.TextProperty, string.Empty);
+        }
 
         private void TotpSetupBox_PasswordChanged(object sender, RoutedEventArgs e)
         {
             var box = (PasswordBox)sender;
+            TotpQrStatus?.SetCurrentValue(TextBlock.TextProperty, string.Empty);
             if (box.DataContext is CredentialViewModel draft)
                 draft.TotpSetupInput = box.Password;
         }
+
+        private async void PasteTotpQr_Click(object sender, RoutedEventArgs e)
+        {
+            if (_readingTotpQr || TotpSetupBox.DataContext is not CredentialViewModel draft || draft.RemoveTotp)
+                return;
+
+            var previousInput = draft.TotpSetupInput;
+            _readingTotpQr = true;
+            try
+            {
+                var image = Clipboard.GetImage();
+                if (image == null)
+                {
+                    ShowQrStatus("NoTotpQrImage");
+                    return;
+                }
+
+                image.Freeze();
+                var link = await Task.Run(() => TotpQrReader.ReadSetupLink(image));
+                if (!TotpSetupBox.IsVisible || !TotpSetupBox.IsEnabled ||
+                    !ReferenceEquals(TotpSetupBox.DataContext, draft) || draft.TotpSetupInput != previousInput)
+                    return;
+
+                if (link != null)
+                    TotpSetupBox.Password = link;
+                ShowQrStatus(link != null ? "TotpQrImported" : "InvalidTotpQr");
+            }
+            catch (Exception ex) when (ex is ExternalException or InvalidOperationException or ArgumentException or NotSupportedException)
+            {
+                if (TotpSetupBox.IsVisible && ReferenceEquals(TotpSetupBox.DataContext, draft))
+                    ShowQrStatus("InvalidTotpQr");
+            }
+            finally
+            {
+                _readingTotpQr = false;
+            }
+        }
+
+        private void ShowQrStatus(string resourceKey) => TotpQrStatus.Text = LocalizationManager.Instance[resourceKey];
 
         private void NameEditBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {

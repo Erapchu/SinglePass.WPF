@@ -472,4 +472,16 @@
   <data name="InvalidTotp" xml:space="preserve">
     <value>Enter a valid Base32 setup key or a supported TOTP link.</value>
   </data>
+  <data name="PasteTotpQr" xml:space="preserve">
+    <value>Paste QR code</value>
+  </data>
+  <data name="NoTotpQrImage" xml:space="preserve">
+    <value>Copy a screenshot of the QR code to the clipboard first.</value>
+  </data>
+  <data name="InvalidTotpQr" xml:space="preserve">
+    <value>Could not read a valid TOTP QR code from the clipboard.</value>
+  </data>
+  <data name="TotpQrImported" xml:space="preserve">
+    <value>QR code read. Save the entry to apply it.</value>
+  </data>
 </root>

@@ -492,4 +492,16 @@
   <data name="InvalidTotp" xml:space="preserve">
     <value>Введите корректный ключ Base32 или поддерживаемую ссылку TOTP.</value>
   </data>
+  <data name="PasteTotpQr" xml:space="preserve">
+    <value>Вставить QR-код</value>
+  </data>
+  <data name="NoTotpQrImage" xml:space="preserve">
+    <value>Сначала скопируйте снимок QR-кода в буфер обмена.</value>
+  </data>
+  <data name="InvalidTotpQr" xml:space="preserve">
+    <value>Не удалось прочитать QR-код настройки TOTP из буфера обмена.</value>
+  </data>
+  <data name="TotpQrImported" xml:space="preserve">
+    <value>QR-код прочитан. Сохраните запись, чтобы применить настройку.</value>
+  </data>
 </root>

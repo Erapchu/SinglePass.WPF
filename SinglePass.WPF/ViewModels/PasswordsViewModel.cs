@@ -621,18 +621,17 @@ namespace SinglePass.WPF.ViewModels
                 CopyToClipboard(code);
         }
 
-        [RelayCommand]
-        private void OpenInBrowser()
+        private static bool CanOpenInBrowser(Uri address) =>
+            address?.IsAbsoluteUri == true &&
+            (address.Scheme == Uri.UriSchemeHttp || address.Scheme == Uri.UriSchemeHttps);
+
+        [RelayCommand(CanExecute = nameof(CanOpenInBrowser))]
+        private void OpenInBrowser(Uri address)
         {
-            var uri = SelectedCredentialVM?.SiteFieldVM?.Value;
-            if (string.IsNullOrWhiteSpace(uri))
+            if (!CanOpenInBrowser(address))
                 return;
 
-            uri = uri.Replace("&", "^&");
-            if (Uri.TryCreate(uri, UriKind.RelativeOrAbsolute, out var site))
-            {
-                Process.Start(new ProcessStartInfo("cmd", $"/c start {site}") { CreateNoWindow = true });
-            }
+            Process.Start(new ProcessStartInfo(address.AbsoluteUri) { UseShellExecute = true });
         }
     }
 }

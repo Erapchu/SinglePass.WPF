@@ -30,6 +30,19 @@ namespace SinglePass.WPF.ViewModels
         private readonly IFavIconCollector _favIconCollector;
 
         public Credential Model { get; }
+        public TotpConfiguration Totp => Model.Totp;
+
+        [ObservableProperty]
+        public partial string TotpSetupInput { get; set; }
+
+        [ObservableProperty]
+        public partial bool RemoveTotp { get; set; }
+
+        [ObservableProperty]
+        public partial bool HasInvalidTotp { get; set; }
+
+        partial void OnTotpSetupInputChanged(string value) => HasInvalidTotp = false;
+        partial void OnRemoveTotpChanged(bool value) => HasInvalidTotp = false;
         public PassFieldViewModel NameFieldVM { get; }
         public PassFieldViewModel LoginFieldVM { get; }
         public PassFieldViewModel PasswordFieldVM { get; }

@@ -457,4 +457,19 @@
   <data name="YandexDiskCallbackUnavailable" xml:space="preserve">
     <value>Local port {0} is unavailable. Set a free port in Settings:YandexDiskConfig:RedirectUri and register the same address in Yandex OAuth.</value>
   </data>
+  <data name="TotpCode" xml:space="preserve">
+    <value>Verification code</value>
+  </data>
+  <data name="CopyTotp" xml:space="preserve">
+    <value>Copy verification code</value>
+  </data>
+  <data name="TotpSetup" xml:space="preserve">
+    <value>2FA setup key or otpauth link</value>
+  </data>
+  <data name="RemoveTotp" xml:space="preserve">
+    <value>Remove verification code</value>
+  </data>
+  <data name="InvalidTotp" xml:space="preserve">
+    <value>Enter a valid Base32 setup key or a supported TOTP link.</value>
+  </data>
 </root>

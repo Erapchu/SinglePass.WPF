@@ -503,6 +503,17 @@ namespace SinglePass.WPF.ViewModels
             if (draft.NameFieldVM.HasErrors)
                 return;
 
+            var originalTotp = draft.Model.Totp;
+            var totp = originalTotp;
+            if (draft.RemoveTotp)
+                totp = null;
+            else if (!string.IsNullOrWhiteSpace(draft.TotpSetupInput) &&
+                     !TotpService.TryParse(draft.TotpSetupInput, out totp))
+            {
+                draft.HasInvalidTotp = true;
+                return;
+            }
+
             var groupId = _draftGroupId;
             var changeGroup = _draftGroupId != _originalGroupId;
             var isNew = IsAdding;
@@ -510,13 +521,17 @@ namespace SinglePass.WPF.ViewModels
             try
             {
                 draft.LastModifiedTime = DateTime.Now;
+                draft.Model.Totp = totp;
                 if (isNew)
                     draft.CreationTime = draft.LastModifiedTime;
 
                 if (!await SaveCredentialAsync(() => isNew
                         ? _credentialsCryptoService.AddCredential(draft.Model, groupId)
                         : _credentialsCryptoService.EditCredential(draft.Model, groupId, changeGroup)))
+                {
+                    draft.Model.Totp = originalTotp;
                     return;
+                }
 
                 var index = _credentialVMs.FindIndex(item => item.Model.Id == draft.Model.Id);
                 if (index >= 0)
@@ -525,6 +540,8 @@ namespace SinglePass.WPF.ViewModels
                     _credentialVMs.Add(draft);
 
                 var stillEditingDraft = ReferenceEquals(DraftCredential, draft);
+                draft.TotpSetupInput = null;
+                draft.RemoveTotp = false;
                 if (stillEditingDraft)
                     DraftCredential = null;
 
@@ -595,6 +612,13 @@ namespace SinglePass.WPF.ViewModels
             {
                 _logger.LogError(ex, string.Empty);
             }
+        }
+
+        [RelayCommand]
+        private void CopyTotp()
+        {
+            if (!IsEditing && TotpService.TryGetCode(SelectedCredentialVM?.Totp, DateTime.UtcNow, out var code, out _))
+                CopyToClipboard(code);
         }
 
         [RelayCommand]

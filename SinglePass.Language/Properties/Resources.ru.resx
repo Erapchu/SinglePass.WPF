@@ -477,4 +477,19 @@
   <data name="YandexDiskCallbackUnavailable" xml:space="preserve">
     <value>Локальный порт {0} недоступен. Укажите свободный порт в Settings:YandexDiskConfig:RedirectUri и зарегистрируйте тот же адрес в Яндекс OAuth.</value>
   </data>
+  <data name="TotpCode" xml:space="preserve">
+    <value>Код двухфакторной аутентификации</value>
+  </data>
+  <data name="CopyTotp" xml:space="preserve">
+    <value>Скопировать код</value>
+  </data>
+  <data name="TotpSetup" xml:space="preserve">
+    <value>Ключ настройки 2FA или ссылка otpauth</value>
+  </data>
+  <data name="RemoveTotp" xml:space="preserve">
+    <value>Удалить настройку 2FA</value>
+  </data>
+  <data name="InvalidTotp" xml:space="preserve">
+    <value>Введите корректный ключ Base32 или поддерживаемую ссылку TOTP.</value>
+  </data>
 </root>

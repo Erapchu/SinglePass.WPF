@@ -45,6 +45,7 @@
     <PackageReference Include="NHotkey.Wpf" Version="4.0.0" />
     <PackageReference Include="NLog" Version="6.2.2" />
     <PackageReference Include="NLog.Extensions.Logging" Version="6.3.0" />
+    <PackageReference Include="Otp.NET" Version="1.4.1" />
     <PackageReference Include="Unidecode.NET" Version="2.2.1" />
   </ItemGroup>
 

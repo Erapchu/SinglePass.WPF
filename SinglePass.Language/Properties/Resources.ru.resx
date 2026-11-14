@@ -573,4 +573,10 @@
   <data name="ToggleSwitchOff" xml:space="preserve">
     <value>Выкл.</value>
   </data>
+  <data name="ReplaceTotp" xml:space="preserve">
+    <value>Заменить</value>
+  </data>
+  <data name="TotpRemovalPending" xml:space="preserve">
+    <value>Настройка 2FA будет удалена при сохранении.</value>
+  </data>
 </root>

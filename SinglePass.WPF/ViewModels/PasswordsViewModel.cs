@@ -507,8 +507,9 @@ namespace SinglePass.WPF.ViewModels
             var totp = originalTotp;
             if (draft.RemoveTotp)
                 totp = null;
-            else if (!string.IsNullOrWhiteSpace(draft.TotpSetupInput) &&
-                     !TotpService.TryParse(draft.TotpSetupInput, out totp))
+            else if (draft.ShowTotpSetup &&
+                     (draft.ReplaceTotp || !string.IsNullOrWhiteSpace(draft.TotpSetupInput)) &&
+                     !TotpService.TryParse(draft.TotpSetupInput ?? string.Empty, out totp))
             {
                 draft.HasInvalidTotp = true;
                 return;
@@ -542,6 +543,7 @@ namespace SinglePass.WPF.ViewModels
                 var stillEditingDraft = ReferenceEquals(DraftCredential, draft);
                 draft.TotpSetupInput = null;
                 draft.RemoveTotp = false;
+                draft.ReplaceTotp = false;
                 if (stillEditingDraft)
                     DraftCredential = null;
 
@@ -617,7 +619,10 @@ namespace SinglePass.WPF.ViewModels
         [RelayCommand]
         private void CopyTotp()
         {
-            if (!IsEditing && TotpService.TryGetCode(SelectedCredentialVM?.Totp, DateTime.UtcNow, out var code, out _))
+            var configuration = IsEditing
+                ? DraftCredential is { ShowCurrentTotp: true } draft ? draft.Totp : null
+                : SelectedCredentialVM?.Totp;
+            if (TotpService.TryGetCode(configuration, DateTime.UtcNow, out var code, out _))
                 CopyToClipboard(code);
         }
 

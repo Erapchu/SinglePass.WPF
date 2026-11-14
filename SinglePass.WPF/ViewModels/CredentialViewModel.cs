@@ -36,7 +36,20 @@ namespace SinglePass.WPF.ViewModels
         public partial string TotpSetupInput { get; set; }
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ShowCurrentTotp))]
+        [NotifyPropertyChangedFor(nameof(ShowTotpSetup))]
+        [NotifyPropertyChangedFor(nameof(IsChangingTotp))]
         public partial bool RemoveTotp { get; set; }
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ShowCurrentTotp))]
+        [NotifyPropertyChangedFor(nameof(ShowTotpSetup))]
+        [NotifyPropertyChangedFor(nameof(IsChangingTotp))]
+        public partial bool ReplaceTotp { get; set; }
+
+        public bool ShowCurrentTotp => Totp != null && !RemoveTotp && !ReplaceTotp;
+        public bool ShowTotpSetup => !RemoveTotp && (Totp == null || ReplaceTotp);
+        public bool IsChangingTotp => RemoveTotp || ReplaceTotp;
 
         [ObservableProperty]
         public partial bool HasInvalidTotp { get; set; }

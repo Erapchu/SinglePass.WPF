@@ -35,25 +35,62 @@ namespace SinglePass.WPF.Views.Controls
             _totpTimer.Stop();
             TotpCode.Text = string.Empty;
             TotpProgressArc.Data = null;
+            EditTotpCode.Text = string.Empty;
+            EditTotpProgressArc.Data = null;
         }
 
         private void RefreshTotp()
         {
-            if (TotpCode == null || TotpProgressArc == null || CopyTotpButton == null)
+            if (TotpProgressArc == null || EditTotpProgressArc == null)
                 return;
 
-            var configuration = TotpDisplay.IsLoaded && TotpDisplay.IsVisible ? TotpDisplay.DataContext as TotpConfiguration : null;
+            var viewing = UpdateTotpDisplay(TotpDisplay, TotpCode, TotpCountdown, TotpProgressArc, CopyTotpButton);
+            var editing = UpdateTotpDisplay(EditTotpDisplay, EditTotpCode, EditTotpCountdown, EditTotpProgressArc, EditCopyTotpButton);
+            _totpTimer.IsEnabled = viewing || editing;
+        }
+
+        private static bool UpdateTotpDisplay(StackPanel display, TextBlock codeText, Grid countdown,
+            System.Windows.Shapes.Path arc, Button copyButton)
+        {
+            var configuration = display.IsLoaded && display.IsVisible ? display.DataContext as TotpConfiguration : null;
             var now = DateTime.UtcNow;
             var valid = TotpService.TryGetCode(configuration, now, out var code, out var seconds);
-            TotpCode.Text = valid ? code.Insert(code.Length / 2, " ") : string.Empty;
-            TotpCountdown.Visibility = valid ? Visibility.Visible : Visibility.Collapsed;
-            TotpProgressArc.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty,
+            codeText.Text = valid ? code.Insert(code.Length / 2, " ") : string.Empty;
+            countdown.Visibility = valid ? Visibility.Visible : Visibility.Collapsed;
+            arc.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty,
                 valid && seconds <= 5 ? "SystemFillColorCriticalBrush" : "AccentFillColorDefaultBrush");
-            TotpProgressArc.Data = valid
+            arc.Data = valid
                 ? CreateProgressArc((seconds - now.Millisecond / 1000.0) / configuration.PeriodSeconds)
                 : null;
-            CopyTotpButton.IsEnabled = valid;
-            _totpTimer.IsEnabled = valid;
+            copyButton.IsEnabled = valid;
+            return valid;
+        }
+
+        private void ReplaceTotp_Click(object sender, RoutedEventArgs e)
+        {
+            if (TotpSetupBox.DataContext is CredentialViewModel draft)
+            {
+                draft.ReplaceTotp = true;
+                TotpSetupBox.Focus();
+            }
+        }
+
+        private void RemoveTotp_Click(object sender, RoutedEventArgs e)
+        {
+            if (TotpSetupBox.DataContext is CredentialViewModel draft)
+                draft.RemoveTotp = true;
+        }
+
+        private void CancelTotpChange_Click(object sender, RoutedEventArgs e)
+        {
+            if (TotpSetupBox.DataContext is CredentialViewModel draft)
+            {
+                draft.ReplaceTotp = false;
+                draft.RemoveTotp = false;
+                draft.HasInvalidTotp = false;
+                TotpSetupBox.Clear();
+                TotpQrStatus.Text = string.Empty;
+            }
         }
 
         private static Geometry CreateProgressArc(double fraction)

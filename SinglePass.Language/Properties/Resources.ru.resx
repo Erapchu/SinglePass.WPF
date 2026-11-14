@@ -537,4 +537,28 @@
   <data name="SaveSecuritySettingsFailed" xml:space="preserve">
     <value>Не удалось сохранить настройки безопасности.</value>
   </data>
+  <data name="GroupIconInternet" xml:space="preserve">
+    <value>Интернет</value>
+  </data>
+  <data name="GroupIconBooks" xml:space="preserve">
+    <value>Книги</value>
+  </data>
+  <data name="GroupIconGames" xml:space="preserve">
+    <value>Игры</value>
+  </data>
+  <data name="GroupIconMusic" xml:space="preserve">
+    <value>Музыка</value>
+  </data>
+  <data name="GroupIconMessages" xml:space="preserve">
+    <value>Сообщения</value>
+  </data>
+  <data name="GroupIconContacts" xml:space="preserve">
+    <value>Контакты</value>
+  </data>
+  <data name="GroupIconIdeas" xml:space="preserve">
+    <value>Идеи</value>
+  </data>
+  <data name="GroupIconEducation" xml:space="preserve">
+    <value>Образование</value>
+  </data>
 </root>

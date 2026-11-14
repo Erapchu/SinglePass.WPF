@@ -517,4 +517,28 @@
   <data name="SaveSecuritySettingsFailed" xml:space="preserve">
     <value>Could not save the security settings.</value>
   </data>
+  <data name="GroupIconInternet" xml:space="preserve">
+    <value>Internet</value>
+  </data>
+  <data name="GroupIconBooks" xml:space="preserve">
+    <value>Books</value>
+  </data>
+  <data name="GroupIconGames" xml:space="preserve">
+    <value>Games</value>
+  </data>
+  <data name="GroupIconMusic" xml:space="preserve">
+    <value>Music</value>
+  </data>
+  <data name="GroupIconMessages" xml:space="preserve">
+    <value>Messages</value>
+  </data>
+  <data name="GroupIconContacts" xml:space="preserve">
+    <value>Contacts</value>
+  </data>
+  <data name="GroupIconIdeas" xml:space="preserve">
+    <value>Ideas</value>
+  </data>
+  <data name="GroupIconEducation" xml:space="preserve">
+    <value>Education</value>
+  </data>
 </root>

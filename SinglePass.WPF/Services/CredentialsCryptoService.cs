@@ -343,20 +343,28 @@ namespace SinglePass.WPF.Services
         private void WriteVault(PasswordVault vault, string password)
         {
             var path = Constants.PasswordsFilePath;
-            var tempPath = path + ".tmp";
+            var tempPath = $"{path}.{Guid.NewGuid():N}.tmp";
+            var tempFileCreated = false;
             try
             {
-                using (var stream = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                using (var stream = new FileStream(tempPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
                 {
+                    tempFileCreated = true;
                     _cryptoService.EncryptToStream(vault, stream, password);
                     stream.Flush(flushToDisk: true);
                 }
 
-                File.Move(tempPath, path, overwrite: true);
+                if (File.Exists(path))
+                    File.Replace(tempPath, path, destinationBackupFileName: null, ignoreMetadataErrors: false);
+                else
+                    File.Move(tempPath, path);
             }
             catch
             {
-                try { File.Delete(tempPath); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                if (tempFileCreated)
+                {
+                    try { File.Delete(tempPath); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                }
                 throw;
             }
         }

@@ -504,4 +504,34 @@
   <data name="TotpQrImported" xml:space="preserve">
     <value>QR-код прочитан. Сохраните запись, чтобы применить настройку.</value>
   </data>
+  <data name="Security" xml:space="preserve">
+    <value>Безопасность</value>
+  </data>
+  <data name="LockAfterInactivity" xml:space="preserve">
+    <value>Блокировать при бездействии</value>
+  </data>
+  <data name="LockOnWindowsLock" xml:space="preserve">
+    <value>Блокировать SinglePass при блокировке Windows</value>
+  </data>
+  <data name="IdleLockFiveMinutes" xml:space="preserve">
+    <value>5 минут</value>
+  </data>
+  <data name="IdleLockTenMinutes" xml:space="preserve">
+    <value>10 минут</value>
+  </data>
+  <data name="IdleLockFifteenMinutes" xml:space="preserve">
+    <value>15 минут</value>
+  </data>
+  <data name="IdleLockThirtyMinutes" xml:space="preserve">
+    <value>30 минут</value>
+  </data>
+  <data name="IdleLockOneHour" xml:space="preserve">
+    <value>1 час</value>
+  </data>
+  <data name="IdleLockTwoHours" xml:space="preserve">
+    <value>2 часа</value>
+  </data>
+  <data name="SaveSecuritySettingsFailed" xml:space="preserve">
+    <value>Не удалось сохранить настройки безопасности.</value>
+  </data>
 </root>

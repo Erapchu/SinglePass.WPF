@@ -155,7 +155,7 @@ namespace SinglePass.WPF
 
             var hiw = new HiddenInterprocessWindow(ShowVault);
             var traySource = hiw.InitWithoutShowing();
-            var autoLock = new VaultAutoLock(traySource, LockVault);
+            var autoLock = new VaultAutoLock(traySource, settings, LockVault);
             hiw.Closing += (_, _) => autoLock.Dispose();
 
             async void OnLoginContentRendered(object sender, EventArgs args)

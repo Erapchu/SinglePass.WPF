@@ -1,3 +1,4 @@
+using SinglePass.WPF.Settings;
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -10,17 +11,17 @@ namespace SinglePass.WPF.Helpers
     {
         private const int SessionChange = 0x02B1;
         private const int SessionLock = 0x7;
-        private static readonly TimeSpan IdleTimeout = TimeSpan.FromMinutes(5);
-
         private readonly HwndSource _source;
+        private readonly AppSettings _settings;
         private readonly Action _lockVault;
         private readonly DispatcherTimer _timer;
         private readonly bool _registered;
         private bool _idle;
 
-        internal VaultAutoLock(HwndSource source, Action lockVault)
+        internal VaultAutoLock(HwndSource source, AppSettings settings, Action lockVault)
         {
             _source = source;
+            _settings = settings;
             _lockVault = lockVault;
             source.AddHook(WindowProc);
             _registered = WTSRegisterSessionNotification(source.Handle, 0);
@@ -38,7 +39,8 @@ namespace SinglePass.WPF.Helpers
             if (!GetLastInputInfo(ref input))
                 return;
 
-            var idle = unchecked((uint)Environment.TickCount - input.Tick) >= IdleTimeout.TotalMilliseconds;
+            var timeout = TimeSpan.FromMinutes((int)_settings.IdleLockTimeout);
+            var idle = unchecked((uint)Environment.TickCount - input.Tick) >= timeout.TotalMilliseconds;
             var expired = idle && !_idle;
             _idle = idle;
             if (expired)
@@ -47,7 +49,7 @@ namespace SinglePass.WPF.Helpers
 
         private IntPtr WindowProc(IntPtr hwnd, int message, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
-            if (message == SessionChange && wParam.ToInt64() == SessionLock)
+            if (message == SessionChange && wParam.ToInt64() == SessionLock && _settings.LockOnWindowsLock)
                 _source.Dispatcher.InvokeAsync(_lockVault, DispatcherPriority.Send);
 
             return IntPtr.Zero;

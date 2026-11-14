@@ -9,6 +9,7 @@ namespace SinglePass.WPF.Views.Controls
     public partial class SettingsControl : UserControl
     {
         public static RoutedCommand OpenCloudSyncCommand { get; } = new();
+        public static RoutedCommand OpenSecurityCommand { get; } = new();
 
         public SettingsControl()
         {

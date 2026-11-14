@@ -4,6 +4,16 @@ namespace SinglePass.WPF.Settings
 {
     public class AppSettings : IAppSettings
     {
+        private IdleLockTimeout _idleLockTimeout = IdleLockTimeout.FiveMinutes;
+
+        public IdleLockTimeout IdleLockTimeout
+        {
+            get => _idleLockTimeout;
+            set => _idleLockTimeout = System.Enum.IsDefined(value) ? value : IdleLockTimeout.FiveMinutes;
+        }
+
+        public bool LockOnWindowsLock { get; set; } = true;
+
         public AppTheme ThemeMode { get; set; }
         public string Language { get; set; } = "system";
         public bool GoogleDriveEnabled { get; set; }

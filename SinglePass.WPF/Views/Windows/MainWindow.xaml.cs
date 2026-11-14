@@ -9,6 +9,7 @@ using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -24,6 +25,8 @@ namespace SinglePass.WPF.Views.Windows
         private readonly AppSettingsService _appSettingsService;
         private readonly DispatcherTimer _statusTimer = new() { Interval = TimeSpan.FromSeconds(3) };
         private CloudSyncControl _cloudSyncControl;
+        private SecurityControl _securityControl;
+        private Button _settingsPageButton;
 
         private MainWindowViewModel ViewModel => DataContext as MainWindowViewModel;
 
@@ -62,8 +65,8 @@ namespace SinglePass.WPF.Views.Windows
             if (e.PropertyName != nameof(MainWindowViewModel.SelectedNavigationItem))
                 return;
 
-            if (CloudSyncBreadcrumb.Visibility == Visibility.Visible)
-                CloseCloudSync();
+            if (_settingsPageButton != null)
+                CloseSettingsPage();
 
             var showSettings = ViewModel.SelectedNavigationItem == ViewModel.SettingsNavigation;
             var pageChanged = showSettings != (SettingsHeader.Visibility == Visibility.Visible);
@@ -152,12 +155,32 @@ namespace SinglePass.WPF.Views.Windows
 
         private void OpenCloudSync_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            if (NavigationContent.Content is not SettingsControl)
+            if (NavigationContent.Content is not SettingsControl settings)
                 return;
 
             _cloudSyncControl ??= new CloudSyncControl { DataContext = ViewModel.CloudSyncVM };
-            NavigationContent.Content = _cloudSyncControl;
-            CloudSyncBreadcrumb.Visibility = Visibility.Visible;
+            OpenSettingsPage(_cloudSyncControl, settings.CloudSyncButton, "CloudSync");
+        }
+
+        private void OpenSecurity_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (NavigationContent.Content is not SettingsControl settings)
+                return;
+
+            _securityControl ??= new SecurityControl { DataContext = ViewModel.SettingsVM };
+            OpenSettingsPage(_securityControl, settings.SecurityButton, "Security");
+        }
+
+        private void OpenSettingsPage(UserControl page, Button sourceButton, string titleKey)
+        {
+            _settingsPageButton = sourceButton;
+            NavigationContent.Content = page;
+            SettingsPageTitle.SetBinding(TextBlock.TextProperty, new Binding($"[{titleKey}]")
+            {
+                Source = LocalizationManager.Instance,
+                Mode = BindingMode.OneWay
+            });
+            SettingsPageBreadcrumb.Visibility = Visibility.Visible;
             AnimateSettingsPage(64);
             Dispatcher.InvokeAsync(() => SettingsBreadcrumbButton.Focus(), DispatcherPriority.Loaded);
         }
@@ -166,7 +189,7 @@ namespace SinglePass.WPF.Views.Windows
         {
             base.OnPreviewMouseDown(e);
 
-            if (e.ChangedButton == MouseButton.XButton1 && NavigationContent.Content is CloudSyncControl)
+            if (e.ChangedButton == MouseButton.XButton1 && _settingsPageButton != null)
             {
                 e.Handled = true;
                 ReturnToSettings();
@@ -177,18 +200,21 @@ namespace SinglePass.WPF.Views.Windows
 
         private void ReturnToSettings()
         {
-            CloseCloudSync();
-            AnimateSettingsPage(-64);
+            var sourceButton = _settingsPageButton;
+            if (sourceButton == null)
+                return;
 
-            if (NavigationContent.Content is SettingsControl settings)
-                Dispatcher.InvokeAsync(() => settings.CloudSyncButton.Focus(), DispatcherPriority.Loaded);
+            CloseSettingsPage();
+            AnimateSettingsPage(-64);
+            Dispatcher.InvokeAsync(() => sourceButton.Focus(), DispatcherPriority.Loaded);
         }
 
-        private void CloseCloudSync()
+        private void CloseSettingsPage()
         {
             // Clearing the local value restores the binding to the selected sidebar item.
             NavigationContent.ClearValue(ContentControl.ContentProperty);
-            CloudSyncBreadcrumb.Visibility = Visibility.Collapsed;
+            SettingsPageBreadcrumb.Visibility = Visibility.Collapsed;
+            _settingsPageButton = null;
         }
 
         private void AnimateSettingsPage(double horizontalOffset)

@@ -493,6 +493,9 @@
   <data name="LockOnWindowsLock" xml:space="preserve">
     <value>Lock SinglePass when Windows is locked</value>
   </data>
+  <data name="IdleLockDisabled" xml:space="preserve">
+    <value>Off</value>
+  </data>
   <data name="IdleLockFiveMinutes" xml:space="preserve">
     <value>5 minutes</value>
   </data>

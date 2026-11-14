@@ -513,6 +513,9 @@
   <data name="LockOnWindowsLock" xml:space="preserve">
     <value>Блокировать SinglePass при блокировке Windows</value>
   </data>
+  <data name="IdleLockDisabled" xml:space="preserve">
+    <value>Выключено</value>
+  </data>
   <data name="IdleLockFiveMinutes" xml:space="preserve">
     <value>5 минут</value>
   </data>

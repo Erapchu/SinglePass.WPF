@@ -2,6 +2,7 @@ namespace SinglePass.WPF.Settings
 {
     public enum IdleLockTimeout
     {
+        Disabled = 0,
         FiveMinutes = 5,
         TenMinutes = 10,
         FifteenMinutes = 15,

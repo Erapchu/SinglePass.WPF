@@ -35,11 +35,18 @@ namespace SinglePass.WPF.Helpers
 
         private void CheckIdle(object sender, EventArgs e)
         {
+            var idleLockTimeout = _settings.IdleLockTimeout;
+            if (idleLockTimeout == IdleLockTimeout.Disabled)
+            {
+                _idle = false;
+                return;
+            }
+
             var input = new LastInputInfo { Size = (uint)Marshal.SizeOf<LastInputInfo>() };
             if (!GetLastInputInfo(ref input))
                 return;
 
-            var timeout = TimeSpan.FromMinutes((int)_settings.IdleLockTimeout);
+            var timeout = TimeSpan.FromMinutes((int)idleLockTimeout);
             var idle = unchecked((uint)Environment.TickCount - input.Tick) >= timeout.TotalMilliseconds;
             var expired = idle && !_idle;
             _idle = idle;

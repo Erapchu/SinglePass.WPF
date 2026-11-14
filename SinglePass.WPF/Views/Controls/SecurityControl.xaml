@@ -21,6 +21,7 @@
                 <DockPanel>
                     <ComboBox x:Name="IdleLockSelector" DockPanel.Dock="Right" MinWidth="164" Margin="12,0,0,0"
                               VerticalAlignment="Center" SelectedValue="{Binding IdleLockTimeout, Mode=TwoWay}" SelectedValuePath="Tag">
+                        <ComboBoxItem Content="{Binding [IdleLockDisabled], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Tag="{x:Static settings:IdleLockTimeout.Disabled}" />
                         <ComboBoxItem Content="{Binding [IdleLockFiveMinutes], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Tag="{x:Static settings:IdleLockTimeout.FiveMinutes}" />
                         <ComboBoxItem Content="{Binding [IdleLockTenMinutes], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Tag="{x:Static settings:IdleLockTimeout.TenMinutes}" />
                         <ComboBoxItem Content="{Binding [IdleLockFifteenMinutes], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Tag="{x:Static settings:IdleLockTimeout.FifteenMinutes}" />

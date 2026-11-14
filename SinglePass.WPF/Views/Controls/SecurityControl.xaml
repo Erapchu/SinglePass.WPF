@@ -2,6 +2,7 @@
     x:Class="SinglePass.WPF.Views.Controls.SecurityControl"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:SinglePass.WPF.Controls"
     xmlns:loc="clr-namespace:SinglePass.WPF.Localization"
     xmlns:settings="clr-namespace:SinglePass.WPF.Settings">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -32,8 +33,17 @@
                 </DockPanel>
             </Border>
             <Border Style="{StaticResource Card}">
-                <CheckBox IsChecked="{Binding LockOnWindowsLock, Mode=TwoWay}"
-                          Content="{Binding [LockOnWindowsLock], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
+                <DockPanel>
+                    <controls:ToggleSwitch x:Name="WindowsLockToggle" DockPanel.Dock="Right" Margin="12,0,0,0"
+                                  VerticalAlignment="Center"
+                                  AutomationProperties.LabeledBy="{Binding ElementName=WindowsLockLabel}"
+                                  IsChecked="{Binding LockOnWindowsLock, Mode=TwoWay}" />
+                    <Label x:Name="WindowsLockLabel" Padding="0" VerticalAlignment="Center" FontWeight="SemiBold"
+                           Target="{Binding ElementName=WindowsLockToggle}">
+                        <TextBlock TextWrapping="Wrap"
+                                   Text="{Binding [LockOnWindowsLock], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
+                    </Label>
+                </DockPanel>
             </Border>
         </StackPanel>
     </ScrollViewer>

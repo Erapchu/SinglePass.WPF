@@ -6,7 +6,6 @@ using SinglePass.WPF.Cloud.Enums;
 using SinglePass.WPF.Clouds.Services;
 using SinglePass.WPF.Localization;
 using SinglePass.WPF.Services;
-using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels.Dialogs;
 using SinglePass.WPF.Views.Helpers;
 using SinglePass.WPF.Views.Windows;
@@ -31,7 +30,6 @@ namespace SinglePass.WPF.ViewModels
         }
         #endregion
 
-        private readonly AppSettingsService _appSettingsService;
         private readonly CloudServiceProvider _cloudServiceProvider;
         private readonly ILogger<CloudSyncViewModel> _logger;
         private readonly ImageService _imageService;
@@ -55,19 +53,16 @@ namespace SinglePass.WPF.ViewModels
         private CloudSyncViewModel() { }
 
         public CloudSyncViewModel(
-            AppSettingsService appSettingsService,
             CloudServiceProvider cloudServiceProvider,
             ImageService imageService,
             SyncService syncService,
             ILogger<CloudSyncViewModel> logger,
             YandexOAuthProvider yandexOAuthProvider)
         {
-            _appSettingsService = appSettingsService;
             _cloudServiceProvider = cloudServiceProvider;
             _imageService = imageService;
             _syncService = syncService;
             _logger = logger;
-            GoogleDrive.IsConnected = _appSettingsService.GoogleDriveEnabled;
             YandexDisk = new CloudAccount(CloudType.YandexDisk) { CanSignIn = yandexOAuthProvider.IsConfigured };
         }
 
@@ -87,7 +82,7 @@ namespace SinglePass.WPF.ViewModels
                         var oauthInfo = await cloudService.OAuthProvider.AuthorizeAsync(cancellationToken);
                         _logger.LogInformation($"Authorization process to {cloudType} has been complete.");
                         await cloudService.TokenHolder.SetAndSaveToken(oauthInfo, cancellationToken);
-                        await SetConnectedAsync(account, true);
+                        account.IsConnected = true;
                     });
                 await FetchUserInfoFromCloud(account);
             }
@@ -115,9 +110,10 @@ namespace SinglePass.WPF.ViewModels
         private async Task Logout(CloudType cloudType)
         {
             var account = GetAccount(cloudType);
-            if (account.FetchingUserInfo || TransferInProgress)
+            if (!account.IsConnected || account.SigningOut || TransferInProgress)
                 return;
 
+            account.SigningOut = true;
             try
             {
                 // Revoke
@@ -127,12 +123,17 @@ namespace SinglePass.WPF.ViewModels
                     SinglePass.Language.Properties.Resources.PleaseWait,
                     async cancellationToken =>
                     {
+                        account.ProfileCancellation?.Cancel();
+                        // Let any in-flight token refresh settle before revoking the current token.
+                        await account.ProfileRequest;
+                        cancellationToken.ThrowIfCancellationRequested();
                         var oauthInfo = cloudService.TokenHolder.OAuthInfo;
                         await cloudService.OAuthProvider.RevokeTokenAsync(oauthInfo, cancellationToken);
                         await cloudService.TokenHolder.RemoveToken();
                         account.ProfileImage = null;
                         account.UserName = null;
-                        await SetConnectedAsync(account, false);
+                        account.ProfileLoaded = false;
+                        account.IsConnected = false;
                     });
             }
             catch (OperationCanceledException)
@@ -144,15 +145,9 @@ namespace SinglePass.WPF.ViewModels
                 _logger.LogError(ex, string.Empty);
                 ShowAccountError("CloudSignOutFailed");
             }
-        }
-
-        private async Task SetConnectedAsync(CloudAccount account, bool connected)
-        {
-            account.IsConnected = connected;
-            if (account.Type == CloudType.GoogleDrive)
+            finally
             {
-                _appSettingsService.GoogleDriveEnabled = connected;
-                await _appSettingsService.Save();
+                account.SigningOut = false;
             }
         }
 
@@ -160,19 +155,36 @@ namespace SinglePass.WPF.ViewModels
             SinglePass.Language.Properties.Resources.Error, LocalizationManager.Instance[messageKey],
             MessageDialogButtons.OK, "\uEA39");
 
-        private async Task FetchUserInfoFromCloud(CloudAccount account)
+        private Task FetchUserInfoFromCloud(CloudAccount account)
         {
-            if (!account.IsConnected || account.FetchingUserInfo || !string.IsNullOrEmpty(account.UserName))
-                return;
+            if (!account.IsConnected || account.SigningOut || account.FetchingUserInfo || account.ProfileLoaded)
+                return Task.CompletedTask;
 
+            return account.ProfileRequest = LoadProfileAsync(account);
+        }
+
+        private async Task LoadProfileAsync(CloudAccount account)
+        {
+            using var cancellation = new CancellationTokenSource();
+            account.ProfileCancellation = cancellation;
+            var token = cancellation.Token;
             try
             {
                 account.FetchingUserInfo = true;
                 var cloudService = _cloudServiceProvider.GetCloudService(account.Type);
-                var userInfo = await cloudService.GetUserInfo(CancellationToken.None);
+                var userInfo = await cloudService.GetUserInfo(token);
+                token.ThrowIfCancellationRequested();
                 account.UserName = userInfo.UserName;
                 if (!string.IsNullOrEmpty(userInfo.ProfileUrl))
-                    account.ProfileImage = await _imageService.GetImageAsync(userInfo.ProfileUrl, CancellationToken.None);
+                {
+                    var image = await _imageService.GetProfileImageAsync(userInfo.ProfileUrl, token);
+                    token.ThrowIfCancellationRequested();
+                    account.ProfileImage = image;
+                }
+                account.ProfileLoaded = true;
+            }
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
+            {
             }
             catch (Exception ex)
             {
@@ -180,6 +192,7 @@ namespace SinglePass.WPF.ViewModels
             }
             finally
             {
+                account.ProfileCancellation = null;
                 account.FetchingUserInfo = false;
             }
         }
@@ -187,10 +200,10 @@ namespace SinglePass.WPF.ViewModels
         [RelayCommand]
         private async Task SyncCredentials(CloudType cloudType)
         {
-            if (TransferInProgress)
+            var account = GetAccount(cloudType);
+            if (!account.IsConnected || account.SigningOut || TransferInProgress)
                 return;
 
-            var account = GetAccount(cloudType);
             try
             {
                 TransferInProgress = account.Transferring = true;
@@ -223,10 +236,10 @@ namespace SinglePass.WPF.ViewModels
         [RelayCommand]
         private async Task UploadCredentials(CloudType cloudType)
         {
-            if (TransferInProgress)
+            var account = GetAccount(cloudType);
+            if (!account.IsConnected || account.SigningOut || TransferInProgress)
                 return;
 
-            var account = GetAccount(cloudType);
             try
             {
                 TransferInProgress = account.Transferring = true;
@@ -267,6 +280,10 @@ namespace SinglePass.WPF.ViewModels
         [RelayCommand]
         private Task Loading()
         {
+            var googleToken = _cloudServiceProvider.GetCloudService(CloudType.GoogleDrive).TokenHolder.OAuthInfo;
+            GoogleDrive.IsConnected = !string.IsNullOrEmpty(googleToken.AccessToken)
+                || !string.IsNullOrEmpty(googleToken.RefreshToken);
+
             var yandexToken = _cloudServiceProvider.GetCloudService(CloudType.YandexDisk).TokenHolder.OAuthInfo;
             YandexDisk.IsConnected = !string.IsNullOrEmpty(yandexToken.AccessToken);
             return Task.WhenAll(FetchUserInfoFromCloud(GoogleDrive), FetchUserInfoFromCloud(YandexDisk));
@@ -277,6 +294,10 @@ namespace SinglePass.WPF.ViewModels
     {
         public CloudType Type { get; } = type;
         public bool CanSignIn { get; init; } = true;
+        internal bool ProfileLoaded { get; set; }
+        internal bool SigningOut { get; set; }
+        internal CancellationTokenSource ProfileCancellation { get; set; }
+        internal Task ProfileRequest { get; set; } = Task.CompletedTask;
 
         [ObservableProperty]
         public partial bool IsConnected { get; set; }

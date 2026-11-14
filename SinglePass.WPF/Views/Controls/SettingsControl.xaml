@@ -54,17 +54,27 @@
                            Content="{Binding [Language], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Target="{Binding ElementName=LanguageSelector}" />
                 </DockPanel>
             </Border>
-            <Border Margin="0,0,0,8" Style="{StaticResource Card}">
+            <Button
+                x:Name="SecurityButton"
+                MinHeight="64"
+                Margin="0,0,0,8"
+                Padding="16,10"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Center"
+                AutomationProperties.Name="{Binding [Security], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                Command="{x:Static controls:SettingsControl.OpenSecurityCommand}">
                 <DockPanel>
-                    <Path Style="{StaticResource SettingsCardIcon}"
-                          Data="M 4,10 H 20 V 22 H 4 Z M 7,10 V 7 A 5,5 0 0 1 17,7 V 10 M 12,14 V 18" />
-                    <Button x:Name="ChangePasswordButton" DockPanel.Dock="Right" Margin="12,0,0,0" VerticalAlignment="Center"
-                            Command="{Binding ChangePasswordCommand}"
-                            Content="{Binding [Change], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
-                    <Label Padding="0" VerticalAlignment="Center" FontWeight="SemiBold"
-                           Content="{Binding [ChangePassword], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Target="{Binding ElementName=ChangePasswordButton}" />
+                    <TextBlock DockPanel.Dock="Left" Width="20" Margin="0,0,16,0"
+                               FontSize="20" Style="{StaticResource SymbolText}" Text="&#xE72E;" />
+                    <TextBlock DockPanel.Dock="Right" Margin="12,0,0,0"
+                               FontSize="12" Style="{StaticResource SymbolText}" Text="&#xE76C;" />
+                    <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" TextWrapping="Wrap"
+                               Text="{Binding [Security], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
                 </DockPanel>
-            </Border>
+            </Button>
             <Button
                 x:Name="CloudSyncButton"
                 MinHeight="64"

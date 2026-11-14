@@ -84,7 +84,7 @@ namespace SinglePass.WPF
             services.AddHttpClient(nameof(OAuthProvider)).RemoveAllLoggers();
             services.AddTransient<GoogleOAuthProvider>();
             services.AddSingleton<GoogleDriveTokenHolder>();
-            services.AddTransient<GoogleDriveCloudService>();
+            services.AddSingleton<GoogleDriveCloudService>();
 
             services.Configure<YandexDiskConfig>(configuration.GetSection("Settings:YandexDiskConfig"));
             services.AddHttpClient(YandexDiskCloudService.HttpClientName).RemoveAllLoggers();
@@ -155,7 +155,7 @@ namespace SinglePass.WPF
 
             var hiw = new HiddenInterprocessWindow(ShowVault);
             var traySource = hiw.InitWithoutShowing();
-            var autoLock = new VaultAutoLock(traySource, LockVault);
+            var autoLock = new VaultAutoLock(traySource, settings, LockVault);
             hiw.Closing += (_, _) => autoLock.Dispose();
 
             async void OnLoginContentRendered(object sender, EventArgs args)

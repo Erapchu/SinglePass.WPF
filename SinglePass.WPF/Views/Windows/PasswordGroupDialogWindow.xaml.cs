@@ -30,7 +30,17 @@ namespace SinglePass.WPF.Views.Windows
                 new("\uE968", loc["GroupIconServers"]),
                 new("\uE8C7", loc["GroupIconFinance"]),
                 new("\uE7BF", loc["GroupIconShopping"]),
-                new("\uE806", loc["GroupIconTravel"])
+                new("\uE806", loc["GroupIconTravel"]),
+                new("\uE774", loc["GroupIconInternet"]),
+                new("\uE8D4", loc["GroupIconBooks"]),
+                new("\uE7FC", loc["GroupIconGames"]),
+                new("\uE8D6", loc["GroupIconMusic"]),
+                new("\uE8BD", loc["GroupIconMessages"]),
+                new("\uE771", loc["GroupIconContacts"]),
+                new("\uE790", loc["GroupIconIdeas"]),
+                new("\uEB05", loc["GroupIconEducation"]),
+                new("\uEB51", loc["GroupIconHealth"]),
+                new("\uEB9F", loc["GroupIconPhotos"])
             };
             IconList.ItemsSource = icons;
             var iconIndex = Array.FindIndex(icons, icon => icon.Glyph == group?.Icon);

@@ -504,4 +504,73 @@
   <data name="TotpQrImported" xml:space="preserve">
     <value>QR-код прочитан. Сохраните запись, чтобы применить настройку.</value>
   </data>
+  <data name="Security" xml:space="preserve">
+    <value>Безопасность</value>
+  </data>
+  <data name="LockAfterInactivity" xml:space="preserve">
+    <value>Блокировать при бездействии</value>
+  </data>
+  <data name="LockOnWindowsLock" xml:space="preserve">
+    <value>Блокировать SinglePass при блокировке Windows</value>
+  </data>
+  <data name="IdleLockDisabled" xml:space="preserve">
+    <value>Выключено</value>
+  </data>
+  <data name="IdleLockFiveMinutes" xml:space="preserve">
+    <value>5 минут</value>
+  </data>
+  <data name="IdleLockTenMinutes" xml:space="preserve">
+    <value>10 минут</value>
+  </data>
+  <data name="IdleLockFifteenMinutes" xml:space="preserve">
+    <value>15 минут</value>
+  </data>
+  <data name="IdleLockThirtyMinutes" xml:space="preserve">
+    <value>30 минут</value>
+  </data>
+  <data name="IdleLockOneHour" xml:space="preserve">
+    <value>1 час</value>
+  </data>
+  <data name="IdleLockTwoHours" xml:space="preserve">
+    <value>2 часа</value>
+  </data>
+  <data name="SaveSecuritySettingsFailed" xml:space="preserve">
+    <value>Не удалось сохранить настройки безопасности.</value>
+  </data>
+  <data name="GroupIconInternet" xml:space="preserve">
+    <value>Интернет</value>
+  </data>
+  <data name="GroupIconBooks" xml:space="preserve">
+    <value>Книги</value>
+  </data>
+  <data name="GroupIconGames" xml:space="preserve">
+    <value>Игры</value>
+  </data>
+  <data name="GroupIconMusic" xml:space="preserve">
+    <value>Музыка</value>
+  </data>
+  <data name="GroupIconMessages" xml:space="preserve">
+    <value>Сообщения</value>
+  </data>
+  <data name="GroupIconContacts" xml:space="preserve">
+    <value>Контакты</value>
+  </data>
+  <data name="GroupIconIdeas" xml:space="preserve">
+    <value>Идеи</value>
+  </data>
+  <data name="GroupIconEducation" xml:space="preserve">
+    <value>Образование</value>
+  </data>
+  <data name="GroupIconHealth" xml:space="preserve">
+    <value>Здоровье</value>
+  </data>
+  <data name="GroupIconPhotos" xml:space="preserve">
+    <value>Фото</value>
+  </data>
+  <data name="ToggleSwitchOn" xml:space="preserve">
+    <value>Вкл.</value>
+  </data>
+  <data name="ToggleSwitchOff" xml:space="preserve">
+    <value>Выкл.</value>
+  </data>
 </root>

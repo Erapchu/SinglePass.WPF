@@ -484,4 +484,73 @@
   <data name="TotpQrImported" xml:space="preserve">
     <value>QR code read. Save the entry to apply it.</value>
   </data>
+  <data name="Security" xml:space="preserve">
+    <value>Security</value>
+  </data>
+  <data name="LockAfterInactivity" xml:space="preserve">
+    <value>Lock after inactivity</value>
+  </data>
+  <data name="LockOnWindowsLock" xml:space="preserve">
+    <value>Lock SinglePass when Windows is locked</value>
+  </data>
+  <data name="IdleLockDisabled" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="IdleLockFiveMinutes" xml:space="preserve">
+    <value>5 minutes</value>
+  </data>
+  <data name="IdleLockTenMinutes" xml:space="preserve">
+    <value>10 minutes</value>
+  </data>
+  <data name="IdleLockFifteenMinutes" xml:space="preserve">
+    <value>15 minutes</value>
+  </data>
+  <data name="IdleLockThirtyMinutes" xml:space="preserve">
+    <value>30 minutes</value>
+  </data>
+  <data name="IdleLockOneHour" xml:space="preserve">
+    <value>1 hour</value>
+  </data>
+  <data name="IdleLockTwoHours" xml:space="preserve">
+    <value>2 hours</value>
+  </data>
+  <data name="SaveSecuritySettingsFailed" xml:space="preserve">
+    <value>Could not save the security settings.</value>
+  </data>
+  <data name="GroupIconInternet" xml:space="preserve">
+    <value>Internet</value>
+  </data>
+  <data name="GroupIconBooks" xml:space="preserve">
+    <value>Books</value>
+  </data>
+  <data name="GroupIconGames" xml:space="preserve">
+    <value>Games</value>
+  </data>
+  <data name="GroupIconMusic" xml:space="preserve">
+    <value>Music</value>
+  </data>
+  <data name="GroupIconMessages" xml:space="preserve">
+    <value>Messages</value>
+  </data>
+  <data name="GroupIconContacts" xml:space="preserve">
+    <value>Contacts</value>
+  </data>
+  <data name="GroupIconIdeas" xml:space="preserve">
+    <value>Ideas</value>
+  </data>
+  <data name="GroupIconEducation" xml:space="preserve">
+    <value>Education</value>
+  </data>
+  <data name="GroupIconHealth" xml:space="preserve">
+    <value>Health</value>
+  </data>
+  <data name="GroupIconPhotos" xml:space="preserve">
+    <value>Photos</value>
+  </data>
+  <data name="ToggleSwitchOn" xml:space="preserve">
+    <value>On</value>
+  </data>
+  <data name="ToggleSwitchOff" xml:space="preserve">
+    <value>Off</value>
+  </data>
 </root>

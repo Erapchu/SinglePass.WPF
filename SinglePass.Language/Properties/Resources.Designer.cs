@@ -77,7 +77,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("AddPasswordGroup", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to All passwords.
         /// </summary>
@@ -86,7 +86,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("AllPasswords", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Ascending.
         /// </summary>
@@ -131,7 +131,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("CancelEdit", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Can&apos;t merge credentials.
         /// </summary>
@@ -187,6 +187,33 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Google Drive and Yandex Disk.
+        /// </summary>
+        public static string CloudProviders {
+            get {
+                return ResourceManager.GetString("CloudProviders", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not sign in to the cloud account..
+        /// </summary>
+        public static string CloudSignInFailed {
+            get {
+                return ResourceManager.GetString("CloudSignInFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not sign out of the cloud account..
+        /// </summary>
+        public static string CloudSignOutFailed {
+            get {
+                return ResourceManager.GetString("CloudSignOutFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cloud sync.
         /// </summary>
         public static string CloudSync {
@@ -210,6 +237,15 @@ namespace SinglePass.Language.Properties {
         public static string CopyPassword {
             get {
                 return ResourceManager.GetString("CopyPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy verification code.
+        /// </summary>
+        public static string CopyTotp {
+            get {
+                return ResourceManager.GetString("CopyTotp", resourceCulture);
             }
         }
         
@@ -302,7 +338,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("DeletePasswordGroup", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Delete “{0}”? Its passwords will be available in All passwords..
         /// </summary>
@@ -311,7 +347,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("DeletePasswordGroupConfirmation", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Descending.
         /// </summary>
@@ -356,7 +392,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("EditPasswordGroup", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Enter.
         /// </summary>
@@ -392,7 +428,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("GroupIcon", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Favorites.
         /// </summary>
@@ -401,7 +437,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("GroupIconFavorites", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Finance.
         /// </summary>
@@ -410,7 +446,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("GroupIconFinance", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Folder.
         /// </summary>
@@ -419,7 +455,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("GroupIconFolder", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Home.
         /// </summary>
@@ -428,7 +464,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("GroupIconHome", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Servers.
         /// </summary>
@@ -437,7 +473,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("GroupIconServers", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Shopping.
         /// </summary>
@@ -446,7 +482,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("GroupIconShopping", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Travel.
         /// </summary>
@@ -455,7 +491,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("GroupIconTravel", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Work.
         /// </summary>
@@ -464,13 +500,76 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("GroupIconWork", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Hotkeys.
         /// </summary>
         public static string Hotkeys {
             get {
                 return ResourceManager.GetString("Hotkeys", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Off.
+        /// </summary>
+        public static string IdleLockDisabled {
+            get {
+                return ResourceManager.GetString("IdleLockDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 15 minutes.
+        /// </summary>
+        public static string IdleLockFifteenMinutes {
+            get {
+                return ResourceManager.GetString("IdleLockFifteenMinutes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 5 minutes.
+        /// </summary>
+        public static string IdleLockFiveMinutes {
+            get {
+                return ResourceManager.GetString("IdleLockFiveMinutes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 1 hour.
+        /// </summary>
+        public static string IdleLockOneHour {
+            get {
+                return ResourceManager.GetString("IdleLockOneHour", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 10 minutes.
+        /// </summary>
+        public static string IdleLockTenMinutes {
+            get {
+                return ResourceManager.GetString("IdleLockTenMinutes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 30 minutes.
+        /// </summary>
+        public static string IdleLockThirtyMinutes {
+            get {
+                return ResourceManager.GetString("IdleLockThirtyMinutes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 2 hours.
+        /// </summary>
+        public static string IdleLockTwoHours {
+            get {
+                return ResourceManager.GetString("IdleLockTwoHours", resourceCulture);
             }
         }
         
@@ -489,6 +588,24 @@ namespace SinglePass.Language.Properties {
         public static string InputPasswordOfFile {
             get {
                 return ResourceManager.GetString("InputPasswordOfFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter a valid Base32 setup key or a supported TOTP link..
+        /// </summary>
+        public static string InvalidTotp {
+            get {
+                return ResourceManager.GetString("InvalidTotp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not read a valid TOTP QR code from the clipboard..
+        /// </summary>
+        public static string InvalidTotpQr {
+            get {
+                return ResourceManager.GetString("InvalidTotpQr", resourceCulture);
             }
         }
         
@@ -516,6 +633,24 @@ namespace SinglePass.Language.Properties {
         public static string Loading {
             get {
                 return ResourceManager.GetString("Loading", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Lock after inactivity.
+        /// </summary>
+        public static string LockAfterInactivity {
+            get {
+                return ResourceManager.GetString("LockAfterInactivity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Lock SinglePass when Windows is locked.
+        /// </summary>
+        public static string LockOnWindowsLock {
+            get {
+                return ResourceManager.GetString("LockOnWindowsLock", resourceCulture);
             }
         }
         
@@ -680,7 +815,16 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("NoPasswordGroup", resourceCulture);
             }
         }
-
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy a screenshot of the QR code to the clipboard first..
+        /// </summary>
+        public static string NoTotpQrImage {
+            get {
+                return ResourceManager.GetString("NoTotpQrImage", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to OK.
         /// </summary>
@@ -752,7 +896,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("PasswordGroupActions", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Group:.
         /// </summary>
@@ -761,7 +905,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("PasswordGroupLabel", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Groups.
         /// </summary>
@@ -770,7 +914,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("PasswordGroups", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Password groups updated..
         /// </summary>
@@ -779,7 +923,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("PasswordGroupsSynchronized", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Password is incorrect.
         /// </summary>
@@ -804,6 +948,15 @@ namespace SinglePass.Language.Properties {
         public static string PasswordTooLong {
             get {
                 return ResourceManager.GetString("PasswordTooLong", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Paste QR code.
+        /// </summary>
+        public static string PasteTotpQr {
+            get {
+                return ResourceManager.GetString("PasteTotpQr", resourceCulture);
             }
         }
         
@@ -844,6 +997,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Remove verification code.
+        /// </summary>
+        public static string RemoveTotp {
+            get {
+                return ResourceManager.GetString("RemoveTotp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Retry.
         /// </summary>
         public static string Retry {
@@ -869,7 +1031,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("SavePasswordGroupsFailed", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Could not save the password vault..
         /// </summary>
@@ -878,13 +1040,31 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("SavePasswordVaultFailed", resourceCulture);
             }
         }
-
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not save the security settings..
+        /// </summary>
+        public static string SaveSecuritySettingsFailed {
+            get {
+                return ResourceManager.GetString("SaveSecuritySettingsFailed", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to Search.
         /// </summary>
         public static string Search {
             get {
                 return ResourceManager.GetString("Search", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Security.
+        /// </summary>
+        public static string Security {
+            get {
+                return ResourceManager.GetString("Security", resourceCulture);
             }
         }
         
@@ -1033,6 +1213,33 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to One-Time Password.
+        /// </summary>
+        public static string TotpCode {
+            get {
+                return ResourceManager.GetString("TotpCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to QR code read. Save the entry to apply it..
+        /// </summary>
+        public static string TotpQrImported {
+            get {
+                return ResourceManager.GetString("TotpQrImported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 2FA setup key or otpauth link.
+        /// </summary>
+        public static string TotpSetup {
+            get {
+                return ResourceManager.GetString("TotpSetup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Upload.
         /// </summary>
         public static string Upload {
@@ -1074,6 +1281,33 @@ namespace SinglePass.Language.Properties {
         public static string Website {
             get {
                 return ResourceManager.GetString("Website", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Yandex Disk.
+        /// </summary>
+        public static string YandexDisk {
+            get {
+                return ResourceManager.GetString("YandexDisk", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Local port {0} is unavailable. Set a free port in Settings:YandexDiskConfig:RedirectUri and register the same address in Yandex OAuth..
+        /// </summary>
+        public static string YandexDiskCallbackUnavailable {
+            get {
+                return ResourceManager.GetString("YandexDiskCallbackUnavailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Configure Yandex OAuth to enable sign-in..
+        /// </summary>
+        public static string YandexDiskOAuthNotConfigured {
+            get {
+                return ResourceManager.GetString("YandexDiskOAuthNotConfigured", resourceCulture);
             }
         }
         

@@ -31,12 +31,6 @@ namespace SinglePass.WPF.Settings
             set => Settings.Language = value;
         }
 
-        public bool GoogleDriveEnabled
-        {
-            get => Settings.GoogleDriveEnabled;
-            set => Settings.GoogleDriveEnabled = value;
-        }
-
         public Hotkey ShowPopupHotkey
         {
             get => Settings.ShowPopupHotkey;

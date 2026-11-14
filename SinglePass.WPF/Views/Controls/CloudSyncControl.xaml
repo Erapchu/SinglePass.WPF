@@ -19,6 +19,29 @@
     <UserControl.Resources>
         <conv:BooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" FalseValue="Visible" TrueValue="Collapsed" />
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <Style x:Key="ProfileSkeleton" TargetType="Shape">
+            <Setter Property="Fill" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+            <Setter Property="Opacity" Value="0.13" />
+            <Style.Triggers>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding IsVisible, RelativeSource={RelativeSource Self}}" Value="True" />
+                        <Condition Binding="{Binding Path=(SystemParameters.ClientAreaAnimation)}" Value="True" />
+                    </MultiDataTrigger.Conditions>
+                    <MultiDataTrigger.EnterActions>
+                        <BeginStoryboard x:Name="ProfilePulse">
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0.10" To="0.23"
+                                                 Duration="0:0:0.75" AutoReverse="True" RepeatBehavior="Forever" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </MultiDataTrigger.EnterActions>
+                    <MultiDataTrigger.ExitActions>
+                        <RemoveStoryboard BeginStoryboardName="ProfilePulse" />
+                    </MultiDataTrigger.ExitActions>
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
         <DataTemplate x:Key="CloudAccountTemplate">
             <Border Margin="8" Style="{StaticResource Card}">
                 <StackPanel>
@@ -62,28 +85,43 @@
                         </TextBlock.Style>
                     </TextBlock>
                     <StackPanel Visibility="{Binding IsConnected, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <TextBlock
-                            Text="{Binding [Loading], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
-                            Visibility="{Binding FetchingUserInfo, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                        <StackPanel
-                            Margin="0,0,0,12"
-                            Orientation="Horizontal"
-                            Visibility="{Binding FetchingUserInfo, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                            <Ellipse Width="36" Height="36">
+                        <Grid Height="36" Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="36" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Ellipse Style="{StaticResource ProfileSkeleton}"
+                                     Visibility="{Binding FetchingUserInfo, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            <Ellipse Visibility="{Binding FetchingUserInfo, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                                 <Ellipse.Fill>
                                     <ImageBrush ImageSource="{Binding ProfileImage}" Stretch="UniformToFill" />
                                 </Ellipse.Fill>
                             </Ellipse>
-                            <TextBlock Margin="8,0,0,0" VerticalAlignment="Center" Text="{Binding UserName}" TextTrimming="CharacterEllipsis" />
-                        </StackPanel>
+                            <Rectangle Grid.Column="1" Width="116" Height="12" RadiusX="4" RadiusY="4"
+                                       Margin="8,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                <Rectangle.Style>
+                                    <Style TargetType="Rectangle" BasedOn="{StaticResource ProfileSkeleton}">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding FetchingUserInfo}" Value="True" />
+                                                    <Condition Binding="{Binding UserName}" Value="{x:Null}" />
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </MultiDataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Rectangle.Style>
+                            </Rectangle>
+                            <TextBlock Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center"
+                                       Text="{Binding UserName}" TextTrimming="CharacterEllipsis" />
+                        </Grid>
                         <WrapPanel>
                             <WrapPanel.Style>
                                 <Style TargetType="WrapPanel">
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding DataContext.TransferInProgress, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
-                                            <Setter Property="IsEnabled" Value="False" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding FetchingUserInfo}" Value="True">
                                             <Setter Property="IsEnabled" Value="False" />
                                         </DataTrigger>
                                     </Style.Triggers>

@@ -41,6 +41,12 @@ namespace SinglePass.WPF.ViewModels
         [ObservableProperty]
         public partial string Language { get; set; } = "system";
 
+        [ObservableProperty]
+        public partial IdleLockTimeout IdleLockTimeout { get; set; } = IdleLockTimeout.FiveMinutes;
+
+        [ObservableProperty]
+        public partial bool LockOnWindowsLock { get; set; } = true;
+
         private SettingsViewModel() { }
 
         public SettingsViewModel(
@@ -52,6 +58,8 @@ namespace SinglePass.WPF.ViewModels
             ThemeMode = appSettingsService.ThemeMode;
             Language = LocalizationManager.Normalize(appSettingsService.Language);
             ShowPopupHotkey = appSettingsService.ShowPopupHotkey;
+            IdleLockTimeout = appSettingsService.Settings.IdleLockTimeout;
+            LockOnWindowsLock = appSettingsService.Settings.LockOnWindowsLock;
 
             _themeService = themeService;
             _appSettingsService = appSettingsService;
@@ -96,5 +104,27 @@ namespace SinglePass.WPF.ViewModels
         partial void OnLanguageChanged(string value) => LocalizationManager.Instance.Apply(value);
 
         partial void OnThemeModeChanged(AppTheme value) => _themeService?.Apply(value);
+
+        partial void OnIdleLockTimeoutChanged(IdleLockTimeout value) => SaveSecuritySettings();
+
+        partial void OnLockOnWindowsLockChanged(bool value) => SaveSecuritySettings();
+
+        private async void SaveSecuritySettings()
+        {
+            if (_appSettingsService is null)
+                return;
+
+            _appSettingsService.Settings.IdleLockTimeout = IdleLockTimeout;
+            _appSettingsService.Settings.LockOnWindowsLock = LockOnWindowsLock;
+            try
+            {
+                await _appSettingsService.Save();
+            }
+            catch (Exception)
+            {
+                MessageDialog.ShowDialog(Resources.Error, LocalizationManager.Instance["SaveSecuritySettingsFailed"],
+                    MessageDialogButtons.OK, "\uEA39");
+            }
+        }
     }
 }

@@ -47,6 +47,8 @@ namespace SinglePass.WPF.Views.Controls
             var valid = TotpService.TryGetCode(configuration, now, out var code, out var seconds);
             TotpCode.Text = valid ? code.Insert(code.Length / 2, " ") : string.Empty;
             TotpCountdown.Visibility = valid ? Visibility.Visible : Visibility.Collapsed;
+            TotpProgressArc.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty,
+                valid && seconds <= 5 ? "SystemFillColorCriticalBrush" : "AccentFillColorDefaultBrush");
             TotpProgressArc.Data = valid
                 ? CreateProgressArc((seconds - now.Millisecond / 1000.0) / configuration.PeriodSeconds)
                 : null;

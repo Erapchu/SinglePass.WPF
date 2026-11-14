@@ -84,7 +84,7 @@ namespace SinglePass.WPF
             services.AddHttpClient(nameof(OAuthProvider)).RemoveAllLoggers();
             services.AddTransient<GoogleOAuthProvider>();
             services.AddSingleton<GoogleDriveTokenHolder>();
-            services.AddTransient<GoogleDriveCloudService>();
+            services.AddSingleton<GoogleDriveCloudService>();
 
             services.Configure<YandexDiskConfig>(configuration.GetSection("Settings:YandexDiskConfig"));
             services.AddHttpClient(YandexDiskCloudService.HttpClientName).RemoveAllLoggers();

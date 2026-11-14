@@ -15,6 +15,7 @@ namespace SinglePass.WPF.Clouds.Services
     public class GoogleDriveCloudService : ICloudService
     {
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly SemaphoreSlim _tokenLock = new(1);
 
         public IOAuthProvider OAuthProvider { get; }
         public ITokenHolder TokenHolder { get; }
@@ -31,12 +32,21 @@ namespace SinglePass.WPF.Clouds.Services
 
         private async Task RefreshAccessTokenIfRequired(CancellationToken cancellationToken)
         {
-            if (!TokenHolder.OAuthInfo.IsValid())
+            await _tokenLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
             {
-                var oauthInfo = await OAuthProvider.RefreshTokenAsync(TokenHolder.OAuthInfo, cancellationToken).ConfigureAwait(false);
-                // Only Googe Drive should re-use the same refresh token and it will not return it again
-                oauthInfo.RefreshToken = TokenHolder.OAuthInfo.RefreshToken;
-                await TokenHolder.SetAndSaveToken(oauthInfo, cancellationToken).ConfigureAwait(false);
+                var token = TokenHolder.OAuthInfo;
+                if (!token.IsValid())
+                {
+                    var oauthInfo = await OAuthProvider.RefreshTokenAsync(token, cancellationToken).ConfigureAwait(false);
+                    // Google does not return a new refresh token here.
+                    oauthInfo.RefreshToken = token.RefreshToken;
+                    await TokenHolder.SetAndSaveToken(oauthInfo, cancellationToken).ConfigureAwait(false);
+                }
+            }
+            finally
+            {
+                _tokenLock.Release();
             }
         }
 
@@ -137,6 +147,7 @@ namespace SinglePass.WPF.Clouds.Services
             requestMessage.Method = HttpMethod.Get;
             requestMessage.RequestUri = new System.Uri("https://www.googleapis.com/oauth2/v3/userinfo");
             using var userInfoResponse = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
+            userInfoResponse.EnsureSuccessStatusCode();
             using var content = userInfoResponse.Content;
             var jsonResponse = await content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
             var userInfo = JsonSerializer.Deserialize<GoogleUserInfo>(jsonResponse);

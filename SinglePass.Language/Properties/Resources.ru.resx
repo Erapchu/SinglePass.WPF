@@ -567,4 +567,10 @@
   <data name="GroupIconPhotos" xml:space="preserve">
     <value>Фото</value>
   </data>
+  <data name="ToggleSwitchOn" xml:space="preserve">
+    <value>Вкл.</value>
+  </data>
+  <data name="ToggleSwitchOff" xml:space="preserve">
+    <value>Выкл.</value>
+  </data>
 </root>

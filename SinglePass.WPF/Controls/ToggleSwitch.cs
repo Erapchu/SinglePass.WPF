@@ -66,7 +66,7 @@ namespace SinglePass.WPF.Controls
         private void UpdatePosition(bool animate)
         {
             var isOn = IsChecked == true;
-            SetVisualValue(_thumbOffset, TranslateTransform.XProperty, isOn ? 22 : 0, SlideDuration, animate);
+            SetVisualValue(_thumbOffset, TranslateTransform.XProperty, isOn ? 20 : 0, SlideDuration, animate);
             SetVisualValue(_onTrack, OpacityProperty, isOn ? 1 : 0, SlideDuration, animate);
         }
 

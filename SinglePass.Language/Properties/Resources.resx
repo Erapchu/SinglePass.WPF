@@ -547,4 +547,10 @@
   <data name="GroupIconPhotos" xml:space="preserve">
     <value>Photos</value>
   </data>
+  <data name="ToggleSwitchOn" xml:space="preserve">
+    <value>On</value>
+  </data>
+  <data name="ToggleSwitchOff" xml:space="preserve">
+    <value>Off</value>
+  </data>
 </root>

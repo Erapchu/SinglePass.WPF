@@ -2,12 +2,15 @@
 using SinglePass.WPF.Services;
 using SinglePass.WPF.Localization;
 using SinglePass.WPF.ViewModels;
+using SinglePass.WPF.Views.Windows;
 using System;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 
 namespace SinglePass.WPF.Views.Controls
@@ -17,6 +20,23 @@ namespace SinglePass.WPF.Views.Controls
     /// </summary>
     public partial class CredentialsDetailsControl : UserControl
     {
+        public static readonly DependencyProperty DisplayedDraftProperty = DependencyProperty.Register(
+            nameof(DisplayedDraft), typeof(CredentialViewModel), typeof(CredentialsDetailsControl),
+            new PropertyMetadata(null, (sender, e) => ((CredentialsDetailsControl)sender).SetValue(IsEditingPropertyKey, e.NewValue != null)));
+
+        private static readonly DependencyPropertyKey IsEditingPropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(IsEditing), typeof(bool), typeof(CredentialsDetailsControl), new PropertyMetadata(false));
+
+        public static readonly DependencyProperty IsEditingProperty = IsEditingPropertyKey.DependencyProperty;
+
+        public CredentialViewModel DisplayedDraft
+        {
+            get => (CredentialViewModel)GetValue(DisplayedDraftProperty);
+            set => SetValue(DisplayedDraftProperty, value);
+        }
+
+        public bool IsEditing => (bool)GetValue(IsEditingProperty);
+
         private readonly DispatcherTimer _totpTimer = new() { Interval = TimeSpan.FromSeconds(1) };
         private bool _readingTotpQr;
 
@@ -24,7 +44,46 @@ namespace SinglePass.WPF.Views.Controls
         {
             _totpTimer.Tick += (_, _) => RefreshTotp();
             InitializeComponent();
+            FollowDraft();
         }
+
+        internal void FollowDraft() => SetBinding(DisplayedDraftProperty, new Binding(nameof(PasswordsViewModel.DraftCredential)));
+
+        private void EditButton_Click(object sender, RoutedEventArgs e) => EditCredential();
+
+        internal void EditCredential()
+        {
+            if (DataContext is not PasswordsViewModel viewModel || !viewModel.EditCommand.CanExecute(null))
+                return;
+
+            if (Window.GetWindow(this) is MainWindow window && Parent is Decorator anchor)
+                window.ShowCredentialEditor(this, anchor, EditButton, viewModel);
+            else
+                viewModel.EditCommand.Execute(null);
+        }
+
+        internal void UseModalSurface(bool enabled)
+        {
+            if (enabled)
+            {
+                CardBorder.Background = Brushes.Transparent;
+                CardBorder.BorderBrush = Brushes.Transparent;
+            }
+            else
+            {
+                CardBorder.ClearValue(Border.BackgroundProperty);
+                CardBorder.ClearValue(Border.BorderBrushProperty);
+            }
+        }
+
+        internal void AnimateEditActions(AnimationTimeline animation)
+        {
+            TotpEditActions.BeginAnimation(OpacityProperty, animation);
+            TotpSetupFields.BeginAnimation(OpacityProperty, animation);
+            EditActions.BeginAnimation(OpacityProperty, animation);
+        }
+
+        internal void UseDefaultIcon() => CredentialIcon.SetResourceReference(Image.SourceProperty, "DefaultFavIcon");
 
         private void TotpDisplay_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e) => RefreshTotp();
         private void TotpDisplay_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) => RefreshTotp();

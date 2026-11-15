@@ -16,6 +16,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
@@ -66,6 +67,7 @@ namespace SinglePass.WPF.ViewModels
         public ListCollectionView GroupedCredentials { get; private set; }
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CanEditCredential))]
         public partial CredentialViewModel SelectedCredentialVM { get; set; }
 
         partial void OnSelectedCredentialVMChanged(CredentialViewModel value)
@@ -79,6 +81,7 @@ namespace SinglePass.WPF.ViewModels
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsEditing))]
         [NotifyPropertyChangedFor(nameof(IsAdding))]
+        [NotifyPropertyChangedFor(nameof(CanEditCredential))]
         [NotifyCanExecuteChangedFor(nameof(EditCommand))]
         [NotifyCanExecuteChangedFor(nameof(DeleteCommand))]
         [NotifyCanExecuteChangedFor(nameof(CancelEditCommand))]
@@ -92,6 +95,7 @@ namespace SinglePass.WPF.ViewModels
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(AddCommand))]
+        [NotifyPropertyChangedFor(nameof(CanEditCredential))]
         [NotifyCanExecuteChangedFor(nameof(EditCommand))]
         [NotifyCanExecuteChangedFor(nameof(DeleteCommand))]
         [NotifyCanExecuteChangedFor(nameof(CancelEditCommand))]
@@ -377,12 +381,12 @@ namespace SinglePass.WPF.ViewModels
         private bool CanAdd() => !IsSavingEdit;
 
         [RelayCommand(CanExecute = nameof(CanAdd))]
-        private async Task Add()
+        private async Task Add(CancellationToken cancellationToken)
         {
             if (_initialLoad is not null)
                 await _initialLoad;
 
-            if (!CanAdd())
+            if (cancellationToken.IsCancellationRequested || !CanAdd())
                 return;
 
             DraftCredential = null;
@@ -468,9 +472,9 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
-        private bool CanEdit() => SelectedCredentialVM != null && !IsEditing && !IsSavingEdit;
+        public bool CanEditCredential => SelectedCredentialVM != null && !IsEditing && !IsSavingEdit;
 
-        [RelayCommand(CanExecute = nameof(CanEdit))]
+        [RelayCommand(CanExecute = nameof(CanEditCredential))]
         private void Edit()
         {
             if (SelectedCredentialVM is not { } credential)
@@ -556,7 +560,7 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
-        [RelayCommand(CanExecute = nameof(CanEdit))]
+        [RelayCommand(CanExecute = nameof(CanEditCredential))]
         private async Task Delete()
         {
             if (SelectedCredentialVM is not { } credential)

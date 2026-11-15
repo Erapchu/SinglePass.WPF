@@ -7,6 +7,7 @@ using SinglePass.WPF.Views.Controls;
 using SinglePass.WPF.Views.Helpers;
 using System;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -60,11 +61,18 @@ namespace SinglePass.WPF.Views.Windows
             DataContext = mainViewModel;
         }
 
+        internal void ShowCredentialEditor(CredentialsDetailsControl card, Decorator anchor, Button source, PasswordsViewModel viewModel) =>
+            CredentialEditor.OpenForEdit(card, anchor, source, viewModel);
+
+        internal Task ShowNewCredentialEditorAsync(CredentialsDetailsControl details, Button source, PasswordsViewModel viewModel) =>
+            CredentialEditor.OpenForAddAsync(details, source, viewModel);
+
         private void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName != nameof(MainWindowViewModel.SelectedNavigationItem))
                 return;
 
+            CredentialEditor.Dismiss();
             if (_settingsPageButton != null)
                 CloseSettingsPage();
 
@@ -296,6 +304,7 @@ namespace SinglePass.WPF.Views.Windows
 
         private void Window_Closed(object sender, EventArgs e)
         {
+            CredentialEditor.Dismiss();
             _statusTimer.Stop();
             ViewModel.PropertyChanged -= ViewModel_PropertyChanged;
             ViewModel.PasswordsVM.StatusMessageRequested -= ShowStatusMessage;

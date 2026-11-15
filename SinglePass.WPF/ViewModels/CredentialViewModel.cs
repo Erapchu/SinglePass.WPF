@@ -75,6 +75,8 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
+        public bool HasWebsite => !string.IsNullOrWhiteSpace(SiteFieldVM.Value);
+
         public sealed record WebsiteDisplay(string Prefix, string Host, string Suffix, Uri Address);
 
         public WebsiteDisplay Website
@@ -176,6 +178,7 @@ namespace SinglePass.WPF.ViewModels
                 {
                     OnPropertyChanged(nameof(WebsiteDomain));
                     OnPropertyChanged(nameof(Website));
+                    OnPropertyChanged(nameof(HasWebsite));
                 }
             };
             AdditionalFields = new ObservableCollection<PassFieldViewModel>(credential.AdditionalFields.Select(f => new PassFieldViewModel(f)));

@@ -20,7 +20,6 @@ namespace SinglePass.WPF.Views.Controls
         private static readonly TimeSpan LiftDuration = TimeSpan.FromMilliseconds(65);
         private static readonly TimeSpan OpenDuration = TimeSpan.FromMilliseconds(275);
         private static readonly TimeSpan CloseDuration = TimeSpan.FromMilliseconds(235);
-        private static readonly TimeSpan RestoreDetailsDuration = TimeSpan.FromMilliseconds(125);
 
         private sealed record EditorSession(CredentialsDetailsControl Card, CredentialsDetailsControl Details,
             Button Source, Decorator Anchor, PasswordsViewModel ViewModel)
@@ -85,7 +84,6 @@ namespace SinglePass.WPF.Views.Controls
             session.ViewModel.PropertyChanged += DraftChanged;
 
             // The host controls when the form switches modes and releases its draft.
-            session.Details.AnimateBodyOpacity(null);
             session.Card.DisplayedDraft = null;
             session.Card.DataContext = session.ViewModel;
             if (session.IsAdding)
@@ -103,10 +101,7 @@ namespace SinglePass.WPF.Views.Controls
             if (SystemParameters.ClientAreaAnimation)
             {
                 if (!session.IsAdding)
-                {
                     AnimateBounds(origin, _layout, OpenDuration, LiftDuration, -6);
-                    AnimateOpacity(CardContent, OpacityProperty, 1, 0, LiftDuration);
-                }
                 AnimateOpacity(Backdrop, OpacityProperty, 0, BackdropOpacity, OpenDuration);
                 AnimateOpacity(CardShadow, OpacityProperty, 0, ShadowOpacity, OpenDuration);
                 session.Card.AnimateEditActions(OpacityAnimation(0, 1, OpenDuration, TimeSpan.FromMilliseconds(105)));
@@ -230,12 +225,14 @@ namespace SinglePass.WPF.Views.Controls
                     _session.Card.DisplayedDraft = draft;
                     UpdateEditorLayout(animate: true, opening: true);
 
-                    _waitingForDraft = false;
-                    CardPanel.Opacity = 1;
-                    CardContent.Opacity = 1;
-                    if (SystemParameters.ClientAreaAnimation)
-                        AnimateOpacity(CardContent, OpacityProperty, 0, 1,
-                            _session.IsAdding ? OpenDuration : OpenDuration - LiftDuration);
+                    if (_waitingForDraft)
+                    {
+                        _waitingForDraft = false;
+                        CardPanel.Opacity = 1;
+                        CardContent.Opacity = 1;
+                        if (SystemParameters.ClientAreaAnimation)
+                            AnimateOpacity(CardContent, OpacityProperty, 0, 1, OpenDuration);
+                    }
                 }
                 else if (!_waitingForDraft)
                     Close(saved: _session.ViewModel.IsSavingEdit);
@@ -269,16 +266,14 @@ namespace SinglePass.WPF.Views.Controls
             CardContent.IsEnabled = false;
             Focus();
             AnimateBounds(CurrentCardBounds, GetBounds(destination), CloseDuration);
-            AnimateOpacity(CardContent, OpacityProperty, CardContent.Opacity, 0, CloseDuration);
-            var revealDetails = destination != session.Source;
-            if (session.IsAdding && revealDetails)
-                session.Details.AnimateBodyOpacity(OpacityAnimation(1, 0, RestoreDetailsDuration));
+            if (session.IsAdding && destination == session.Origin)
+                AnimateOpacity(CardContent, OpacityProperty, CardContent.Opacity, 0, CloseDuration);
             AnimateOpacity(CardShadow, OpacityProperty, CardShadow.Opacity, 0, CloseDuration);
             var fade = OpacityAnimation(Backdrop.Opacity, 0, CloseDuration);
             fade.Completed += (_, _) =>
             {
                 if (ReferenceEquals(_session, session))
-                    Release(restoreFocus: true, revealDetails);
+                    Release(restoreFocus: true);
             };
             Backdrop.BeginAnimation(OpacityProperty, fade);
         }
@@ -293,7 +288,7 @@ namespace SinglePass.WPF.Views.Controls
                 session.ViewModel.CancelEditCommand.Execute(null);
         }
 
-        private void Release(bool restoreFocus, bool revealDetails = false)
+        private void Release(bool restoreFocus)
         {
             var session = _session;
             _session = null;
@@ -323,7 +318,6 @@ namespace SinglePass.WPF.Views.Controls
             }
             session.Card.ClearValue(DataContextProperty);
             session.Details.FollowDraft();
-            session.Details.AnimateBodyOpacity(revealDetails ? OpacityAnimation(0, 1, RestoreDetailsDuration) : null);
 
             if (restoreFocus)
                 Dispatcher.InvokeAsync(() => session.Source.Focus(), DispatcherPriority.Input);

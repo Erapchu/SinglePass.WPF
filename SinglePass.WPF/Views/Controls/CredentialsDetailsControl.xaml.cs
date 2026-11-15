@@ -89,8 +89,6 @@ namespace SinglePass.WPF.Views.Controls
             EditActions.BeginAnimation(OpacityProperty, animation);
         }
 
-        internal void AnimateBodyOpacity(AnimationTimeline animation) => CardBody.BeginAnimation(OpacityProperty, animation);
-
         internal void UseDefaultIcon() => CredentialIcon.SetResourceReference(Image.SourceProperty, "DefaultFavIcon");
 
         private void TotpDisplay_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e) => RefreshTotp();

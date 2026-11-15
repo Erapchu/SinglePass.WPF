@@ -2,11 +2,13 @@
 using SinglePass.WPF.Services;
 using SinglePass.WPF.Localization;
 using SinglePass.WPF.ViewModels;
+using SinglePass.WPF.Views.Windows;
 using System;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Threading;
 
@@ -17,6 +19,23 @@ namespace SinglePass.WPF.Views.Controls
     /// </summary>
     public partial class CredentialsDetailsControl : UserControl
     {
+        public static readonly DependencyProperty DisplayedDraftProperty = DependencyProperty.Register(
+            nameof(DisplayedDraft), typeof(CredentialViewModel), typeof(CredentialsDetailsControl),
+            new PropertyMetadata(null, (sender, e) => ((CredentialsDetailsControl)sender).SetValue(IsEditingPropertyKey, e.NewValue != null)));
+
+        private static readonly DependencyPropertyKey IsEditingPropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(IsEditing), typeof(bool), typeof(CredentialsDetailsControl), new PropertyMetadata(false));
+
+        public static readonly DependencyProperty IsEditingProperty = IsEditingPropertyKey.DependencyProperty;
+
+        public CredentialViewModel DisplayedDraft
+        {
+            get => (CredentialViewModel)GetValue(DisplayedDraftProperty);
+            set => SetValue(DisplayedDraftProperty, value);
+        }
+
+        public bool IsEditing => (bool)GetValue(IsEditingProperty);
+
         private readonly DispatcherTimer _totpTimer = new() { Interval = TimeSpan.FromSeconds(1) };
         private bool _readingTotpQr;
 
@@ -24,7 +43,58 @@ namespace SinglePass.WPF.Views.Controls
         {
             _totpTimer.Tick += (_, _) => RefreshTotp();
             InitializeComponent();
+            FollowDraft();
         }
+
+        internal void FollowDraft() => SetBinding(DisplayedDraftProperty, new Binding(nameof(PasswordsViewModel.DraftCredential)));
+
+        internal double MeasureEditorHeight(double width)
+        {
+            Measure(new Size(width, double.PositiveInfinity));
+            return DesiredSize.Height;
+        }
+
+        private void EditButton_Click(object sender, RoutedEventArgs e) => EditCredential();
+
+        internal void EditCredential()
+        {
+            if (DataContext is not PasswordsViewModel viewModel || !viewModel.EditCommand.CanExecute(null))
+                return;
+
+            if (Window.GetWindow(this) is MainWindow window && Parent is Decorator anchor)
+                window.ShowCredentialEditor(this, anchor, EditButton, viewModel);
+            else
+                viewModel.EditCommand.Execute(null);
+        }
+
+        private async void DeleteButton_Click(object sender, RoutedEventArgs e) => await DeleteCredentialAsync();
+
+        internal async Task DeleteCredentialAsync()
+        {
+            if (DataContext is not PasswordsViewModel viewModel || !viewModel.DeleteCommand.CanExecute(null))
+                return;
+
+            if (Window.GetWindow(this) is MainWindow window && Parent is Decorator anchor)
+                window.ShowCredentialDeletion(this, anchor, DeleteButton, viewModel);
+            else
+                await viewModel.DeleteCommand.ExecuteAsync(null);
+        }
+
+        internal void UseModalSurface(bool enabled)
+        {
+            if (enabled)
+            {
+                CardBorder.Background = Brushes.Transparent;
+                CardBorder.BorderBrush = Brushes.Transparent;
+            }
+            else
+            {
+                CardBorder.ClearValue(Border.BackgroundProperty);
+                CardBorder.ClearValue(Border.BorderBrushProperty);
+            }
+        }
+
+        internal void UseDefaultIcon() => CredentialIcon.SetResourceReference(Image.SourceProperty, "DefaultFavIcon");
 
         private void TotpDisplay_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e) => RefreshTotp();
         private void TotpDisplay_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) => RefreshTotp();
@@ -35,25 +105,50 @@ namespace SinglePass.WPF.Views.Controls
             _totpTimer.Stop();
             TotpCode.Text = string.Empty;
             TotpProgressArc.Data = null;
+            EditTotpCode.Text = string.Empty;
+            EditTotpProgressArc.Data = null;
         }
 
         private void RefreshTotp()
         {
-            if (TotpCode == null || TotpProgressArc == null || CopyTotpButton == null)
+            if (TotpProgressArc == null || EditTotpProgressArc == null)
                 return;
 
-            var configuration = TotpDisplay.IsLoaded && TotpDisplay.IsVisible ? TotpDisplay.DataContext as TotpConfiguration : null;
+            var viewing = UpdateTotpDisplay(TotpDisplay, TotpCode, TotpCountdown, TotpProgressArc);
+            var editing = UpdateTotpDisplay(EditTotpDisplay, EditTotpCode, EditTotpCountdown, EditTotpProgressArc);
+            CopyTotpButton.IsEnabled = viewing;
+            _totpTimer.IsEnabled = viewing || editing;
+        }
+
+        private static bool UpdateTotpDisplay(StackPanel display, TextBlock codeText, Grid countdown,
+            System.Windows.Shapes.Path arc)
+        {
+            var configuration = display.IsLoaded && display.IsVisible ? display.DataContext as TotpConfiguration : null;
             var now = DateTime.UtcNow;
             var valid = TotpService.TryGetCode(configuration, now, out var code, out var seconds);
-            TotpCode.Text = valid ? code.Insert(code.Length / 2, " ") : string.Empty;
-            TotpCountdown.Visibility = valid ? Visibility.Visible : Visibility.Collapsed;
-            TotpProgressArc.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty,
+            codeText.Text = valid ? code.Insert(code.Length / 2, " ") : string.Empty;
+            countdown.Visibility = valid ? Visibility.Visible : Visibility.Collapsed;
+            arc.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty,
                 valid && seconds <= 5 ? "SystemFillColorCriticalBrush" : "AccentFillColorDefaultBrush");
-            TotpProgressArc.Data = valid
+            arc.Data = valid
                 ? CreateProgressArc((seconds - now.Millisecond / 1000.0) / configuration.PeriodSeconds)
                 : null;
-            CopyTotpButton.IsEnabled = valid;
-            _totpTimer.IsEnabled = valid;
+            return valid;
+        }
+
+        private void ReplaceTotp_Click(object sender, RoutedEventArgs e)
+        {
+            if (TotpSetupBox.DataContext is CredentialViewModel draft)
+            {
+                draft.ReplaceTotp = true;
+                TotpSetupBox.Focus();
+            }
+        }
+
+        private void RemoveTotp_Click(object sender, RoutedEventArgs e)
+        {
+            if (TotpSetupBox.DataContext is CredentialViewModel draft)
+                draft.RemoveTotp = true;
         }
 
         private static Geometry CreateProgressArc(double fraction)

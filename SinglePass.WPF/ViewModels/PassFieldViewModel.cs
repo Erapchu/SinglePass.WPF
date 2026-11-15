@@ -35,8 +35,11 @@ namespace SinglePass.WPF.ViewModels
 
                 Model.Value = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(HasText));
             }
         }
+
+        public bool HasText => !string.IsNullOrWhiteSpace(Value);
 
         public PassFieldViewModel(PassField field)
         {

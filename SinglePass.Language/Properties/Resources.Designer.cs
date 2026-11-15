@@ -430,6 +430,33 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Books.
+        /// </summary>
+        public static string GroupIconBooks {
+            get {
+                return ResourceManager.GetString("GroupIconBooks", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Contacts.
+        /// </summary>
+        public static string GroupIconContacts {
+            get {
+                return ResourceManager.GetString("GroupIconContacts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Education.
+        /// </summary>
+        public static string GroupIconEducation {
+            get {
+                return ResourceManager.GetString("GroupIconEducation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Favorites.
         /// </summary>
         public static string GroupIconFavorites {
@@ -457,11 +484,74 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Games.
+        /// </summary>
+        public static string GroupIconGames {
+            get {
+                return ResourceManager.GetString("GroupIconGames", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Health.
+        /// </summary>
+        public static string GroupIconHealth {
+            get {
+                return ResourceManager.GetString("GroupIconHealth", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Home.
         /// </summary>
         public static string GroupIconHome {
             get {
                 return ResourceManager.GetString("GroupIconHome", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ideas.
+        /// </summary>
+        public static string GroupIconIdeas {
+            get {
+                return ResourceManager.GetString("GroupIconIdeas", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Internet.
+        /// </summary>
+        public static string GroupIconInternet {
+            get {
+                return ResourceManager.GetString("GroupIconInternet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Messages.
+        /// </summary>
+        public static string GroupIconMessages {
+            get {
+                return ResourceManager.GetString("GroupIconMessages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Music.
+        /// </summary>
+        public static string GroupIconMusic {
+            get {
+                return ResourceManager.GetString("GroupIconMusic", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Photos.
+        /// </summary>
+        public static string GroupIconPhotos {
+            get {
+                return ResourceManager.GetString("GroupIconPhotos", resourceCulture);
             }
         }
         
@@ -1006,6 +1096,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Replace.
+        /// </summary>
+        public static string ReplaceTotp {
+            get {
+                return ResourceManager.GetString("ReplaceTotp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Retry.
         /// </summary>
         public static string Retry {
@@ -1195,6 +1294,24 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Off.
+        /// </summary>
+        public static string ToggleSwitchOff {
+            get {
+                return ResourceManager.GetString("ToggleSwitchOff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to On.
+        /// </summary>
+        public static string ToggleSwitchOn {
+            get {
+                return ResourceManager.GetString("ToggleSwitchOn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to to paste combination.
         /// </summary>
         public static string ToPasteCombination {
@@ -1227,6 +1344,15 @@ namespace SinglePass.Language.Properties {
         public static string TotpQrImported {
             get {
                 return ResourceManager.GetString("TotpQrImported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 2FA setup will be removed when you save..
+        /// </summary>
+        public static string TotpRemovalPending {
+            get {
+                return ResourceManager.GetString("TotpRemovalPending", resourceCulture);
             }
         }
         

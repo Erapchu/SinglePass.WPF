@@ -57,6 +57,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Resources\CardShadow.png" />
     <Resource Include="Resources\pass-man.ico">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>

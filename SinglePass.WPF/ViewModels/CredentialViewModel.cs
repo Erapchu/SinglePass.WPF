@@ -36,7 +36,17 @@ namespace SinglePass.WPF.ViewModels
         public partial string TotpSetupInput { get; set; }
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ShowCurrentTotp))]
+        [NotifyPropertyChangedFor(nameof(ShowTotpSetup))]
         public partial bool RemoveTotp { get; set; }
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ShowCurrentTotp))]
+        [NotifyPropertyChangedFor(nameof(ShowTotpSetup))]
+        public partial bool ReplaceTotp { get; set; }
+
+        public bool ShowCurrentTotp => Totp != null && !RemoveTotp && !ReplaceTotp;
+        public bool ShowTotpSetup => !RemoveTotp && (Totp == null || ReplaceTotp);
 
         [ObservableProperty]
         public partial bool HasInvalidTotp { get; set; }
@@ -61,6 +71,8 @@ namespace SinglePass.WPF.ViewModels
                 return ParseWebsite(site, out _)?.Host;
             }
         }
+
+        public bool HasWebsite => !string.IsNullOrWhiteSpace(SiteFieldVM.Value);
 
         public sealed record WebsiteDisplay(string Prefix, string Host, string Suffix, Uri Address);
 
@@ -163,6 +175,7 @@ namespace SinglePass.WPF.ViewModels
                 {
                     OnPropertyChanged(nameof(WebsiteDomain));
                     OnPropertyChanged(nameof(Website));
+                    OnPropertyChanged(nameof(HasWebsite));
                 }
             };
             AdditionalFields = new ObservableCollection<PassFieldViewModel>(credential.AdditionalFields.Select(f => new PassFieldViewModel(f)));

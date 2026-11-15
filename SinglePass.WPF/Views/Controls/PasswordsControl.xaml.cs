@@ -6,6 +6,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using SinglePass.WPF.ViewModels;
+using SinglePass.WPF.Views.Windows;
 
 namespace SinglePass.WPF.Views.Controls
 {
@@ -25,6 +26,22 @@ namespace SinglePass.WPF.Views.Controls
         {
             InitializeComponent();
         }
+
+        private async void AddPasswordButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not PasswordsViewModel viewModel || !viewModel.AddCommand.CanExecute(null))
+                return;
+
+            if (Window.GetWindow(this) is MainWindow window)
+                await window.ShowNewCredentialEditorAsync(CredentialsDetailsControl, AddPasswordButton, viewModel);
+            else
+                await viewModel.AddCommand.ExecuteAsync(null);
+        }
+
+        private void EditPasswordMenuItem_Click(object sender, RoutedEventArgs e) => CredentialsDetailsControl.EditCredential();
+
+        private async void DeletePasswordMenuItem_Click(object sender, RoutedEventArgs e) =>
+            await CredentialsDetailsControl.DeleteCredentialAsync();
 
         private void CredentialsList_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {

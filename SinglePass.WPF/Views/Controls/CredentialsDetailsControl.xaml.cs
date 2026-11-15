@@ -49,6 +49,12 @@ namespace SinglePass.WPF.Views.Controls
 
         internal void FollowDraft() => SetBinding(DisplayedDraftProperty, new Binding(nameof(PasswordsViewModel.DraftCredential)));
 
+        internal double MeasureEditorHeight(double width)
+        {
+            Measure(new Size(width, double.PositiveInfinity));
+            return DesiredSize.Height;
+        }
+
         private void EditButton_Click(object sender, RoutedEventArgs e) => EditCredential();
 
         internal void EditCredential()

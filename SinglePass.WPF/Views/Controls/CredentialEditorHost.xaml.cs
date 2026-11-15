@@ -93,14 +93,15 @@ namespace SinglePass.WPF.Views.Controls
 
             session.Card.UseModalSurface(true);
             CardContent.Child = session.Card;
+            CardPanel.Opacity = session.IsAdding ? 0 : 1;
             CardContent.Opacity = session.IsAdding ? 0 : 1;
             Visibility = Visibility.Visible;
             Focus();
             SetLayout(GetLayout(session, origin));
             if (SystemParameters.ClientAreaAnimation)
             {
-                var lift = session.IsAdding ? TimeSpan.Zero : LiftDuration;
-                AnimateBounds(origin, _layout, OpenDuration, lift, session.IsAdding ? 0 : -6);
+                if (!session.IsAdding)
+                    AnimateBounds(origin, _layout, OpenDuration, LiftDuration, -6);
                 AnimateOpacity(Backdrop, OpacityProperty, 0, BackdropOpacity, OpenDuration);
                 AnimateOpacity(CardShadow, OpacityProperty, 0, ShadowOpacity, OpenDuration);
                 session.Card.AnimateEditActions(OpacityAnimation(0, 1, OpenDuration, TimeSpan.FromMilliseconds(105)));
@@ -133,7 +134,7 @@ namespace SinglePass.WPF.Views.Controls
             if (session.IsAdding)
             {
                 width = Math.Min(560, width);
-                height = Math.Min(610, height);
+                height = FitEditorHeight(session.Card, width, height);
                 return new Rect((Surface.ActualWidth - width) / 2, (Surface.ActualHeight - height) / 2, width, height);
             }
 
@@ -141,8 +142,12 @@ namespace SinglePass.WPF.Views.Controls
             var right = Math.Max(WindowInset + width, Math.Min(origin.Right - 10, Surface.ActualWidth - WindowInset));
             var top = Math.Max(WindowInset, origin.Top - 48);
             var bottom = Math.Min(Surface.ActualHeight - WindowInset, origin.Bottom);
-            return new Rect(right - width, top, width, Math.Max(1, bottom - top));
+            height = FitEditorHeight(session.Card, width, Math.Max(1, bottom - top));
+            return new Rect(right - width, top, width, height);
         }
+
+        private static double FitEditorHeight(CredentialsDetailsControl card, double width, double availableHeight) =>
+            card.IsEditing ? Math.Clamp(card.MeasureEditorHeight(width), 1, availableHeight) : availableHeight;
 
         private void SetLayout(Rect bounds)
         {
@@ -152,8 +157,11 @@ namespace SinglePass.WPF.Views.Controls
             CardPanel.Width = bounds.Width;
             CardPanel.Height = bounds.Height;
             ContentClip.Rect = new Rect(bounds.Size);
-            CardShadow.ShadowBounds = ContentClip.Rect;
+            CardShadow.ShadowBounds = new Rect(bounds.Size);
         }
+
+        private Rect CurrentCardBounds =>
+            new(new Point(_layout.X + CardOffset.X, _layout.Y + CardOffset.Y), ContentClip.Rect.Size);
 
         private void AnimateBounds(Rect from, Rect to, TimeSpan duration, TimeSpan lift = default, double liftOffset = 0)
         {
@@ -215,13 +223,16 @@ namespace SinglePass.WPF.Views.Controls
                 if (_session.ViewModel.DraftCredential is { } draft)
                 {
                     _session.Card.DisplayedDraft = draft;
-                    if (!_waitingForDraft)
-                        return;
+                    UpdateEditorLayout(animate: true, opening: true);
 
-                    _waitingForDraft = false;
-                    CardContent.Opacity = 1;
-                    if (SystemParameters.ClientAreaAnimation)
-                        AnimateOpacity(CardContent, OpacityProperty, 0, 1, OpenDuration);
+                    if (_waitingForDraft)
+                    {
+                        _waitingForDraft = false;
+                        CardPanel.Opacity = 1;
+                        CardContent.Opacity = 1;
+                        if (SystemParameters.ClientAreaAnimation)
+                            AnimateOpacity(CardContent, OpacityProperty, 0, 1, OpenDuration);
+                    }
                 }
                 else if (!_waitingForDraft)
                     Close(saved: _session.ViewModel.IsSavingEdit);
@@ -254,8 +265,7 @@ namespace SinglePass.WPF.Views.Controls
 
             CardContent.IsEnabled = false;
             Focus();
-            var from = new Rect(new Point(_layout.X + CardOffset.X, _layout.Y + CardOffset.Y), ContentClip.Rect.Size);
-            AnimateBounds(from, GetBounds(destination), CloseDuration);
+            AnimateBounds(CurrentCardBounds, GetBounds(destination), CloseDuration);
             if (session.IsAdding && destination == session.Origin)
                 AnimateOpacity(CardContent, OpacityProperty, CardContent.Opacity, 0, CloseDuration);
             AnimateOpacity(CardShadow, OpacityProperty, CardShadow.Opacity, 0, CloseDuration);
@@ -331,15 +341,32 @@ namespace SinglePass.WPF.Views.Controls
 
         private void Host_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (_session is not { } session || _closing || e.NewSize.Width <= 16 || e.NewSize.Height <= 16)
+            if (e.NewSize.Width > 2 * WindowInset && e.NewSize.Height > 2 * WindowInset)
+                UpdateEditorLayout(animate: false);
+        }
+
+        private void Host_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            if (_session?.Card.EditScrollViewer == e.OriginalSource && e.ExtentHeightChange != 0)
+                UpdateEditorLayout(animate: true);
+        }
+
+        private void UpdateEditorLayout(bool animate, bool opening = false)
+        {
+            if (_session is not { } session || _closing || (!opening && _waitingForDraft))
                 return;
 
-            var layout = GetLayout(session, GetBounds(session.Origin));
-            if (layout != _layout)
-            {
+            var origin = GetBounds(session.Origin);
+            var layout = GetLayout(session, origin);
+            if (layout == _layout && !(opening && session.IsAdding))
+                return;
+
+            var from = _waitingForDraft ? origin : CurrentCardBounds;
+            SetLayout(layout);
+            if (animate && SystemParameters.ClientAreaAnimation)
+                AnimateBounds(from, layout, opening && session.IsAdding ? OpenDuration : OpenDuration - LiftDuration);
+            else
                 ResetBoundsAnimations();
-                SetLayout(layout);
-            }
         }
 
         protected override void OnKeyDown(KeyEventArgs e)

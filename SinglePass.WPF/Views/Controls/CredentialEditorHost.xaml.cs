@@ -17,8 +17,8 @@ namespace SinglePass.WPF.Views.Controls
         private const double WindowInset = 8;
         private const double BackdropOpacity = 0.32;
         private const double ShadowOpacity = 0.36;
-        private static readonly TimeSpan LiftDuration = TimeSpan.FromMilliseconds(65);
         private static readonly TimeSpan OpenDuration = TimeSpan.FromMilliseconds(275);
+        private static readonly TimeSpan ResizeDuration = TimeSpan.FromMilliseconds(210);
         private static readonly TimeSpan CloseDuration = TimeSpan.FromMilliseconds(235);
 
         private sealed record EditorSession(CredentialsDetailsControl Card, CredentialsDetailsControl Details,
@@ -29,7 +29,6 @@ namespace SinglePass.WPF.Views.Controls
         }
 
         private EditorSession _session;
-        private DispatcherTimer _lift;
         private Rect _layout;
         private bool _closing;
         private bool _waitingForDraft;
@@ -46,14 +45,10 @@ namespace SinglePass.WPF.Views.Controls
 
             var session = new EditorSession(card, card, source, anchor, viewModel);
             Open(session);
-            if (SystemParameters.ClientAreaAnimation)
-            {
-                _lift = new DispatcherTimer(LiftDuration, DispatcherPriority.Input, (_, _) => StartEdit(), Dispatcher);
-            }
-            else
-            {
-                StartEdit();
-            }
+            if (viewModel.EditCommand.CanExecute(null))
+                viewModel.EditCommand.Execute(null);
+            if (!viewModel.IsEditing)
+                Close();
         }
 
         internal async Task OpenForAddAsync(CredentialsDetailsControl details, Button source, PasswordsViewModel viewModel)
@@ -100,8 +95,6 @@ namespace SinglePass.WPF.Views.Controls
             SetLayout(GetLayout(session, origin));
             if (SystemParameters.ClientAreaAnimation)
             {
-                if (!session.IsAdding)
-                    AnimateBounds(origin, _layout, OpenDuration, LiftDuration, -6);
                 AnimateOpacity(Backdrop, OpacityProperty, 0, BackdropOpacity, OpenDuration);
                 AnimateOpacity(CardShadow, OpacityProperty, 0, ShadowOpacity, OpenDuration);
                 session.Card.AnimateEditActions(OpacityAnimation(0, 1, OpenDuration, TimeSpan.FromMilliseconds(105)));
@@ -111,16 +104,6 @@ namespace SinglePass.WPF.Views.Controls
                 Backdrop.Opacity = BackdropOpacity;
                 CardShadow.Opacity = ShadowOpacity;
             }
-        }
-
-        private void StartEdit()
-        {
-            StopLift();
-            var viewModel = _session.ViewModel;
-            if (viewModel.EditCommand.CanExecute(null))
-                viewModel.EditCommand.Execute(null);
-            if (!viewModel.IsEditing)
-                Close();
         }
 
         private FrameworkElement Surface => (FrameworkElement)Parent;
@@ -138,11 +121,10 @@ namespace SinglePass.WPF.Views.Controls
                 return new Rect((Surface.ActualWidth - width) / 2, (Surface.ActualHeight - height) / 2, width, height);
             }
 
-            width = Math.Min(origin.Width + 132, width);
+            width = Math.Min(origin.Width, width);
             var right = Math.Max(WindowInset + width, Math.Min(origin.Right - 10, Surface.ActualWidth - WindowInset));
-            var top = Math.Max(WindowInset, origin.Top - 48);
-            var bottom = Math.Min(Surface.ActualHeight - WindowInset, origin.Bottom);
-            height = FitEditorHeight(session.Card, width, Math.Max(1, bottom - top));
+            height = FitEditorHeight(session.Card, width, height);
+            var top = (Surface.ActualHeight - height) / 2;
             return new Rect(right - width, top, width, height);
         }
 
@@ -163,37 +145,23 @@ namespace SinglePass.WPF.Views.Controls
         private Rect CurrentCardBounds =>
             new(new Point(_layout.X + CardOffset.X, _layout.Y + CardOffset.Y), ContentClip.Rect.Size);
 
-        private void AnimateBounds(Rect from, Rect to, TimeSpan duration, TimeSpan lift = default, double liftOffset = 0)
+        private void AnimateBounds(Rect from, Rect to, TimeSpan duration)
         {
             // Scale the card surface. The form moves and clips at its final layout size.
-            AnimateDouble(CardOffset, TranslateTransform.XProperty, from.X - _layout.X, to.X - _layout.X, duration, lift);
-            AnimateDouble(CardOffset, TranslateTransform.YProperty, from.Y - _layout.Y, to.Y - _layout.Y, duration, lift, liftOffset);
-            AnimateDouble(SurfaceScale, ScaleTransform.ScaleXProperty, from.Width / _layout.Width, to.Width / _layout.Width, duration, lift);
-            AnimateDouble(SurfaceScale, ScaleTransform.ScaleYProperty, from.Height / _layout.Height, to.Height / _layout.Height, duration, lift);
+            AnimateDouble(CardOffset, TranslateTransform.XProperty, from.X - _layout.X, to.X - _layout.X, duration);
+            AnimateDouble(CardOffset, TranslateTransform.YProperty, from.Y - _layout.Y, to.Y - _layout.Y, duration);
+            AnimateDouble(SurfaceScale, ScaleTransform.ScaleXProperty, from.Width / _layout.Width, to.Width / _layout.Width, duration);
+            AnimateDouble(SurfaceScale, ScaleTransform.ScaleYProperty, from.Height / _layout.Height, to.Height / _layout.Height, duration);
 
-            var startClip = new Rect(from.Size);
-            var clip = new RectAnimationUsingKeyFrames { Duration = duration };
-            clip.KeyFrames.Add(new DiscreteRectKeyFrame(startClip, KeyTime.FromTimeSpan(TimeSpan.Zero)));
-            if (lift > TimeSpan.Zero)
-                clip.KeyFrames.Add(new DiscreteRectKeyFrame(startClip, KeyTime.FromTimeSpan(lift)));
-            clip.KeyFrames.Add(new EasingRectKeyFrame(new Rect(to.Size), KeyTime.FromTimeSpan(duration), MoveEase()));
+            var clip = new RectAnimation(new Rect(from.Size), new Rect(to.Size), duration) { EasingFunction = MoveEase() };
             ContentClip.BeginAnimation(RectangleGeometry.RectProperty, clip);
             CardShadow.BeginAnimation(PrerenderedShadow.ShadowBoundsProperty, clip);
         }
 
         private static CubicEase MoveEase() => new() { EasingMode = EasingMode.EaseInOut };
 
-        private static void AnimateDouble(Animatable target, DependencyProperty property, double from, double to,
-            TimeSpan duration, TimeSpan lift, double liftOffset = 0)
-        {
-            var animation = new DoubleAnimationUsingKeyFrames { Duration = duration };
-            animation.KeyFrames.Add(new DiscreteDoubleKeyFrame(from, KeyTime.FromTimeSpan(TimeSpan.Zero)));
-            if (lift > TimeSpan.Zero)
-                animation.KeyFrames.Add(new EasingDoubleKeyFrame(from + liftOffset, KeyTime.FromTimeSpan(lift),
-                    new CubicEase { EasingMode = EasingMode.EaseOut }));
-            animation.KeyFrames.Add(new EasingDoubleKeyFrame(to, KeyTime.FromTimeSpan(duration), MoveEase()));
-            target.BeginAnimation(property, animation);
-        }
+        private static void AnimateDouble(Animatable target, DependencyProperty property, double from, double to, TimeSpan duration) =>
+            target.BeginAnimation(property, new DoubleAnimation(from, to, duration) { EasingFunction = MoveEase() });
 
         private static DoubleAnimationUsingKeyFrames OpacityAnimation(double from, double to, TimeSpan duration, TimeSpan delay = default)
         {
@@ -237,10 +205,6 @@ namespace SinglePass.WPF.Views.Controls
                 else if (!_waitingForDraft)
                     Close(saved: _session.ViewModel.IsSavingEdit);
             }
-            else if (e.PropertyName == nameof(PasswordsViewModel.SelectedCredentialVM) && _lift != null)
-            {
-                Close();
-            }
         }
 
         private void Close(bool saved = false)
@@ -249,7 +213,6 @@ namespace SinglePass.WPF.Views.Controls
                 return;
 
             _closing = true;
-            StopLift();
             if (_waitingForDraft)
                 session.ViewModel.AddCommand.Cancel();
 
@@ -292,7 +255,6 @@ namespace SinglePass.WPF.Views.Controls
         {
             var session = _session;
             _session = null;
-            StopLift();
             session.ViewModel.PropertyChanged -= DraftChanged;
             if (_waitingForDraft)
                 session.ViewModel.AddCommand.Cancel();
@@ -321,12 +283,6 @@ namespace SinglePass.WPF.Views.Controls
 
             if (restoreFocus)
                 Dispatcher.InvokeAsync(() => session.Source.Focus(), DispatcherPriority.Input);
-        }
-
-        private void StopLift()
-        {
-            _lift?.Stop();
-            _lift = null;
         }
 
         private void ResetBoundsAnimations()
@@ -358,13 +314,13 @@ namespace SinglePass.WPF.Views.Controls
 
             var origin = GetBounds(session.Origin);
             var layout = GetLayout(session, origin);
-            if (layout == _layout && !(opening && session.IsAdding))
+            if (layout == _layout && !opening)
                 return;
 
-            var from = _waitingForDraft ? origin : CurrentCardBounds;
+            var from = opening ? origin : CurrentCardBounds;
             SetLayout(layout);
             if (animate && SystemParameters.ClientAreaAnimation)
-                AnimateBounds(from, layout, opening && session.IsAdding ? OpenDuration : OpenDuration - LiftDuration);
+                AnimateBounds(from, layout, opening ? OpenDuration : ResizeDuration);
             else
                 ResetBoundsAnimations();
         }
@@ -375,7 +331,7 @@ namespace SinglePass.WPF.Views.Controls
             if (e.Key != Key.Escape || _session is not { } session)
                 return;
 
-            if (_waitingForDraft || _lift != null)
+            if (_waitingForDraft)
             {
                 e.Handled = true;
                 Close();

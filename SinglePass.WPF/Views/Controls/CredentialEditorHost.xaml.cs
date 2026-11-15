@@ -89,7 +89,6 @@ namespace SinglePass.WPF.Views.Controls
             session.Card.UseModalSurface(true);
             CardContent.Child = session.Card;
             CardPanel.Opacity = session.IsAdding ? 0 : 1;
-            CardContent.Opacity = session.IsAdding ? 0 : 1;
             Visibility = Visibility.Visible;
             Focus();
             SetLayout(GetLayout(session, origin));
@@ -97,7 +96,6 @@ namespace SinglePass.WPF.Views.Controls
             {
                 AnimateOpacity(Backdrop, OpacityProperty, 0, BackdropOpacity, OpenDuration);
                 AnimateOpacity(CardShadow, OpacityProperty, 0, ShadowOpacity, OpenDuration);
-                session.Card.AnimateEditActions(OpacityAnimation(0, 1, OpenDuration, TimeSpan.FromMilliseconds(105)));
             }
             else
             {
@@ -190,16 +188,18 @@ namespace SinglePass.WPF.Views.Controls
             {
                 if (_session.ViewModel.DraftCredential is { } draft)
                 {
+                    var footer = _session.Card.EditorFooter;
+                    var animate = SystemParameters.ClientAreaAnimation;
+                    footer.Opacity = animate ? 0 : 1;
                     _session.Card.DisplayedDraft = draft;
                     UpdateEditorLayout(animate: true, opening: true);
+                    if (animate)
+                        footer.BeginAnimation(OpacityProperty, OpacityAnimation(0, 1, OpenDuration, TimeSpan.FromMilliseconds(105)));
 
                     if (_waitingForDraft)
                     {
                         _waitingForDraft = false;
                         CardPanel.Opacity = 1;
-                        CardContent.Opacity = 1;
-                        if (SystemParameters.ClientAreaAnimation)
-                            AnimateOpacity(CardContent, OpacityProperty, 0, 1, OpenDuration);
                     }
                 }
                 else if (!_waitingForDraft)
@@ -229,8 +229,8 @@ namespace SinglePass.WPF.Views.Controls
             CardContent.IsEnabled = false;
             Focus();
             AnimateBounds(CurrentCardBounds, GetBounds(destination), CloseDuration);
-            if (session.IsAdding && destination == session.Origin)
-                AnimateOpacity(CardContent, OpacityProperty, CardContent.Opacity, 0, CloseDuration);
+            var footer = session.Card.EditorFooter;
+            AnimateOpacity(footer, OpacityProperty, footer.Opacity, 0, CloseDuration);
             AnimateOpacity(CardShadow, OpacityProperty, CardShadow.Opacity, 0, CloseDuration);
             var fade = OpacityAnimation(Backdrop.Opacity, 0, CloseDuration);
             fade.Completed += (_, _) =>
@@ -264,14 +264,14 @@ namespace SinglePass.WPF.Views.Controls
             Visibility = Visibility.Collapsed;
             Backdrop.BeginAnimation(OpacityProperty, null);
             CardShadow.BeginAnimation(OpacityProperty, null);
-            CardContent.BeginAnimation(OpacityProperty, null);
             Backdrop.Opacity = 0;
             CardShadow.Opacity = 0;
             CardContent.IsEnabled = true;
             ResetBoundsAnimations();
 
             CardContent.Child = null;
-            session.Card.AnimateEditActions(null);
+            session.Card.EditorFooter.BeginAnimation(OpacityProperty, null);
+            session.Card.EditorFooter.Opacity = 1;
             session.Card.DisplayedDraft = null;
             if (session.Anchor != null)
             {

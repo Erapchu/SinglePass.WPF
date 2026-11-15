@@ -10,7 +10,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Threading;
 
 namespace SinglePass.WPF.Views.Controls
@@ -80,13 +79,6 @@ namespace SinglePass.WPF.Views.Controls
                 CardBorder.ClearValue(Border.BackgroundProperty);
                 CardBorder.ClearValue(Border.BorderBrushProperty);
             }
-        }
-
-        internal void AnimateEditActions(AnimationTimeline animation)
-        {
-            TotpEditActions.BeginAnimation(OpacityProperty, animation);
-            TotpSetupFields.BeginAnimation(OpacityProperty, animation);
-            EditActions.BeginAnimation(OpacityProperty, animation);
         }
 
         internal void UseDefaultIcon() => CredentialIcon.SetResourceReference(Image.SourceProperty, "DefaultFavIcon");

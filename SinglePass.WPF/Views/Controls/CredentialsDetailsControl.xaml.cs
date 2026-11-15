@@ -114,13 +114,14 @@ namespace SinglePass.WPF.Views.Controls
             if (TotpProgressArc == null || EditTotpProgressArc == null)
                 return;
 
-            var viewing = UpdateTotpDisplay(TotpDisplay, TotpCode, TotpCountdown, TotpProgressArc, CopyTotpButton);
-            var editing = UpdateTotpDisplay(EditTotpDisplay, EditTotpCode, EditTotpCountdown, EditTotpProgressArc, EditCopyTotpButton);
+            var viewing = UpdateTotpDisplay(TotpDisplay, TotpCode, TotpCountdown, TotpProgressArc);
+            var editing = UpdateTotpDisplay(EditTotpDisplay, EditTotpCode, EditTotpCountdown, EditTotpProgressArc);
+            CopyTotpButton.IsEnabled = viewing;
             _totpTimer.IsEnabled = viewing || editing;
         }
 
         private static bool UpdateTotpDisplay(StackPanel display, TextBlock codeText, Grid countdown,
-            System.Windows.Shapes.Path arc, Button copyButton)
+            System.Windows.Shapes.Path arc)
         {
             var configuration = display.IsLoaded && display.IsVisible ? display.DataContext as TotpConfiguration : null;
             var now = DateTime.UtcNow;
@@ -132,7 +133,6 @@ namespace SinglePass.WPF.Views.Controls
             arc.Data = valid
                 ? CreateProgressArc((seconds - now.Millisecond / 1000.0) / configuration.PeriodSeconds)
                 : null;
-            copyButton.IsEnabled = valid;
             return valid;
         }
 
@@ -149,18 +149,6 @@ namespace SinglePass.WPF.Views.Controls
         {
             if (TotpSetupBox.DataContext is CredentialViewModel draft)
                 draft.RemoveTotp = true;
-        }
-
-        private void CancelTotpChange_Click(object sender, RoutedEventArgs e)
-        {
-            if (TotpSetupBox.DataContext is CredentialViewModel draft)
-            {
-                draft.ReplaceTotp = false;
-                draft.RemoveTotp = false;
-                draft.HasInvalidTotp = false;
-                TotpSetupBox.Clear();
-                TotpQrStatus.Text = string.Empty;
-            }
         }
 
         private static Geometry CreateProgressArc(double fraction)

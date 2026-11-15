@@ -224,7 +224,7 @@ namespace SinglePass.WPF.Views.Controls
                         AnimateOpacity(CardContent, OpacityProperty, 0, 1, OpenDuration);
                 }
                 else if (!_waitingForDraft)
-                    Close();
+                    Close(saved: _session.ViewModel.IsSavingEdit);
             }
             else if (e.PropertyName == nameof(PasswordsViewModel.SelectedCredentialVM) && _lift != null)
             {
@@ -232,7 +232,7 @@ namespace SinglePass.WPF.Views.Controls
             }
         }
 
-        private void Close()
+        private void Close(bool saved = false)
         {
             if (_session is not { } session || _closing)
                 return;
@@ -242,7 +242,11 @@ namespace SinglePass.WPF.Views.Controls
             if (_waitingForDraft)
                 session.ViewModel.AddCommand.Cancel();
 
-            if (!SystemParameters.ClientAreaAnimation || !session.Origin.IsVisible)
+            var destination = session.Origin;
+            if (saved && session.IsAdding && session.Details.Parent is Decorator { IsVisible: true } detailsPane)
+                destination = detailsPane;
+
+            if (!SystemParameters.ClientAreaAnimation || !destination.IsVisible)
             {
                 Release(restoreFocus: true);
                 return;
@@ -251,8 +255,8 @@ namespace SinglePass.WPF.Views.Controls
             CardContent.IsEnabled = false;
             Focus();
             var from = new Rect(new Point(_layout.X + CardOffset.X, _layout.Y + CardOffset.Y), ContentClip.Rect.Size);
-            AnimateBounds(from, GetBounds(session.Origin), CloseDuration);
-            if (session.IsAdding)
+            AnimateBounds(from, GetBounds(destination), CloseDuration);
+            if (session.IsAdding && destination == session.Origin)
                 AnimateOpacity(CardContent, OpacityProperty, CardContent.Opacity, 0, CloseDuration);
             AnimateOpacity(CardShadow, OpacityProperty, CardShadow.Opacity, 0, CloseDuration);
             var fade = OpacityAnimation(Backdrop.Opacity, 0, CloseDuration);

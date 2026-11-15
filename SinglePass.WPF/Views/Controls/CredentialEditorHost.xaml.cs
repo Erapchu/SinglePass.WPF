@@ -22,10 +22,11 @@ namespace SinglePass.WPF.Views.Controls
         private static readonly TimeSpan CloseDuration = TimeSpan.FromMilliseconds(235);
 
         private sealed record EditorSession(CredentialsDetailsControl Card, CredentialsDetailsControl Details,
-            Button Source, Decorator Anchor, PasswordsViewModel ViewModel)
+            Button Source, Decorator Anchor, PasswordsViewModel ViewModel, CredentialDeleteConfirmation DeleteCard = null)
         {
             public bool IsAdding => Anchor == null;
-            public FrameworkElement Origin => IsAdding ? Source : Anchor;
+            public FrameworkElement Origin => IsAdding || DeleteCard != null ? Source : Anchor;
+            public FrameworkElement Footer => DeleteCard != null ? DeleteCard.Footer : Card.EditorFooter;
         }
 
         private EditorSession _session;
@@ -71,6 +72,49 @@ namespace SinglePass.WPF.Views.Controls
             }
         }
 
+        internal void OpenForDelete(CredentialsDetailsControl details, Decorator anchor, Button source, PasswordsViewModel viewModel)
+        {
+            if (_session != null || viewModel.SelectedCredentialVM is not { } credential)
+                return;
+
+            var card = new CredentialDeleteConfirmation { DataContext = credential };
+            var session = new EditorSession(null, details, source, anchor, viewModel, card);
+            _session = session;
+            card.CancelButton.Click += (_, _) => Close();
+            card.ConfirmButton.Click += async (_, _) => await ConfirmDeletionAsync(session, credential);
+            var animate = SystemParameters.ClientAreaAnimation;
+            card.Footer.Opacity = animate ? 0 : 1;
+            var origin = GetBounds(source);
+            ShowCard(card, session, origin);
+            if (animate)
+            {
+                AnimateBounds(origin, _layout, OpenDuration);
+                RevealFooter(card.Footer);
+            }
+            card.CancelButton.Focus();
+        }
+
+        private async Task ConfirmDeletionAsync(EditorSession session, CredentialViewModel credential)
+        {
+            if (!ReferenceEquals(_session, session) || _closing || !CardContent.IsEnabled)
+                return;
+
+            var origin = GetBounds(session.Source);
+            CardContent.IsEnabled = false;
+            Focus();
+            var deleted = await session.ViewModel.DeleteCredentialAsync(credential);
+            if (!ReferenceEquals(_session, session))
+                return;
+
+            if (deleted)
+                Close(hiddenOrigin: origin);
+            else
+            {
+                CardContent.IsEnabled = true;
+                session.DeleteCard.CancelButton.Focus();
+            }
+        }
+
         private void Open(EditorSession session)
         {
             var origin = GetBounds(session.Origin);
@@ -87,8 +131,13 @@ namespace SinglePass.WPF.Views.Controls
                 session.Anchor.Child = null;
 
             session.Card.UseModalSurface(true);
-            CardContent.Child = session.Card;
-            CardPanel.Opacity = session.IsAdding ? 0 : 1;
+            ShowCard(session.Card, session, origin, initiallyHidden: session.IsAdding);
+        }
+
+        private void ShowCard(UIElement card, EditorSession session, Rect origin, bool initiallyHidden = false)
+        {
+            CardContent.Child = card;
+            CardPanel.Opacity = initiallyHidden ? 0 : 1;
             Visibility = Visibility.Visible;
             Focus();
             SetLayout(GetLayout(session, origin));
@@ -119,10 +168,23 @@ namespace SinglePass.WPF.Views.Controls
                 return new Rect((Surface.ActualWidth - width) / 2, (Surface.ActualHeight - height) / 2, width, height);
             }
 
-            width = Math.Min(origin.Width, width);
-            var right = Math.Max(WindowInset + width, Math.Min(origin.Right - 10, Surface.ActualWidth - WindowInset));
-            height = FitEditorHeight(session.Card, width, height);
-            var top = (Surface.ActualHeight - height) / 2;
+            var pane = session.DeleteCard == null ? origin : GetBounds(session.Anchor);
+            width = Math.Min(pane.Width, width);
+            if (session.DeleteCard is { } deleteCard)
+            {
+                width = Math.Min(400, width);
+                deleteCard.Measure(new Size(width, double.PositiveInfinity));
+                height = Math.Min(height, deleteCard.DesiredSize.Height);
+            }
+            else
+            {
+                height = FitEditorHeight(session.Card, width, height);
+            }
+            var rightEdge = session.DeleteCard == null ? pane.Right - 10 : origin.Right;
+            var right = Math.Max(WindowInset + width, Math.Min(rightEdge, Surface.ActualWidth - WindowInset));
+            var top = session.DeleteCard == null
+                ? (Surface.ActualHeight - height) / 2
+                : Math.Max(WindowInset, Math.Min(origin.Top, Surface.ActualHeight - WindowInset - height));
             return new Rect(right - width, top, width, height);
         }
 
@@ -179,6 +241,9 @@ namespace SinglePass.WPF.Views.Controls
         private static void AnimateOpacity(IAnimatable target, DependencyProperty property, double from, double to, TimeSpan duration) =>
             target.BeginAnimation(property, OpacityAnimation(from, to, duration));
 
+        private static void RevealFooter(FrameworkElement footer) =>
+            footer.BeginAnimation(OpacityProperty, OpacityAnimation(0, 1, OpenDuration, TimeSpan.FromMilliseconds(105)));
+
         private void DraftChanged(object sender, PropertyChangedEventArgs e)
         {
             if (_closing)
@@ -194,7 +259,7 @@ namespace SinglePass.WPF.Views.Controls
                     _session.Card.DisplayedDraft = draft;
                     UpdateEditorLayout(animate: true, opening: true);
                     if (animate)
-                        footer.BeginAnimation(OpacityProperty, OpacityAnimation(0, 1, OpenDuration, TimeSpan.FromMilliseconds(105)));
+                        RevealFooter(footer);
 
                     if (_waitingForDraft)
                     {
@@ -207,7 +272,7 @@ namespace SinglePass.WPF.Views.Controls
             }
         }
 
-        private void Close(bool saved = false)
+        private void Close(bool saved = false, Rect? hiddenOrigin = null)
         {
             if (_session is not { } session || _closing)
                 return;
@@ -220,7 +285,8 @@ namespace SinglePass.WPF.Views.Controls
             if (saved && session.IsAdding && session.Details.Parent is Decorator { IsVisible: true } detailsPane)
                 destination = detailsPane;
 
-            if (!SystemParameters.ClientAreaAnimation || !destination.IsVisible)
+            var destinationBounds = destination.IsVisible ? GetBounds(destination) : hiddenOrigin;
+            if (!SystemParameters.ClientAreaAnimation || destinationBounds is not { } bounds)
             {
                 Release(restoreFocus: true);
                 return;
@@ -228,8 +294,8 @@ namespace SinglePass.WPF.Views.Controls
 
             CardContent.IsEnabled = false;
             Focus();
-            AnimateBounds(CurrentCardBounds, GetBounds(destination), CloseDuration);
-            var footer = session.Card.EditorFooter;
+            AnimateBounds(CurrentCardBounds, bounds, CloseDuration);
+            var footer = session.Footer;
             AnimateOpacity(footer, OpacityProperty, footer.Opacity, 0, CloseDuration);
             AnimateOpacity(CardShadow, OpacityProperty, CardShadow.Opacity, 0, CloseDuration);
             var fade = OpacityAnimation(Backdrop.Opacity, 0, CloseDuration);
@@ -247,7 +313,7 @@ namespace SinglePass.WPF.Views.Controls
                 return;
 
             Release(restoreFocus: false);
-            if (session.ViewModel.CancelEditCommand.CanExecute(null))
+            if (session.DeleteCard == null && session.ViewModel.CancelEditCommand.CanExecute(null))
                 session.ViewModel.CancelEditCommand.Execute(null);
         }
 
@@ -270,8 +336,17 @@ namespace SinglePass.WPF.Views.Controls
             ResetBoundsAnimations();
 
             CardContent.Child = null;
-            session.Card.EditorFooter.BeginAnimation(OpacityProperty, null);
-            session.Card.EditorFooter.Opacity = 1;
+            session.Footer.BeginAnimation(OpacityProperty, null);
+            session.Footer.Opacity = 1;
+            if (session.DeleteCard == null)
+                ReleaseDraft(session);
+
+            if (restoreFocus)
+                Dispatcher.InvokeAsync(() => session.Source.Focus(), DispatcherPriority.Input);
+        }
+
+        private static void ReleaseDraft(EditorSession session)
+        {
             session.Card.DisplayedDraft = null;
             if (session.Anchor != null)
             {
@@ -280,9 +355,6 @@ namespace SinglePass.WPF.Views.Controls
             }
             session.Card.ClearValue(DataContextProperty);
             session.Details.FollowDraft();
-
-            if (restoreFocus)
-                Dispatcher.InvokeAsync(() => session.Source.Focus(), DispatcherPriority.Input);
         }
 
         private void ResetBoundsAnimations()
@@ -303,7 +375,7 @@ namespace SinglePass.WPF.Views.Controls
 
         private void Host_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            if (_session?.Card.EditScrollViewer == e.OriginalSource && e.ExtentHeightChange != 0)
+            if (_session?.Card?.EditScrollViewer == e.OriginalSource && e.ExtentHeightChange != 0)
                 UpdateEditorLayout(animate: true);
         }
 
@@ -328,10 +400,10 @@ namespace SinglePass.WPF.Views.Controls
         protected override void OnKeyDown(KeyEventArgs e)
         {
             base.OnKeyDown(e);
-            if (e.Key != Key.Escape || _session is not { } session)
+            if (e.Key != Key.Escape || _session is not { } session || !CardContent.IsEnabled)
                 return;
 
-            if (_waitingForDraft)
+            if (_waitingForDraft || session.DeleteCard != null)
             {
                 e.Handled = true;
                 Close();

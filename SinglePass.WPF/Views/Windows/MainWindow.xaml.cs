@@ -67,6 +67,9 @@ namespace SinglePass.WPF.Views.Windows
         internal Task ShowNewCredentialEditorAsync(CredentialsDetailsControl details, Button source, PasswordsViewModel viewModel) =>
             CredentialEditor.OpenForAddAsync(details, source, viewModel);
 
+        internal void ShowCredentialDeletion(CredentialsDetailsControl details, Decorator anchor, Button source, PasswordsViewModel viewModel) =>
+            CredentialEditor.OpenForDelete(details, anchor, source, viewModel);
+
         private void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName != nameof(MainWindowViewModel.SelectedNavigationItem))

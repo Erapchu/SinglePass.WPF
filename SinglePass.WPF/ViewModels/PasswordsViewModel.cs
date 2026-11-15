@@ -573,19 +573,20 @@ namespace SinglePass.WPF.ViewModels
                 "\uE74D");
 
             if (result == DialogChoice.Yes)
-            {
-                if (!await SaveCredentialAsync(() => _credentialsCryptoService.DeleteCredential(credential.Model)))
-                    return;
-                _credentialVMs.Remove(credential);
-                var dIndex = DisplayedCredentials.IndexOf(credential);
-                var countAfterDeletion = DisplayedCredentials.Count - 1;
-                var sIndex = dIndex >= countAfterDeletion ? countAfterDeletion - 1 : dIndex;
-                await DisplayCredentialsAsync();
-                if (sIndex >= 0 && sIndex < DisplayedCredentials.Count)
-                {
-                    SelectedCredentialVM = DisplayedCredentials.ElementAt(sIndex);
-                }
-            }
+                await DeleteCredentialAsync(credential);
+        }
+
+        internal async Task<bool> DeleteCredentialAsync(CredentialViewModel credential)
+        {
+            if (!await SaveCredentialAsync(() => _credentialsCryptoService.DeleteCredential(credential.Model)))
+                return false;
+
+            _credentialVMs.Remove(credential);
+            var index = Math.Min(DisplayedCredentials.IndexOf(credential), DisplayedCredentials.Count - 2);
+            await DisplayCredentialsAsync();
+            if (index >= 0 && index < DisplayedCredentials.Count)
+                SelectedCredentialVM = DisplayedCredentials[index];
+            return true;
         }
 
         private async Task<bool> SaveCredentialAsync(Func<Task> save)

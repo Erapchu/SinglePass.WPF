@@ -40,6 +40,9 @@ namespace SinglePass.WPF.Views.Controls
 
         private void EditPasswordMenuItem_Click(object sender, RoutedEventArgs e) => CredentialsDetailsControl.EditCredential();
 
+        private async void DeletePasswordMenuItem_Click(object sender, RoutedEventArgs e) =>
+            await CredentialsDetailsControl.DeleteCredentialAsync();
+
         private void CredentialsList_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             _dragStart = e.GetPosition(CredentialsListBox);

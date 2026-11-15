@@ -67,6 +67,19 @@ namespace SinglePass.WPF.Views.Controls
                 viewModel.EditCommand.Execute(null);
         }
 
+        private async void DeleteButton_Click(object sender, RoutedEventArgs e) => await DeleteCredentialAsync();
+
+        internal async Task DeleteCredentialAsync()
+        {
+            if (DataContext is not PasswordsViewModel viewModel || !viewModel.DeleteCommand.CanExecute(null))
+                return;
+
+            if (Window.GetWindow(this) is MainWindow window && Parent is Decorator anchor)
+                window.ShowCredentialDeletion(this, anchor, DeleteButton, viewModel);
+            else
+                await viewModel.DeleteCommand.ExecuteAsync(null);
+        }
+
         internal void UseModalSurface(bool enabled)
         {
             if (enabled)

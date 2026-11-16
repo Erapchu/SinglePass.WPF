@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,6 +24,14 @@ namespace SinglePass.WPF.Authorization.Helpers
         public const string ResponseType = "response_type";
         public const string Code = "code";
         public const string AuthorizationCode = "authorization_code";
+
+        internal static string CreateRandomUrlToken() => Base64Url(RandomNumberGenerator.GetBytes(32));
+
+        internal static string CreatePkceChallenge(string verifier) =>
+            Base64Url(SHA256.HashData(Encoding.ASCII.GetBytes(verifier)));
+
+        internal static string Base64Url(byte[] bytes) =>
+            Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
 
         public static int GetRandomUnusedPort()
         {

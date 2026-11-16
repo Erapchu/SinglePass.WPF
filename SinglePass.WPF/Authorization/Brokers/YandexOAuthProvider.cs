@@ -51,15 +51,15 @@ namespace SinglePass.WPF.Authorization.Brokers
                 throw new InvalidOperationException("Yandex Disk requires an HTTP loopback redirect URI ending in a slash.");
             }
 
-            var state = Base64Url(RandomNumberGenerator.GetBytes(32));
-            var verifier = Base64Url(RandomNumberGenerator.GetBytes(32));
+            var state = OAuthHelper.CreateRandomUrlToken();
+            var verifier = OAuthHelper.CreateRandomUrlToken();
             var query = OAuthHelper.GetHttpQSCollection();
             query["response_type"] = "code";
             query["client_id"] = _config.ClientId;
             query["redirect_uri"] = redirectUri.AbsoluteUri;
             query["scope"] = Scopes;
             query["state"] = state;
-            query["code_challenge"] = Base64Url(SHA256.HashData(Encoding.ASCII.GetBytes(verifier)));
+            query["code_challenge"] = OAuthHelper.CreatePkceChallenge(verifier);
             query["code_challenge_method"] = "S256";
             query["force_confirm"] = "yes";
             query["device_id"] = GetDeviceId();
@@ -160,11 +160,9 @@ namespace SinglePass.WPF.Authorization.Brokers
         {
             using var identity = WindowsIdentity.GetCurrent();
             var device = $"SinglePass:{Environment.MachineName}:{identity.User?.Value}";
-            return Base64Url(SHA256.HashData(Encoding.UTF8.GetBytes(device)));
+            return OAuthHelper.Base64Url(SHA256.HashData(Encoding.UTF8.GetBytes(device)));
         }
 
-        private static string Base64Url(byte[] bytes) =>
-            Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
     }
 
     internal sealed class YandexCallbackUnavailableException(int port, Exception innerException)

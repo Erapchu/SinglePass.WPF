@@ -182,9 +182,8 @@ namespace SinglePass.WPF.Views.Controls
             }
             var rightEdge = session.DeleteCard == null ? pane.Right - 10 : origin.Right;
             var right = Math.Max(WindowInset + width, Math.Min(rightEdge, Surface.ActualWidth - WindowInset));
-            var top = session.DeleteCard == null
-                ? (Surface.ActualHeight - height) / 2
-                : Math.Max(WindowInset, Math.Min(origin.Top, Surface.ActualHeight - WindowInset - height));
+            var preferredTop = session.DeleteCard == null ? origin.Top + 12 : origin.Top;
+            var top = Math.Max(WindowInset, Math.Min(preferredTop, Surface.ActualHeight - WindowInset - height));
             return new Rect(right - width, top, width, height);
         }
 

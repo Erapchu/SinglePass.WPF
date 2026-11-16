@@ -15,7 +15,7 @@
       "logName": "SinglePass",
       "logDir": "${specialfolder:folder=LocalApplicationData}/SinglePass/Logs",
       "logDirArchive": "${var:logDir}/Archive",
-      "logLayout": "${date} | ${level:padding=-5:fixedLength=true} | TID:${threadid:padding=-2} | ${callsite:includeNamespace=False:cleanNamesOfAnonymousDelegates=True:cleanNamesOfAsyncContinuations=True}> ${message} ${exception:format=toString:innerFormat=toString}"
+      "logLayout": "[${date:format=yyyy-MM-dd HH\\:mm\\:ss,fff}] ${level:uppercase=true:padding=5} [${threadid:padding=2}] ${callsite:includeNamespace=False:cleanNamesOfAnonymousDelegates=True:cleanNamesOfAsyncContinuations=True}> ${message} ${exception:format=toString:innerFormat=toString}"
     },
     "targets": {
       "async": true,

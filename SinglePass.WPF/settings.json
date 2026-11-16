@@ -37,6 +37,10 @@
     },
     "rules": [
       {
+        "logger": "Microsoft.EntityFrameworkCore.Database.Command",
+        "finalMinLevel": "Warn"
+      },
+      {
         "logger": "*",
         //"levels": "Trace,Debug,Info,Warn,Error,Fatal",
         "minLevel": "Info",

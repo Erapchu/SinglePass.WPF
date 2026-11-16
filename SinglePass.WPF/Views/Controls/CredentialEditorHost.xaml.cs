@@ -17,9 +17,9 @@ namespace SinglePass.WPF.Views.Controls
         private const double WindowInset = 8;
         private const double BackdropOpacity = 0.32;
         private const double ShadowOpacity = 0.36;
-        private static readonly TimeSpan OpenDuration = TimeSpan.FromMilliseconds(275);
+        private static readonly TimeSpan OpenDuration = TimeSpan.FromMilliseconds(170);
         private static readonly TimeSpan ResizeDuration = TimeSpan.FromMilliseconds(210);
-        private static readonly TimeSpan CloseDuration = TimeSpan.FromMilliseconds(235);
+        private static readonly TimeSpan CloseDuration = TimeSpan.FromMilliseconds(170);
 
         private sealed record EditorSession(CredentialsDetailsControl Card, CredentialsDetailsControl Details,
             Button Source, Decorator Anchor, PasswordsViewModel ViewModel, CredentialDeleteConfirmation DeleteCard = null)
@@ -242,7 +242,7 @@ namespace SinglePass.WPF.Views.Controls
             target.BeginAnimation(property, OpacityAnimation(from, to, duration));
 
         private static void RevealFooter(FrameworkElement footer) =>
-            footer.BeginAnimation(OpacityProperty, OpacityAnimation(0, 1, OpenDuration, TimeSpan.FromMilliseconds(105)));
+            footer.BeginAnimation(OpacityProperty, OpacityAnimation(0, 1, OpenDuration, TimeSpan.FromMilliseconds(60)));
 
         private void DraftChanged(object sender, PropertyChangedEventArgs e)
         {

@@ -15,6 +15,7 @@
     Height="550"
     MinWidth="620"
     MinHeight="300"
+    helpers:UiAnimations.IsEnabled="{Binding SettingsVM.AnimationsEnabled, FallbackValue=True}"
     d:DataContext="{x:Static vm:MainWindowViewModel.DesignTimeInstance}"
     Closed="Window_Closed"
     Closing="Window_Closing"
@@ -78,6 +79,7 @@
     <Window.CommandBindings>
         <CommandBinding Command="{x:Static controls:SettingsControl.OpenCloudSyncCommand}" Executed="OpenCloudSync_Executed" />
         <CommandBinding Command="{x:Static controls:SettingsControl.OpenSecurityCommand}" Executed="OpenSecurity_Executed" />
+        <CommandBinding Command="{x:Static controls:SettingsControl.OpenAppearanceCommand}" Executed="OpenAppearance_Executed" />
     </Window.CommandBindings>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Loaded">

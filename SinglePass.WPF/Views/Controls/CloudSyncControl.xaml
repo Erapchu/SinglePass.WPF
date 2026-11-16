@@ -5,6 +5,7 @@
     xmlns:cloud="clr-namespace:SinglePass.WPF.Cloud.Enums"
     xmlns:conv="clr-namespace:SinglePass.WPF.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:helpers="clr-namespace:SinglePass.WPF.Helpers"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:loc="clr-namespace:SinglePass.WPF.Localization"
@@ -26,6 +27,7 @@
                 <MultiDataTrigger>
                     <MultiDataTrigger.Conditions>
                         <Condition Binding="{Binding IsVisible, RelativeSource={RelativeSource Self}}" Value="True" />
+                        <Condition Binding="{Binding Path=(helpers:UiAnimations.IsEnabled), RelativeSource={RelativeSource Self}}" Value="True" />
                         <Condition Binding="{Binding Path=(SystemParameters.ClientAreaAnimation)}" Value="True" />
                     </MultiDataTrigger.Conditions>
                     <MultiDataTrigger.EnterActions>

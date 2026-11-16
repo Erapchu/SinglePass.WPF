@@ -27,6 +27,7 @@ namespace SinglePass.WPF.Views.Windows
         private readonly DispatcherTimer _statusTimer = new() { Interval = TimeSpan.FromSeconds(3) };
         private CloudSyncControl _cloudSyncControl;
         private SecurityControl _securityControl;
+        private AppearanceControl _appearanceControl;
         private Button _settingsPageButton;
 
         private MainWindowViewModel ViewModel => DataContext as MainWindowViewModel;
@@ -84,7 +85,7 @@ namespace SinglePass.WPF.Views.Windows
             SettingsHeader.Visibility = showSettings ? Visibility.Visible : Visibility.Collapsed;
             PasswordsHeading.Visibility = showSettings ? Visibility.Collapsed : Visibility.Visible;
 
-            if (pageChanged && IsVisible && SystemParameters.ClientAreaAnimation)
+            if (pageChanged && IsVisible && UiAnimations.ShouldAnimate(this))
                 AnimateNavigation(new Vector(0, 8), 0.85, TimeSpan.FromMilliseconds(160));
         }
 
@@ -182,6 +183,15 @@ namespace SinglePass.WPF.Views.Windows
             OpenSettingsPage(_securityControl, settings.SecurityButton, "Security");
         }
 
+        private void OpenAppearance_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (NavigationContent.Content is not SettingsControl settings)
+                return;
+
+            _appearanceControl ??= new AppearanceControl { DataContext = ViewModel.SettingsVM };
+            OpenSettingsPage(_appearanceControl, settings.AppearanceButton, "Appearance");
+        }
+
         private void OpenSettingsPage(UserControl page, Button sourceButton, string titleKey)
         {
             _settingsPageButton = sourceButton;
@@ -230,8 +240,19 @@ namespace SinglePass.WPF.Views.Windows
 
         private void AnimateSettingsPage(double horizontalOffset)
         {
-            if (IsVisible && SystemParameters.ClientAreaAnimation)
+            if (IsVisible && UiAnimations.ShouldAnimate(this))
                 AnimateNavigation(new Vector(horizontalOffset, 0), 0, TimeSpan.FromMilliseconds(250));
+        }
+
+        protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
+        {
+            base.OnPropertyChanged(e);
+            if (e.Property != UiAnimations.IsEnabledProperty || e.NewValue is not false)
+                return;
+
+            NavigationContent?.BeginAnimation(OpacityProperty, null);
+            NavigationOffset?.BeginAnimation(TranslateTransform.XProperty, null);
+            NavigationOffset?.BeginAnimation(TranslateTransform.YProperty, null);
         }
 
         private void AnimateNavigation(Vector offset, double initialOpacity, TimeSpan duration)

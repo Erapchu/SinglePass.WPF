@@ -1,4 +1,5 @@
 using SinglePass.WPF.Controls;
+using SinglePass.WPF.Helpers;
 using SinglePass.WPF.ViewModels;
 using System;
 using System.ComponentModel;
@@ -82,7 +83,7 @@ namespace SinglePass.WPF.Views.Controls
             _session = session;
             card.CancelButton.Click += (_, _) => Close();
             card.ConfirmButton.Click += async (_, _) => await ConfirmDeletionAsync(session, credential);
-            var animate = SystemParameters.ClientAreaAnimation;
+            var animate = UiAnimations.ShouldAnimate(this);
             card.Footer.Opacity = animate ? 0 : 1;
             var origin = GetBounds(source);
             ShowCard(card, session, origin);
@@ -141,7 +142,7 @@ namespace SinglePass.WPF.Views.Controls
             Visibility = Visibility.Visible;
             Focus();
             SetLayout(GetLayout(session, origin));
-            if (SystemParameters.ClientAreaAnimation)
+            if (UiAnimations.ShouldAnimate(this))
             {
                 AnimateOpacity(Backdrop, OpacityProperty, 0, BackdropOpacity, OpenDuration);
                 AnimateOpacity(CardShadow, OpacityProperty, 0, ShadowOpacity, OpenDuration);
@@ -253,7 +254,7 @@ namespace SinglePass.WPF.Views.Controls
                 if (_session.ViewModel.DraftCredential is { } draft)
                 {
                     var footer = _session.Card.EditorFooter;
-                    var animate = SystemParameters.ClientAreaAnimation;
+                    var animate = UiAnimations.ShouldAnimate(this);
                     footer.Opacity = animate ? 0 : 1;
                     _session.Card.DisplayedDraft = draft;
                     UpdateEditorLayout(animate: true, opening: true);
@@ -285,7 +286,7 @@ namespace SinglePass.WPF.Views.Controls
                 destination = detailsPane;
 
             var destinationBounds = destination.IsVisible ? GetBounds(destination) : hiddenOrigin;
-            if (!SystemParameters.ClientAreaAnimation || destinationBounds is not { } bounds)
+            if (!UiAnimations.ShouldAnimate(this) || destinationBounds is not { } bounds)
             {
                 Release(restoreFocus: true);
                 return;
@@ -390,7 +391,7 @@ namespace SinglePass.WPF.Views.Controls
 
             var from = opening ? origin : CurrentCardBounds;
             SetLayout(layout);
-            if (animate && SystemParameters.ClientAreaAnimation)
+            if (animate && UiAnimations.ShouldAnimate(this))
                 AnimateBounds(from, layout, opening ? OpenDuration : ResizeDuration);
             else
                 ResetBoundsAnimations();

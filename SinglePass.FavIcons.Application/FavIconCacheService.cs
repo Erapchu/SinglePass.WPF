@@ -24,9 +24,9 @@
             return _favIconRepository.GetMany(favIconDtos);
         }
 
-        public Task Add(FavIcon favIcon)
+        public Task Save(FavIcon favIcon)
         {
-            return _favIconRepository.Add(favIcon);
+            return _favIconRepository.Save(favIcon);
         }
     }
 }

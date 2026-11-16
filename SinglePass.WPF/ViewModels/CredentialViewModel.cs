@@ -150,10 +150,14 @@ namespace SinglePass.WPF.ViewModels
         {
             get
             {
-                if (_favIcon is null && WebsiteDomain is { } domain)
-                    _favIconCollector?.ScheduleGetImage(
+                if (_favIconCollector != null && WebsiteDomain is { } domain)
+                    _favIconCollector.ScheduleGetImage(
                         "https://" + domain,
-                        (image) => SetProperty(ref _favIcon, image, nameof(FavIcon)));
+                        image =>
+                        {
+                            if (WebsiteDomain == domain)
+                                SetProperty(ref _favIcon, image, nameof(FavIcon));
+                        });
 
                 return _favIcon;
             }
@@ -176,6 +180,8 @@ namespace SinglePass.WPF.ViewModels
                     OnPropertyChanged(nameof(WebsiteDomain));
                     OnPropertyChanged(nameof(Website));
                     OnPropertyChanged(nameof(HasWebsite));
+                    _favIcon = null;
+                    OnPropertyChanged(nameof(FavIcon));
                 }
             };
             AdditionalFields = new ObservableCollection<PassFieldViewModel>(credential.AdditionalFields.Select(f => new PassFieldViewModel(f)));

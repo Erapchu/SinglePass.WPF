@@ -15,7 +15,7 @@ namespace SinglePass.FavIcons.Repository.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "6.0.9");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.15");
 
             modelBuilder.Entity("SinglePass.FavIcons.Application.FavIcon", b =>
                 {
@@ -29,10 +29,22 @@ namespace SinglePass.FavIcons.Repository.Migrations
                     b.Property<string>("Host")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("LastCheckedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("LastUpdatedUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("Size")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("Host", "Size")
+                        .IsUnique();
 
                     b.ToTable("FavIcons");
                 });

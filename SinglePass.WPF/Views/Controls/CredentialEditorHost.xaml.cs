@@ -17,9 +17,9 @@ namespace SinglePass.WPF.Views.Controls
         private const double WindowInset = 8;
         private const double BackdropOpacity = 0.32;
         private const double ShadowOpacity = 0.36;
-        private static readonly TimeSpan OpenDuration = TimeSpan.FromMilliseconds(180);
+        private static readonly TimeSpan OpenDuration = TimeSpan.FromMilliseconds(200);
         private static readonly TimeSpan ResizeDuration = TimeSpan.FromMilliseconds(210);
-        private static readonly TimeSpan CloseDuration = TimeSpan.FromMilliseconds(180);
+        private static readonly TimeSpan CloseDuration = TimeSpan.FromMilliseconds(200);
 
         private sealed record EditorSession(CredentialsDetailsControl Card, CredentialsDetailsControl Details,
             Button Source, Decorator Anchor, PasswordsViewModel ViewModel, CredentialDeleteConfirmation DeleteCard = null)

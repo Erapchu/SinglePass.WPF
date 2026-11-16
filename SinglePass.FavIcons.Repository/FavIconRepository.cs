@@ -12,9 +12,9 @@ namespace SinglePass.FavIcons.Repository
             _favIconDbContext = favIconDbContext;
         }
 
-        public Task Add(FavIcon favIcon)
+        public Task Save(FavIcon favIcon)
         {
-            _favIconDbContext.FavIcons.Add(favIcon);
+            _favIconDbContext.FavIcons.Update(favIcon);
             return _favIconDbContext.SaveChangesAsync();
         }
 
@@ -28,18 +28,18 @@ namespace SinglePass.FavIcons.Repository
             return _favIconDbContext.FavIcons.FirstOrDefaultAsync(f => f.Host == favIconDto.Host && f.Size == favIconDto.Size);
         }
 
-        public Task<List<FavIcon>> GetMany(List<FavIconDto> favIconDtos)
+        public async Task<List<FavIcon>> GetMany(List<FavIconDto> favIconDtos)
         {
-            if (favIconDtos.Count == 0)
-                return Task.FromResult(new List<FavIcon>());
-
-            IQueryable<FavIcon> query = _favIconDbContext.FavIcons.AsNoTracking().Where(f => f.Host == favIconDtos[0].Host && f.Size == favIconDtos[0].Size);
-            var whereClause = _favIconDbContext.FavIcons.AsNoTracking();
-            foreach (var favIcon in favIconDtos.Skip(1))
+            var icons = new List<FavIcon>();
+            foreach (var group in favIconDtos.GroupBy(icon => icon.Size))
             {
-                query = query.Concat(whereClause.Where(f => f.Host == favIcon.Host && f.Size == favIcon.Size));
+                var size = group.Key;
+                var hosts = group.Select(icon => icon.Host).ToArray();
+                icons.AddRange(await _favIconDbContext.FavIcons.AsNoTracking()
+                    .Where(icon => icon.Size == size && hosts.Contains(icon.Host))
+                    .ToListAsync());
             }
-            return query.ToListAsync();
+            return icons;
         }
     }
 }

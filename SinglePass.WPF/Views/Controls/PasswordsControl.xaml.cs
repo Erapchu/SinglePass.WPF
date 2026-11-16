@@ -145,6 +145,12 @@ namespace SinglePass.WPF.Views.Controls
             }
         }
 
+        private void FavIcon_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (sender is Image { IsVisible: true } icon)
+                icon.GetBindingExpression(Image.SourceProperty)?.UpdateTarget();
+        }
+
         private async void UserControl_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (e.NewValue is bool v && v)

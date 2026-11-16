@@ -26,14 +26,15 @@ namespace SinglePass.WPF.Services
         private const int _maxConcurrentDownloads = 4;
         private const int _favIconSize = 32;
         private const string _favIconServiceUrl = "https://www.google.com/s2/favicons?domain_url={0}&sz={1}&alt=404";
+        private static readonly TimeSpan AvailableRefreshInterval = TimeSpan.FromDays(30);
+        private static readonly TimeSpan UnavailableRetryInterval = TimeSpan.FromDays(1);
 
         private readonly RegeneratedList<ImageRequest> _processingImages = new();
         private readonly ILogger<FavIconCollector> _logger;
         private readonly ImageService _imageService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly CancellationTokenSource _processingCTS = new();
-        // A null entry means the provider returned 404 during this session.
-        private readonly ConcurrentDictionary<string, ImageSource> _imagesCache = new();
+        private readonly ConcurrentDictionary<string, CachedImage> _imagesCache = new();
 
         public FavIconCollector(
             ILogger<FavIconCollector> logger,
@@ -58,14 +59,10 @@ namespace SinglePass.WPF.Services
 
                 var host = imageUrl.Host;
 
-                if (_imagesCache.TryGetValue(host, out ImageSource image))
-                {
-                    setPropertyAction(image);
-                }
+                if (_imagesCache.TryGetValue(host, out var cached) && cached.RefreshAfterUtc > DateTime.UtcNow)
+                    setPropertyAction(cached.Image);
                 else
-                {
                     _processingImages.Add(new ImageRequest(host, setPropertyAction));
-                }
             }
             catch (Exception ex)
             {
@@ -114,8 +111,8 @@ namespace SinglePass.WPF.Services
             var pending = new List<IGrouping<string, ImageRequest>>();
             foreach (var group in requests.GroupBy(request => request.Host))
             {
-                if (_imagesCache.TryGetValue(group.Key, out var image))
-                    PublishImage(group, image);
+                if (_imagesCache.TryGetValue(group.Key, out var cached) && cached.RefreshAfterUtc > DateTime.UtcNow)
+                    PublishImage(group, cached.Image);
                 else
                     pending.Add(group);
             }
@@ -131,28 +128,26 @@ namespace SinglePass.WPF.Services
                 cachedIcons = await cache.GetMany(keys);
             }
 
-            var iconsByHost = cachedIcons.ToLookup(icon => icon.Host);
-            var downloads = new List<IGrouping<string, ImageRequest>>();
+            var iconsByHost = cachedIcons.ToDictionary(icon => icon.Host);
+            var downloads = new List<(IGrouping<string, ImageRequest> Requests, FavIcon Icon, ImageSource Image)>();
             foreach (var group in pending)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                var cachedIcon = iconsByHost[group.Key].FirstOrDefault();
-                if (cachedIcon == null)
+                if (!iconsByHost.TryGetValue(group.Key, out var icon))
+                    icon = new FavIcon { Host = group.Key, Size = _favIconSize };
+
+                var image = DecodeCachedImage(icon);
+                var refreshAfter = GetRefreshAfterUtc(icon);
+                if (refreshAfter > DateTime.UtcNow &&
+                    (image != null || icon.Status != FavIconStatus.Available))
                 {
-                    downloads.Add(group);
+                    _imagesCache[group.Key] = new CachedImage(image, refreshAfter);
+                    PublishImage(group, image);
                     continue;
                 }
 
-                try
-                {
-                    var image = ImageSourceHelper.ToImageSource(cachedIcon.Bytes);
-                    _imagesCache.TryAdd(group.Key, image);
-                    PublishImage(group, image);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, null);
-                }
+                PublishImage(group, image);
+                downloads.Add((group, icon, image));
             }
 
             var options = new ParallelOptions
@@ -160,29 +155,80 @@ namespace SinglePass.WPF.Services
                 CancellationToken = cancellationToken,
                 MaxDegreeOfParallelism = _maxConcurrentDownloads,
             };
-            await Parallel.ForEachAsync(downloads, options, async (group, token) =>
+            await Parallel.ForEachAsync(downloads, options, async (download, token) =>
             {
-                try
-                {
-                    var host = group.Key;
-                    var url = string.Format(_favIconServiceUrl, Uri.EscapeDataString(host), _favIconSize);
-                    var image = await _imageService.GetImageAsync(url, token);
-                    _imagesCache.TryAdd(group.Key, image);
-                    PublishImage(group, image);
-
-                    using var scope = _serviceScopeFactory.CreateScope();
-                    var cache = scope.ServiceProvider.GetRequiredService<FavIconCacheService>();
-                    await cache.Add(new FavIcon { Host = host, Size = _favIconSize, Bytes = ImageSourceHelper.ToBytes(image) });
-                }
-                catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
-                {
-                    _imagesCache.TryAdd(group.Key, null);
-                }
-                catch (Exception ex) when (!token.IsCancellationRequested)
-                {
-                    _logger.LogError(ex, null);
-                }
+                await RefreshImage(download.Icon, download.Image, download.Requests, token);
             });
+        }
+
+        private async Task RefreshImage(FavIcon icon, ImageSource image, IEnumerable<ImageRequest> requests,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                var url = string.Format(_favIconServiceUrl, Uri.EscapeDataString(icon.Host), icon.Size);
+                var downloadedImage = await _imageService.GetImageAsync(url, cancellationToken);
+                var bytes = ImageSourceHelper.ToBytes(downloadedImage);
+                if (icon.Bytes == null || !bytes.AsSpan().SequenceEqual(icon.Bytes))
+                {
+                    icon.Bytes = bytes;
+                    icon.LastUpdatedUtc = DateTime.UtcNow;
+                    image = downloadedImage;
+                }
+                image ??= downloadedImage;
+                icon.Status = FavIconStatus.Available;
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+            {
+                icon.Status = FavIconStatus.Missing;
+            }
+            catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
+            {
+                icon.Status = FavIconStatus.TemporaryError;
+                _logger.LogDebug(ex, "Unable to refresh a favicon");
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+            icon.LastCheckedUtc = DateTime.UtcNow;
+            _imagesCache[icon.Host] = new CachedImage(image, GetRefreshAfterUtc(icon));
+            PublishImage(requests, image);
+
+            try
+            {
+                using var scope = _serviceScopeFactory.CreateScope();
+                var cache = scope.ServiceProvider.GetRequiredService<FavIconCacheService>();
+                await cache.Save(icon);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unable to save a favicon cache entry");
+            }
+        }
+
+        private ImageSource DecodeCachedImage(FavIcon icon)
+        {
+            if (icon.Bytes is not { Length: > 0 })
+                return null;
+
+            try
+            {
+                return ImageSourceHelper.ToImageSource(icon.Bytes);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "Unable to decode a cached favicon");
+                return null;
+            }
+        }
+
+        private static DateTime GetRefreshAfterUtc(FavIcon icon)
+        {
+            if (icon.LastCheckedUtc is not { } lastChecked)
+                return DateTime.MinValue;
+
+            return lastChecked + (icon.Status == FavIconStatus.Available
+                ? AvailableRefreshInterval
+                : UnavailableRetryInterval);
         }
 
         private void PublishImage(IEnumerable<ImageRequest> requests, ImageSource image)
@@ -201,5 +247,6 @@ namespace SinglePass.WPF.Services
         }
 
         private sealed record ImageRequest(string Host, Action<ImageSource> SetPropertyAction);
+        private sealed record CachedImage(ImageSource Image, DateTime RefreshAfterUtc);
     }
 }

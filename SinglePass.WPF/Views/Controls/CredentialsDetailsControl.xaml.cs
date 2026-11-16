@@ -96,6 +96,12 @@ namespace SinglePass.WPF.Views.Controls
 
         internal void UseDefaultIcon() => CredentialIcon.SetResourceReference(Image.SourceProperty, "DefaultFavIcon");
 
+        private void CredentialIcon_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (sender is Image { IsVisible: true } icon)
+                icon.GetBindingExpression(Image.SourceProperty)?.UpdateTarget();
+        }
+
         private void TotpDisplay_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e) => RefreshTotp();
         private void TotpDisplay_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) => RefreshTotp();
         private void TotpDisplay_Loaded(object sender, RoutedEventArgs e) => RefreshTotp();

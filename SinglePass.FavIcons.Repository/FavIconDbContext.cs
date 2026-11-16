@@ -17,6 +17,11 @@ namespace SinglePass.FavIcons.Repository
 
         }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<FavIcon>().HasIndex(icon => new { icon.Host, icon.Size }).IsUnique();
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (optionsBuilder.IsConfigured)

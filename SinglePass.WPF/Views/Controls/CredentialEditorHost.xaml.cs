@@ -179,7 +179,7 @@ namespace SinglePass.WPF.Views.Controls
             }
             else
             {
-                height = FitEditorHeight(session.Card, width, height);
+                height = Math.Min(origin.Height, height);
             }
             var rightEdge = session.DeleteCard == null ? pane.Right - 10 : origin.Right;
             var right = Math.Max(WindowInset + width, Math.Min(rightEdge, Surface.ActualWidth - WindowInset));
@@ -375,7 +375,7 @@ namespace SinglePass.WPF.Views.Controls
 
         private void Host_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            if (_session?.Card?.EditScrollViewer == e.OriginalSource && e.ExtentHeightChange != 0)
+            if (_session is { IsAdding: true } session && session.Card.EditScrollViewer == e.OriginalSource && e.ExtentHeightChange != 0)
                 UpdateEditorLayout(animate: true);
         }
 

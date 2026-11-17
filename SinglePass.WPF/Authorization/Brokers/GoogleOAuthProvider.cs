@@ -35,7 +35,6 @@ namespace SinglePass.WPF.Authorization.Brokers
             nvc["scope"] = Scopes;
             nvc["access_type"] = "offline";
             nvc["include_granted_scopes"] = "true";
-            nvc["state"] = "state_parameter_passthrough_value";
         }
 
         protected override string GetResponseString()

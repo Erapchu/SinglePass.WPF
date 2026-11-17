@@ -39,6 +39,9 @@ namespace SinglePass.WPF.ViewModels
         public partial AppTheme ThemeMode { get; set; }
 
         [ObservableProperty]
+        public partial bool AnimationsEnabled { get; set; } = true;
+
+        [ObservableProperty]
         public partial string Language { get; set; } = "system";
 
         [ObservableProperty]
@@ -56,6 +59,7 @@ namespace SinglePass.WPF.ViewModels
             HotkeysService hotkeysService)
         {
             ThemeMode = appSettingsService.ThemeMode;
+            AnimationsEnabled = appSettingsService.Settings.AnimationsEnabled;
             Language = LocalizationManager.Normalize(appSettingsService.Language);
             ShowPopupHotkey = appSettingsService.ShowPopupHotkey;
             IdleLockTimeout = appSettingsService.Settings.IdleLockTimeout;
@@ -104,6 +108,25 @@ namespace SinglePass.WPF.ViewModels
         partial void OnLanguageChanged(string value) => LocalizationManager.Instance.Apply(value);
 
         partial void OnThemeModeChanged(AppTheme value) => _themeService?.Apply(value);
+
+        partial void OnAnimationsEnabledChanged(bool value) => SaveAnimationsSetting(value);
+
+        private async void SaveAnimationsSetting(bool enabled)
+        {
+            if (_appSettingsService is null)
+                return;
+
+            _appSettingsService.Settings.AnimationsEnabled = enabled;
+            try
+            {
+                await _appSettingsService.Save();
+            }
+            catch (Exception)
+            {
+                MessageDialog.ShowDialog(Resources.Error, LocalizationManager.Instance["SaveAppearanceSettingsFailed"],
+                    MessageDialogButtons.OK, "\uEA39");
+            }
+        }
 
         partial void OnIdleLockTimeoutChanged(IdleLockTimeout value) => SaveSecuritySettings();
 

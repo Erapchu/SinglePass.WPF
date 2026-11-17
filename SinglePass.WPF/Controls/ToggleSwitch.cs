@@ -1,3 +1,4 @@
+using SinglePass.WPF.Helpers;
 using System;
 using System.Windows;
 using System.Windows.Controls.Primitives;
@@ -54,13 +55,18 @@ namespace SinglePass.WPF.Controls
             UpdatePosition(ShouldAnimate);
         }
 
-        private bool ShouldAnimate => IsLoaded && IsVisible && SystemParameters.ClientAreaAnimation;
+        private bool ShouldAnimate => IsLoaded && IsVisible && UiAnimations.ShouldAnimate(this);
 
         protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
         {
             base.OnPropertyChanged(e);
             if (e.Property == IsPressedProperty || e.Property == IsMouseOverProperty)
                 UpdateThumbScale(ShouldAnimate);
+            else if (e.Property == UiAnimations.IsEnabledProperty && e.NewValue is false)
+            {
+                UpdatePosition(false);
+                UpdateThumbScale(false);
+            }
         }
 
         private void UpdatePosition(bool animate)

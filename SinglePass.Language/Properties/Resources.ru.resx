@@ -504,6 +504,15 @@
   <data name="TotpQrImported" xml:space="preserve">
     <value>QR-код прочитан. Сохраните запись, чтобы применить настройку.</value>
   </data>
+  <data name="Appearance" xml:space="preserve">
+    <value>Оформление</value>
+  </data>
+  <data name="Animations" xml:space="preserve">
+    <value>Анимации интерфейса</value>
+  </data>
+  <data name="SaveAppearanceSettingsFailed" xml:space="preserve">
+    <value>Не удалось сохранить настройки оформления.</value>
+  </data>
   <data name="Security" xml:space="preserve">
     <value>Безопасность</value>
   </data>

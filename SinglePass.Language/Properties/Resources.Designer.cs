@@ -88,6 +88,24 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Interface animations.
+        /// </summary>
+        public static string Animations {
+            get {
+                return ResourceManager.GetString("Animations", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Appearance.
+        /// </summary>
+        public static string Appearance {
+            get {
+                return ResourceManager.GetString("Appearance", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Ascending.
         /// </summary>
         public static string Ascending {
@@ -1122,6 +1140,15 @@ namespace SinglePass.Language.Properties {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to Couldn&apos;t save the appearance settings..
+        /// </summary>
+        public static string SaveAppearanceSettingsFailed {
+            get {
+                return ResourceManager.GetString("SaveAppearanceSettingsFailed", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Couldn&apos;t save changes to password groups..
         /// </summary>

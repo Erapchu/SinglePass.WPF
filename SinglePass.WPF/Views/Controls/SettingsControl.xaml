@@ -7,7 +7,6 @@
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:loc="clr-namespace:SinglePass.WPF.Localization"
-    xmlns:settings="clr-namespace:SinglePass.WPF.Settings"
     xmlns:vm="clr-namespace:SinglePass.WPF.ViewModels"
     d:DataContext="{x:Static vm:SettingsViewModel.DesignTimeInstance}"
     mc:Ignorable="d">
@@ -26,20 +25,27 @@
     </UserControl.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="8">
-            <Border Margin="0,0,0,8" Style="{StaticResource Card}">
+            <Button
+                x:Name="AppearanceButton"
+                MinHeight="64"
+                Margin="0,0,0,8"
+                Padding="16,10"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Center"
+                AutomationProperties.Name="{Binding [Appearance], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                Command="{x:Static controls:SettingsControl.OpenAppearanceCommand}">
                 <DockPanel>
                     <Path Style="{StaticResource SettingsCardIcon}"
                           Data="M 5,2 H 19 V 12 Q 19,16 15,16 H 14 V 22 A 2,2 0 0 1 10,22 V 16 H 9 Q 5,16 5,12 Z M 5,12 H 19 M 10,2 V 8 M 15,2 V 6" />
-                    <ComboBox x:Name="ThemeSelector" DockPanel.Dock="Right" MinWidth="164" Margin="12,0,0,0" VerticalAlignment="Center"
-                              SelectedValue="{Binding ThemeMode, Mode=TwoWay}" SelectedValuePath="Tag">
-                        <ComboBoxItem Content="{Binding [System], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Tag="{x:Static settings:AppTheme.Inherit}" />
-                        <ComboBoxItem Content="{Binding [Light], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Tag="{x:Static settings:AppTheme.Light}" />
-                        <ComboBoxItem Content="{Binding [Dark], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Tag="{x:Static settings:AppTheme.Dark}" />
-                    </ComboBox>
-                    <Label Padding="0" VerticalAlignment="Center" FontWeight="SemiBold"
-                           Content="{Binding [Theme], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Target="{Binding ElementName=ThemeSelector}" />
+                    <TextBlock DockPanel.Dock="Right" Margin="12,0,0,0"
+                               FontSize="12" Style="{StaticResource SymbolText}" Text="&#xE76C;" />
+                    <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" TextWrapping="Wrap"
+                               Text="{Binding [Appearance], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
                 </DockPanel>
-            </Border>
+            </Button>
             <Border Margin="0,0,0,8" Style="{StaticResource Card}">
                 <DockPanel>
                     <Path Style="{StaticResource SettingsCardIcon}"

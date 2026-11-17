@@ -1,4 +1,5 @@
 using SinglePass.WPF.Controls;
+using SinglePass.WPF.Helpers;
 using SinglePass.WPF.ViewModels;
 using System;
 using System.ComponentModel;
@@ -17,14 +18,16 @@ namespace SinglePass.WPF.Views.Controls
         private const double WindowInset = 8;
         private const double BackdropOpacity = 0.32;
         private const double ShadowOpacity = 0.36;
-        private static readonly TimeSpan OpenDuration = TimeSpan.FromMilliseconds(275);
+        private const double CenteredCardRestScale = 1.05;
+        private static readonly TimeSpan OpenDuration = TimeSpan.FromMilliseconds(180);
         private static readonly TimeSpan ResizeDuration = TimeSpan.FromMilliseconds(210);
-        private static readonly TimeSpan CloseDuration = TimeSpan.FromMilliseconds(235);
+        private static readonly TimeSpan CloseDuration = TimeSpan.FromMilliseconds(180);
 
         private sealed record EditorSession(CredentialsDetailsControl Card, CredentialsDetailsControl Details,
             Button Source, Decorator Anchor, PasswordsViewModel ViewModel, CredentialDeleteConfirmation DeleteCard = null)
         {
             public bool IsAdding => Anchor == null;
+            public bool IsCentered => IsAdding || DeleteCard != null;
             public FrameworkElement Origin => IsAdding || DeleteCard != null ? Source : Anchor;
             public FrameworkElement Footer => DeleteCard != null ? DeleteCard.Footer : Card.EditorFooter;
         }
@@ -82,15 +85,8 @@ namespace SinglePass.WPF.Views.Controls
             _session = session;
             card.CancelButton.Click += (_, _) => Close();
             card.ConfirmButton.Click += async (_, _) => await ConfirmDeletionAsync(session, credential);
-            var animate = SystemParameters.ClientAreaAnimation;
-            card.Footer.Opacity = animate ? 0 : 1;
-            var origin = GetBounds(source);
-            ShowCard(card, session, origin);
-            if (animate)
-            {
-                AnimateBounds(origin, _layout, OpenDuration);
-                RevealFooter(card.Footer);
-            }
+            ShowCard(card, session, GetBounds(source), initiallyHidden: true);
+            RevealCenteredCard(UiAnimations.ShouldAnimate(this));
             card.CancelButton.Focus();
         }
 
@@ -99,7 +95,6 @@ namespace SinglePass.WPF.Views.Controls
             if (!ReferenceEquals(_session, session) || _closing || !CardContent.IsEnabled)
                 return;
 
-            var origin = GetBounds(session.Source);
             CardContent.IsEnabled = false;
             Focus();
             var deleted = await session.ViewModel.DeleteCredentialAsync(credential);
@@ -107,7 +102,7 @@ namespace SinglePass.WPF.Views.Controls
                 return;
 
             if (deleted)
-                Close(hiddenOrigin: origin);
+                Close();
             else
             {
                 CardContent.IsEnabled = true;
@@ -141,10 +136,13 @@ namespace SinglePass.WPF.Views.Controls
             Visibility = Visibility.Visible;
             Focus();
             SetLayout(GetLayout(session, origin));
-            if (SystemParameters.ClientAreaAnimation)
+            if (UiAnimations.ShouldAnimate(this))
             {
                 AnimateOpacity(Backdrop, OpacityProperty, 0, BackdropOpacity, OpenDuration);
-                AnimateOpacity(CardShadow, OpacityProperty, 0, ShadowOpacity, OpenDuration);
+                if (initiallyHidden)
+                    CardShadow.Opacity = ShadowOpacity;
+                else
+                    AnimateOpacity(CardShadow, OpacityProperty, 0, ShadowOpacity, OpenDuration);
             }
             else
             {
@@ -165,28 +163,27 @@ namespace SinglePass.WPF.Views.Controls
             {
                 width = Math.Min(560, width);
                 height = FitEditorHeight(session.Card, width, height);
-                return new Rect((Surface.ActualWidth - width) / 2, (Surface.ActualHeight - height) / 2, width, height);
+                return CenterCard(width, height);
             }
 
-            var pane = session.DeleteCard == null ? origin : GetBounds(session.Anchor);
-            width = Math.Min(pane.Width, width);
             if (session.DeleteCard is { } deleteCard)
             {
-                width = Math.Min(400, width);
+                width = Math.Min(400, Math.Min(GetBounds(session.Anchor).Width, width));
                 deleteCard.Measure(new Size(width, double.PositiveInfinity));
                 height = Math.Min(height, deleteCard.DesiredSize.Height);
+                return CenterCard(width, height);
             }
-            else
-            {
-                height = FitEditorHeight(session.Card, width, height);
-            }
-            var rightEdge = session.DeleteCard == null ? pane.Right - 10 : origin.Right;
-            var right = Math.Max(WindowInset + width, Math.Min(rightEdge, Surface.ActualWidth - WindowInset));
-            var top = session.DeleteCard == null
-                ? (Surface.ActualHeight - height) / 2
-                : Math.Max(WindowInset, Math.Min(origin.Top, Surface.ActualHeight - WindowInset - height));
+
+            width = Math.Min(origin.Width, width);
+            height = Math.Min(origin.Height, height);
+            var right = Math.Max(WindowInset + width, Math.Min(origin.Right - 10, Surface.ActualWidth - WindowInset));
+            var preferredTop = origin.Top + 12;
+            var top = Math.Max(WindowInset, Math.Min(preferredTop, Surface.ActualHeight - WindowInset - height));
             return new Rect(right - width, top, width, height);
         }
+
+        private Rect CenterCard(double width, double height) =>
+            new((Surface.ActualWidth - width) / 2, (Surface.ActualHeight - height) / 2, width, height);
 
         private static double FitEditorHeight(CredentialsDetailsControl card, double width, double availableHeight) =>
             card.IsEditing ? Math.Clamp(card.MeasureEditorHeight(width), 1, availableHeight) : availableHeight;
@@ -242,7 +239,27 @@ namespace SinglePass.WPF.Views.Controls
             target.BeginAnimation(property, OpacityAnimation(from, to, duration));
 
         private static void RevealFooter(FrameworkElement footer) =>
-            footer.BeginAnimation(OpacityProperty, OpacityAnimation(0, 1, OpenDuration, TimeSpan.FromMilliseconds(105)));
+            footer.BeginAnimation(OpacityProperty, OpacityAnimation(0, 1, OpenDuration, TimeSpan.FromMilliseconds(60)));
+
+        private void RevealCenteredCard(bool animate)
+        {
+            if (!animate)
+            {
+                CardPanel.Opacity = 1;
+                return;
+            }
+
+            CenteredCardScale.ScaleX = CenteredCardRestScale;
+            CenteredCardScale.ScaleY = CenteredCardRestScale;
+            AnimateCenteredCard(1, 1, OpenDuration);
+        }
+
+        private void AnimateCenteredCard(double opacity, double scale, TimeSpan duration)
+        {
+            AnimateOpacity(CardPanel, OpacityProperty, CardPanel.Opacity, opacity, duration);
+            AnimateDouble(CenteredCardScale, ScaleTransform.ScaleXProperty, CenteredCardScale.ScaleX, scale, duration);
+            AnimateDouble(CenteredCardScale, ScaleTransform.ScaleYProperty, CenteredCardScale.ScaleY, scale, duration);
+        }
 
         private void DraftChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -253,26 +270,27 @@ namespace SinglePass.WPF.Views.Controls
             {
                 if (_session.ViewModel.DraftCredential is { } draft)
                 {
+                    var isAdding = _session.IsAdding;
                     var footer = _session.Card.EditorFooter;
-                    var animate = SystemParameters.ClientAreaAnimation;
-                    footer.Opacity = animate ? 0 : 1;
+                    var animate = UiAnimations.ShouldAnimate(this);
+                    footer.Opacity = animate && !isAdding ? 0 : 1;
                     _session.Card.DisplayedDraft = draft;
-                    UpdateEditorLayout(animate: true, opening: true);
-                    if (animate)
+                    UpdateEditorLayout(animate: !isAdding, opening: true);
+                    if (animate && !isAdding)
                         RevealFooter(footer);
 
                     if (_waitingForDraft)
                     {
                         _waitingForDraft = false;
-                        CardPanel.Opacity = 1;
+                        RevealCenteredCard(animate);
                     }
                 }
                 else if (!_waitingForDraft)
-                    Close(saved: _session.ViewModel.IsSavingEdit);
+                    Close();
             }
         }
 
-        private void Close(bool saved = false, Rect? hiddenOrigin = null)
+        private void Close()
         {
             if (_session is not { } session || _closing)
                 return;
@@ -281,12 +299,7 @@ namespace SinglePass.WPF.Views.Controls
             if (_waitingForDraft)
                 session.ViewModel.AddCommand.Cancel();
 
-            var destination = session.Origin;
-            if (saved && session.IsAdding && session.Details.Parent is Decorator { IsVisible: true } detailsPane)
-                destination = detailsPane;
-
-            var destinationBounds = destination.IsVisible ? GetBounds(destination) : hiddenOrigin;
-            if (!SystemParameters.ClientAreaAnimation || destinationBounds is not { } bounds)
+            if (!UiAnimations.ShouldAnimate(this) || (!session.IsCentered && !session.Origin.IsVisible))
             {
                 Release(restoreFocus: true);
                 return;
@@ -294,10 +307,17 @@ namespace SinglePass.WPF.Views.Controls
 
             CardContent.IsEnabled = false;
             Focus();
-            AnimateBounds(CurrentCardBounds, bounds, CloseDuration);
-            var footer = session.Footer;
-            AnimateOpacity(footer, OpacityProperty, footer.Opacity, 0, CloseDuration);
-            AnimateOpacity(CardShadow, OpacityProperty, CardShadow.Opacity, 0, CloseDuration);
+            if (session.IsCentered)
+            {
+                AnimateCenteredCard(0, CenteredCardRestScale, CloseDuration);
+            }
+            else
+            {
+                AnimateBounds(CurrentCardBounds, GetBounds(session.Origin), CloseDuration);
+                var footer = session.Footer;
+                AnimateOpacity(footer, OpacityProperty, footer.Opacity, 0, CloseDuration);
+                AnimateOpacity(CardShadow, OpacityProperty, CardShadow.Opacity, 0, CloseDuration);
+            }
             var fade = OpacityAnimation(Backdrop.Opacity, 0, CloseDuration);
             fade.Completed += (_, _) =>
             {
@@ -330,6 +350,12 @@ namespace SinglePass.WPF.Views.Controls
             Visibility = Visibility.Collapsed;
             Backdrop.BeginAnimation(OpacityProperty, null);
             CardShadow.BeginAnimation(OpacityProperty, null);
+            CardPanel.BeginAnimation(OpacityProperty, null);
+            CenteredCardScale.BeginAnimation(ScaleTransform.ScaleXProperty, null);
+            CenteredCardScale.BeginAnimation(ScaleTransform.ScaleYProperty, null);
+            CardPanel.Opacity = 1;
+            CenteredCardScale.ScaleX = 1;
+            CenteredCardScale.ScaleY = 1;
             Backdrop.Opacity = 0;
             CardShadow.Opacity = 0;
             CardContent.IsEnabled = true;
@@ -375,7 +401,7 @@ namespace SinglePass.WPF.Views.Controls
 
         private void Host_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            if (_session?.Card?.EditScrollViewer == e.OriginalSource && e.ExtentHeightChange != 0)
+            if (_session is { IsAdding: true } session && session.Card.EditScrollViewer == e.OriginalSource && e.ExtentHeightChange != 0)
                 UpdateEditorLayout(animate: true);
         }
 
@@ -391,7 +417,7 @@ namespace SinglePass.WPF.Views.Controls
 
             var from = opening ? origin : CurrentCardBounds;
             SetLayout(layout);
-            if (animate && SystemParameters.ClientAreaAnimation)
+            if (animate && UiAnimations.ShouldAnimate(this))
                 AnimateBounds(from, layout, opening ? OpenDuration : ResizeDuration);
             else
                 ResetBoundsAnimations();

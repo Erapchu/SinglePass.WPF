@@ -15,6 +15,7 @@ namespace SinglePass.WPF.Settings
         public bool LockOnWindowsLock { get; set; } = true;
 
         public AppTheme ThemeMode { get; set; }
+        public bool AnimationsEnabled { get; set; } = true;
         public string Language { get; set; } = "system";
         public Hotkey ShowPopupHotkey { get; set; }
         public WindowSettings MainWindowSettings { get; set; }

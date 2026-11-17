@@ -40,34 +40,19 @@ namespace SinglePass.WPF.Authorization.Brokers
         public async Task<OAuthInfo> AuthorizeAsync(CancellationToken cancellationToken)
         {
             var redirectUri = GetRedirectUri();
-            var response = await GetAuthCode(redirectUri, cancellationToken);
+            var state = OAuthHelper.CreateRandomUrlToken();
+            var verifier = OAuthHelper.CreateRandomUrlToken();
+            var challenge = OAuthHelper.CreatePkceChallenge(verifier);
+            var authorizationUri = CreateUrlRequestCode(redirectUri, state, challenge);
+            var response = await GetAuthCode(redirectUri, authorizationUri, cancellationToken);
 
-            if (string.IsNullOrWhiteSpace(response?.Code))
-            {
-                var exceptionSb = new StringBuilder();
-                exceptionSb.AppendLine("Code was empty!");
-                if (response?.State != null)
-                {
-                    exceptionSb.Append("State: ");
-                    exceptionSb.AppendLine(response.State);
-                }
+            if (!string.Equals(response?.State, state, StringComparison.Ordinal))
+                throw new InvalidOperationException("The OAuth callback state is missing or does not match the authorization request.");
 
-                if (response?.Error != null)
-                {
-                    exceptionSb.Append("Error: ");
-                    exceptionSb.AppendLine(response.Error);
-                }
+            if (response.Error != null || string.IsNullOrWhiteSpace(response.Code))
+                throw new InvalidOperationException("The OAuth callback did not return an authorization code.");
 
-                if (response?.ErrorDescription != null)
-                {
-                    exceptionSb.Append("Description: ");
-                    exceptionSb.AppendLine(response.ErrorDescription);
-                }
-
-                throw new Exception(exceptionSb.ToString());
-            }
-
-            var tokenResponse = await GetTokenResponse(response.Code, redirectUri);
+            var tokenResponse = await GetTokenResponse(response.Code, redirectUri, verifier, cancellationToken);
             return new OAuthInfo()
             {
                 AccessToken = tokenResponse.AccessToken,
@@ -134,36 +119,45 @@ namespace SinglePass.WPF.Authorization.Brokers
             using var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
         }
 
-        private async Task<AuthorizationCodeResponseUrl> GetAuthCode(string redirectUri, CancellationToken cancellationToken)
+        private async Task<AuthorizationCodeResponseUrl> GetAuthCode(string redirectUri, string authorizationUri,
+            CancellationToken cancellationToken)
         {
             using (var listener = OAuthHelper.StartListener(redirectUri))
             {
-                var authorizationUri = CreateUrlRequestCode(redirectUri);
                 OAuthHelper.OpenBrowser(authorizationUri);
                 return await OAuthHelper.GetResponseFromListener(listener, GetResponseString(), cancellationToken);
             }
         }
 
-        private async Task<TokenResponse> GetTokenResponse(string code, string redirectUri)
+        private async Task<TokenResponse> GetTokenResponse(string code, string redirectUri, string verifier,
+            CancellationToken cancellationToken)
         {
-            var http = new HttpClient();
-            var tokenRequest = CreateRequestMessageToken(code, redirectUri);
-            var response = await http.SendAsync(tokenRequest);
-            var responseText = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<TokenResponse>(responseText);
+            using var http = _httpClientFactory.CreateClient(nameof(OAuthProvider));
+            using var tokenRequest = CreateRequestMessageToken(code, redirectUri, verifier);
+            using var response = await http.SendAsync(tokenRequest, cancellationToken);
+            response.EnsureSuccessStatusCode();
+            var responseText = await response.Content.ReadAsStringAsync(cancellationToken);
+            var token = JsonConvert.DeserializeObject<TokenResponse>(responseText);
+            if (string.IsNullOrWhiteSpace(token?.AccessToken))
+                throw new InvalidOperationException("The OAuth token response is missing an access token.");
+
+            return token;
         }
 
         /// <summary>
         /// Creates Url request code that will be used for authorization in Browser.
         /// </summary>
         /// <returns></returns>
-        private string CreateUrlRequestCode(string redirectUri)
+        private string CreateUrlRequestCode(string redirectUri, string state, string challenge)
         {
             var nvc = OAuthHelper.GetHttpQSCollection();
             nvc[OAuthHelper.ClientId] = ClientId;
             nvc[OAuthHelper.ResponseType] = OAuthHelper.Code;
             nvc[OAuthHelper.RedirectUri] = redirectUri;
             FillAuthUriQuery(nvc);
+            nvc["state"] = state;
+            nvc["code_challenge"] = challenge;
+            nvc["code_challenge_method"] = "S256";
             var authUri = new Uri(AuthEndpoint);
             var uriBuilder = new UriBuilder(authUri.Scheme, authUri.Host, authUri.Port, authUri.LocalPath, $"?{nvc}");
             return uriBuilder.Uri.AbsoluteUri;
@@ -172,9 +166,8 @@ namespace SinglePass.WPF.Authorization.Brokers
         /// <summary>
         /// Creates HttpRequestMessage that will be used to receive response to obtain access and refresh token.
         /// </summary>
-        /// <param name="code"></param>
         /// <returns></returns>
-        private HttpRequestMessage CreateRequestMessageToken(string code, string redirectUri)
+        private HttpRequestMessage CreateRequestMessageToken(string code, string redirectUri, string verifier)
         {
             var nvc = OAuthHelper.GetHttpQSCollection();
             nvc[OAuthHelper.Code] = code;
@@ -183,6 +176,7 @@ namespace SinglePass.WPF.Authorization.Brokers
             nvc[OAuthHelper.GrantType] = OAuthHelper.AuthorizationCode;
             nvc[OAuthHelper.RedirectUri] = redirectUri;
             FillTokenContent(nvc);
+            nvc["code_verifier"] = verifier;
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, TokenEndpoint)
             {
                 Content = new StringContent(nvc.ToString(), Encoding.UTF8, OAuthHelper.ApplicationXWWW)

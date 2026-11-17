@@ -484,6 +484,15 @@
   <data name="TotpQrImported" xml:space="preserve">
     <value>QR code read. Save the entry to apply it.</value>
   </data>
+  <data name="Appearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="Animations" xml:space="preserve">
+    <value>Interface animations</value>
+  </data>
+  <data name="SaveAppearanceSettingsFailed" xml:space="preserve">
+    <value>Couldn't save the appearance settings.</value>
+  </data>
   <data name="Security" xml:space="preserve">
     <value>Security</value>
   </data>

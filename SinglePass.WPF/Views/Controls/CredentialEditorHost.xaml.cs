@@ -18,9 +18,10 @@ namespace SinglePass.WPF.Views.Controls
         private const double WindowInset = 8;
         private const double BackdropOpacity = 0.32;
         private const double ShadowOpacity = 0.36;
-        private static readonly TimeSpan OpenDuration = TimeSpan.FromMilliseconds(200);
+        private const double AddCardRestScale = 1.05;
+        private static readonly TimeSpan OpenDuration = TimeSpan.FromMilliseconds(180);
         private static readonly TimeSpan ResizeDuration = TimeSpan.FromMilliseconds(210);
-        private static readonly TimeSpan CloseDuration = TimeSpan.FromMilliseconds(200);
+        private static readonly TimeSpan CloseDuration = TimeSpan.FromMilliseconds(180);
 
         private sealed record EditorSession(CredentialsDetailsControl Card, CredentialsDetailsControl Details,
             Button Source, Decorator Anchor, PasswordsViewModel ViewModel, CredentialDeleteConfirmation DeleteCard = null)
@@ -145,7 +146,10 @@ namespace SinglePass.WPF.Views.Controls
             if (UiAnimations.ShouldAnimate(this))
             {
                 AnimateOpacity(Backdrop, OpacityProperty, 0, BackdropOpacity, OpenDuration);
-                AnimateOpacity(CardShadow, OpacityProperty, 0, ShadowOpacity, OpenDuration);
+                if (initiallyHidden)
+                    CardShadow.Opacity = ShadowOpacity;
+                else
+                    AnimateOpacity(CardShadow, OpacityProperty, 0, ShadowOpacity, OpenDuration);
             }
             else
             {
@@ -244,6 +248,13 @@ namespace SinglePass.WPF.Views.Controls
         private static void RevealFooter(FrameworkElement footer) =>
             footer.BeginAnimation(OpacityProperty, OpacityAnimation(0, 1, OpenDuration, TimeSpan.FromMilliseconds(60)));
 
+        private void AnimateAddCard(double opacity, double scale, TimeSpan duration)
+        {
+            AnimateOpacity(CardPanel, OpacityProperty, CardPanel.Opacity, opacity, duration);
+            AnimateDouble(AddCardScale, ScaleTransform.ScaleXProperty, AddCardScale.ScaleX, scale, duration);
+            AnimateDouble(AddCardScale, ScaleTransform.ScaleYProperty, AddCardScale.ScaleY, scale, duration);
+        }
+
         private void DraftChanged(object sender, PropertyChangedEventArgs e)
         {
             if (_closing)
@@ -253,26 +264,36 @@ namespace SinglePass.WPF.Views.Controls
             {
                 if (_session.ViewModel.DraftCredential is { } draft)
                 {
+                    var isAdding = _session.IsAdding;
                     var footer = _session.Card.EditorFooter;
                     var animate = UiAnimations.ShouldAnimate(this);
-                    footer.Opacity = animate ? 0 : 1;
+                    footer.Opacity = animate && !isAdding ? 0 : 1;
                     _session.Card.DisplayedDraft = draft;
-                    UpdateEditorLayout(animate: true, opening: true);
-                    if (animate)
+                    UpdateEditorLayout(animate: !isAdding, opening: true);
+                    if (animate && !isAdding)
                         RevealFooter(footer);
 
                     if (_waitingForDraft)
                     {
                         _waitingForDraft = false;
-                        CardPanel.Opacity = 1;
+                        if (animate)
+                        {
+                            AddCardScale.ScaleX = AddCardRestScale;
+                            AddCardScale.ScaleY = AddCardRestScale;
+                            AnimateAddCard(1, 1, OpenDuration);
+                        }
+                        else
+                        {
+                            CardPanel.Opacity = 1;
+                        }
                     }
                 }
                 else if (!_waitingForDraft)
-                    Close(saved: _session.ViewModel.IsSavingEdit);
+                    Close();
             }
         }
 
-        private void Close(bool saved = false, Rect? hiddenOrigin = null)
+        private void Close(Rect? hiddenOrigin = null)
         {
             if (_session is not { } session || _closing)
                 return;
@@ -281,12 +302,8 @@ namespace SinglePass.WPF.Views.Controls
             if (_waitingForDraft)
                 session.ViewModel.AddCommand.Cancel();
 
-            var destination = session.Origin;
-            if (saved && session.IsAdding && session.Details.Parent is Decorator { IsVisible: true } detailsPane)
-                destination = detailsPane;
-
-            var destinationBounds = destination.IsVisible ? GetBounds(destination) : hiddenOrigin;
-            if (!UiAnimations.ShouldAnimate(this) || destinationBounds is not { } bounds)
+            var destinationBounds = !session.IsAdding && session.Origin.IsVisible ? GetBounds(session.Origin) : hiddenOrigin;
+            if (!UiAnimations.ShouldAnimate(this) || (!session.IsAdding && destinationBounds == null))
             {
                 Release(restoreFocus: true);
                 return;
@@ -294,10 +311,17 @@ namespace SinglePass.WPF.Views.Controls
 
             CardContent.IsEnabled = false;
             Focus();
-            AnimateBounds(CurrentCardBounds, bounds, CloseDuration);
-            var footer = session.Footer;
-            AnimateOpacity(footer, OpacityProperty, footer.Opacity, 0, CloseDuration);
-            AnimateOpacity(CardShadow, OpacityProperty, CardShadow.Opacity, 0, CloseDuration);
+            if (session.IsAdding)
+            {
+                AnimateAddCard(0, AddCardRestScale, CloseDuration);
+            }
+            else
+            {
+                AnimateBounds(CurrentCardBounds, destinationBounds.Value, CloseDuration);
+                var footer = session.Footer;
+                AnimateOpacity(footer, OpacityProperty, footer.Opacity, 0, CloseDuration);
+                AnimateOpacity(CardShadow, OpacityProperty, CardShadow.Opacity, 0, CloseDuration);
+            }
             var fade = OpacityAnimation(Backdrop.Opacity, 0, CloseDuration);
             fade.Completed += (_, _) =>
             {
@@ -330,6 +354,12 @@ namespace SinglePass.WPF.Views.Controls
             Visibility = Visibility.Collapsed;
             Backdrop.BeginAnimation(OpacityProperty, null);
             CardShadow.BeginAnimation(OpacityProperty, null);
+            CardPanel.BeginAnimation(OpacityProperty, null);
+            AddCardScale.BeginAnimation(ScaleTransform.ScaleXProperty, null);
+            AddCardScale.BeginAnimation(ScaleTransform.ScaleYProperty, null);
+            CardPanel.Opacity = 1;
+            AddCardScale.ScaleX = 1;
+            AddCardScale.ScaleY = 1;
             Backdrop.Opacity = 0;
             CardShadow.Opacity = 0;
             CardContent.IsEnabled = true;

@@ -193,20 +193,34 @@ namespace SinglePass.WPF.Services
 
         public Task EditCredential(Credential credential) => EditCredential(credential, null, changeGroup: false);
 
-        internal Task EditCredential(Credential credential, Guid? groupId, bool changeGroup)
+        internal async Task<Credential> EditCredential(Credential credential, Guid? groupId, bool changeGroup)
         {
             ArgumentNullException.ThrowIfNull(credential);
-            return UpdateVault(vault =>
+            Credential saved = null;
+            await UpdateVault(vault =>
             {
                 var index = vault.Credentials.IndexOf(credential);
                 if (index < 0)
-                    return vault;
+                    throw new InvalidOperationException("The credential is no longer available.");
 
+                var current = vault.Credentials[index];
+                var previousPassword = current.PasswordField.Value;
+                var history = current.PasswordHistory;
+                if (!string.IsNullOrEmpty(previousPassword) &&
+                    !string.Equals(previousPassword, credential.PasswordField.Value, StringComparison.Ordinal))
+                {
+                    var entry = new PasswordHistoryEntry { Password = previousPassword, ChangedAtUtc = DateTimeOffset.UtcNow };
+                    history = [entry, .. history.Take(Credential.PasswordHistoryLimit - 1)];
+                }
+
+                saved = credential.Clone();
+                saved.PasswordHistory = history;
                 var credentials = vault.Credentials.ToList();
-                credentials[index] = credential;
+                credentials[index] = saved;
                 var updated = vault with { Credentials = credentials };
                 return changeGroup ? AssignGroupOrThrow(updated, credential.Id, groupId) : updated;
-            });
+            }).ConfigureAwait(false);
+            return saved;
         }
 
         public Task DeleteCredential(Credential credential)
@@ -293,10 +307,18 @@ namespace SinglePass.WPF.Services
                         credentials.Add(credential);
                         result.NewCredentials.Add(credential);
                     }
-                    else if (credentials[index].LastModifiedTime < credential.LastModifiedTime)
+                    else
                     {
-                        result.ChangedCredentials.Add(credentials[index]);
-                        credentials[index] = credential;
+                        var local = credentials[index];
+                        var winner = local.LastModifiedTime < credential.LastModifiedTime ? credential : local;
+                        var history = MergePasswordHistory(winner, ReferenceEquals(winner, local) ? credential : local);
+                        if (!ReferenceEquals(winner, local) || !ReferenceEquals(history, local.PasswordHistory))
+                        {
+                            var merged = winner.Clone();
+                            merged.PasswordHistory = history;
+                            result.ChangedCredentials.Add(local);
+                            credentials[index] = merged;
+                        }
                     }
                 }
 
@@ -324,6 +346,20 @@ namespace SinglePass.WPF.Services
                 return result.AnyChanges ? vault with { Credentials = credentials, Groups = groups, Assignments = assignments } : vault;
             });
             return result;
+        }
+
+        private static IReadOnlyList<PasswordHistoryEntry> MergePasswordHistory(Credential winner, Credential other)
+        {
+            if (other.PasswordHistory.Count == 0)
+                return winner.PasswordHistory;
+
+            var history = winner.PasswordHistory.Concat(other.PasswordHistory)
+                .DistinctBy(entry => (entry.ChangedAtUtc, entry.Password))
+                .OrderByDescending(entry => entry.ChangedAtUtc)
+                .ThenBy(entry => entry.Password, StringComparer.Ordinal)
+                .Take(Credential.PasswordHistoryLimit)
+                .ToArray();
+            return history.SequenceEqual(winner.PasswordHistory) ? winner.PasswordHistory : history;
         }
 
         private Task UpdateVault(Func<PasswordVault, PasswordVault> update) => Task.Run(async () =>

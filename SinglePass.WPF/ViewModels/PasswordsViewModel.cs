@@ -530,9 +530,15 @@ namespace SinglePass.WPF.ViewModels
                 if (isNew)
                     draft.CreationTime = draft.LastModifiedTime;
 
-                if (!await SaveCredentialAsync(() => isNew
-                        ? _credentialsCryptoService.AddCredential(draft.Model, groupId)
-                        : _credentialsCryptoService.EditCredential(draft.Model, groupId, changeGroup)))
+                var savedCredential = draft;
+                if (!await SaveCredentialAsync(async () =>
+                    {
+                        if (isNew)
+                            await _credentialsCryptoService.AddCredential(draft.Model, groupId);
+                        else
+                            savedCredential = _credentialViewModelFactory.ProvideNew(
+                                await _credentialsCryptoService.EditCredential(draft.Model, groupId, changeGroup));
+                    }))
                 {
                     draft.Model.Totp = originalTotp;
                     return;
@@ -540,7 +546,7 @@ namespace SinglePass.WPF.ViewModels
 
                 var index = _credentialVMs.FindIndex(item => item.Model.Id == draft.Model.Id);
                 if (index >= 0)
-                    _credentialVMs[index] = draft;
+                    _credentialVMs[index] = savedCredential;
                 else if (isNew)
                     _credentialVMs.Add(draft);
 
@@ -607,7 +613,7 @@ namespace SinglePass.WPF.ViewModels
         [RelayCommand]
         private void CopyToClipboard(string data)
         {
-            if (string.IsNullOrWhiteSpace(data))
+            if (string.IsNullOrEmpty(data))
                 return;
 
             try

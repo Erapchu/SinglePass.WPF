@@ -102,6 +102,15 @@ namespace SinglePass.WPF.Views.Controls
                 icon.GetBindingExpression(Image.SourceProperty)?.UpdateTarget();
         }
 
+        private void PasswordHistory_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e) =>
+            ((Expander)sender).IsExpanded = false;
+
+        private void PasswordHistory_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (sender is Expander { IsVisible: false } history)
+                history.IsExpanded = false;
+        }
+
         private void TotpDisplay_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e) => RefreshTotp();
         private void TotpDisplay_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) => RefreshTotp();
         private void TotpDisplay_Loaded(object sender, RoutedEventArgs e) => RefreshTotp();

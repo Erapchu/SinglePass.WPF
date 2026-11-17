@@ -588,4 +588,10 @@
   <data name="TotpRemovalPending" xml:space="preserve">
     <value>Настройка 2FA будет удалена при сохранении.</value>
   </data>
+  <data name="PasswordHistory" xml:space="preserve">
+    <value>История паролей</value>
+  </data>
+  <data name="PasswordReplacedFormatted" xml:space="preserve">
+    <value>Заменён: {0:dd-MM-yyyy, HH:mm:ss}</value>
+  </data>
 </root>

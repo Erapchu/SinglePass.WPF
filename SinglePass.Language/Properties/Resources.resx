@@ -571,7 +571,4 @@
   <data name="PasswordHistory" xml:space="preserve">
     <value>Password history</value>
   </data>
-  <data name="PasswordReplacedFormatted" xml:space="preserve">
-    <value>Replaced: {0:dd-MM-yyyy, HH:mm:ss}</value>
-  </data>
 </root>

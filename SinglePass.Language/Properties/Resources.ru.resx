@@ -591,7 +591,4 @@
   <data name="PasswordHistory" xml:space="preserve">
     <value>История паролей</value>
   </data>
-  <data name="PasswordReplacedFormatted" xml:space="preserve">
-    <value>Заменён: {0:dd-MM-yyyy, HH:mm:ss}</value>
-  </data>
 </root>

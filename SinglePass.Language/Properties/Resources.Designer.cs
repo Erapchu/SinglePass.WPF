@@ -1049,15 +1049,6 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("PasswordIsIncorrect", resourceCulture);
             }
         }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Replaced: {0:dd-MM-yyyy, HH:mm:ss}.
-        /// </summary>
-        public static string PasswordReplacedFormatted {
-            get {
-                return ResourceManager.GetString("PasswordReplacedFormatted", resourceCulture);
-            }
-        }
         
         /// <summary>
         ///   Looks up a localized string similar to Passwords.

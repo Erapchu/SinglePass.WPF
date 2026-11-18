@@ -70,6 +70,51 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to About.
+        /// </summary>
+        public static string About {
+            get {
+                return ResourceManager.GetString("About", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SinglePass is a password manager for Windows with a local encrypted vault, quick credential filling, and optional cloud synchronization..
+        /// </summary>
+        public static string AboutDescription {
+            get {
+                return ResourceManager.GetString("AboutDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Project founder.
+        /// </summary>
+        public static string AboutFounder {
+            get {
+                return ResourceManager.GetString("AboutFounder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not open the link in your browser..
+        /// </summary>
+        public static string AboutOpenLinkFailed {
+            get {
+                return ResourceManager.GetString("AboutOpenLinkFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SinglePass on GitHub.
+        /// </summary>
+        public static string AboutProjectLink {
+            get {
+                return ResourceManager.GetString("AboutProjectLink", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Add group.
         /// </summary>
         public static string AddPasswordGroup {
@@ -95,7 +140,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("Animations", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Appearance.
         /// </summary>
@@ -104,7 +149,16 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("Appearance", resourceCulture);
             }
         }
-
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Version.
+        /// </summary>
+        public static string AppVersion {
+            get {
+                return ResourceManager.GetString("AppVersion", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to Ascending.
         /// </summary>
@@ -1031,7 +1085,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("PasswordGroupsSynchronized", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Password history.
         /// </summary>
@@ -1157,7 +1211,7 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("SaveAppearanceSettingsFailed", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Couldn&apos;t save changes to password groups..
         /// </summary>

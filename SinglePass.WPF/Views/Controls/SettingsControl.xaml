@@ -106,7 +106,7 @@
                     </StackPanel>
                 </DockPanel>
             </Button>
-            <Border Style="{StaticResource Card}">
+            <Border Margin="0,0,0,8" Style="{StaticResource Card}">
                 <StackPanel>
                     <DockPanel Margin="0,0,0,8">
                         <Path Style="{StaticResource SettingsCardIcon}"
@@ -140,6 +140,32 @@
                     </TextBlock>
                 </StackPanel>
             </Border>
+            <Button
+                x:Name="AboutButton"
+                MinHeight="64"
+                Padding="16,10"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Center"
+                AutomationProperties.Name="{Binding [About], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                Command="{x:Static controls:SettingsControl.OpenAboutCommand}">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Left" Width="20" Margin="0,0,16,0"
+                               FontSize="20" Style="{StaticResource SymbolText}" Text="&#xE946;" />
+                    <TextBlock DockPanel.Dock="Right" Margin="12,0,0,0"
+                               FontSize="12" Style="{StaticResource SymbolText}" Text="&#xE76C;" />
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock FontWeight="SemiBold" TextWrapping="Wrap"
+                                   Text="{Binding [About], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
+                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap">
+                            <Run Text="{Binding [AppVersion], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
+                            <Run Text=" " /><Run Text="{x:Static controls:AboutControl.AppVersion}" />
+                        </TextBlock>
+                    </StackPanel>
+                </DockPanel>
+            </Button>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

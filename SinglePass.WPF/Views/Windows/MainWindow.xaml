@@ -80,6 +80,7 @@
         <CommandBinding Command="{x:Static controls:SettingsControl.OpenCloudSyncCommand}" Executed="OpenCloudSync_Executed" />
         <CommandBinding Command="{x:Static controls:SettingsControl.OpenSecurityCommand}" Executed="OpenSecurity_Executed" />
         <CommandBinding Command="{x:Static controls:SettingsControl.OpenAppearanceCommand}" Executed="OpenAppearance_Executed" />
+        <CommandBinding Command="{x:Static controls:SettingsControl.OpenAboutCommand}" Executed="OpenAbout_Executed" />
     </Window.CommandBindings>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Loaded">

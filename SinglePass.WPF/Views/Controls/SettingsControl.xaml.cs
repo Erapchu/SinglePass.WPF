@@ -11,6 +11,7 @@ namespace SinglePass.WPF.Views.Controls
         public static RoutedCommand OpenCloudSyncCommand { get; } = new();
         public static RoutedCommand OpenSecurityCommand { get; } = new();
         public static RoutedCommand OpenAppearanceCommand { get; } = new();
+        public static RoutedCommand OpenAboutCommand { get; } = new();
 
         public SettingsControl()
         {

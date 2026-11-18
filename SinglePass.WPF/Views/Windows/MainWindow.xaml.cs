@@ -28,6 +28,7 @@ namespace SinglePass.WPF.Views.Windows
         private CloudSyncControl _cloudSyncControl;
         private SecurityControl _securityControl;
         private AppearanceControl _appearanceControl;
+        private AboutControl _aboutControl;
         private Button _settingsPageButton;
 
         private MainWindowViewModel ViewModel => DataContext as MainWindowViewModel;
@@ -190,6 +191,15 @@ namespace SinglePass.WPF.Views.Windows
 
             _appearanceControl ??= new AppearanceControl { DataContext = ViewModel.SettingsVM };
             OpenSettingsPage(_appearanceControl, settings.AppearanceButton, "Appearance");
+        }
+
+        private void OpenAbout_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (NavigationContent.Content is not SettingsControl settings)
+                return;
+
+            _aboutControl ??= new AboutControl();
+            OpenSettingsPage(_aboutControl, settings.AboutButton, "About");
         }
 
         private void OpenSettingsPage(UserControl page, Button sourceButton, string titleKey)

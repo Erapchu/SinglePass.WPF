@@ -1,16 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text.Json.Serialization;
 
 namespace SinglePass.WPF.Models
 {
     [DebuggerDisplay("{NameField.Value}")]
     public class Credential
     {
+        internal const int PasswordHistoryLimit = 10;
+
         public Guid Id { get; init; }
         public PassField NameField { get; set; } = new PassField() { Name = "Name" };
         public PassField LoginField { get; set; } = new PassField() { Name = "Login" };
         public PassField PasswordField { get; set; } = new PassField() { Name = "Password" };
+        [JsonInclude]
+        public IReadOnlyList<PasswordHistoryEntry> PasswordHistory { get; internal set; } = [];
         public PassField OtherField { get; set; } = new PassField() { Name = "Other" };
         public PassField SiteField { get; set; } = new PassField() { Name = "Site" };
         public List<PassField> AdditionalFields { get; set; } = new List<PassField>();
@@ -37,6 +42,7 @@ namespace SinglePass.WPF.Models
                 NameField = NameField.Clone(),
                 LoginField = LoginField.Clone(),
                 PasswordField = PasswordField.Clone(),
+                PasswordHistory = PasswordHistory,
                 OtherField = OtherField.Clone(),
                 SiteField = SiteField.Clone(),
                 Totp = Totp,

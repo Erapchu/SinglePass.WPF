@@ -1,75 +1,59 @@
 name: Build and create release
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: singlepass-release-master
 
 jobs:
   build:
+    if: github.ref == 'refs/heads/master'
     runs-on: windows-latest
     env:
-      SOLUTION_NAME: SinglePass.WPF.sln
       PROJECT_PATH: .\SinglePass.WPF\SinglePass.WPF.csproj
       CONFIGURATION: Release
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-    - name: Install .NET Core
+      with:
+        fetch-depth: 0
+    - name: Install .NET
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 10.0.x
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.3.1
     - name: Restore
-      run: |
-       msbuild $env:PROJECT_PATH /t:Restore /p:Configuration=$env:CONFIGURATION
-    - name: Build
-      run: |
-       msbuild $env:PROJECT_PATH /t:Publish /p:Configuration=$env:CONFIGURATION /p:RuntimeIdentifier=win-x64 /p:SelfContained=true /p:PublishReadyToRun=true /p:PublishSingleFile=true
-    - name: Create .zip artifacts
-      run: |
-        Compress-Archive -Path '.\SinglePass.WPF\bin\Release\win-x64\publish\' -DestinationPath '.\SinglePass.WPF.zip'
-    - name: Create release
-      uses: "actions/github-script@v6.4.0"
+      run: msbuild $env:PROJECT_PATH /t:Restore /p:Configuration=$env:CONFIGURATION
+    - name: Determine release version
+      id: version
       env:
-        RELEASE_NAME: ${{ github.ref_name }}
-        TAG_NAME: ${{ github.ref }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        script: |
-          try {
-            const response = await github.rest.repos.createRelease({
-              draft: false,
-              generate_release_notes: true,
-              name: process.env.RELEASE_NAME,
-              owner: context.repo.owner,
-              prerelease: false,
-              repo: context.repo.repo,
-              tag_name: process.env.TAG_NAME,
-            });
-            core.exportVariable('RELEASE_ID', response.data.id);
-            core.exportVariable('RELEASE_UPLOAD_URL', response.data.upload_url);
-          } catch (error) {
-            core.setFailed(error.message);
-          }
-    - name: Upload artifact
-      uses: actions/upload-release-asset@v1
+        GH_TOKEN: ${{ github.token }}
+      run: ./.github/scripts/Get-ReleaseVersion.ps1
+    - name: Publish application
+      if: steps.version.outputs.published == 'false'
+      run: msbuild $env:PROJECT_PATH /t:Publish /p:Configuration=$env:CONFIGURATION /p:RuntimeIdentifier=win-x64 /p:SelfContained=true /p:PublishReadyToRun=true /p:PublishSingleFile=true
+    - name: Create ZIP archive
+      if: steps.version.outputs.published == 'false'
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ env.RELEASE_UPLOAD_URL }}
-        asset_path: .\SinglePass.WPF.zip
-        asset_name: SinglePass.WPF.zip
-        asset_content_type: application/zip
-
-      # - name: Create release
-      #   uses: actions/create-release@v1
-      #   id: create_release
-      #   with:
-      #     draft: false
-      #     prerelease: false
-      #     release_name: ${{ steps.version.outputs.version }}
-      #     tag_name: ${{ github.ref }}
-      #   env:
-      #     GITHUB_TOKEN: ${{ github.token }}
+        ARCHIVE: ${{ steps.version.outputs.archive }}
+      run: Compress-Archive -Path '.\SinglePass.WPF\bin\Release\win-x64\publish\' -DestinationPath $env:ARCHIVE
+    - name: Create GitHub Release
+      if: steps.version.outputs.published == 'false'
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        ARCHIVE: ${{ steps.version.outputs.archive }}
+        RELEASE_DRAFT: ${{ steps.version.outputs.draft }}
+      run: |
+        if ($env:RELEASE_DRAFT -eq 'true') {
+          gh release upload $env:RELEASE_TAG $env:ARCHIVE --clobber
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          gh release edit $env:RELEASE_TAG --draft=false
+        } else {
+          gh release create $env:RELEASE_TAG $env:ARCHIVE --target $env:GITHUB_SHA --title $env:RELEASE_TAG --generate-notes
+        }

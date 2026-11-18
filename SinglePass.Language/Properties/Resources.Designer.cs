@@ -1031,6 +1031,15 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("PasswordGroupsSynchronized", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Password history.
+        /// </summary>
+        public static string PasswordHistory {
+            get {
+                return ResourceManager.GetString("PasswordHistory", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Password is incorrect.

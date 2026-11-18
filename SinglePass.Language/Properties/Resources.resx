@@ -568,4 +568,7 @@
   <data name="TotpRemovalPending" xml:space="preserve">
     <value>2FA setup will be removed when you save.</value>
   </data>
+  <data name="PasswordHistory" xml:space="preserve">
+    <value>Password history</value>
+  </data>
 </root>

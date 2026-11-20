@@ -46,3 +46,9 @@ jobs:
        msbuild $env:PROJECT_PATH /t:Build /p:Configuration=$env:CONFIGURATION /p:RuntimeIdentifier=win-x64
       env:
         Configuration: ${{ matrix.configuration }}
+
+    - name: Test
+      run: |
+       dotnet test .\SinglePass.Core.Tests\SinglePass.Core.Tests.csproj --configuration $env:CONFIGURATION
+      env:
+        Configuration: ${{ matrix.configuration }}

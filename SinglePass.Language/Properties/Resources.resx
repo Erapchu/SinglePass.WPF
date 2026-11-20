@@ -322,6 +322,9 @@
   <data name="CredentialsChanged" xml:space="preserve">
     <value>Credentials changed:</value>
   </data>
+  <data name="CredentialsDeleted" xml:space="preserve">
+    <value>Credentials deleted:</value>
+  </data>
   <data name="NoAnyChanges" xml:space="preserve">
     <value>No any changes</value>
   </data>

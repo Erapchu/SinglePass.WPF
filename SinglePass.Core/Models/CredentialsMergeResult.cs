@@ -13,8 +13,9 @@ namespace SinglePass.Core.Models
         public bool Success { get; init; }
         public IList<Credential> NewCredentials { get; } = new List<Credential>();
         public IList<Credential> ChangedCredentials { get; } = new List<Credential>();
+        public IList<Credential> DeletedCredentials { get; } = new List<Credential>();
         internal bool GroupChanges { get; set; }
-        public bool AnyChanges => NewCredentials.Count > 0 || ChangedCredentials.Count > 0 || GroupChanges;
+        public bool AnyChanges => NewCredentials.Count > 0 || ChangedCredentials.Count > 0 || DeletedCredentials.Count > 0 || GroupChanges;
 
         public CredentialsMergeResult()
         {
@@ -43,9 +44,17 @@ namespace SinglePass.Core.Models
                     sb.Append(string.Join(Environment.NewLine, ChangedCredentials.Select(c => c.NameField.Value)));
                     sb.AppendLine();
                 }
+                if (DeletedCredentials.Count > 0)
+                {
+                    if (newCreds || changedCreds)
+                        sb.AppendLine();
+                    sb.AppendLine(SinglePass.Core.Localization.LocalizationManager.Instance["CredentialsDeleted"]);
+                    sb.Append(string.Join(Environment.NewLine, DeletedCredentials.Select(c => c.NameField.Value)));
+                    sb.AppendLine();
+                }
                 if (GroupChanges)
                     sb.AppendLine(SinglePass.Core.Localization.LocalizationManager.Instance["PasswordGroupsSynchronized"]);
-                if (!newCreds && !changedCreds && !GroupChanges)
+                if (!AnyChanges)
                 {
                     sb.AppendLine(SinglePass.Language.Properties.Resources.NoAnyChanges);
                 }

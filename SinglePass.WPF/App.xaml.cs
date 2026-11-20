@@ -1,4 +1,4 @@
-using AsyncKeyedLock;
+﻿using AsyncKeyedLock;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,17 +7,19 @@ using Microsoft.Extensions.Options;
 using NLog.Extensions.Logging;
 using SinglePass.FavIcons.Application;
 using SinglePass.FavIcons.Repository;
-using SinglePass.WPF.Authorization.Brokers;
-using SinglePass.WPF.Authorization.TokenHolders;
-using SinglePass.WPF.Clouds.Services;
+using SinglePass.Core.Authorization.Brokers;
+using SinglePass.Core.Authorization.TokenHolders;
+using SinglePass.Core.Clouds.Services;
 using SinglePass.WPF.Extensions;
 using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Hotkeys;
-using SinglePass.WPF.Localization;
-using SinglePass.WPF.Options;
+using SinglePass.Core.Localization;
+using SinglePass.Core.Options;
 using SinglePass.WPF.Services;
 using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels;
+using SinglePass.WPF.ViewModels.Dialogs;
+using SinglePass.WPF.Views.Helpers;
 using SinglePass.WPF.Views;
 using SinglePass.WPF.Views.Windows;
 using System;
@@ -28,6 +30,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using SinglePass.Core.Helpers;
+using SinglePass.Core.Services;
 
 namespace SinglePass.WPF
 {
@@ -42,6 +46,7 @@ namespace SinglePass.WPF
         private MainWindow _vaultWindow;
         private LoginWindow _loginWindow;
         private bool _locking;
+        private bool _updatePrompted;
 
         private bool IsFirstInstance { get; }
         public IServiceProvider Services { get; private set; }
@@ -115,6 +120,7 @@ namespace SinglePass.WPF
             services.AddSingleton<ImageService>();
             services.AddScoped<CredentialViewModelFactory>();
             services.AddSingleton<AddressBarExtractor>();
+            services.AddSingleton<UpdateService>();
             services.AddSingleton(new AsyncKeyedLocker<string>(o =>
             {
                 o.PoolSize = 20;
@@ -188,6 +194,11 @@ namespace SinglePass.WPF
             _loginWindow = null;
             var trayIcon = new TrayIcon(traySource, ShowVault, _rootServices.GetRequiredService<ILogger<TrayIcon>>());
             hiw.Closing += (_, _) => trayIcon.Dispose();
+
+            var updates = _rootServices.GetRequiredService<UpdateService>();
+            updates.UpdateReady += (_, _) => PromptUpdate();
+            updates.Start();
+
             OpenVault();
         }
 
@@ -196,6 +207,26 @@ namespace SinglePass.WPF
             _vaultWindow = Services.GetRequiredService<MainWindow>();
             MainWindow = _vaultWindow;
             _vaultWindow.Show();
+            Dispatcher.BeginInvoke(PromptUpdate, DispatcherPriority.ApplicationIdle);
+        }
+
+        /// <summary>Offers to restart once a downloaded update is ready; asks at most once per session.</summary>
+        private async void PromptUpdate()
+        {
+            var updates = _rootServices?.GetService<UpdateService>();
+            if (_updatePrompted || updates?.State != UpdateState.ReadyToRestart)
+                return;
+            if (_vaultWindow is not { CanShowModal: true })
+                return;
+
+            _updatePrompted = true;
+            var localization = LocalizationManager.Instance;
+            var choice = await MessageDialog.ShowAsync(
+                localization["UpdateAvailableHeader"],
+                string.Format(localization.Culture, localization["UpdateAvailablePrompt"], updates.AvailableVersion),
+                MessageDialogButtons.YesNo);
+            if (choice == DialogChoice.Yes)
+                updates.Restart();
         }
 
         internal bool ShowUnlockIfLocked()
@@ -255,6 +286,7 @@ namespace SinglePass.WPF
             _vaultScope = null;
             Services = null;
             var clearVault = scope.ServiceProvider.GetRequiredService<CredentialsCryptoService>().LockAsync();
+            WindowsClipboard.ClearIfOwned();
             try
             {
                 scope.ServiceProvider.GetService<SyncService>()?.CancelTransfers();
@@ -305,6 +337,7 @@ namespace SinglePass.WPF
 
         private void Application_Exit(object sender, ExitEventArgs e)
         {
+            WindowsClipboard.ClearIfOwned();
             var logger = _rootServices?.GetService<ILogger<App>>();
             logger?.LogInformation("The application is shutting down...{0}", Environment.NewLine);
         }

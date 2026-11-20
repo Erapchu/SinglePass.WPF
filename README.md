@@ -17,7 +17,7 @@ SinglePass is a Windows password manager with a local encrypted vault, a quick-a
 
 ## Getting started
 
-Download `SinglePass.WPF.zip` from [Releases](https://github.com/Erapchu/SinglePass.WPF/releases), extract it and run the application. The archive contains a self-contained Windows x64 build.
+Download `SinglePass.WPF-win-Setup.exe` from [Releases](https://github.com/Erapchu/SinglePass.WPF/releases) and run it. SinglePass installs for the current user without administrator rights into `%LocalAppData%\SinglePass.WPF`, adds Start menu and desktop shortcuts and updates itself from new releases (**Settings → About → Updates**). For a portable copy, download `SinglePass.WPF-win-Portable.zip`, extract it anywhere and run `SinglePass.exe`; it updates itself in place. Both are self-contained Windows x64 builds. The vault and settings are stored separately (see below), so updating or uninstalling the application keeps them.
 
 On first launch, enter a master password of at least eight characters. Use that password to unlock the vault. Keep a secure backup of the vault file and its master password so you can decrypt the backup.
 

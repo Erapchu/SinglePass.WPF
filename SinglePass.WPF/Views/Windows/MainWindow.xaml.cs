@@ -1,5 +1,6 @@
 ﻿using SinglePass.WPF.Helpers;
-using SinglePass.WPF.Localization;
+using SinglePass.Core.Localization;
+using SinglePass.WPF.Services;
 using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels;
 using SinglePass.WPF.ViewModels.Dialogs;
@@ -24,6 +25,7 @@ namespace SinglePass.WPF.Views.Windows
     public partial class MainWindow : Window
     {
         private readonly AppSettingsService _appSettingsService;
+        private readonly UpdateService _updateService;
         private readonly DispatcherTimer _statusTimer = new() { Interval = TimeSpan.FromSeconds(3) };
         private CloudSyncControl _cloudSyncControl;
         private SecurityControl _securityControl;
@@ -35,11 +37,13 @@ namespace SinglePass.WPF.Views.Windows
 
         public MainWindow(
             MainWindowViewModel mainViewModel,
-            AppSettingsService appSettingsService)
+            AppSettingsService appSettingsService,
+            UpdateService updateService)
         {
             InitializeComponent();
 
             _appSettingsService = appSettingsService;
+            _updateService = updateService;
 
             var windowSettings = _appSettingsService.MainWindowSettings;
             if (windowSettings is not null)
@@ -214,7 +218,7 @@ namespace SinglePass.WPF.Views.Windows
             if (NavigationContent.Content is not SettingsControl settings)
                 return;
 
-            _aboutControl ??= new AboutControl();
+            _aboutControl ??= new AboutControl { DataContext = _updateService };
             OpenSettingsPage(_aboutControl, settings.AboutButton, "About");
         }
 

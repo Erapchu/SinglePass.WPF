@@ -10,6 +10,8 @@
     <PublishSingleFile>True</PublishSingleFile>
 	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <!--Custom Main runs Velopack hooks before WPF starts-->
+    <StartupObject>SinglePass.WPF.Program</StartupObject>
       
 	<!--ReadyToRun uses Composite mode by default https://github.com/dotnet/wpf/issues/7282-->
 	<!--Composite image crashes the app https://github.com/dotnet/runtime/issues/65879-->
@@ -35,7 +37,6 @@
 
   <ItemGroup>
     <PackageReference Include="AsyncKeyedLock" Version="8.1.2" />
-    <PackageReference Include="BouncyCastle.Cryptography" Version="2.7.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.15" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.15" />
@@ -45,12 +46,13 @@
     <PackageReference Include="NHotkey.Wpf" Version="4.0.0" />
     <PackageReference Include="NLog" Version="6.2.2" />
     <PackageReference Include="NLog.Extensions.Logging" Version="6.3.0" />
-    <PackageReference Include="Otp.NET" Version="1.4.1" />
     <PackageReference Include="Unidecode.NET" Version="2.2.1" />
+    <PackageReference Include="Velopack" Version="1.2.161" />
     <PackageReference Include="ZXing.Net" Version="0.16.11" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SinglePass.Core\SinglePass.Core.csproj" />
     <ProjectReference Include="..\SinglePass.Language\SinglePass.Language.csproj" />
     <ProjectReference Include="..\SinglePass.FavIcons.Application\SinglePass.FavIcons.Application.csproj" />
     <ProjectReference Include="..\SinglePass.FavIcons.Repository\SinglePass.FavIcons.Repository.csproj" />

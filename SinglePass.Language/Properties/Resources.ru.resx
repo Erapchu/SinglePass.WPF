@@ -612,4 +612,40 @@
   <data name="AboutOpenLinkFailed" xml:space="preserve">
     <value>Не удалось открыть ссылку в браузере.</value>
   </data>
+  <data name="Updates" xml:space="preserve">
+    <value>Обновления</value>
+  </data>
+  <data name="UpdateCheckAutomatically" xml:space="preserve">
+    <value>Автоматически проверять обновления</value>
+  </data>
+  <data name="UpdateCheckNow" xml:space="preserve">
+    <value>Проверить обновления</value>
+  </data>
+  <data name="UpdateRestart" xml:space="preserve">
+    <value>Перезапустить и обновить</value>
+  </data>
+  <data name="UpdateNotSupported" xml:space="preserve">
+    <value>Автоматические обновления доступны только для версии, установленной из релизов GitHub (Setup.exe или Portable.zip).</value>
+  </data>
+  <data name="UpdateChecking" xml:space="preserve">
+    <value>Проверка обновлений…</value>
+  </data>
+  <data name="UpdateUpToDate" xml:space="preserve">
+    <value>Установлена последняя версия.</value>
+  </data>
+  <data name="UpdateDownloading" xml:space="preserve">
+    <value>Загрузка версии {0}… {1}%</value>
+  </data>
+  <data name="UpdateReadyToInstall" xml:space="preserve">
+    <value>Версия {0} готова к установке.</value>
+  </data>
+  <data name="UpdateFailed" xml:space="preserve">
+    <value>Не удалось проверить обновления.</value>
+  </data>
+  <data name="UpdateAvailableHeader" xml:space="preserve">
+    <value>Доступно обновление</value>
+  </data>
+  <data name="UpdateAvailablePrompt" xml:space="preserve">
+    <value>Загружена версия {0}. Перезапустить SinglePass сейчас, чтобы установить её? Хранилище нужно будет разблокировать заново.</value>
+  </data>
 </root>

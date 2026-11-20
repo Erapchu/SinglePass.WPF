@@ -7,6 +7,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using SinglePass.Core.Services;
 
 namespace SinglePass.WPF.ViewModels
 {

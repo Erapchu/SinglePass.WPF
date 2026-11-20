@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using SinglePass.WPF.Localization;
-using SinglePass.WPF.Models;
+using SinglePass.Core.Localization;
+using SinglePass.Core.Models;
 using System;
 using System.ComponentModel;
 using System.Windows.Controls;

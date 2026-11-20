@@ -9,19 +9,6 @@ namespace SinglePass.WPF.Helpers
         public const float DefaultDpiX = 96;
         public const float DefaultDpiY = 96;
 
-        // you should always use this one and it will fallback if necessary
-        // https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getdpiforwindow
-        public static int GetDpiForWindow(IntPtr hwnd)
-        {
-            var h = LoadLibrary("user32.dll");
-            var ptr = GetProcAddress(h, "GetDpiForWindow"); // Windows 10 1607
-            if (ptr == IntPtr.Zero)
-                return GetDpiForNearestMonitor(hwnd);
-
-            return Marshal.GetDelegateForFunctionPointer<GetDpiForWindowFn>(ptr)(hwnd);
-        }
-
-        public static int GetDpiForNearestMonitor(IntPtr hwnd) => GetDpiForMonitor(GetNearestMonitorFromWindow(hwnd));
         public static int GetDpiForNearestMonitor(int x, int y) => GetDpiForMonitor(GetNearestMonitorFromPoint(x, y));
         public static int GetDpiForMonitor(IntPtr monitor, MonitorDpiType type = MonitorDpiType.Effective)
         {
@@ -48,12 +35,8 @@ namespace SinglePass.WPF.Helpers
             return (int)x;
         }
 
-        public static IntPtr GetDesktopMonitor() => GetNearestMonitorFromWindow(GetDesktopWindow());
-        public static IntPtr GetShellMonitor() => GetNearestMonitorFromWindow(GetShellWindow());
-        public static IntPtr GetNearestMonitorFromWindow(IntPtr hwnd) => MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
         public static IntPtr GetNearestMonitorFromPoint(int x, int y) => MonitorFromPoint(new POINT { x = x, y = y }, MONITOR_DEFAULTTONEAREST);
 
-        private delegate int GetDpiForWindowFn(IntPtr hwnd);
         private delegate int GetDpiForMonitorFn(IntPtr hmonitor, MonitorDpiType dpiType, out int dpiX, out int dpiY);
 
         private const int MONITOR_DEFAULTTONEAREST = 2;
@@ -66,15 +49,6 @@ namespace SinglePass.WPF.Helpers
 
         [DllImport("user32")]
         private static extern IntPtr MonitorFromPoint(POINT pt, int flags);
-
-        [DllImport("user32")]
-        private static extern IntPtr MonitorFromWindow(IntPtr hwnd, int flags);
-
-        [DllImport("user32")]
-        private static extern IntPtr GetDesktopWindow();
-
-        [DllImport("user32")]
-        private static extern IntPtr GetShellWindow();
 
         [StructLayout(LayoutKind.Sequential)]
         private partial struct POINT

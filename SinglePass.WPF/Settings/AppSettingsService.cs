@@ -8,10 +8,11 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using SinglePass.Core.Helpers;
 
 namespace SinglePass.WPF.Settings
 {
-    public class AppSettingsService : IAppSettings
+    public class AppSettingsService
     {
         private readonly AsyncKeyedLocker<string> _asyncKeyedLocker;
         private readonly ILogger<AppSettingsService> _logger;

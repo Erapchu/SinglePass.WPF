@@ -2,7 +2,7 @@
 
 namespace SinglePass.WPF.Settings
 {
-    public class AppSettings : IAppSettings
+    public class AppSettings
     {
         private IdleLockTimeout _idleLockTimeout = IdleLockTimeout.FiveMinutes;
 
@@ -22,8 +22,7 @@ namespace SinglePass.WPF.Settings
         public SortType Sort { get; set; }
         public OrderType Order { get; set; }
         public double DetailsPaneRatio { get; set; } = 0.5;
-        [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public PasswordGroupSettings PasswordGroups { get; set; }
+        public bool CheckForUpdates { get; set; } = true;
 
         public AppSettings()
         {

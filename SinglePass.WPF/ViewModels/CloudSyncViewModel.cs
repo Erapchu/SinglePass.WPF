@@ -1,10 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
-using SinglePass.WPF.Authorization.Brokers;
-using SinglePass.WPF.Cloud.Enums;
-using SinglePass.WPF.Clouds.Services;
-using SinglePass.WPF.Localization;
+using SinglePass.Core.Authorization.Brokers;
+using SinglePass.Core.Clouds.Enums;
+using SinglePass.Core.Clouds.Services;
+using SinglePass.Core.Localization;
 using SinglePass.WPF.Services;
 using SinglePass.WPF.ViewModels.Dialogs;
 using SinglePass.WPF.Views.Controls;
@@ -13,6 +13,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media;
+using SinglePass.Core.Services;
 
 namespace SinglePass.WPF.ViewModels
 {

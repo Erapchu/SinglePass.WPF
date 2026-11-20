@@ -1544,5 +1544,113 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("Yes", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Updates.
+        /// </summary>
+        public static string Updates {
+            get {
+                return ResourceManager.GetString("Updates", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Check for updates automatically.
+        /// </summary>
+        public static string UpdateCheckAutomatically {
+            get {
+                return ResourceManager.GetString("UpdateCheckAutomatically", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Check for updates.
+        /// </summary>
+        public static string UpdateCheckNow {
+            get {
+                return ResourceManager.GetString("UpdateCheckNow", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Restart and update.
+        /// </summary>
+        public static string UpdateRestart {
+            get {
+                return ResourceManager.GetString("UpdateRestart", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Automatic updates are available only for the version installed from GitHub releases (Setup.exe or Portable.zip)..
+        /// </summary>
+        public static string UpdateNotSupported {
+            get {
+                return ResourceManager.GetString("UpdateNotSupported", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Checking for updates….
+        /// </summary>
+        public static string UpdateChecking {
+            get {
+                return ResourceManager.GetString("UpdateChecking", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to You have the latest version..
+        /// </summary>
+        public static string UpdateUpToDate {
+            get {
+                return ResourceManager.GetString("UpdateUpToDate", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Downloading version {0}… {1}%.
+        /// </summary>
+        public static string UpdateDownloading {
+            get {
+                return ResourceManager.GetString("UpdateDownloading", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Version {0} is ready to install..
+        /// </summary>
+        public static string UpdateReadyToInstall {
+            get {
+                return ResourceManager.GetString("UpdateReadyToInstall", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Could not check for updates..
+        /// </summary>
+        public static string UpdateFailed {
+            get {
+                return ResourceManager.GetString("UpdateFailed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Update available.
+        /// </summary>
+        public static string UpdateAvailableHeader {
+            get {
+                return ResourceManager.GetString("UpdateAvailableHeader", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Version {0} has been downloaded. Restart SinglePass now to install it? You will need to unlock the vault again..
+        /// </summary>
+        public static string UpdateAvailablePrompt {
+            get {
+                return ResourceManager.GetString("UpdateAvailablePrompt", resourceCulture);
+            }
+        }
     }
 }

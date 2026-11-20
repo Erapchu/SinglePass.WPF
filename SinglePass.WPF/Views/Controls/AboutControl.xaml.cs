@@ -1,4 +1,4 @@
-using SinglePass.WPF.Localization;
+using SinglePass.Core.Localization;
 using SinglePass.WPF.ViewModels.Dialogs;
 using SinglePass.WPF.Views.Helpers;
 using System.ComponentModel;

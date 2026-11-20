@@ -1,5 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using SinglePass.WPF.Models;
+using SinglePass.Core.Models;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;

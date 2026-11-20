@@ -1,5 +1,5 @@
-using SinglePass.WPF.Localization;
-using SinglePass.WPF.Models;
+using SinglePass.Core.Localization;
+using SinglePass.Core.Models;
 using System;
 using System.Windows;
 using System.Windows.Controls;

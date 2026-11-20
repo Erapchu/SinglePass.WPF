@@ -592,4 +592,40 @@
   <data name="AboutOpenLinkFailed" xml:space="preserve">
     <value>Could not open the link in your browser.</value>
   </data>
+  <data name="Updates" xml:space="preserve">
+    <value>Updates</value>
+  </data>
+  <data name="UpdateCheckAutomatically" xml:space="preserve">
+    <value>Check for updates automatically</value>
+  </data>
+  <data name="UpdateCheckNow" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="UpdateRestart" xml:space="preserve">
+    <value>Restart and update</value>
+  </data>
+  <data name="UpdateNotSupported" xml:space="preserve">
+    <value>Automatic updates are available only for the version installed from GitHub releases (Setup.exe or Portable.zip).</value>
+  </data>
+  <data name="UpdateChecking" xml:space="preserve">
+    <value>Checking for updates…</value>
+  </data>
+  <data name="UpdateUpToDate" xml:space="preserve">
+    <value>You have the latest version.</value>
+  </data>
+  <data name="UpdateDownloading" xml:space="preserve">
+    <value>Downloading version {0}… {1}%</value>
+  </data>
+  <data name="UpdateReadyToInstall" xml:space="preserve">
+    <value>Version {0} is ready to install.</value>
+  </data>
+  <data name="UpdateFailed" xml:space="preserve">
+    <value>Could not check for updates.</value>
+  </data>
+  <data name="UpdateAvailableHeader" xml:space="preserve">
+    <value>Update available</value>
+  </data>
+  <data name="UpdateAvailablePrompt" xml:space="preserve">
+    <value>Version {0} has been downloaded. Restart SinglePass now to install it? You will need to unlock the vault again.</value>
+  </data>
 </root>

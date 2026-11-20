@@ -5,7 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:loc="clr-namespace:SinglePass.WPF.Localization"
+    xmlns:loc="clr-namespace:SinglePass.Core.Localization;assembly=SinglePass.Core"
     xmlns:vm="clr-namespace:SinglePass.WPF.ViewModels"
     Title="{Binding [Authorize], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
     Icon="/SinglePass.WPF;component/Resources/pass-man.ico"

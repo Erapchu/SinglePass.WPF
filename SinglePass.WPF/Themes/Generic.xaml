@@ -1,7 +1,7 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:loc="clr-namespace:SinglePass.WPF.Localization"
+    xmlns:loc="clr-namespace:SinglePass.Core.Localization;assembly=SinglePass.Core"
     xmlns:controls="clr-namespace:SinglePass.WPF.Controls">
     <Style TargetType="{x:Type controls:ToggleSwitch}">
         <Setter Property="MinHeight" Value="32" />

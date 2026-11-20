@@ -2,7 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using SinglePass.Language.Properties;
 using SinglePass.WPF.Hotkeys;
-using SinglePass.WPF.Localization;
+using SinglePass.Core.Localization;
 using SinglePass.WPF.Services;
 using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels.Dialogs;
@@ -10,6 +10,7 @@ using SinglePass.WPF.Views.Controls;
 using SinglePass.WPF.Views.Helpers;
 using System;
 using System.Threading.Tasks;
+using SinglePass.Core.Services;
 
 namespace SinglePass.WPF.ViewModels
 {

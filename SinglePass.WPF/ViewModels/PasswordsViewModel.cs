@@ -4,8 +4,8 @@ using Microsoft.Extensions.Logging;
 using SinglePass.WPF.Collections;
 using SinglePass.WPF.Enums;
 using SinglePass.WPF.Helpers;
-using SinglePass.WPF.Localization;
-using SinglePass.WPF.Models;
+using SinglePass.Core.Localization;
+using SinglePass.Core.Models;
 using SinglePass.WPF.Services;
 using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels.Dialogs;
@@ -22,6 +22,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
+using SinglePass.Core.Services;
 
 namespace SinglePass.WPF.ViewModels
 {

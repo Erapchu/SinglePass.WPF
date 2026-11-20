@@ -1,7 +1,8 @@
-﻿using SinglePass.WPF.Models;
+﻿using SinglePass.Core.Models;
 using SinglePass.WPF.ViewModels;
 using System.Collections.Generic;
 using System.Linq;
+using SinglePass.Core.Services;
 
 namespace SinglePass.WPF.Services
 {

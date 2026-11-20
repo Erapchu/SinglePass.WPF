@@ -1,6 +1,6 @@
-﻿using SinglePass.WPF.Models;
+﻿using SinglePass.Core.Models;
 using SinglePass.WPF.Services;
-using SinglePass.WPF.Localization;
+using SinglePass.Core.Localization;
 using SinglePass.WPF.ViewModels;
 using SinglePass.WPF.Views.Windows;
 using System;
@@ -11,6 +11,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Threading;
+using SinglePass.Core.Services;
 
 namespace SinglePass.WPF.Views.Controls
 {

@@ -1,5 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using SinglePass.WPF.Models;
+using SinglePass.Core.Models;
 using SinglePass.WPF.Services;
 using System;
 using System.Collections.Generic;

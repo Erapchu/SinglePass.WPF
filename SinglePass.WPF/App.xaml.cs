@@ -7,14 +7,14 @@ using Microsoft.Extensions.Options;
 using NLog.Extensions.Logging;
 using SinglePass.FavIcons.Application;
 using SinglePass.FavIcons.Repository;
-using SinglePass.WPF.Authorization.Brokers;
-using SinglePass.WPF.Authorization.TokenHolders;
-using SinglePass.WPF.Clouds.Services;
+using SinglePass.Core.Authorization.Brokers;
+using SinglePass.Core.Authorization.TokenHolders;
+using SinglePass.Core.Clouds.Services;
 using SinglePass.WPF.Extensions;
 using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Hotkeys;
-using SinglePass.WPF.Localization;
-using SinglePass.WPF.Options;
+using SinglePass.Core.Localization;
+using SinglePass.Core.Options;
 using SinglePass.WPF.Services;
 using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels;
@@ -28,6 +28,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using SinglePass.Core.Helpers;
+using SinglePass.Core.Services;
 
 namespace SinglePass.WPF
 {

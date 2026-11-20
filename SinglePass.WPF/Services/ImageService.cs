@@ -9,6 +9,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Microsoft.Extensions.Logging;
 using SinglePass.WPF.Helpers;
+using SinglePass.Core.Helpers;
 
 namespace SinglePass.WPF.Services
 {

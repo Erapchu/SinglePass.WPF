@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using SinglePass.Core.Helpers;
 
 namespace SinglePass.WPF.Helpers
 {

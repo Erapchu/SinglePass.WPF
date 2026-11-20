@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 using SinglePass.WPF.Helpers;
-using SinglePass.WPF.Localization;
+using SinglePass.Core.Localization;
 using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
@@ -11,6 +11,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 using static SinglePass.WPF.Helpers.WinApiProvider;
+using SinglePass.Core.Helpers;
 
 namespace SinglePass.WPF.Views
 {

@@ -1,8 +1,9 @@
-using SinglePass.WPF.Localization;
+using SinglePass.Core.Localization;
 using SinglePass.WPF.Services;
 using System;
 using System.Windows;
 using System.Windows.Controls;
+using SinglePass.Core.Services;
 
 namespace SinglePass.WPF.Views.Controls
 {

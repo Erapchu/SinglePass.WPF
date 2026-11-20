@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using SinglePass.WPF.Models;
+using SinglePass.Core.Models;
 using SinglePass.WPF.Views.Controls;
 using System;
 using System.Collections.ObjectModel;

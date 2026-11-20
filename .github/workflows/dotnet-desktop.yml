@@ -51,23 +51,44 @@ jobs:
     - name: Publish application
       if: steps.version.outputs.published == 'false'
       run: msbuild $env:PROJECT_PATH /t:Publish /p:Configuration=$env:CONFIGURATION /p:RuntimeIdentifier=win-x64 /p:SelfContained=true /p:PublishReadyToRun=true /p:PublishSingleFile=true
-    - name: Create ZIP archive
+    - name: Install Velopack CLI
+      if: steps.version.outputs.published == 'false'
+      run: dotnet tool install -g vpk --version 1.2.161
+    - name: Download previous release for delta updates
       if: steps.version.outputs.published == 'false'
       env:
-        ARCHIVE: ${{ steps.version.outputs.archive }}
-      run: Compress-Archive -Path '.\SinglePass.WPF\bin\Release\win-x64\publish\' -DestinationPath $env:ARCHIVE
-    - name: Create GitHub Release
+        REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        vpk download github --repoUrl $env:REPO_URL --token $env:GH_TOKEN --outputDir .\Releases
+        if ($LASTEXITCODE -ne 0) { Write-Warning 'No previous Velopack release found; only a full package will be built.' }
+        exit 0
+    - name: Pack Velopack release
       if: steps.version.outputs.published == 'false'
       env:
+        VERSION: ${{ steps.version.outputs.version }}
+      # packId must differ from "SinglePass": %LocalAppData%\SinglePass holds the user's vault,
+      # and Velopack deletes its install folder (%LocalAppData%\<packId>) on uninstall.
+      run: >
+        vpk pack
+        --packId SinglePass.WPF
+        --packVersion $env:VERSION
+        --packDir .\SinglePass.WPF\bin\Release\win-x64\publish
+        --mainExe SinglePass.WPF.exe
+        --packTitle SinglePass
+        --packAuthors "Andrey Nasonov"
+        --icon .\SinglePass.WPF\Resources\pass-man.ico
+        --outputDir .\Releases
+    - name: Upload GitHub Release
+      if: steps.version.outputs.published == 'false'
+      env:
+        REPO_URL: ${{ github.server_url }}/${{ github.repository }}
         GH_TOKEN: ${{ github.token }}
         RELEASE_TAG: ${{ steps.version.outputs.tag }}
-        ARCHIVE: ${{ steps.version.outputs.archive }}
-        RELEASE_DRAFT: ${{ steps.version.outputs.draft }}
       run: |
-        if ($env:RELEASE_DRAFT -eq 'true') {
-          gh release upload $env:RELEASE_TAG $env:ARCHIVE --clobber
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          gh release edit $env:RELEASE_TAG --draft=false
-        } else {
-          gh release create $env:RELEASE_TAG $env:ARCHIVE --target $env:GITHUB_SHA --title $env:RELEASE_TAG --generate-notes
-        }
+        # Uploads Setup.exe, Portable.zip, nupkg packages and the update feed into a draft release
+        vpk upload github --repoUrl $env:REPO_URL --token $env:GH_TOKEN --outputDir .\Releases --tag $env:RELEASE_TAG --releaseName $env:RELEASE_TAG --targetCommitish $env:GITHUB_SHA --merge
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        gh api "repos/$env:GITHUB_REPOSITORY/releases/generate-notes" -f tag_name=$env:RELEASE_TAG -f target_commitish=$env:GITHUB_SHA --jq .body > release-notes.md
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        gh release edit $env:RELEASE_TAG --draft=false --notes-file release-notes.md

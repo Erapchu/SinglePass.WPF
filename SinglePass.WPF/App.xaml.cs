@@ -1,4 +1,4 @@
-using AsyncKeyedLock;
+﻿using AsyncKeyedLock;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +18,8 @@ using SinglePass.Core.Options;
 using SinglePass.WPF.Services;
 using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels;
+using SinglePass.WPF.ViewModels.Dialogs;
+using SinglePass.WPF.Views.Helpers;
 using SinglePass.WPF.Views;
 using SinglePass.WPF.Views.Windows;
 using System;
@@ -44,6 +46,7 @@ namespace SinglePass.WPF
         private MainWindow _vaultWindow;
         private LoginWindow _loginWindow;
         private bool _locking;
+        private bool _updatePrompted;
 
         private bool IsFirstInstance { get; }
         public IServiceProvider Services { get; private set; }
@@ -117,6 +120,7 @@ namespace SinglePass.WPF
             services.AddSingleton<ImageService>();
             services.AddScoped<CredentialViewModelFactory>();
             services.AddSingleton<AddressBarExtractor>();
+            services.AddSingleton<UpdateService>();
             services.AddSingleton(new AsyncKeyedLocker<string>(o =>
             {
                 o.PoolSize = 20;
@@ -190,6 +194,11 @@ namespace SinglePass.WPF
             _loginWindow = null;
             var trayIcon = new TrayIcon(traySource, ShowVault, _rootServices.GetRequiredService<ILogger<TrayIcon>>());
             hiw.Closing += (_, _) => trayIcon.Dispose();
+
+            var updates = _rootServices.GetRequiredService<UpdateService>();
+            updates.UpdateReady += (_, _) => PromptUpdate();
+            updates.Start();
+
             OpenVault();
         }
 
@@ -198,6 +207,26 @@ namespace SinglePass.WPF
             _vaultWindow = Services.GetRequiredService<MainWindow>();
             MainWindow = _vaultWindow;
             _vaultWindow.Show();
+            Dispatcher.BeginInvoke(PromptUpdate, DispatcherPriority.ApplicationIdle);
+        }
+
+        /// <summary>Offers to restart once a downloaded update is ready; asks at most once per session.</summary>
+        private async void PromptUpdate()
+        {
+            var updates = _rootServices?.GetService<UpdateService>();
+            if (_updatePrompted || updates?.State != UpdateState.ReadyToRestart)
+                return;
+            if (_vaultWindow is not { CanShowModal: true })
+                return;
+
+            _updatePrompted = true;
+            var localization = LocalizationManager.Instance;
+            var choice = await MessageDialog.ShowAsync(
+                localization["UpdateAvailableHeader"],
+                string.Format(localization.Culture, localization["UpdateAvailablePrompt"], updates.AvailableVersion),
+                MessageDialogButtons.YesNo);
+            if (choice == DialogChoice.Yes)
+                updates.Restart();
         }
 
         internal bool ShowUnlockIfLocked()

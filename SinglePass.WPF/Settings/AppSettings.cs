@@ -22,6 +22,7 @@ namespace SinglePass.WPF.Settings
         public SortType Sort { get; set; }
         public OrderType Order { get; set; }
         public double DetailsPaneRatio { get; set; } = 0.5;
+        public bool CheckForUpdates { get; set; } = true;
 
         public AppSettings()
         {

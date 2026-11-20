@@ -24,5 +24,5 @@ if ($published) {
 "published=$($published.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
 "draft=$($draft.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
 "tag=$tag" >> $env:GITHUB_OUTPUT
-"archive=SinglePass.WPF.$version.zip" >> $env:GITHUB_OUTPUT
+"version=$version" >> $env:GITHUB_OUTPUT
 exit 0

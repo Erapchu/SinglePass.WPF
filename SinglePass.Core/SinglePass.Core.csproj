@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="SinglePass.WPF" />
+    <InternalsVisibleTo Include="SinglePass.Core.Tests" />
   </ItemGroup>
 
   <ItemGroup>

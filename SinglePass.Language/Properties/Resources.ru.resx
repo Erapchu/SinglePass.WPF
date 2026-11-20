@@ -342,6 +342,9 @@
   <data name="CredentialsChanged" xml:space="preserve">
     <value>Изменены пароли:</value>
   </data>
+  <data name="CredentialsDeleted" xml:space="preserve">
+    <value>Удалены пароли:</value>
+  </data>
   <data name="NewCredentialsAdded" xml:space="preserve">
     <value>Новые пароли добавлены:</value>
   </data>

@@ -115,14 +115,16 @@ namespace SinglePass.Core.Services
 
             if (json.ValueKind != JsonValueKind.Object ||
                 !json.TryGetProperty(nameof(PasswordVault.Version), out var version) ||
-                !version.TryGetInt32(out var number) || number != 1)
+                !version.TryGetInt32(out var number) || number < 1 || number > PasswordVault.CurrentVersion)
                 throw new JsonException("Unsupported password vault format.");
 
             var vault = json.Deserialize<PasswordVault>();
-            if (vault.Credentials == null || vault.Groups == null || vault.Assignments == null)
+            if (vault.Credentials == null || vault.Groups == null || vault.Assignments == null ||
+                vault.DeletedCredentials == null)
                 throw new JsonException("Incomplete password vault.");
 
-            return vault;
+            // Version 1 has no tombstones; the next write stores the vault as the current version.
+            return vault.Version == PasswordVault.CurrentVersion ? vault : vault with { Version = PasswordVault.CurrentVersion };
         }
 
         internal Task<CredentialLoadResult> LoadCredentialsAsync(string password, bool allowCreate = false) => Task.Run(async () =>
@@ -168,6 +170,12 @@ namespace SinglePass.Core.Services
                     return vault;
 
                 var updated = vault with { Credentials = [.. vault.Credentials, credential] };
+                if (vault.DeletedCredentials.ContainsKey(credential.Id))
+                {
+                    var deleted = new Dictionary<Guid, DateTimeOffset>(vault.DeletedCredentials);
+                    deleted.Remove(credential.Id);
+                    updated = updated with { DeletedCredentials = deleted };
+                }
                 return groupId.HasValue ? AssignGroupOrThrow(updated, credential.Id, groupId) : updated;
             });
         }
@@ -207,9 +215,30 @@ namespace SinglePass.Core.Services
         public Task DeleteCredential(Credential credential)
         {
             ArgumentNullException.ThrowIfNull(credential);
-            return UpdateVault(vault => vault.Credentials.Contains(credential)
-                ? vault with { Credentials = vault.Credentials.Where(item => !item.Equals(credential)).ToList() }
-                : vault);
+            return UpdateVault(vault =>
+            {
+                if (!vault.Credentials.Contains(credential))
+                    return vault;
+
+                // The tombstone keeps other devices and the cloud copy from bringing the credential back on sync.
+                var deleted = new Dictionary<Guid, DateTimeOffset>(vault.DeletedCredentials)
+                {
+                    [credential.Id] = DateTimeOffset.UtcNow
+                };
+                var assignments = vault.Assignments;
+                if (assignments.ContainsKey(credential.Id))
+                {
+                    assignments = new Dictionary<Guid, GroupAssignment>(assignments);
+                    assignments.Remove(credential.Id);
+                }
+
+                return vault with
+                {
+                    Credentials = vault.Credentials.Where(item => !item.Equals(credential)).ToList(),
+                    DeletedCredentials = deleted,
+                    Assignments = assignments
+                };
+            });
         }
 
         internal Task SaveGroup(PasswordGroup group, bool isNew) => UpdateVault(vault =>
@@ -277,57 +306,125 @@ namespace SinglePass.Core.Services
         internal async Task<CredentialsMergeResult> Merge(PasswordVault incoming)
         {
             var result = CredentialsMergeResult.SuccessMergeResult;
-            await UpdateVault(vault =>
-            {
-                var credentials = vault.Credentials.ToList();
-                foreach (var credential in incoming.Credentials)
-                {
-                    var index = credentials.IndexOf(credential);
-                    if (index < 0)
-                    {
-                        credentials.Add(credential);
-                        result.NewCredentials.Add(credential);
-                    }
-                    else
-                    {
-                        var local = credentials[index];
-                        var winner = local.LastModifiedTime < credential.LastModifiedTime ? credential : local;
-                        var history = MergePasswordHistory(winner, ReferenceEquals(winner, local) ? credential : local);
-                        if (!ReferenceEquals(winner, local) || !ReferenceEquals(history, local.PasswordHistory))
-                        {
-                            var merged = winner.Clone();
-                            merged.PasswordHistory = history;
-                            result.ChangedCredentials.Add(local);
-                            credentials[index] = merged;
-                        }
-                    }
-                }
-
-                var groups = new Dictionary<Guid, GroupChange>(vault.Groups);
-                foreach (var (id, change) in incoming.Groups)
-                {
-                    if (!groups.TryGetValue(id, out var local) ||
-                        !local.IsDeleted && (change.IsDeleted || change.ModifiedAt > local.ModifiedAt))
-                    {
-                        groups[id] = change;
-                        result.GroupChanges = true;
-                    }
-                }
-
-                var assignments = new Dictionary<Guid, GroupAssignment>(vault.Assignments);
-                foreach (var (id, assignment) in incoming.Assignments)
-                {
-                    if (!assignments.TryGetValue(id, out var local) || assignment.ModifiedAt > local.ModifiedAt)
-                    {
-                        assignments[id] = assignment;
-                        result.GroupChanges = true;
-                    }
-                }
-
-                return result.AnyChanges ? vault with { Credentials = credentials, Groups = groups, Assignments = assignments } : vault;
-            });
+            await UpdateVault(vault => MergeVaults(vault, incoming, result));
             return result;
         }
+
+        /// <summary>
+        /// Merges <paramref name="incoming"/> into <paramref name="local"/>. Returns <paramref name="local"/>
+        /// itself when nothing has to be written.
+        /// </summary>
+        internal static PasswordVault MergeVaults(PasswordVault local, PasswordVault incoming, CredentialsMergeResult result)
+        {
+            var changed = false;
+
+            // Tombstones: the latest deletion time wins.
+            var deleted = new Dictionary<Guid, DateTimeOffset>(local.DeletedCredentials);
+            foreach (var (id, deletedAt) in incoming.DeletedCredentials)
+            {
+                if (!deleted.TryGetValue(id, out var known) || deletedAt > known)
+                {
+                    deleted[id] = deletedAt;
+                    changed = true;
+                }
+            }
+
+            // Credentials: the latest modification wins, password histories are combined.
+            var credentials = local.Credentials.ToList();
+            foreach (var credential in incoming.Credentials)
+            {
+                var index = credentials.IndexOf(credential);
+                if (index < 0)
+                {
+                    credentials.Add(credential);
+                    result.NewCredentials.Add(credential);
+                    continue;
+                }
+
+                var current = credentials[index];
+                var winner = current.LastModifiedTime < credential.LastModifiedTime ? credential : current;
+                var history = MergePasswordHistory(winner, ReferenceEquals(winner, current) ? credential : current);
+                if (!ReferenceEquals(winner, current) || !ReferenceEquals(history, current.PasswordHistory))
+                {
+                    var merged = winner.Clone();
+                    merged.PasswordHistory = history;
+                    result.ChangedCredentials.Add(merged);
+                    credentials[index] = merged;
+                }
+            }
+
+            // A deletion removes the credential unless it was edited after being deleted somewhere else:
+            // losing a freshly changed password is worse than getting a deleted entry back.
+            for (var i = credentials.Count - 1; i >= 0; i--)
+            {
+                var credential = credentials[i];
+                if (!deleted.TryGetValue(credential.Id, out var deletedAt))
+                    continue;
+
+                if (IsModifiedAfter(credential, deletedAt))
+                {
+                    deleted.Remove(credential.Id);
+                    changed = true;
+                    continue;
+                }
+
+                credentials.RemoveAt(i);
+                result.NewCredentials.Remove(credential);
+                result.ChangedCredentials.Remove(credential);
+                var index = local.Credentials.IndexOf(credential);
+                if (index >= 0)
+                    result.DeletedCredentials.Add(local.Credentials[index]);
+            }
+
+            var groups = new Dictionary<Guid, GroupChange>(local.Groups);
+            foreach (var (id, change) in incoming.Groups)
+            {
+                if (!groups.TryGetValue(id, out var current) ||
+                    !current.IsDeleted && (change.IsDeleted || change.ModifiedAt > current.ModifiedAt))
+                {
+                    groups[id] = change;
+                    result.GroupChanges = true;
+                }
+            }
+
+            // Group links are kept only for credentials that survived the merge.
+            var credentialIds = credentials.Select(credential => credential.Id).ToHashSet();
+            var assignments = new Dictionary<Guid, GroupAssignment>(local.Assignments);
+            foreach (var id in local.Assignments.Keys)
+            {
+                if (!credentialIds.Contains(id))
+                {
+                    assignments.Remove(id);
+                    changed = true;
+                }
+            }
+
+            foreach (var (id, assignment) in incoming.Assignments)
+            {
+                if (!credentialIds.Contains(id))
+                    continue;
+
+                if (!assignments.TryGetValue(id, out var current) || assignment.ModifiedAt > current.ModifiedAt)
+                {
+                    assignments[id] = assignment;
+                    result.GroupChanges = true;
+                }
+            }
+
+            if (!changed && !result.AnyChanges)
+                return local;
+
+            return local with
+            {
+                Credentials = credentials,
+                Groups = groups,
+                Assignments = assignments,
+                DeletedCredentials = deleted
+            };
+        }
+
+        private static bool IsModifiedAfter(Credential credential, DateTimeOffset deletedAt) =>
+            credential.LastModifiedTime.ToUniversalTime() > deletedAt.UtcDateTime;
 
         private static IReadOnlyList<PasswordHistoryEntry> MergePasswordHistory(Credential winner, Credential other)
         {

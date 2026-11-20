@@ -468,6 +468,9 @@
   <data name="YandexDiskOAuthNotConfigured" xml:space="preserve">
     <value>Настройте Яндекс OAuth, чтобы войти в аккаунт.</value>
   </data>
+  <data name="GoogleDriveOAuthNotConfigured" xml:space="preserve">
+    <value>Google OAuth не настроен в этой сборке.</value>
+  </data>
   <data name="CloudSignInFailed" xml:space="preserve">
     <value>Не удалось войти в облачный аккаунт.</value>
   </data>

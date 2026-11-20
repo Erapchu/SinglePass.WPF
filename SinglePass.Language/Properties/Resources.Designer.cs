@@ -1526,6 +1526,15 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("YandexDiskOAuthNotConfigured", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Google OAuth is not configured in this build..
+        /// </summary>
+        public static string GoogleDriveOAuthNotConfigured {
+            get {
+                return ResourceManager.GetString("GoogleDriveOAuthNotConfigured", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Yes.

@@ -34,6 +34,20 @@ jobs:
       env:
         GH_TOKEN: ${{ github.token }}
       run: ./.github/scripts/Get-ReleaseVersion.ps1
+    - name: Write OAuth client settings
+      if: steps.version.outputs.published == 'false'
+      env:
+        GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        YANDEX_CLIENT_ID: ${{ secrets.YANDEX_CLIENT_ID }}
+      run: |
+        if (-not $env:GOOGLE_CLIENT_ID -or -not $env:GOOGLE_CLIENT_SECRET) {
+          Write-Error 'GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET repository secrets are required.'
+          exit 1
+        }
+        $settings = @{ GoogleDriveConfig = @{ ClientId = $env:GOOGLE_CLIENT_ID; ClientSecret = $env:GOOGLE_CLIENT_SECRET } }
+        if ($env:YANDEX_CLIENT_ID) { $settings.YandexDiskConfig = @{ ClientId = $env:YANDEX_CLIENT_ID } }
+        @{ Settings = $settings } | ConvertTo-Json -Depth 5 | Set-Content -Path .\SinglePass.WPF\settings.secrets.json -Encoding utf8
     - name: Publish application
       if: steps.version.outputs.published == 'false'
       run: msbuild $env:PROJECT_PATH /t:Publish /p:Configuration=$env:CONFIGURATION /p:RuntimeIdentifier=win-x64 /p:SelfContained=true /p:PublishReadyToRun=true /p:PublishSingleFile=true

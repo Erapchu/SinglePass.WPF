@@ -15,16 +15,6 @@ namespace SinglePass.WPF.Authorization.Helpers
 {
     internal static class OAuthHelper
     {
-        public const string GrantType = "grant_type";
-        public const string RefreshToken = "refresh_token";
-        public const string ClientId = "client_id";
-        public const string ClientSecret = "client_secret";
-        public const string RedirectUri = "redirect_uri";
-        public const string ApplicationXWWW = "application/x-www-form-urlencoded";
-        public const string ResponseType = "response_type";
-        public const string Code = "code";
-        public const string AuthorizationCode = "authorization_code";
-
         internal static string CreateRandomUrlToken() => Base64Url(RandomNumberGenerator.GetBytes(32));
 
         internal static string CreatePkceChallenge(string verifier) =>
@@ -63,11 +53,13 @@ namespace SinglePass.WPF.Authorization.Helpers
             }
         }
 
-        public static void OpenBrowser(string uri)
+        public static void OpenBrowser(Uri uri)
         {
-            uri = System.Text.RegularExpressions.Regex.Replace(uri, @"(\\*)" + "\"", @"$1$1\" + "\"");
-            uri = System.Text.RegularExpressions.Regex.Replace(uri, @"(\\+)$", @"$1$1");
-            Process.Start(new ProcessStartInfo("cmd", $"/c start \"\" \"{uri}\"") { CreateNoWindow = true });
+            // Only hand HTTPS URLs to the shell so nothing else can be launched through it.
+            if (!uri.IsAbsoluteUri || uri.Scheme != Uri.UriSchemeHttps)
+                throw new ArgumentException("Only HTTPS authorization URLs can be opened.", nameof(uri));
+
+            using var _ = Process.Start(new ProcessStartInfo(uri.AbsoluteUri) { UseShellExecute = true });
         }
 
         public static async Task<AuthorizationCodeResponseUrl> GetResponseFromListener(

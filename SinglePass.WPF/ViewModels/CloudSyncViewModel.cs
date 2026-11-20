@@ -7,12 +7,11 @@ using SinglePass.WPF.Clouds.Services;
 using SinglePass.WPF.Localization;
 using SinglePass.WPF.Services;
 using SinglePass.WPF.ViewModels.Dialogs;
+using SinglePass.WPF.Views.Controls;
 using SinglePass.WPF.Views.Helpers;
-using SinglePass.WPF.Views.Windows;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Media;
 
 namespace SinglePass.WPF.ViewModels
@@ -76,7 +75,7 @@ namespace SinglePass.WPF.ViewModels
             {
                 // Authorize
                 var cloudService = _cloudServiceProvider.GetCloudService(cloudType);
-                await ProcessingDialogWindow.RunAsync(
+                await ProcessingDialog.RunAsync(
                     SinglePass.Language.Properties.Resources.Authorizing,
                     SinglePass.Language.Properties.Resources.PleaseContinueAuthorizationOrCancelIt,
                     async cancellationToken =>
@@ -99,7 +98,7 @@ namespace SinglePass.WPF.ViewModels
                 if (_syncService.IsLocked)
                     return;
                 var message = string.Format(LocalizationManager.Instance["YandexDiskCallbackUnavailable"], ex.Port);
-                MessageDialog.ShowDialog(SinglePass.Language.Properties.Resources.Error, message, MessageDialogButtons.OK, "\uEA39");
+                await MessageDialog.ShowAsync(SinglePass.Language.Properties.Resources.Error, message, MessageDialogButtons.OK, "\uEA39");
             }
             catch (Exception ex)
             {
@@ -121,7 +120,7 @@ namespace SinglePass.WPF.ViewModels
             {
                 // Revoke
                 var cloudService = _cloudServiceProvider.GetCloudService(cloudType);
-                await ProcessingDialogWindow.RunAsync(
+                await ProcessingDialog.RunAsync(
                     SinglePass.Language.Properties.Resources.SigningOut,
                     SinglePass.Language.Properties.Resources.PleaseWait,
                     async cancellationToken =>
@@ -154,7 +153,7 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
-        private static void ShowAccountError(string messageKey) => MessageDialog.ShowDialog(
+        private static void ShowAccountError(string messageKey) => _ = MessageDialog.ShowAsync(
             SinglePass.Language.Properties.Resources.Error, LocalizationManager.Instance[messageKey],
             MessageDialogButtons.OK, "\uEA39");
 
@@ -214,7 +213,7 @@ namespace SinglePass.WPF.ViewModels
                 if (_syncService.IsLocked)
                     return;
 
-                MessageDialog.ShowDialog(
+                await MessageDialog.ShowAsync(
                     mergeResult.Success
                     ? SinglePass.Language.Properties.Resources.SyncSuccess
                     : SinglePass.Language.Properties.Resources.SyncFailed,
@@ -250,7 +249,7 @@ namespace SinglePass.WPF.ViewModels
                 if (_syncService.IsLocked)
                     return;
 
-                MessageDialog.ShowDialog(
+                await MessageDialog.ShowAsync(
                     success
                     ? SinglePass.Language.Properties.Resources.Success
                     : SinglePass.Language.Properties.Resources.Error,
@@ -274,10 +273,11 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
-        private static Task<string> SyncPasswordRequired()
+        private static async Task<string> SyncPasswordRequired()
         {
-            var dialog = new SyncPasswordDialogWindow { Owner = Application.Current.MainWindow };
-            return Task.FromResult(dialog.ShowDialog() == true ? dialog.Password : null);
+            var dialog = new SyncPasswordDialog();
+            await ModalDialog.ShowAsync(dialog);
+            return dialog.Password;
         }
 
         [RelayCommand]

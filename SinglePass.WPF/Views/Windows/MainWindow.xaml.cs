@@ -63,21 +63,30 @@ namespace SinglePass.WPF.Views.Windows
             DataContext = mainViewModel;
         }
 
+        /// <summary>Whether an in-window modal can be shown right now.</summary>
+        internal bool CanShowModal => IsVisible && WindowState != WindowState.Minimized && ModalHost.CanOpen;
+
+        internal Task ShowDialogAsync(IModalDialog dialog, FrameworkElement focusReturn = null) =>
+            ModalHost.ShowDialogAsync(dialog, focusReturn);
+
+        internal Task<DialogChoice> ShowMessageAsync(MessageDialogViewModel viewModel, FrameworkElement focusReturn = null) =>
+            ModalHost.ShowMessageAsync(viewModel, focusReturn);
+
         internal void ShowCredentialEditor(CredentialsDetailsControl card, Decorator anchor, Button source, PasswordsViewModel viewModel) =>
-            CredentialEditor.OpenForEdit(card, anchor, source, viewModel);
+            ModalHost.OpenForEdit(card, anchor, source, viewModel);
 
         internal Task ShowNewCredentialEditorAsync(CredentialsDetailsControl details, Button source, PasswordsViewModel viewModel) =>
-            CredentialEditor.OpenForAddAsync(details, source, viewModel);
+            ModalHost.OpenForAddAsync(details, source, viewModel);
 
         internal void ShowCredentialDeletion(CredentialsDetailsControl details, Decorator anchor, Button source, PasswordsViewModel viewModel) =>
-            CredentialEditor.OpenForDelete(details, anchor, source, viewModel);
+            ModalHost.OpenForDelete(details, anchor, source, viewModel);
 
         private void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName != nameof(MainWindowViewModel.SelectedNavigationItem))
                 return;
 
-            CredentialEditor.Dismiss();
+            ModalHost.Dismiss();
             if (_settingsPageButton != null)
                 CloseSettingsPage();
 
@@ -95,10 +104,15 @@ namespace SinglePass.WPF.Views.Windows
             if (ViewModel.PasswordsVM.IsSavingGroups)
                 return;
 
-            var dialog = new PasswordGroupDialogWindow { Owner = this };
-            if (dialog.ShowDialog() == true)
+            var dialog = new PasswordGroupDialog();
+            await ModalHost.ShowDialogAsync(dialog, sender as FrameworkElement);
+            if (dialog.Group != null)
                 await ViewModel.AddGroupAsync(dialog.Group);
         }
+
+        /// <summary>The group's "..." button that opened the context menu holding <paramref name="menuItem"/>.</summary>
+        private static FrameworkElement GetMenuButton(FrameworkElement menuItem) =>
+            (menuItem.Parent as ContextMenu)?.PlacementTarget as FrameworkElement;
 
         private void GroupMenu_Click(object sender, RoutedEventArgs e)
         {
@@ -112,23 +126,25 @@ namespace SinglePass.WPF.Views.Windows
         private async void EditGroup_Click(object sender, RoutedEventArgs e)
         {
             if (ViewModel.PasswordsVM.IsSavingGroups ||
-                sender is not MenuItem { DataContext: NavigationItemViewModel { Group: { } group } item })
+                sender is not MenuItem { DataContext: NavigationItemViewModel { Group: { } group } item } menuItem)
                 return;
 
-            var dialog = new PasswordGroupDialogWindow(group) { Owner = this };
-            if (dialog.ShowDialog() == true)
+            var dialog = new PasswordGroupDialog(group);
+            await ModalHost.ShowDialogAsync(dialog, GetMenuButton(menuItem));
+            if (dialog.Group != null)
                 await ViewModel.EditGroupAsync(item, dialog.Group);
         }
 
         private async void DeleteGroup_Click(object sender, RoutedEventArgs e)
         {
             if (ViewModel.PasswordsVM.IsSavingGroups ||
-                sender is not FrameworkElement { DataContext: NavigationItemViewModel { Group: { } group } item })
+                sender is not FrameworkElement { DataContext: NavigationItemViewModel { Group: { } group } item } menuItem)
                 return;
 
+            var menuButton = GetMenuButton(menuItem);
             var loc = LocalizationManager.Instance;
-            var choice = MessageDialog.ShowDialog(loc["DeletePasswordGroup"],
-                string.Format(loc["DeletePasswordGroupConfirmation"], group.Name), MessageDialogButtons.YesNo, "\uE74D");
+            var choice = await MessageDialog.ShowAsync(loc["DeletePasswordGroup"],
+                string.Format(loc["DeletePasswordGroupConfirmation"], group.Name), MessageDialogButtons.YesNo, "\uE74D", menuButton);
             if (choice == DialogChoice.Yes)
                 await ViewModel.DeleteGroupAsync(item);
         }
@@ -220,7 +236,7 @@ namespace SinglePass.WPF.Views.Windows
         {
             base.OnPreviewMouseDown(e);
 
-            if (e.ChangedButton == MouseButton.XButton1 && _settingsPageButton != null)
+            if (e.ChangedButton == MouseButton.XButton1 && _settingsPageButton != null && !ModalHost.IsShown)
             {
                 e.Handled = true;
                 ReturnToSettings();
@@ -338,7 +354,7 @@ namespace SinglePass.WPF.Views.Windows
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            CredentialEditor.Dismiss();
+            ModalHost.Dismiss();
             _statusTimer.Stop();
             ViewModel.PropertyChanged -= ViewModel_PropertyChanged;
             ViewModel.PasswordsVM.StatusMessageRequested -= ShowStatusMessage;

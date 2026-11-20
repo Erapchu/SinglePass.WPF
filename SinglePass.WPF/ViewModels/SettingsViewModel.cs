@@ -6,10 +6,10 @@ using SinglePass.WPF.Localization;
 using SinglePass.WPF.Services;
 using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels.Dialogs;
+using SinglePass.WPF.Views.Controls;
 using SinglePass.WPF.Views.Helpers;
-using SinglePass.WPF.Views.Windows;
 using System;
-using System.Windows;
+using System.Threading.Tasks;
 
 namespace SinglePass.WPF.ViewModels
 {
@@ -72,16 +72,13 @@ namespace SinglePass.WPF.ViewModels
         }
 
         [RelayCommand]
-        private void ChangePassword()
+        private async Task ChangePassword()
         {
-            var dialog = new ChangePasswordDialogWindow(_credentialsCryptoService)
+            var dialog = new ChangePasswordDialog(_credentialsCryptoService);
+            await ModalDialog.ShowAsync(dialog);
+            if (dialog.Changed)
             {
-                Owner = Application.Current.MainWindow
-            };
-
-            if (dialog.ShowDialog() == true)
-            {
-                MessageDialog.ShowDialog(
+                await MessageDialog.ShowAsync(
                     Resources.Success,
                     LocalizationManager.Instance["NewPasswordApplied"],
                     MessageDialogButtons.OK,
@@ -123,7 +120,7 @@ namespace SinglePass.WPF.ViewModels
             }
             catch (Exception)
             {
-                MessageDialog.ShowDialog(Resources.Error, LocalizationManager.Instance["SaveAppearanceSettingsFailed"],
+                await MessageDialog.ShowAsync(Resources.Error, LocalizationManager.Instance["SaveAppearanceSettingsFailed"],
                     MessageDialogButtons.OK, "\uEA39");
             }
         }
@@ -145,7 +142,7 @@ namespace SinglePass.WPF.ViewModels
             }
             catch (Exception)
             {
-                MessageDialog.ShowDialog(Resources.Error, LocalizationManager.Instance["SaveSecuritySettingsFailed"],
+                await MessageDialog.ShowAsync(Resources.Error, LocalizationManager.Instance["SaveSecuritySettingsFailed"],
                     MessageDialogButtons.OK, "\uEA39");
             }
         }

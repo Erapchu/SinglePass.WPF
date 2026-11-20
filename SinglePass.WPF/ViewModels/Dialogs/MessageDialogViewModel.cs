@@ -140,6 +140,17 @@ namespace SinglePass.WPF.ViewModels.Dialogs
             }
         }
 
+        /// <summary>
+        /// Result of dismissing the dialog with Escape: the cancel button's choice, or OK for an OK-only dialog.
+        /// </summary>
+        public DialogChoice CancelChoice => Buttons switch
+        {
+            MessageDialogButtons.OK => DialogChoice.OK,
+            MessageDialogButtons.YesNo => DialogChoice.No,
+            MessageDialogButtons.AbortRetryIgnore => DialogChoice.Ignore,
+            _ => DialogChoice.Cancel,
+        };
+
         public MessageDialogViewModel()
         {
 

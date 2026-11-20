@@ -88,16 +88,8 @@
         </i:EventTrigger>
     </i:Interaction.Triggers>
     <Grid>
+        <!-- Not disabled while ModalHost is open: its backdrop blocks the mouse and it keeps keyboard focus. -->
         <Grid x:Name="Workspace" Margin="8">
-            <Grid.Style>
-                <Style TargetType="Grid">
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding Visibility, ElementName=CredentialEditor}" Value="Visible">
-                            <Setter Property="IsEnabled" Value="False" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Grid.Style>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200" />
                 <ColumnDefinition Width="*" />
@@ -247,7 +239,7 @@
                 </ContentControl>
             </DockPanel>
         </Grid>
-        <controls:CredentialEditorHost x:Name="CredentialEditor" />
+        <controls:ModalHost x:Name="ModalHost" />
         <Border
             x:Name="StatusBanner"
             Margin="208,8,8,8"

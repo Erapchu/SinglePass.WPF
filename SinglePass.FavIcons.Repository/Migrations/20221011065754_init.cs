@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
+#pragma warning disable CS8981 // Generated migration name; renaming the class is not worth it
 
 namespace SinglePass.FavIcons.Repository.Migrations
 {

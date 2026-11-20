@@ -69,12 +69,15 @@
                         Visibility="{Binding IsConnected, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                     <TextBlock
                         Margin="0,8,0,0"
-                        Text="{Binding [YandexDiskOAuthNotConfigured], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
                         TextWrapping="Wrap">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Setter Property="Visibility" Value="Collapsed" />
+                                <Setter Property="Text" Value="{Binding [YandexDiskOAuthNotConfigured], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
                                 <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Type}" Value="{x:Static cloud:CloudType.GoogleDrive}">
+                                        <Setter Property="Text" Value="{Binding [GoogleDriveOAuthNotConfigured], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
+                                    </DataTrigger>
                                     <MultiDataTrigger>
                                         <MultiDataTrigger.Conditions>
                                             <Condition Binding="{Binding IsConnected}" Value="False" />

@@ -448,6 +448,9 @@
   <data name="YandexDiskOAuthNotConfigured" xml:space="preserve">
     <value>Configure Yandex OAuth to enable sign-in.</value>
   </data>
+  <data name="GoogleDriveOAuthNotConfigured" xml:space="preserve">
+    <value>Google OAuth is not configured in this build.</value>
+  </data>
   <data name="CloudSignInFailed" xml:space="preserve">
     <value>Could not sign in to the cloud account.</value>
   </data>

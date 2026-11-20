@@ -99,7 +99,7 @@ namespace SinglePass.WPF.ViewModels
                 if (_syncService.IsLocked)
                     return;
                 var message = string.Format(LocalizationManager.Instance["YandexDiskCallbackUnavailable"], ex.Port);
-                MessageDialog.ShowDialog(SinglePass.Language.Properties.Resources.Error, message, MessageDialogButtons.OK, "\uEA39");
+                await MessageDialog.ShowAsync(SinglePass.Language.Properties.Resources.Error, message, MessageDialogButtons.OK, "\uEA39");
             }
             catch (Exception ex)
             {
@@ -154,7 +154,7 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
-        private static void ShowAccountError(string messageKey) => MessageDialog.ShowDialog(
+        private static void ShowAccountError(string messageKey) => _ = MessageDialog.ShowAsync(
             SinglePass.Language.Properties.Resources.Error, LocalizationManager.Instance[messageKey],
             MessageDialogButtons.OK, "\uEA39");
 
@@ -214,7 +214,7 @@ namespace SinglePass.WPF.ViewModels
                 if (_syncService.IsLocked)
                     return;
 
-                MessageDialog.ShowDialog(
+                await MessageDialog.ShowAsync(
                     mergeResult.Success
                     ? SinglePass.Language.Properties.Resources.SyncSuccess
                     : SinglePass.Language.Properties.Resources.SyncFailed,
@@ -250,7 +250,7 @@ namespace SinglePass.WPF.ViewModels
                 if (_syncService.IsLocked)
                     return;
 
-                MessageDialog.ShowDialog(
+                await MessageDialog.ShowAsync(
                     success
                     ? SinglePass.Language.Properties.Resources.Success
                     : SinglePass.Language.Properties.Resources.Error,

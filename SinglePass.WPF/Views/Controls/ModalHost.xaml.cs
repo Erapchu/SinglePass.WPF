@@ -1,6 +1,7 @@
 using SinglePass.WPF.Controls;
 using SinglePass.WPF.Helpers;
 using SinglePass.WPF.ViewModels;
+using SinglePass.WPF.ViewModels.Dialogs;
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
@@ -13,7 +14,7 @@ using System.Windows.Threading;
 
 namespace SinglePass.WPF.Views.Controls
 {
-    public partial class CredentialEditorHost : UserControl
+    public partial class ModalHost : UserControl
     {
         private const double WindowInset = 8;
         private const double BackdropOpacity = 0.32;
@@ -23,23 +24,84 @@ namespace SinglePass.WPF.Views.Controls
         private static readonly TimeSpan ResizeDuration = TimeSpan.FromMilliseconds(210);
         private static readonly TimeSpan CloseDuration = TimeSpan.FromMilliseconds(180);
 
-        private sealed record EditorSession(CredentialsDetailsControl Card, CredentialsDetailsControl Details,
-            Button Source, Decorator Anchor, PasswordsViewModel ViewModel, CredentialDeleteConfirmation DeleteCard = null)
+        private const double DialogMaxWidth = 400;
+
+        /// <summary>
+        /// One modal shown by the host: either the credential editor that morphs out of the page,
+        /// or a centered dialog card (<see cref="Dialog"/> is set).
+        /// </summary>
+        /// <param name="Source">Element that receives focus back when the modal closes.</param>
+        private sealed record ModalSession(FrameworkElement Source)
         {
-            public bool IsAdding => Anchor == null;
-            public bool IsCentered => IsAdding || DeleteCard != null;
-            public FrameworkElement Origin => IsAdding || DeleteCard != null ? Source : Anchor;
-            public FrameworkElement Footer => DeleteCard != null ? DeleteCard.Footer : Card.EditorFooter;
+            // Credential editor
+            public CredentialsDetailsControl Card { get; init; }
+            public CredentialsDetailsControl Details { get; init; }
+            public Decorator Anchor { get; init; }
+            public PasswordsViewModel ViewModel { get; init; }
+
+            // Centered dialog
+            public FrameworkElement Dialog { get; init; }
+            public FrameworkElement DialogFooter { get; init; }
+            /// <summary>Invoked on Escape. Closes the dialog when not set.</summary>
+            public Action Cancel { get; init; }
+            /// <summary>Invoked once the dialog has been removed from the host.</summary>
+            public Action Released { get; init; }
+
+            public bool IsDialog => Dialog != null;
+            public bool IsAdding => !IsDialog && Anchor == null;
+            public bool IsCentered => IsDialog || IsAdding;
+            public FrameworkElement Origin => IsDialog ? null : IsAdding ? Source : Anchor;
+            public FrameworkElement Footer => IsDialog ? DialogFooter : Card.EditorFooter;
         }
 
-        private EditorSession _session;
+        private ModalSession _session;
         private Rect _layout;
         private bool _closing;
         private bool _waitingForDraft;
 
-        public CredentialEditorHost()
+        public ModalHost()
         {
             InitializeComponent();
+        }
+
+        /// <summary>Whether a modal is currently shown.</summary>
+        internal bool IsOpen => _session != null;
+
+        /// <summary>
+        /// Shows a message dialog centered in the window.
+        /// </summary>
+        /// <param name="viewModel">Dialog content and buttons.</param>
+        /// <param name="focusReturn">Element focused after the dialog closes.</param>
+        /// <returns>The chosen button, or <see cref="DialogChoice.None"/> if the dialog was dismissed
+        /// or another modal is already open.</returns>
+        internal Task<DialogChoice> ShowMessageAsync(MessageDialogViewModel viewModel, FrameworkElement focusReturn = null)
+        {
+            if (_session != null)
+                return Task.FromResult(DialogChoice.None);
+
+            var completion = new TaskCompletionSource<DialogChoice>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var card = new MessageDialogCard { DataContext = viewModel };
+
+            void Choose(DialogChoice? choice)
+            {
+                completion.TrySetResult(choice ?? DialogChoice.None);
+                Close();
+            }
+
+            viewModel.Accept += Choose;
+            var session = new ModalSession(focusReturn)
+            {
+                Dialog = card,
+                DialogFooter = card.Footer,
+                Cancel = () => Choose(viewModel.CancelChoice),
+                Released = () =>
+                {
+                    viewModel.Accept -= Choose;
+                    completion.TrySetResult(DialogChoice.None);
+                }
+            };
+            OpenDialog(session, card.CancelButton);
+            return completion.Task;
         }
 
         internal void OpenForEdit(CredentialsDetailsControl card, Decorator anchor, Button source, PasswordsViewModel viewModel)
@@ -47,7 +109,7 @@ namespace SinglePass.WPF.Views.Controls
             if (_session != null)
                 return;
 
-            var session = new EditorSession(card, card, source, anchor, viewModel);
+            var session = new ModalSession(source) { Card = card, Details = card, Anchor = anchor, ViewModel = viewModel };
             Open(session);
             if (viewModel.EditCommand.CanExecute(null))
                 viewModel.EditCommand.Execute(null);
@@ -62,7 +124,7 @@ namespace SinglePass.WPF.Views.Controls
 
             var card = new CredentialsDetailsControl();
             card.UseDefaultIcon();
-            var session = new EditorSession(card, details, source, null, viewModel);
+            var session = new ModalSession(source) { Card = card, Details = details, ViewModel = viewModel };
             Open(session);
             try
             {
@@ -81,23 +143,22 @@ namespace SinglePass.WPF.Views.Controls
                 return;
 
             var card = new CredentialDeleteConfirmation { DataContext = credential };
-            var session = new EditorSession(null, details, source, anchor, viewModel, card);
-            _session = session;
+            // The anchor only limits the dialog width to the details pane.
+            var session = new ModalSession(source) { Anchor = anchor, Dialog = card, DialogFooter = card.Footer };
             card.CancelButton.Click += (_, _) => Close();
-            card.ConfirmButton.Click += async (_, _) => await ConfirmDeletionAsync(session, credential);
-            ShowCard(card, session, GetBounds(source), initiallyHidden: true);
-            RevealCenteredCard(UiAnimations.ShouldAnimate(this));
-            card.CancelButton.Focus();
+            card.ConfirmButton.Click += async (_, _) => await ConfirmDeletionAsync(session, card, viewModel, credential);
+            OpenDialog(session, card.CancelButton);
         }
 
-        private async Task ConfirmDeletionAsync(EditorSession session, CredentialViewModel credential)
+        private async Task ConfirmDeletionAsync(ModalSession session, CredentialDeleteConfirmation card,
+            PasswordsViewModel viewModel, CredentialViewModel credential)
         {
             if (!ReferenceEquals(_session, session) || _closing || !CardContent.IsEnabled)
                 return;
 
             CardContent.IsEnabled = false;
             Focus();
-            var deleted = await session.ViewModel.DeleteCredentialAsync(credential);
+            var deleted = await viewModel.DeleteCredentialAsync(credential);
             if (!ReferenceEquals(_session, session))
                 return;
 
@@ -106,11 +167,20 @@ namespace SinglePass.WPF.Views.Controls
             else
             {
                 CardContent.IsEnabled = true;
-                session.DeleteCard.CancelButton.Focus();
+                card.CancelButton.Focus();
             }
         }
 
-        private void Open(EditorSession session)
+        private void OpenDialog(ModalSession session, IInputElement initialFocus)
+        {
+            _session = session;
+            ShowCard(session.Dialog, session, Rect.Empty, initiallyHidden: true);
+            RevealCenteredCard(UiAnimations.ShouldAnimate(this));
+            if (initialFocus != null)
+                initialFocus.Focus();
+        }
+
+        private void Open(ModalSession session)
         {
             var origin = GetBounds(session.Origin);
             _session = session;
@@ -129,7 +199,7 @@ namespace SinglePass.WPF.Views.Controls
             ShowCard(session.Card, session, origin, initiallyHidden: session.IsAdding);
         }
 
-        private void ShowCard(UIElement card, EditorSession session, Rect origin, bool initiallyHidden = false)
+        private void ShowCard(UIElement card, ModalSession session, Rect origin, bool initiallyHidden = false)
         {
             CardContent.Child = card;
             CardPanel.Opacity = initiallyHidden ? 0 : 1;
@@ -155,7 +225,7 @@ namespace SinglePass.WPF.Views.Controls
 
         private Rect GetBounds(FrameworkElement element) => new(element.TranslatePoint(new Point(), Surface), element.RenderSize);
 
-        private Rect GetLayout(EditorSession session, Rect origin)
+        private Rect GetLayout(ModalSession session, Rect origin)
         {
             var width = Surface.ActualWidth - 2 * WindowInset;
             var height = Surface.ActualHeight - 2 * WindowInset;
@@ -166,11 +236,13 @@ namespace SinglePass.WPF.Views.Controls
                 return CenterCard(width, height);
             }
 
-            if (session.DeleteCard is { } deleteCard)
+            if (session.Dialog is { } dialog)
             {
-                width = Math.Min(400, Math.Min(GetBounds(session.Anchor).Width, width));
-                deleteCard.Measure(new Size(width, double.PositiveInfinity));
-                height = Math.Min(height, deleteCard.DesiredSize.Height);
+                width = Math.Min(DialogMaxWidth, width);
+                if (session.Anchor != null)
+                    width = Math.Min(GetBounds(session.Anchor).Width, width);
+                dialog.Measure(new Size(width, double.PositiveInfinity));
+                height = Math.Min(height, dialog.DesiredSize.Height);
                 return CenterCard(width, height);
             }
 
@@ -333,7 +405,7 @@ namespace SinglePass.WPF.Views.Controls
                 return;
 
             Release(restoreFocus: false);
-            if (session.DeleteCard == null && session.ViewModel.CancelEditCommand.CanExecute(null))
+            if (!session.IsDialog && session.ViewModel.CancelEditCommand.CanExecute(null))
                 session.ViewModel.CancelEditCommand.Execute(null);
         }
 
@@ -341,7 +413,8 @@ namespace SinglePass.WPF.Views.Controls
         {
             var session = _session;
             _session = null;
-            session.ViewModel.PropertyChanged -= DraftChanged;
+            if (session.ViewModel != null)
+                session.ViewModel.PropertyChanged -= DraftChanged;
             if (_waitingForDraft)
                 session.ViewModel.AddCommand.Cancel();
 
@@ -364,14 +437,15 @@ namespace SinglePass.WPF.Views.Controls
             CardContent.Child = null;
             session.Footer.BeginAnimation(OpacityProperty, null);
             session.Footer.Opacity = 1;
-            if (session.DeleteCard == null)
+            if (!session.IsDialog)
                 ReleaseDraft(session);
 
-            if (restoreFocus)
-                Dispatcher.InvokeAsync(() => session.Source.Focus(), DispatcherPriority.Input);
+            if (restoreFocus && session.Source is { } source)
+                Dispatcher.InvokeAsync(() => source.Focus(), DispatcherPriority.Input);
+            session.Released?.Invoke();
         }
 
-        private static void ReleaseDraft(EditorSession session)
+        private static void ReleaseDraft(ModalSession session)
         {
             session.Card.DisplayedDraft = null;
             if (session.Anchor != null)
@@ -401,8 +475,15 @@ namespace SinglePass.WPF.Views.Controls
 
         private void Host_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            if (_session is { IsAdding: true } session && session.Card.EditScrollViewer == e.OriginalSource && e.ExtentHeightChange != 0)
+            if (e.ExtentHeightChange == 0 || _session is not { } session)
+                return;
+
+            if (session.IsAdding && session.Card.EditScrollViewer == e.OriginalSource)
                 UpdateEditorLayout(animate: true);
+            // Dialog content is measured on open, before its bindings have been applied;
+            // fit the card again once the real text is laid out.
+            else if (session.IsDialog)
+                UpdateEditorLayout(animate: false);
         }
 
         private void UpdateEditorLayout(bool animate, bool opening = false)
@@ -410,7 +491,7 @@ namespace SinglePass.WPF.Views.Controls
             if (_session is not { } session || _closing || (!opening && _waitingForDraft))
                 return;
 
-            var origin = GetBounds(session.Origin);
+            var origin = session.Origin is { } originElement ? GetBounds(originElement) : Rect.Empty;
             var layout = GetLayout(session, origin);
             if (layout == _layout && !opening)
                 return;
@@ -429,7 +510,15 @@ namespace SinglePass.WPF.Views.Controls
             if (e.Key != Key.Escape || _session is not { } session || !CardContent.IsEnabled)
                 return;
 
-            if (_waitingForDraft || session.DeleteCard != null)
+            if (session.IsDialog)
+            {
+                e.Handled = true;
+                if (session.Cancel != null)
+                    session.Cancel();
+                else
+                    Close();
+            }
+            else if (_waitingForDraft)
             {
                 e.Handled = true;
                 Close();

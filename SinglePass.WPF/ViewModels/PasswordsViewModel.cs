@@ -572,7 +572,7 @@ namespace SinglePass.WPF.ViewModels
             if (SelectedCredentialVM is not { } credential)
                 return;
 
-            var result = MessageDialog.ShowDialog(
+            var result = await MessageDialog.ShowAsync(
                 SinglePass.Language.Properties.Resources.DeleteItem,
                 string.Format(SinglePass.Language.Properties.Resources.Name0, credential.NameFieldVM.Value),
                 MessageDialogButtons.YesNo,

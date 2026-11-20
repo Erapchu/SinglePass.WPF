@@ -63,21 +63,27 @@ namespace SinglePass.WPF.Views.Windows
             DataContext = mainViewModel;
         }
 
+        /// <summary>Whether an in-window modal can be shown right now.</summary>
+        internal bool CanShowModal => IsVisible && WindowState != WindowState.Minimized && !ModalHost.IsOpen;
+
+        internal Task<DialogChoice> ShowMessageAsync(MessageDialogViewModel viewModel, FrameworkElement focusReturn = null) =>
+            ModalHost.ShowMessageAsync(viewModel, focusReturn);
+
         internal void ShowCredentialEditor(CredentialsDetailsControl card, Decorator anchor, Button source, PasswordsViewModel viewModel) =>
-            CredentialEditor.OpenForEdit(card, anchor, source, viewModel);
+            ModalHost.OpenForEdit(card, anchor, source, viewModel);
 
         internal Task ShowNewCredentialEditorAsync(CredentialsDetailsControl details, Button source, PasswordsViewModel viewModel) =>
-            CredentialEditor.OpenForAddAsync(details, source, viewModel);
+            ModalHost.OpenForAddAsync(details, source, viewModel);
 
         internal void ShowCredentialDeletion(CredentialsDetailsControl details, Decorator anchor, Button source, PasswordsViewModel viewModel) =>
-            CredentialEditor.OpenForDelete(details, anchor, source, viewModel);
+            ModalHost.OpenForDelete(details, anchor, source, viewModel);
 
         private void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName != nameof(MainWindowViewModel.SelectedNavigationItem))
                 return;
 
-            CredentialEditor.Dismiss();
+            ModalHost.Dismiss();
             if (_settingsPageButton != null)
                 CloseSettingsPage();
 
@@ -123,12 +129,14 @@ namespace SinglePass.WPF.Views.Windows
         private async void DeleteGroup_Click(object sender, RoutedEventArgs e)
         {
             if (ViewModel.PasswordsVM.IsSavingGroups ||
-                sender is not FrameworkElement { DataContext: NavigationItemViewModel { Group: { } group } item })
+                sender is not FrameworkElement { DataContext: NavigationItemViewModel { Group: { } group } item } menuItem)
                 return;
 
+            // Return focus to the group's "..." button that opened the context menu.
+            var menuButton = (menuItem.Parent as ContextMenu)?.PlacementTarget as FrameworkElement;
             var loc = LocalizationManager.Instance;
-            var choice = MessageDialog.ShowDialog(loc["DeletePasswordGroup"],
-                string.Format(loc["DeletePasswordGroupConfirmation"], group.Name), MessageDialogButtons.YesNo, "\uE74D");
+            var choice = await MessageDialog.ShowAsync(loc["DeletePasswordGroup"],
+                string.Format(loc["DeletePasswordGroupConfirmation"], group.Name), MessageDialogButtons.YesNo, "\uE74D", menuButton);
             if (choice == DialogChoice.Yes)
                 await ViewModel.DeleteGroupAsync(item);
         }
@@ -338,7 +346,7 @@ namespace SinglePass.WPF.Views.Windows
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            CredentialEditor.Dismiss();
+            ModalHost.Dismiss();
             _statusTimer.Stop();
             ViewModel.PropertyChanged -= ViewModel_PropertyChanged;
             ViewModel.PasswordsVM.StatusMessageRequested -= ShowStatusMessage;

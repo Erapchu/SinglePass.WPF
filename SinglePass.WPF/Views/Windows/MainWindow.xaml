@@ -92,7 +92,7 @@
             <Grid.Style>
                 <Style TargetType="Grid">
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding Visibility, ElementName=CredentialEditor}" Value="Visible">
+                        <DataTrigger Binding="{Binding Visibility, ElementName=ModalHost}" Value="Visible">
                             <Setter Property="IsEnabled" Value="False" />
                         </DataTrigger>
                     </Style.Triggers>
@@ -247,7 +247,7 @@
                 </ContentControl>
             </DockPanel>
         </Grid>
-        <controls:CredentialEditorHost x:Name="CredentialEditor" />
+        <controls:ModalHost x:Name="ModalHost" />
         <Border
             x:Name="StatusBanner"
             Margin="208,8,8,8"

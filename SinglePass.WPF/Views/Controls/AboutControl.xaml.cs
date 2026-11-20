@@ -29,7 +29,7 @@ namespace SinglePass.WPF.Views.Controls
             catch (Win32Exception)
             {
                 var localization = LocalizationManager.Instance;
-                MessageDialog.ShowDialog(localization["Error"], localization["AboutOpenLinkFailed"], MessageDialogButtons.OK);
+                _ = MessageDialog.ShowAsync(localization["Error"], localization["AboutOpenLinkFailed"], MessageDialogButtons.OK);
             }
         }
     }

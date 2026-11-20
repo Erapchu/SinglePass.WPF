@@ -81,7 +81,7 @@ namespace SinglePass.WPF.ViewModels
 
             if (dialog.ShowDialog() == true)
             {
-                MessageDialog.ShowDialog(
+                _ = MessageDialog.ShowAsync(
                     Resources.Success,
                     LocalizationManager.Instance["NewPasswordApplied"],
                     MessageDialogButtons.OK,
@@ -123,7 +123,7 @@ namespace SinglePass.WPF.ViewModels
             }
             catch (Exception)
             {
-                MessageDialog.ShowDialog(Resources.Error, LocalizationManager.Instance["SaveAppearanceSettingsFailed"],
+                await MessageDialog.ShowAsync(Resources.Error, LocalizationManager.Instance["SaveAppearanceSettingsFailed"],
                     MessageDialogButtons.OK, "\uEA39");
             }
         }
@@ -145,7 +145,7 @@ namespace SinglePass.WPF.ViewModels
             }
             catch (Exception)
             {
-                MessageDialog.ShowDialog(Resources.Error, LocalizationManager.Instance["SaveSecuritySettingsFailed"],
+                await MessageDialog.ShowAsync(Resources.Error, LocalizationManager.Instance["SaveSecuritySettingsFailed"],
                     MessageDialogButtons.OK, "\uEA39");
             }
         }

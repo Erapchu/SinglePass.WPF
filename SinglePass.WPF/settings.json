@@ -1,10 +1,4 @@
 {
-  "Settings": {
-    "GoogleDriveConfig": {
-      "ClientId": "977481544425-32f220l78p3tpmg8t0bu5un78nhhvp34.apps.googleusercontent.com",
-      "ClientSecret": "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"
-    }
-  },
   "NLog": {
     "autoReload": true,
     "throwConfigExceptions": true,

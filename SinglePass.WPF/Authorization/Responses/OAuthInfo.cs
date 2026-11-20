@@ -10,22 +10,20 @@ namespace SinglePass.WPF.Authorization.Responses
         public string RefreshToken { get; set; }
         public DateTimeOffset CreationTime { get; set; }
         public string ClientId { get; set; }
-        public string ClientSecret { get; set; }
-        public string RedirectUri { get; set; }
         public DateTimeOffset ExpirationTime => CreationTime + TimeSpan.FromSeconds(ExpiresIn);
 
         public OAuthInfo()
         {
         }
 
-        public bool IsValid()
+        /// <summary>
+        /// Whether the access token can be used for at least one more request,
+        /// with a margin so it does not expire in flight.
+        /// </summary>
+        public bool HasUsableAccessToken()
         {
             return !string.IsNullOrWhiteSpace(AccessToken)
-                && !string.IsNullOrWhiteSpace(RefreshToken)
-                && !string.IsNullOrWhiteSpace(ClientId)
-                && !string.IsNullOrWhiteSpace(ClientSecret)
-                && !string.IsNullOrWhiteSpace(RedirectUri)
-                && ExpirationTime > DateTimeOffset.Now;
+                && ExpirationTime > DateTimeOffset.Now.AddMinutes(1);
         }
     }
 }

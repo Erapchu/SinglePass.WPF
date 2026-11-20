@@ -36,12 +36,10 @@ namespace SinglePass.WPF.Clouds.Services
             try
             {
                 var token = TokenHolder.OAuthInfo;
-                if (!token.IsValid())
+                if (!token.HasUsableAccessToken())
                 {
                     var oauthInfo = await OAuthProvider.RefreshTokenAsync(token, cancellationToken).ConfigureAwait(false);
-                    // Google does not return a new refresh token here.
-                    oauthInfo.RefreshToken = token.RefreshToken;
-                    await TokenHolder.SetAndSaveToken(oauthInfo, cancellationToken).ConfigureAwait(false);
+                    await TokenHolder.SetAndSaveToken(oauthInfo, CancellationToken.None).ConfigureAwait(false);
                 }
             }
             finally
@@ -66,9 +64,12 @@ namespace SinglePass.WPF.Clouds.Services
             getFilesRM.Method = HttpMethod.Get;
             getFilesRM.RequestUri = new System.Uri("https://www.googleapis.com/drive/v3/files?q=trashed%3Dfalse");
             using var filesResponse = await client.SendAsync(getFilesRM, cancellationToken).ConfigureAwait(false);
+            filesResponse.EnsureSuccessStatusCode();
             using var content = filesResponse.Content;
             var jsonResponse = await content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
             var fileList = JsonSerializer.Deserialize<GoogleDriveFileList>(jsonResponse);
+            if (fileList?.Files is null)
+                throw new InvalidDataException("Google Drive returned an invalid file list.");
 
             return fileList;
         }
@@ -95,6 +96,7 @@ namespace SinglePass.WPF.Clouds.Services
                 updateFileRM.RequestUri = new System.Uri($"https://www.googleapis.com/upload/drive/v3/files/{targetFile.Id}?uploadType=media");
                 updateFileRM.Content = streamContent;
                 using var updateResponse = await client.SendAsync(updateFileRM, cancellationToken).ConfigureAwait(false);
+                updateResponse.EnsureSuccessStatusCode();
             }
             else
             {
@@ -104,17 +106,21 @@ namespace SinglePass.WPF.Clouds.Services
                 createFileRM.RequestUri = new System.Uri("https://www.googleapis.com/upload/drive/v3/files?uploadType=media");
                 createFileRM.Content = streamContent;
                 using var createResponse = await client.SendAsync(createFileRM, cancellationToken).ConfigureAwait(false);
+                createResponse.EnsureSuccessStatusCode();
 
                 // Rename
                 using var createContent = createResponse.Content;
                 var createContentString = await createContent.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
                 var file = JsonSerializer.Deserialize<GoogleDriveFile>(createContentString);
+                if (string.IsNullOrEmpty(file?.Id))
+                    throw new InvalidDataException("Google Drive did not return the created file id.");
                 using var jsonMetaContent = JsonContent.Create(new { name = fileName });
                 using var renameFileRM = GetAuthHttpRequestMessage();
                 renameFileRM.Method = HttpMethod.Patch;
                 renameFileRM.RequestUri = new System.Uri($"https://www.googleapis.com/drive/v3/files/{file.Id}");
                 renameFileRM.Content = jsonMetaContent;
                 using var renameResponse = await client.SendAsync(renameFileRM, cancellationToken).ConfigureAwait(false);
+                renameResponse.EnsureSuccessStatusCode();
             }
         }
 
@@ -132,9 +138,11 @@ namespace SinglePass.WPF.Clouds.Services
             using var getFileStreamRM = GetAuthHttpRequestMessage();
             getFileStreamRM.Method = HttpMethod.Get;
             getFileStreamRM.RequestUri = new System.Uri($"https://www.googleapis.com/drive/v3/files/{targetFile.Id}?alt=media");
-            var fileResponse = await client.SendAsync(getFileStreamRM, cancellationToken).ConfigureAwait(false);
-            var fileContent = fileResponse.Content;
-            return await fileContent.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+            using var fileResponse = await client.SendAsync(getFileStreamRM, cancellationToken).ConfigureAwait(false);
+            fileResponse.EnsureSuccessStatusCode();
+            var bytes = await fileResponse.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
+            // The vault reader seeks back to the start when retrying the master password.
+            return new MemoryStream(bytes, writable: false);
         }
 
         public async Task<BaseUserInfo> GetUserInfo(CancellationToken cancellationToken)

@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Options;
 using SinglePass.WPF.Authorization.Helpers;
 using SinglePass.WPF.Authorization.Responses;
+using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net.Http;
 
@@ -14,43 +16,40 @@ namespace SinglePass.WPF.Authorization.Brokers
 
     public class GoogleOAuthProvider : OAuthProvider
     {
-        private const string Scopes = "https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile";
-        private const string TokenRevokeEndpoint = "https://oauth2.googleapis.com/revoke?token=";
         private readonly GoogleDriveConfig _config;
 
-        public override string ClientId => _config.ClientId;
-        public override string ClientSecret => _config.ClientSecret;
-        public override string AuthEndpoint => "https://accounts.google.com/o/oauth2/v2/auth";
-        public override string TokenEndpoint => "https://oauth2.googleapis.com/token";
-
-        public GoogleOAuthProvider(
-            IOptions<GoogleDriveConfig> options,
-            IHttpClientFactory httpClientFactory) : base(httpClientFactory)
+        public GoogleOAuthProvider(IOptions<GoogleDriveConfig> options, IHttpClientFactory httpClientFactory)
+            : base(httpClientFactory)
         {
             _config = options.Value;
         }
 
-        protected override void FillAuthUriQuery(NameValueCollection nvc)
+        public override string ClientId => _config.ClientId;
+        public override string ClientSecret => _config.ClientSecret;
+        protected override string AuthEndpoint => "https://accounts.google.com/o/oauth2/v2/auth";
+        protected override string TokenEndpoint => "https://oauth2.googleapis.com/token";
+        protected override string Scopes => "https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile";
+
+        // Google "Desktop app" clients still require the (non-confidential) secret in token requests.
+        protected override bool RequiresClientSecret => true;
+
+        protected override void FillAuthorizationQuery(NameValueCollection query)
         {
-            nvc["scope"] = Scopes;
-            nvc["access_type"] = "offline";
-            nvc["include_granted_scopes"] = "true";
+            query["access_type"] = "offline";
+            query["include_granted_scopes"] = "true";
         }
 
-        protected override string GetResponseString()
-        {
-            return "(Google) Authorization success, you can return to application";
-        }
+        // Google accepts any loopback port for desktop clients.
+        protected override Uri GetRedirectUri() => new($"http://localhost:{OAuthHelper.GetRandomUnusedPort()}/");
 
-        protected override string GetRedirectUri()
+        protected override (string Endpoint, Dictionary<string, string> Form)? GetRevokeRequest(OAuthInfo oAuthInfo)
         {
-            var unusedPort = OAuthHelper.GetRandomUnusedPort();
-            return $"http://localhost:{unusedPort}/";
-        }
+            // Revoking the refresh token also revokes the access tokens issued for it.
+            var token = string.IsNullOrEmpty(oAuthInfo.RefreshToken) ? oAuthInfo.AccessToken : oAuthInfo.RefreshToken;
+            if (string.IsNullOrEmpty(token))
+                return null;
 
-        protected override string BuildTokenRevokeEndpoint(OAuthInfo oAuthInfo)
-        {
-            return TokenRevokeEndpoint + oAuthInfo.RefreshToken;
+            return ("https://oauth2.googleapis.com/revoke", new Dictionary<string, string> { ["token"] = token });
         }
     }
 }

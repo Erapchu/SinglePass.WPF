@@ -32,6 +32,16 @@ namespace SinglePass.WPF.ViewModels
             internal set => SetProperty(ref _isSelected, value);
         }
 
+        private bool _hasBadge;
+        /// <summary>
+        /// Shows an attention dot next to the item, e.g. when an update is ready.
+        /// </summary>
+        public bool HasBadge
+        {
+            get => _hasBadge;
+            internal set => SetProperty(ref _hasBadge, value);
+        }
+
         /// <summary>
         /// Visible content.
         /// </summary>

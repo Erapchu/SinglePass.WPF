@@ -1,9 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SinglePass.Core.Models;
+using SinglePass.WPF.Services;
 using SinglePass.WPF.Views.Controls;
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -28,6 +30,7 @@ namespace SinglePass.WPF.ViewModels
         public PasswordsViewModel PasswordsVM { get; }
         public SettingsViewModel SettingsVM { get; }
         public CloudSyncViewModel CloudSyncVM { get; }
+        public UpdateService Updates { get; }
         public NavigationItemViewModel AllPasswordsNavigation { get; }
         public NavigationItemViewModel SettingsNavigation { get; }
         public ObservableCollection<NavigationItemViewModel> GroupNavigation { get; } = new();
@@ -55,7 +58,8 @@ namespace SinglePass.WPF.ViewModels
         public MainWindowViewModel(
             PasswordsViewModel passwordsViewModel,
             SettingsViewModel settingsViewModel,
-            CloudSyncViewModel cloudsViewModel)
+            CloudSyncViewModel cloudsViewModel,
+            UpdateService updateService)
         {
             PasswordsVM = passwordsViewModel;
             CloudSyncVM = cloudsViewModel;
@@ -75,7 +79,15 @@ namespace SinglePass.WPF.ViewModels
                 () => new SettingsControl { DataContext = SettingsVM });
             foreach (var group in PasswordsVM.PasswordGroups)
                 GroupNavigation.Add(new NavigationItemViewModel(group, AllPasswordsNavigation));
+
+            // UpdateService outlives this view model (it is recreated on every unlock), so subscribe weakly.
+            Updates = updateService;
+            SettingsNavigation.HasBadge = updateService.IsUpdateReady;
+            PropertyChangedEventManager.AddHandler(updateService, UpdateService_IsUpdateReadyChanged, nameof(UpdateService.IsUpdateReady));
         }
+
+        private void UpdateService_IsUpdateReadyChanged(object sender, PropertyChangedEventArgs e) =>
+            SettingsNavigation.HasBadge = Updates.IsUpdateReady;
 
         internal async Task AddGroupAsync(PasswordGroup group)
         {

@@ -163,6 +163,18 @@
                             <Run Text="{Binding [AppVersion], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
                             <Run Text=" " /><Run Text="{x:Static controls:AboutControl.AppVersion}" />
                         </TextBlock>
+                        <TextBlock FontSize="12" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" TextWrapping="Wrap"
+                                   Text="{Binding DataContext.Updates.UpdateAvailableText, RelativeSource={RelativeSource AncestorType=Window}, Mode=OneWay}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DataContext.Updates.IsUpdateReady, RelativeSource={RelativeSource AncestorType=Window}, FallbackValue=False}" Value="False">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
                     </StackPanel>
                 </DockPanel>
             </Button>

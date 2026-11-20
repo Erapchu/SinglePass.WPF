@@ -71,10 +71,18 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <TextBlock Style="{StaticResource SymbolText}" Text="{Binding Glyph}" />
                 <TextBlock Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center" Text="{Binding Name}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Name}" />
+                <Ellipse x:Name="Badge" Grid.Column="2" Width="8" Height="8" Margin="8,0,0,0" VerticalAlignment="Center"
+                         Fill="{DynamicResource AccentFillColorDefaultBrush}" Visibility="Collapsed" />
             </Grid>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding HasBadge}" Value="True">
+                    <Setter TargetName="Badge" Property="Visibility" Value="Visible" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
         </DataTemplate>
     </Window.Resources>
     <Window.CommandBindings>

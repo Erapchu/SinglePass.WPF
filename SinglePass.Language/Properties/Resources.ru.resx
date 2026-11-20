@@ -651,4 +651,7 @@
   <data name="UpdateAvailablePrompt" xml:space="preserve">
     <value>Загружена версия {0}. Перезапустить SinglePass сейчас, чтобы установить её? Хранилище нужно будет разблокировать заново.</value>
   </data>
+  <data name="UpdateAvailableShort" xml:space="preserve">
+    <value>Доступно обновление {0}</value>
+  </data>
 </root>

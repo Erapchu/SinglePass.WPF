@@ -446,10 +446,10 @@
     <value>Google Drive and Yandex Disk</value>
   </data>
   <data name="YandexDiskOAuthNotConfigured" xml:space="preserve">
-    <value>Configure Yandex OAuth to enable sign-in.</value>
+    <value>Yandex sign-in is not configured in this build. Set the Settings__YandexDiskConfig__ClientId environment variable to your Yandex OAuth application ID and restart SinglePass.</value>
   </data>
   <data name="GoogleDriveOAuthNotConfigured" xml:space="preserve">
-    <value>Google OAuth is not configured in this build.</value>
+    <value>Google sign-in is not configured in this build. Set the Settings__GoogleDriveConfig__ClientId and Settings__GoogleDriveConfig__ClientSecret environment variables and restart SinglePass.</value>
   </data>
   <data name="CloudSignInFailed" xml:space="preserve">
     <value>Could not sign in to the cloud account.</value>

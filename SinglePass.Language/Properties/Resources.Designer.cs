@@ -493,7 +493,7 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Google OAuth is not configured in this build..
+        ///   Looks up a localized string similar to Google sign-in is not configured in this build. Set the Settings__GoogleDriveConfig__ClientId and Settings__GoogleDriveConfig__ClientSecret environment variables and restart SinglePass..
         /// </summary>
         public static string GoogleDriveOAuthNotConfigured {
             get {
@@ -1528,7 +1528,7 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Configure Yandex OAuth to enable sign-in..
+        ///   Looks up a localized string similar to Yandex sign-in is not configured in this build. Set the Settings__YandexDiskConfig__ClientId environment variable to your Yandex OAuth application ID and restart SinglePass..
         /// </summary>
         public static string YandexDiskOAuthNotConfigured {
             get {

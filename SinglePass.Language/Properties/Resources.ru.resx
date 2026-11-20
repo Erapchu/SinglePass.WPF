@@ -466,10 +466,10 @@
     <value>Google Drive и Яндекс Диск</value>
   </data>
   <data name="YandexDiskOAuthNotConfigured" xml:space="preserve">
-    <value>Настройте Яндекс OAuth, чтобы войти в аккаунт.</value>
+    <value>Вход через Яндекс не настроен в этой сборке. Задайте переменную окружения Settings__YandexDiskConfig__ClientId с ID своего приложения Яндекс OAuth и перезапустите SinglePass.</value>
   </data>
   <data name="GoogleDriveOAuthNotConfigured" xml:space="preserve">
-    <value>Google OAuth не настроен в этой сборке.</value>
+    <value>Вход через Google не настроен в этой сборке. Задайте переменные окружения Settings__GoogleDriveConfig__ClientId и Settings__GoogleDriveConfig__ClientSecret и перезапустите SinglePass.</value>
   </data>
   <data name="CloudSignInFailed" xml:space="preserve">
     <value>Не удалось войти в облачный аккаунт.</value>

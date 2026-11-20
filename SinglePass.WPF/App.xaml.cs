@@ -257,6 +257,7 @@ namespace SinglePass.WPF
             _vaultScope = null;
             Services = null;
             var clearVault = scope.ServiceProvider.GetRequiredService<CredentialsCryptoService>().LockAsync();
+            WindowsClipboard.ClearIfOwned();
             try
             {
                 scope.ServiceProvider.GetService<SyncService>()?.CancelTransfers();
@@ -307,6 +308,7 @@ namespace SinglePass.WPF
 
         private void Application_Exit(object sender, ExitEventArgs e)
         {
+            WindowsClipboard.ClearIfOwned();
             var logger = _rootServices?.GetService<ILogger<App>>();
             logger?.LogInformation("The application is shutting down...{0}", Environment.NewLine);
         }

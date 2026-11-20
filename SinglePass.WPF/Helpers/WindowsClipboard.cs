@@ -1,9 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace SinglePass.WPF.Helpers
 {
@@ -11,13 +9,6 @@ namespace SinglePass.WPF.Helpers
     // so: https://stackoverflow.com/questions/44205260/net-core-copy-to-clipboard
     internal static class WindowsClipboard
     {
-        public static async Task SetTextAsync(string text, CancellationToken cancellation)
-        {
-            await TryOpenClipboardAsync(cancellation);
-
-            InnerSet(text);
-        }
-
         public static void SetText(string text)
         {
             TryOpenClipboard();
@@ -73,25 +64,6 @@ namespace SinglePass.WPF.Helpers
             }
         }
 
-        private static async Task TryOpenClipboardAsync(CancellationToken cancellation)
-        {
-            var num = 10;
-            while (true)
-            {
-                if (OpenClipboard(default))
-                {
-                    break;
-                }
-
-                if (--num == 0)
-                {
-                    ThrowWin32();
-                }
-
-                await Task.Delay(100, cancellation);
-            }
-        }
-
         private static void TryOpenClipboard()
         {
             var num = 10;
@@ -111,79 +83,12 @@ namespace SinglePass.WPF.Helpers
             }
         }
 
-        public static async Task<string> GetTextAsync(CancellationToken cancellation)
-        {
-            if (!IsClipboardFormatAvailable(CF_UNICODETEXT))
-            {
-                return null;
-            }
-            await TryOpenClipboardAsync(cancellation);
-
-            return InnerGet();
-        }
-
-        public static string GetText()
-        {
-            if (!IsClipboardFormatAvailable(CF_UNICODETEXT))
-            {
-                return null;
-            }
-            TryOpenClipboard();
-
-            return InnerGet();
-        }
-
-        private static string InnerGet()
-        {
-            IntPtr handle = default;
-
-            IntPtr pointer = default;
-            try
-            {
-                handle = GetClipboardData(CF_UNICODETEXT);
-                if (handle == default)
-                {
-                    return null;
-                }
-
-                pointer = GlobalLock(handle);
-                if (pointer == default)
-                {
-                    return null;
-                }
-
-                var size = GlobalSize(handle);
-                var buff = new byte[size];
-
-                Marshal.Copy(pointer, buff, 0, size);
-
-                return Encoding.Unicode.GetString(buff).TrimEnd('\0');
-            }
-            finally
-            {
-                if (pointer != default)
-                {
-                    GlobalUnlock(handle);
-                }
-
-                CloseClipboard();
-            }
-        }
-
         public const uint CF_UNICODETEXT = 0xD; // 13
-        public const uint CF_TEXT = 0x1; // 1
 
         static void ThrowWin32()
         {
             throw new Win32Exception(Marshal.GetLastWin32Error());
         }
-
-        [DllImport("User32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool IsClipboardFormatAvailable(uint format);
-
-        [DllImport("User32.dll", SetLastError = true)]
-        static extern IntPtr GetClipboardData(uint uFormat);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         static extern IntPtr GlobalLock(IntPtr hMem);
@@ -205,8 +110,5 @@ namespace SinglePass.WPF.Helpers
 
         [DllImport("user32.dll")]
         static extern bool EmptyClipboard();
-
-        [DllImport("Kernel32.dll", SetLastError = true)]
-        static extern int GlobalSize(IntPtr hMem);
     }
 }

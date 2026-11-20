@@ -11,7 +11,6 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media;
-using SinglePass.Core.Utilities;
 
 namespace SinglePass.WPF.Services
 {
@@ -29,7 +28,7 @@ namespace SinglePass.WPF.Services
         private static readonly TimeSpan AvailableRefreshInterval = TimeSpan.FromDays(30);
         private static readonly TimeSpan UnavailableRetryInterval = TimeSpan.FromDays(1);
 
-        private readonly RegeneratedList<ImageRequest> _processingImages = new();
+        private readonly ConcurrentQueue<ImageRequest> _processingImages = new();
         private readonly ILogger<FavIconCollector> _logger;
         private readonly ImageService _imageService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
@@ -62,7 +61,7 @@ namespace SinglePass.WPF.Services
                 if (_imagesCache.TryGetValue(host, out var cached) && cached.RefreshAfterUtc > DateTime.UtcNow)
                     setPropertyAction(cached.Image);
                 else
-                    _processingImages.Add(new ImageRequest(host, setPropertyAction));
+                    _processingImages.Enqueue(new ImageRequest(host, setPropertyAction));
             }
             catch (Exception ex)
             {
@@ -89,8 +88,10 @@ namespace SinglePass.WPF.Services
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    var requests = _processingImages.PopAll();
-                    if (requests != null)
+                    var requests = new List<ImageRequest>();
+                    while (_processingImages.TryDequeue(out var request))
+                        requests.Add(request);
+                    if (requests.Count > 0)
                         await ProcessBatch(requests, cancellationToken);
 
                     await Task.Delay(_processingTimeout, cancellationToken);

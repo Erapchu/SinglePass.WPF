@@ -10,17 +10,7 @@ namespace SinglePass.WPF.Helpers
         public const byte VK_TAB = 0x09;
         public const int KEYEVENTF_KEYUP = 0x0002;
 
-        public const uint WM_PASTE = 0x0302;
-        public const uint WM_KEYDOWN = 0x0100;
-        public const uint WM_KEYUP = 0x0101;
-
-        public const int INPUT_MOUSE = 0;
         public const int INPUT_KEYBOARD = 1;
-        public const int INPUT_HARDWARE = 2;
-
-        [Obsolete]
-        [DllImport("user32.dll")]
-        public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
 
         /// <summary>
         /// Synthesizes keystrokes, mouse motions, and button clicks.

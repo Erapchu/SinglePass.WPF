@@ -2,7 +2,7 @@
 
 namespace SinglePass.WPF.Settings
 {
-    public class AppSettings : IAppSettings
+    public class AppSettings
     {
         private IdleLockTimeout _idleLockTimeout = IdleLockTimeout.FiveMinutes;
 

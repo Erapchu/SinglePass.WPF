@@ -57,12 +57,14 @@ namespace SinglePass.WPF.ViewModels
             ImageService imageService,
             SyncService syncService,
             ILogger<CloudSyncViewModel> logger,
+            GoogleOAuthProvider googleOAuthProvider,
             YandexOAuthProvider yandexOAuthProvider)
         {
             _cloudServiceProvider = cloudServiceProvider;
             _imageService = imageService;
             _syncService = syncService;
             _logger = logger;
+            GoogleDrive = new CloudAccount(CloudType.GoogleDrive) { CanSignIn = googleOAuthProvider.IsConfigured };
             YandexDisk = new CloudAccount(CloudType.YandexDisk) { CanSignIn = yandexOAuthProvider.IsConfigured };
         }
 
@@ -90,8 +92,9 @@ namespace SinglePass.WPF.ViewModels
             {
                 _logger.LogWarning($"Authorization process to {cloudType} has been cancelled.");
             }
-            catch (YandexCallbackUnavailableException ex)
+            catch (OAuthCallbackUnavailableException ex) when (cloudType == CloudType.YandexDisk)
             {
+                // Only Yandex uses a fixed, user-configurable callback port.
                 _logger.LogError(ex, "Yandex Disk sign-in could not open the local callback");
                 if (_syncService.IsLocked)
                     return;

@@ -1,4 +1,5 @@
 using SinglePass.WPF.Authorization.Brokers;
+using SinglePass.WPF.Authorization.Responses;
 using SinglePass.WPF.Authorization.TokenHolders;
 using SinglePass.WPF.Clouds.Models;
 using System;
@@ -17,6 +18,7 @@ namespace SinglePass.WPF.Clouds.Services
     {
         internal const string HttpClientName = "YandexDisk";
         private const string ResourcesEndpoint = "https://cloud-api.yandex.net/v1/disk/resources";
+        private static readonly TimeSpan ProactiveRefreshInterval = TimeSpan.FromDays(90);
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly SemaphoreSlim _tokenLock = new(1);
 
@@ -101,12 +103,24 @@ namespace SinglePass.WPF.Clouds.Services
             try
             {
                 var token = TokenHolder.OAuthInfo;
-                if (string.IsNullOrEmpty(token.AccessToken) || token.ExpirationTime <= DateTimeOffset.UtcNow.AddMinutes(1)
+                var now = DateTimeOffset.UtcNow;
+                if (string.IsNullOrEmpty(token.AccessToken) || token.ExpirationTime <= now.AddMinutes(1)
                     || token.AccessToken == rejectedToken)
                 {
-                    token = await OAuthProvider.RefreshTokenAsync(token, cancellationToken).ConfigureAwait(false);
-                    // A successful refresh may invalidate the previous refresh token.
-                    await TokenHolder.SetAndSaveToken(token, CancellationToken.None).ConfigureAwait(false);
+                    token = await RefreshAndSaveAsync(token, cancellationToken).ConfigureAwait(false);
+                }
+                else if (token.CreationTime <= now - ProactiveRefreshInterval)
+                {
+                    // Yandex refresh tokens expire together with the access token (about a year), so waiting
+                    // for expiry means a forced sign-in whenever the app was not running at that moment.
+                    // Renew early instead, as Yandex recommends. Best effort: the current token still works.
+                    try
+                    {
+                        token = await RefreshAndSaveAsync(token, cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (Exception) when (!cancellationToken.IsCancellationRequested)
+                    {
+                    }
                 }
 
                 return token.AccessToken;
@@ -115,6 +129,14 @@ namespace SinglePass.WPF.Clouds.Services
             {
                 _tokenLock.Release();
             }
+        }
+
+        private async Task<OAuthInfo> RefreshAndSaveAsync(OAuthInfo token, CancellationToken cancellationToken)
+        {
+            var renewed = await OAuthProvider.RefreshTokenAsync(token, cancellationToken).ConfigureAwait(false);
+            // A successful refresh invalidates the previous refresh token, so persist it even if cancelled now.
+            await TokenHolder.SetAndSaveToken(renewed, CancellationToken.None).ConfigureAwait(false);
+            return renewed;
         }
 
         private static async Task<Uri> ReadLinkAsync(HttpResponseMessage response, CancellationToken cancellationToken)

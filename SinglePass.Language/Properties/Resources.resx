@@ -571,4 +571,22 @@
   <data name="PasswordHistory" xml:space="preserve">
     <value>Password history</value>
   </data>
+  <data name="About" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="AppVersion" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="AboutDescription" xml:space="preserve">
+    <value>SinglePass is a password manager for Windows with a local encrypted vault, quick credential filling, and optional cloud synchronization.</value>
+  </data>
+  <data name="AboutProjectLink" xml:space="preserve">
+    <value>SinglePass on GitHub</value>
+  </data>
+  <data name="AboutFounder" xml:space="preserve">
+    <value>Project founder</value>
+  </data>
+  <data name="AboutOpenLinkFailed" xml:space="preserve">
+    <value>Could not open the link in your browser.</value>
+  </data>
 </root>

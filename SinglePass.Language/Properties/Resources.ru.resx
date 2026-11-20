@@ -591,4 +591,22 @@
   <data name="PasswordHistory" xml:space="preserve">
     <value>История паролей</value>
   </data>
+  <data name="About" xml:space="preserve">
+    <value>О программе</value>
+  </data>
+  <data name="AppVersion" xml:space="preserve">
+    <value>Версия</value>
+  </data>
+  <data name="AboutDescription" xml:space="preserve">
+    <value>SinglePass — менеджер паролей для Windows с локальным зашифрованным хранилищем, быстрым заполнением логинов и паролей и облачной синхронизацией по желанию.</value>
+  </data>
+  <data name="AboutProjectLink" xml:space="preserve">
+    <value>SinglePass на GitHub</value>
+  </data>
+  <data name="AboutFounder" xml:space="preserve">
+    <value>Основатель проекта</value>
+  </data>
+  <data name="AboutOpenLinkFailed" xml:space="preserve">
+    <value>Не удалось открыть ссылку в браузере.</value>
+  </data>
 </root>

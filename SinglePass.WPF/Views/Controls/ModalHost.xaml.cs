@@ -58,14 +58,72 @@ namespace SinglePass.WPF.Views.Controls
         private Rect _layout;
         private bool _closing;
         private bool _waitingForDraft;
+        private TaskCompletionSource _released = NewReleasedSignal();
 
         public ModalHost()
         {
             InitializeComponent();
         }
 
-        /// <summary>Whether a modal is currently shown.</summary>
-        internal bool IsOpen => _session != null;
+        private static TaskCompletionSource NewReleasedSignal() => new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        /// <summary>
+        /// Whether a dialog can be shown now: nothing is open, or the open modal is already closing
+        /// (the dialog then waits for it to finish).
+        /// </summary>
+        internal bool CanOpen => _session == null || _closing;
+
+        /// <summary>
+        /// Shows a dialog card centered in the window.
+        /// </summary>
+        /// <param name="dialog">The card. It must be a <see cref="FrameworkElement"/>.</param>
+        /// <param name="focusReturn">Element focused after the dialog closes; defaults to the currently focused element.</param>
+        /// <returns>A task that completes when the dialog raises <see cref="IModalDialog.CloseRequested"/>
+        /// or is dismissed by the host; immediately if another modal is open.</returns>
+        internal async Task ShowDialogAsync(IModalDialog dialog, FrameworkElement focusReturn = null)
+        {
+            var element = (FrameworkElement)dialog;
+            if (focusReturn == null && Keyboard.FocusedElement is FrameworkElement focused &&
+                !IsAncestorOf(focused) && Window.GetWindow(focused) == Window.GetWindow(this))
+                focusReturn = focused;
+            var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            void Finish()
+            {
+                completion.TrySetResult();
+                if (ReferenceEquals(_session?.Dialog, element))
+                    Close();
+            }
+
+            // Subscribe first: the dialog may finish while it waits for a closing modal.
+            dialog.CloseRequested += Finish;
+            try
+            {
+                while (_session != null)
+                {
+                    if (!_closing)
+                        return;
+                    await _released.Task;
+                }
+
+                if (completion.Task.IsCompleted)
+                    return;
+
+                var session = new ModalSession(focusReturn)
+                {
+                    Dialog = element,
+                    DialogFooter = dialog.Footer,
+                    Cancel = dialog.Cancel,
+                    Released = () => completion.TrySetResult()
+                };
+                OpenDialog(session, dialog.InitialFocus);
+                await completion.Task;
+            }
+            finally
+            {
+                dialog.CloseRequested -= Finish;
+            }
+        }
 
         /// <summary>
         /// Shows a message dialog centered in the window.
@@ -74,34 +132,11 @@ namespace SinglePass.WPF.Views.Controls
         /// <param name="focusReturn">Element focused after the dialog closes.</param>
         /// <returns>The chosen button, or <see cref="DialogChoice.None"/> if the dialog was dismissed
         /// or another modal is already open.</returns>
-        internal Task<DialogChoice> ShowMessageAsync(MessageDialogViewModel viewModel, FrameworkElement focusReturn = null)
+        internal async Task<DialogChoice> ShowMessageAsync(MessageDialogViewModel viewModel, FrameworkElement focusReturn = null)
         {
-            if (_session != null)
-                return Task.FromResult(DialogChoice.None);
-
-            var completion = new TaskCompletionSource<DialogChoice>(TaskCreationOptions.RunContinuationsAsynchronously);
             var card = new MessageDialogCard { DataContext = viewModel };
-
-            void Choose(DialogChoice? choice)
-            {
-                completion.TrySetResult(choice ?? DialogChoice.None);
-                Close();
-            }
-
-            viewModel.Accept += Choose;
-            var session = new ModalSession(focusReturn)
-            {
-                Dialog = card,
-                DialogFooter = card.Footer,
-                Cancel = () => Choose(viewModel.CancelChoice),
-                Released = () =>
-                {
-                    viewModel.Accept -= Choose;
-                    completion.TrySetResult(DialogChoice.None);
-                }
-            };
-            OpenDialog(session, card.CancelButton);
-            return completion.Task;
+            await ShowDialogAsync(card, focusReturn);
+            return card.Result ?? DialogChoice.None;
         }
 
         internal void OpenForEdit(CredentialsDetailsControl card, Decorator anchor, Button source, PasswordsViewModel viewModel)
@@ -176,8 +211,16 @@ namespace SinglePass.WPF.Views.Controls
             _session = session;
             ShowCard(session.Dialog, session, Rect.Empty, initiallyHidden: true);
             RevealCenteredCard(UiAnimations.ShouldAnimate(this));
-            if (initialFocus != null)
-                initialFocus.Focus();
+            if (initialFocus == null)
+                return;
+
+            initialFocus.Focus();
+            // A freshly added card may not accept focus until it has been laid out.
+            Dispatcher.InvokeAsync(() =>
+            {
+                if (ReferenceEquals(_session, session) && !_closing && !CardContent.IsKeyboardFocusWithin)
+                    initialFocus.Focus();
+            }, DispatcherPriority.Loaded);
         }
 
         private void Open(ModalSession session)
@@ -443,6 +486,9 @@ namespace SinglePass.WPF.Views.Controls
             if (restoreFocus && session.Source is { } source)
                 Dispatcher.InvokeAsync(() => source.Focus(), DispatcherPriority.Input);
             session.Released?.Invoke();
+            var released = _released;
+            _released = NewReleasedSignal();
+            released.TrySetResult();
         }
 
         private static void ReleaseDraft(ModalSession session)

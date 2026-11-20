@@ -7,12 +7,11 @@ using SinglePass.WPF.Clouds.Services;
 using SinglePass.WPF.Localization;
 using SinglePass.WPF.Services;
 using SinglePass.WPF.ViewModels.Dialogs;
+using SinglePass.WPF.Views.Controls;
 using SinglePass.WPF.Views.Helpers;
-using SinglePass.WPF.Views.Windows;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Media;
 
 namespace SinglePass.WPF.ViewModels
@@ -76,7 +75,7 @@ namespace SinglePass.WPF.ViewModels
             {
                 // Authorize
                 var cloudService = _cloudServiceProvider.GetCloudService(cloudType);
-                await ProcessingDialogWindow.RunAsync(
+                await ProcessingDialog.RunAsync(
                     SinglePass.Language.Properties.Resources.Authorizing,
                     SinglePass.Language.Properties.Resources.PleaseContinueAuthorizationOrCancelIt,
                     async cancellationToken =>
@@ -121,7 +120,7 @@ namespace SinglePass.WPF.ViewModels
             {
                 // Revoke
                 var cloudService = _cloudServiceProvider.GetCloudService(cloudType);
-                await ProcessingDialogWindow.RunAsync(
+                await ProcessingDialog.RunAsync(
                     SinglePass.Language.Properties.Resources.SigningOut,
                     SinglePass.Language.Properties.Resources.PleaseWait,
                     async cancellationToken =>
@@ -274,10 +273,11 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
-        private static Task<string> SyncPasswordRequired()
+        private static async Task<string> SyncPasswordRequired()
         {
-            var dialog = new SyncPasswordDialogWindow { Owner = Application.Current.MainWindow };
-            return Task.FromResult(dialog.ShowDialog() == true ? dialog.Password : null);
+            var dialog = new SyncPasswordDialog();
+            await ModalDialog.ShowAsync(dialog);
+            return dialog.Password;
         }
 
         [RelayCommand]

@@ -18,15 +18,15 @@ jobs:
       CONFIGURATION: Release
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v7
       with:
         fetch-depth: 0
     - name: Install .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: 10.0.x
     - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v1.3.1
+      uses: microsoft/setup-msbuild@v3
     - name: Restore
       run: msbuild $env:PROJECT_PATH /t:Restore /p:Configuration=$env:CONFIGURATION
     - name: Determine release version

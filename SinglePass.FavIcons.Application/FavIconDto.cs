@@ -2,7 +2,7 @@
 {
     public class FavIconDto
     {
-        public string Host { get; set; }
+        public required string Host { get; set; }
         public int Size { get; set; }
     }
 }

@@ -3,7 +3,6 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
-using System.Reflection;
 using System.Windows.Data;
 using System.Windows.Media;
 
@@ -16,12 +15,14 @@ namespace SinglePass.WPF.Converters
         {
             if (value is null && !DesignerProperties.GetIsInDesignMode(new System.Windows.DependencyObject()))
             {
-                var entryAssembly = Assembly.GetEntryAssembly();
-                if (entryAssembly is null)
+                // Assembly location is unavailable in single-file apps, so take the icon from the process executable.
+                var processPath = Environment.ProcessPath;
+                if (processPath is null)
                     return value;
 
-                var icon = Icon.ExtractAssociatedIcon(entryAssembly.ManifestModule.FullyQualifiedName);
-                return icon?.ToBitmap()?.GetWpfImageSource();
+                using var icon = Icon.ExtractAssociatedIcon(processPath);
+                using var bitmap = icon?.ToBitmap();
+                return bitmap?.GetWpfImageSource();
             }
             else
             {

@@ -236,7 +236,7 @@ namespace SinglePass.WPF.Views.Windows
         {
             base.OnPreviewMouseDown(e);
 
-            if (e.ChangedButton == MouseButton.XButton1 && _settingsPageButton != null)
+            if (e.ChangedButton == MouseButton.XButton1 && _settingsPageButton != null && !ModalHost.IsShown)
             {
                 e.Handled = true;
                 ReturnToSettings();

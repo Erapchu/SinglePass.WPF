@@ -88,16 +88,8 @@
         </i:EventTrigger>
     </i:Interaction.Triggers>
     <Grid>
+        <!-- Not disabled while ModalHost is open: its backdrop blocks the mouse and it keeps keyboard focus. -->
         <Grid x:Name="Workspace" Margin="8">
-            <Grid.Style>
-                <Style TargetType="Grid">
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding Visibility, ElementName=ModalHost}" Value="Visible">
-                            <Setter Property="IsEnabled" Value="False" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Grid.Style>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200" />
                 <ColumnDefinition Width="*" />

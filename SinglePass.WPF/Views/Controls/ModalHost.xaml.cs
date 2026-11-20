@@ -550,6 +550,25 @@ namespace SinglePass.WPF.Views.Controls
                 ResetBoundsAnimations();
         }
 
+        /// <summary>Whether a modal is shown (including its closing animation).</summary>
+        internal bool IsShown => _session != null;
+
+        protected override void OnIsKeyboardFocusWithinChanged(DependencyPropertyChangedEventArgs e)
+        {
+            base.OnIsKeyboardFocusWithinChanged(e);
+            if (e.NewValue is true || _session == null)
+                return;
+
+            // The page behind stays enabled, so keep keyboard focus inside the host, e.g. when the
+            // focused control gets disabled. Skip window deactivation: focus returns there on activation.
+            Dispatcher.InvokeAsync(() =>
+            {
+                if (_session != null && Window.GetWindow(this) is { IsActive: true } &&
+                    !(Keyboard.FocusedElement is DependencyObject focused && IsAncestorOf(focused)))
+                    Focus();
+            }, DispatcherPriority.Input);
+        }
+
         protected override void OnKeyDown(KeyEventArgs e)
         {
             base.OnKeyDown(e);

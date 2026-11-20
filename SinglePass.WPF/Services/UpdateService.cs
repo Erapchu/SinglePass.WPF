@@ -45,12 +45,15 @@ namespace SinglePass.WPF.Services
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(StatusText))]
         [NotifyPropertyChangedFor(nameof(IsBusy))]
+        [NotifyPropertyChangedFor(nameof(IsUpdateReady))]
+        [NotifyPropertyChangedFor(nameof(UpdateAvailableText))]
         [NotifyCanExecuteChangedFor(nameof(CheckCommand))]
         [NotifyCanExecuteChangedFor(nameof(RestartCommand))]
         public partial UpdateState State { get; private set; }
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(StatusText))]
+        [NotifyPropertyChangedFor(nameof(UpdateAvailableText))]
         public partial string AvailableVersion { get; private set; }
 
         [ObservableProperty]
@@ -60,6 +63,14 @@ namespace SinglePass.WPF.Services
         public bool IsSupported => State != UpdateState.NotSupported;
 
         public bool IsBusy => State is UpdateState.Checking or UpdateState.Downloading;
+
+        /// <summary>An update is downloaded and waits for a restart.</summary>
+        public bool IsUpdateReady => State == UpdateState.ReadyToRestart;
+
+        /// <summary>Short notice for the settings page, e.g. "Update available: 1.11.20"; empty when there is none.</summary>
+        public string UpdateAvailableText => IsUpdateReady
+            ? string.Format(LocalizationManager.Instance.Culture, LocalizationManager.Instance["UpdateAvailableShort"], AvailableVersion)
+            : string.Empty;
 
         public bool AutoCheck
         {
@@ -109,7 +120,20 @@ namespace SinglePass.WPF.Services
                 State = UpdateState.NotSupported;
             }
 
-            LocalizationManager.Instance.PropertyChanged += (_, _) => OnPropertyChanged(nameof(StatusText));
+#if DEBUG
+            // Preview the "update ready" UI without a real release: set SINGLEPASS_FAKE_UPDATE=9.9.9
+            if (Environment.GetEnvironmentVariable("SINGLEPASS_FAKE_UPDATE") is { Length: > 0 } fakeVersion)
+            {
+                AvailableVersion = fakeVersion;
+                State = UpdateState.ReadyToRestart;
+            }
+#endif
+
+            LocalizationManager.Instance.PropertyChanged += (_, _) =>
+            {
+                OnPropertyChanged(nameof(StatusText));
+                OnPropertyChanged(nameof(UpdateAvailableText));
+            };
         }
 
         /// <summary>Starts periodic background checks. Call on the UI thread.</summary>

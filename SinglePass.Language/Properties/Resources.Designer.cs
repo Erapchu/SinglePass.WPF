@@ -1483,6 +1483,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Update available: {0}.
+        /// </summary>
+        public static string UpdateAvailableShort {
+            get {
+                return ResourceManager.GetString("UpdateAvailableShort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Check for updates automatically.
         /// </summary>
         public static string UpdateCheckAutomatically {

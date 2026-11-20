@@ -64,7 +64,7 @@ The Velopack package id is `SinglePass.WPF` on purpose. Velopack installs into `
 1. **Startup.** `Program.Main` calls `VelopackApp.Build().Run()` before WPF starts. It handles install, update and uninstall hooks (the process exits for those) and applies an update downloaded in a previous session.
 2. **Background check.** After the vault is unlocked for the first time, `UpdateService.Start` waits 30 seconds, checks for updates, then checks every 12 hours. Only published, non-prerelease releases are considered. Checks run only when **Check for updates automatically** is on (`CheckForUpdates` in `commonSettings.json`, on by default).
 3. **Download.** When a newer version exists, it is downloaded in the background: the delta packages from the installed version if possible, otherwise the full package. Velopack verifies each package against the SHA256 in the feed.
-4. **Prompt.** When the download finishes and the main window is open, the user is asked once per session whether to restart now. The same action is available as **Restart and update** on the About page.
+4. **Prompt.** When the download finishes and the main window is open, the user is asked once per session whether to restart now. Until the update is installed, a dot is shown next to **Settings** in the navigation, the **About** card says "Update available: X", and **Restart and update** is available on the About page. The running application is never replaced: SinglePass usually stays in the notification area, so the update waits until the user restarts it.
 5. **Apply.** On restart the application shuts down normally (clearing the clipboard as usual), Velopack replaces `current\` and starts the new version. The vault must be unlocked again. If the user declines, the update is applied at the next start.
 
 Manual **Check for updates** on the About page runs steps 2–4 immediately.
@@ -96,6 +96,8 @@ A delta contains only the binary difference from the previous version. With an o
 3. Push any commit to `master` and run the workflow again. The new release should contain a `-delta.nupkg`.
 4. Open the installed application and unlock it. Within a minute it should offer to restart; or press **Check for updates**.
 5. Accept. The application restarts, and **About** shows the new version.
+
+To preview the "update ready" indicators in a Debug build without a release, set the environment variable `SINGLEPASS_FAKE_UPDATE` to any version (for example `9.9.9`) before starting the application. **Restart and update** does nothing in this mode.
 
 ## Troubleshooting
 

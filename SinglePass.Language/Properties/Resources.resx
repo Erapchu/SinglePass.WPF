@@ -631,4 +631,7 @@
   <data name="UpdateAvailablePrompt" xml:space="preserve">
     <value>Version {0} has been downloaded. Restart SinglePass now to install it? You will need to unlock the vault again.</value>
   </data>
+  <data name="UpdateAvailableShort" xml:space="preserve">
+    <value>Update available: {0}</value>
+  </data>
 </root>

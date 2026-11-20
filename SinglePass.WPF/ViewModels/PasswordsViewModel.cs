@@ -494,10 +494,27 @@ namespace SinglePass.WPF.ViewModels
 
         private bool CanFinishEdit() => IsEditing && !IsSavingEdit;
 
+        // Saving needs a name; the Save button stays disabled until one is entered.
+        private bool CanSaveEdit() => CanFinishEdit() && DraftCredential.NameFieldVM.HasText;
+
+        partial void OnDraftCredentialChanged(CredentialViewModel oldValue, CredentialViewModel newValue)
+        {
+            if (oldValue != null)
+                oldValue.NameFieldVM.PropertyChanged -= DraftName_PropertyChanged;
+            if (newValue != null)
+                newValue.NameFieldVM.PropertyChanged += DraftName_PropertyChanged;
+        }
+
+        private void DraftName_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(PassFieldViewModel.HasText))
+                SaveEditCommand.NotifyCanExecuteChanged();
+        }
+
         [RelayCommand(CanExecute = nameof(CanFinishEdit))]
         private void CancelEdit() => DraftCredential = null;
 
-        [RelayCommand(CanExecute = nameof(CanFinishEdit))]
+        [RelayCommand(CanExecute = nameof(CanSaveEdit))]
         private async Task SaveEdit()
         {
             if (DraftCredential is not { } draft)

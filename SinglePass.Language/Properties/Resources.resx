@@ -266,13 +266,13 @@
     <value>Sync succeed</value>
   </data>
   <data name="DownloadingFile" xml:space="preserve">
-    <value>Downloading file...</value>
+    <value>Downloading from the cloud...</value>
   </data>
   <data name="Decrypting" xml:space="preserve">
     <value>Decrypting...</value>
   </data>
   <data name="Uploading" xml:space="preserve">
-    <value>Uploading...</value>
+    <value>Uploading to the cloud...</value>
   </data>
   <data name="InputPasswordOfFile" xml:space="preserve">
     <value>Input password of file</value>
@@ -636,5 +636,11 @@
   </data>
   <data name="CloudVaultKeptChanging" xml:space="preserve">
     <value>The cloud copy kept changing during synchronization. Try again later.</value>
+  </data>
+  <data name="Merging" xml:space="preserve">
+    <value>Merging changes...</value>
+  </data>
+  <data name="SyncRetrying" xml:space="preserve">
+    <value>The cloud copy changed, syncing again...</value>
   </data>
 </root>

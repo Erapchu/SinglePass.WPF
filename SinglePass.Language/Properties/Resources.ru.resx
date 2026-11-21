@@ -286,13 +286,13 @@
     <value>Расшифровка...</value>
   </data>
   <data name="DownloadingFile" xml:space="preserve">
-    <value>Загрузка файла...</value>
+    <value>Скачивание из облака...</value>
   </data>
   <data name="Error" xml:space="preserve">
     <value>Ошибка</value>
   </data>
   <data name="Uploading" xml:space="preserve">
-    <value>Отгрузка...</value>
+    <value>Загрузка в облако...</value>
   </data>
   <data name="InputPasswordOfFile" xml:space="preserve">
     <value>Введите пароль от файла</value>
@@ -656,5 +656,11 @@
   </data>
   <data name="CloudVaultKeptChanging" xml:space="preserve">
     <value>Копия в облаке менялась во время синхронизации. Повторите попытку позже.</value>
+  </data>
+  <data name="Merging" xml:space="preserve">
+    <value>Объединение изменений...</value>
+  </data>
+  <data name="SyncRetrying" xml:space="preserve">
+    <value>Копия в облаке изменилась, синхронизирую заново...</value>
   </data>
 </root>

@@ -62,6 +62,10 @@ So a password change on one device reaches the cloud and the other devices inste
 | Revision | `md5Checksum` | `md5` of the resource |
 | Create | One multipart request (metadata + content) | Upload link with `overwrite=true` |
 
+## Progress shown to the user
+
+While sync runs, the account card shows a progress bar and the current stage from `SyncService.SyncStateChanged(cloudType, text)`: downloading, decrypting, merging, uploading, or "the cloud copy changed, syncing again" when an attempt is repeated. An empty text means sync ended.
+
 ## Result shown to the user
 
 New, changed and deleted credentials; "groups updated"; "master password changed on another device"; "cloud copy updated" or "cloud copy updated and re-encrypted with this device's password"; or "no changes".

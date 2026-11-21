@@ -66,6 +66,8 @@ namespace SinglePass.WPF.ViewModels
             _logger = logger;
             GoogleDrive = new CloudAccount(CloudType.GoogleDrive) { CanSignIn = googleOAuthProvider.IsConfigured };
             YandexDisk = new CloudAccount(CloudType.YandexDisk) { CanSignIn = yandexOAuthProvider.IsConfigured };
+            // Both live in the vault scope and are disposed together, so the subscription needs no removal.
+            _syncService.SyncStateChanged += (cloudType, state) => GetAccount(cloudType).SyncState = state;
         }
 
         [RelayCommand]
@@ -273,6 +275,10 @@ namespace SinglePass.WPF.ViewModels
 
         [ObservableProperty]
         public partial bool Transferring { get; set; }
+
+        /// <summary>Current sync stage shown under the progress bar.</summary>
+        [ObservableProperty]
+        public partial string SyncState { get; set; }
 
         [ObservableProperty]
         public partial ImageSource ProfileImage { get; set; }

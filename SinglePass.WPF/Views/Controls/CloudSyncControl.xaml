@@ -143,9 +143,14 @@
                                 CommandParameter="{Binding Type}"
                                 Content="{Binding [SignOut], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
                         </WrapPanel>
-                        <ProgressBar
-                            Height="4" Margin="0,8,0,0" IsIndeterminate="True"
-                            Visibility="{Binding Transferring, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        <StackPanel Visibility="{Binding Transferring, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <ProgressBar Height="4" Margin="0,8,0,0" IsIndeterminate="True" />
+                            <TextBlock
+                                Margin="0,4,0,0" FontSize="12" TextWrapping="Wrap"
+                                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                Text="{Binding SyncState}"
+                                AutomationProperties.LiveSetting="Polite" />
+                        </StackPanel>
                     </StackPanel>
                 </StackPanel>
             </Border>

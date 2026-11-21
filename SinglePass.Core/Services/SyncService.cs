@@ -28,7 +28,8 @@ namespace SinglePass.Core.Services
         private readonly CancellationTokenSource _syncCTS = new();
         internal bool IsLocked => _credentialsCryptoService.IsLocked;
 
-        public event Action<string> SyncStateChanged;
+        /// <summary>Current sync stage for the given cloud, as text for the UI; empty when sync ends.</summary>
+        public event Action<CloudType, string> SyncStateChanged;
 
         public SyncService(
             CloudServiceProvider cloudServiceProvider,
@@ -69,7 +70,9 @@ namespace SinglePass.Core.Services
 
                 for (var attempt = 1; attempt <= MaxAttempts; attempt++)
                 {
-                    SyncStateChanged?.Invoke(SinglePass.Language.Properties.Resources.DownloadingFile);
+                    SyncStateChanged?.Invoke(cloudType, attempt == 1
+                        ? SinglePass.Language.Properties.Resources.DownloadingFile
+                        : LocalizationManager.Instance["SyncRetrying"]);
                     var cloudBytes = await cloudService.Download(Constants.PasswordsFileName, token);
                     token.ThrowIfCancellationRequested();
 
@@ -79,11 +82,12 @@ namespace SinglePass.Core.Services
                     {
                         expectedRevision = Convert.ToHexStringLower(MD5.HashData(cloudBytes));
                         var (incoming, password, isLegacy) = await DecryptCloudVault(
-                            cloudBytes, cloudPassword, userPasswordRequired, token);
+                            cloudType, cloudBytes, cloudPassword, userPasswordRequired, token);
                         if (incoming is null)
                             return CredentialsMergeResult.FailureMergeResult; // Cancelled by the user
 
                         cloudPassword = password;
+                        SyncStateChanged?.Invoke(cloudType, LocalizationManager.Instance["Merging"]);
                         await _credentialsCryptoService.MergeFromCloud(incoming, password, result);
                         needsUpload = result.CloudNeedsUpdate || isLegacy;
                     }
@@ -91,7 +95,7 @@ namespace SinglePass.Core.Services
                     if (!needsUpload)
                         return result;
 
-                    SyncStateChanged?.Invoke(SinglePass.Language.Properties.Resources.Uploading);
+                    SyncStateChanged?.Invoke(cloudType, SinglePass.Language.Properties.Resources.Uploading);
                     var localBytes = await ReadLocalVault();
 
                     // Neither provider offers an atomic conditional write, so check right before uploading.
@@ -126,7 +130,7 @@ namespace SinglePass.Core.Services
             }
             finally
             {
-                SyncStateChanged?.Invoke(string.Empty);
+                SyncStateChanged?.Invoke(cloudType, string.Empty);
                 lock (_syncClouds)
                 {
                     _syncClouds.Remove(cloudType);
@@ -140,7 +144,7 @@ namespace SinglePass.Core.Services
         /// a previous attempt, then asks the user. Returns a null vault when the user cancels.
         /// </summary>
         private async Task<(PasswordVault Vault, string Password, bool IsLegacy)> DecryptCloudVault(
-            byte[] cloudBytes, string knownPassword, Func<Task<string>> userPasswordRequired, CancellationToken token)
+            CloudType cloudType, byte[] cloudBytes, string knownPassword, Func<Task<string>> userPasswordRequired, CancellationToken token)
         {
             var candidates = new List<string> { _credentialsCryptoService.GetPassword() };
             if (knownPassword is not null && knownPassword != candidates[0])
@@ -152,7 +156,7 @@ namespace SinglePass.Core.Services
                 if (password is null)
                     return (null, null, false);
 
-                SyncStateChanged?.Invoke(SinglePass.Language.Properties.Resources.Decrypting);
+                SyncStateChanged?.Invoke(cloudType, SinglePass.Language.Properties.Resources.Decrypting);
                 try
                 {
                     var vault = await Task.Run(() =>

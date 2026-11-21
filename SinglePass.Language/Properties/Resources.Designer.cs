@@ -439,7 +439,7 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Downloading file....
+        ///   Looks up a localized string similar to Downloading from the cloud....
         /// </summary>
         public static string DownloadingFile {
             get {
@@ -1584,7 +1584,7 @@ namespace SinglePass.Language.Properties {
         
         
         /// <summary>
-        ///   Looks up a localized string similar to Uploading....
+        ///   Looks up a localized string similar to Uploading to the cloud....
         /// </summary>
         public static string Uploading {
             get {

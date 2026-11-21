@@ -643,4 +643,7 @@
   <data name="SyncRetrying" xml:space="preserve">
     <value>The cloud copy changed, syncing again...</value>
   </data>
+  <data name="LastSyncFormatted" xml:space="preserve">
+    <value>Last sync: {0:dd-MM-yyyy, HH:mm}</value>
+  </data>
 </root>

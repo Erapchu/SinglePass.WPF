@@ -663,4 +663,7 @@
   <data name="SyncRetrying" xml:space="preserve">
     <value>Копия в облаке изменилась, синхронизирую заново...</value>
   </data>
+  <data name="LastSyncFormatted" xml:space="preserve">
+    <value>Последняя синхронизация: {0:dd-MM-yyyy, HH:mm}</value>
+  </data>
 </root>

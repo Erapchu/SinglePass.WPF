@@ -1,4 +1,7 @@
-﻿using SinglePass.WPF.Hotkeys;
+﻿using SinglePass.Core.Clouds.Enums;
+using SinglePass.WPF.Hotkeys;
+using System;
+using System.Collections.Generic;
 
 namespace SinglePass.WPF.Settings
 {
@@ -23,6 +26,9 @@ namespace SinglePass.WPF.Settings
         public OrderType Order { get; set; }
         public double DetailsPaneRatio { get; set; } = 0.5;
         public bool CheckForUpdates { get; set; } = true;
+
+        /// <summary>Time of the last successful sync on this device, per cloud.</summary>
+        public Dictionary<CloudType, DateTimeOffset> LastSyncTimes { get; set => field = value ?? new(); } = new();
 
         public AppSettings()
         {

@@ -66,6 +66,8 @@ So a password change on one device reaches the cloud and the other devices inste
 
 While sync runs, the account card shows a progress bar and the current stage from `SyncService.SyncStateChanged(cloudType, text)`: downloading, decrypting, merging, uploading, or "the cloud copy changed, syncing again" when an attempt is repeated. An empty text means sync ended.
 
+After a successful sync the card also shows **Last sync** (local date and time). It is stored per cloud in `commonSettings.json` (`LastSyncTimes`, UTC), so it describes this device only, and it is cleared on sign-out.
+
 ## Result shown to the user
 
 New, changed and deleted credentials; "groups updated"; "master password changed on another device"; "cloud copy updated" or "cloud copy updated and re-encrypted with this device's password"; or "no changes".

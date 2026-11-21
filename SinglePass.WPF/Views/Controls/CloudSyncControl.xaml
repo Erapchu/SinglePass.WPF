@@ -122,6 +122,27 @@
                             <TextBlock Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center"
                                        Text="{Binding UserName}" TextTrimming="CharacterEllipsis" />
                         </Grid>
+                        <TextBlock Margin="0,0,0,8" FontSize="12" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}">
+                            <TextBlock.Text>
+                                <MultiBinding Mode="OneWay">
+                                    <MultiBinding.Converter>
+                                        <conv:LocalizedFormatConverter />
+                                    </MultiBinding.Converter>
+                                    <Binding Path="[LastSyncFormatted]" Source="{x:Static loc:LocalizationManager.Instance}" />
+                                    <Binding Path="LastSyncTime" />
+                                </MultiBinding>
+                            </TextBlock.Text>
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding LastSyncTime}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
                         <WrapPanel>
                             <WrapPanel.Style>
                                 <Style TargetType="WrapPanel">

@@ -180,7 +180,8 @@ namespace SinglePass.WPF.ViewModels
                 try
                 {
                     IsLoading = true;
-                    tempCredentialsVM.AddRange(_credentialViewModelFactory.ProvideAllNew());
+                    // The popup types a login and password into the active window; other entry types have neither.
+                    tempCredentialsVM.AddRange(_credentialViewModelFactory.ProvideAllNew().Where(c => c.IsLogin));
 
                     var addressBarString = _addressBarExtractor.ExtractAddressBar(ForegroundHWND);
                     if (!string.IsNullOrWhiteSpace(addressBarString))

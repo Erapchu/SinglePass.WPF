@@ -1637,5 +1637,176 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("Yes", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SSH key.
+        /// </summary>
+        public static string SshKey {
+            get {
+                return ResourceManager.GetString("SshKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Private key.
+        /// </summary>
+        public static string PrivateKey {
+            get {
+                return ResourceManager.GetString("PrivateKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Public key.
+        /// </summary>
+        public static string PublicKey {
+            get {
+                return ResourceManager.GetString("PublicKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Passphrase.
+        /// </summary>
+        public static string Passphrase {
+            get {
+                return ResourceManager.GetString("Passphrase", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Fingerprint.
+        /// </summary>
+        public static string Fingerprint {
+            get {
+                return ResourceManager.GetString("Fingerprint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy private key.
+        /// </summary>
+        public static string CopyPrivateKey {
+            get {
+                return ResourceManager.GetString("CopyPrivateKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy public key.
+        /// </summary>
+        public static string CopyPublicKey {
+            get {
+                return ResourceManager.GetString("CopyPublicKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy passphrase.
+        /// </summary>
+        public static string CopyPassphrase {
+            get {
+                return ResourceManager.GetString("CopyPassphrase", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show/hide private key.
+        /// </summary>
+        public static string ShowHidePrivateKey {
+            get {
+                return ResourceManager.GetString("ShowHidePrivateKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show/hide passphrase.
+        /// </summary>
+        public static string ShowHidePassphrase {
+            get {
+                return ResourceManager.GetString("ShowHidePassphrase", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Save private key to file.
+        /// </summary>
+        public static string SavePrivateKey {
+            get {
+                return ResourceManager.GetString("SavePrivateKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Import from file.
+        /// </summary>
+        public static string ImportSshKey {
+            get {
+                return ResourceManager.GetString("ImportSshKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Generate Ed25519 key.
+        /// </summary>
+        public static string GenerateSshKey {
+            get {
+                return ResourceManager.GetString("GenerateSshKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The private key is protected by a passphrase..
+        /// </summary>
+        public static string SshKeyEncrypted {
+            get {
+                return ResourceManager.GetString("SshKeyEncrypted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The file is not an SSH key..
+        /// </summary>
+        public static string InvalidSshKeyFile {
+            get {
+                return ResourceManager.GetString("InvalidSshKeyFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The file is too large to be an SSH key..
+        /// </summary>
+        public static string SshKeyFileTooLarge {
+            get {
+                return ResourceManager.GetString("SshKeyFileTooLarge", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Private key saved.
+        /// </summary>
+        public static string PrivateKeySaved {
+            get {
+                return ResourceManager.GetString("PrivateKeySaved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SSH keys.
+        /// </summary>
+        public static string SshKeyFiles {
+            get {
+                return ResourceManager.GetString("SshKeyFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to All files.
+        /// </summary>
+        public static string AllFiles {
+            get {
+                return ResourceManager.GetString("AllFiles", resourceCulture);
+            }
+        }
     }
 }

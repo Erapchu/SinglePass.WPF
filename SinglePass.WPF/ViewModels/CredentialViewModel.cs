@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using SinglePass.Core.Models;
+using SinglePass.Core.Services;
 using SinglePass.WPF.Services;
 using System;
 using System.Collections.Generic;
@@ -31,6 +32,89 @@ namespace SinglePass.WPF.ViewModels
 
         public Credential Model { get; }
         public TotpConfiguration Totp => Model.Totp;
+
+        public CredentialType Type => Model.Type;
+        public bool IsLogin => Model.Type == CredentialType.Login;
+        public bool IsSshKey => Model.Type == CredentialType.SshKey;
+
+        #region SSH key
+        public string SshPrivateKey
+        {
+            get => Model.SshKey?.PrivateKey;
+            set
+            {
+                if (Model.SshKey is not { } key || key.PrivateKey == value)
+                    return;
+
+                // Keep the public key in step with the private one, unless the user entered a different one.
+                var followsPrivateKey = !HasSshPublicKey ||
+                    (SshKeys.TryGetPublicKey(key.PrivateKey, out var previous) && SameKey(previous, key.PublicKey));
+                key.PrivateKey = value;
+                OnPropertyChanged();
+                if (followsPrivateKey && SshKeys.TryGetPublicKey(value, out var derived) && !SameKey(derived, SshPublicKey))
+                    SshPublicKey = derived;
+                OnPropertyChanged(nameof(HasSshPrivateKey));
+                OnPropertyChanged(nameof(IsSshKeyEncrypted));
+            }
+        }
+
+        public string SshPublicKey
+        {
+            get => Model.SshKey?.PublicKey;
+            set
+            {
+                if (Model.SshKey is not { } key || key.PublicKey == value)
+                    return;
+
+                key.PublicKey = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HasSshPublicKey));
+                OnPropertyChanged(nameof(SshKeyInfo));
+                OnPropertyChanged(nameof(HasSshKeyInfo));
+            }
+        }
+
+        public string SshPassphrase
+        {
+            get => Model.SshKey?.Passphrase;
+            set
+            {
+                if (Model.SshKey is not { } key || key.Passphrase == value)
+                    return;
+
+                key.Passphrase = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HasSshPassphrase));
+            }
+        }
+
+        public bool HasSshPrivateKey => !string.IsNullOrWhiteSpace(SshPrivateKey);
+        public bool HasSshPublicKey => !string.IsNullOrWhiteSpace(SshPublicKey);
+        public bool HasSshPassphrase => !string.IsNullOrEmpty(SshPassphrase);
+        public bool IsSshKeyEncrypted => SshKeys.IsEncrypted(SshPrivateKey);
+
+        public sealed record SshKeyDescription(string KeyType, string Fingerprint);
+
+        /// <summary>Key type and fingerprint of <see cref="SshPublicKey"/>, or null when it cannot be read.</summary>
+        public SshKeyDescription SshKeyInfo =>
+            SshKeys.TryParsePublicKey(SshPublicKey, out var keyType, out var fingerprint, out _)
+                ? new SshKeyDescription(keyType, fingerprint)
+                : null;
+
+        public bool HasSshKeyInfo => SshKeyInfo != null;
+
+        /// <summary>Same key data; the comment after it does not matter.</summary>
+        private static bool SameKey(string first, string second)
+        {
+            static string KeyPart(string line)
+            {
+                var parts = line?.Trim().Split((char[])null, 3, StringSplitOptions.RemoveEmptyEntries);
+                return parts is { Length: >= 2 } ? parts[0] + " " + parts[1] : line?.Trim();
+            }
+
+            return KeyPart(first) == KeyPart(second);
+        }
+        #endregion
 
         [ObservableProperty]
         public partial string TotpSetupInput { get; set; }

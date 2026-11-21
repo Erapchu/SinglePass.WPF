@@ -1,4 +1,4 @@
-using SinglePass.Core.Models;
+﻿using SinglePass.Core.Models;
 using SinglePass.Core.Services;
 using System;
 using System.Collections.Generic;
@@ -169,6 +169,26 @@ namespace SinglePass.Core.Tests
             Assert.Equal("new name", Assert.Single(merged.Credentials).NameField.Value);
             Assert.Equal("new name", Assert.Single(result.ChangedCredentials).NameField.Value);
         }
+
+        [Fact]
+        public void SshKeyEntry_LaterEditWins()
+        {
+            var id = Guid.NewGuid();
+            var local = MakeCredential(id, "server", T0);
+            local.Type = CredentialType.SshKey;
+            local.SshKey = new SshKeyData { PrivateKey = "old", PublicKey = "ssh-ed25519 AAAA" };
+            var incoming = MakeCredential(id, "server", T0.AddHours(1));
+            incoming.Type = CredentialType.SshKey;
+            incoming.SshKey = new SshKeyData { PrivateKey = "new", PublicKey = "ssh-ed25519 BBBB", Passphrase = "pass" };
+
+            var (merged, _) = Merge(new PasswordVault { Credentials = [local] }, new PasswordVault { Credentials = [incoming] });
+
+            var credential = Assert.Single(merged.Credentials);
+            Assert.Equal(CredentialType.SshKey, credential.Type);
+            Assert.Equal("new", credential.SshKey.PrivateKey);
+            Assert.Equal("ssh-ed25519 BBBB", credential.SshKey.PublicKey);
+            Assert.Equal("pass", credential.SshKey.Passphrase);
+        }
     }
 
     public class VaultFormatTests
@@ -211,6 +231,57 @@ namespace SinglePass.Core.Tests
             var vault = RoundTrip(new PasswordVault { DeletedCredentials = new() { [id] = deletedAt } });
 
             Assert.Equal(deletedAt, vault.DeletedCredentials[id]);
+        }
+
+        [Fact]
+        public void Version2Vault_ReadsEntriesAsLogins()
+        {
+            var id = Guid.NewGuid();
+            var v2 = new Dictionary<string, object>
+            {
+                ["Version"] = 2,
+                ["Credentials"] = new[] { new Dictionary<string, object> { ["Id"] = id } },
+                ["Groups"] = new Dictionary<Guid, object>(),
+                ["Assignments"] = new Dictionary<Guid, object>(),
+                ["DeletedCredentials"] = new Dictionary<Guid, object>()
+            };
+
+            var vault = RoundTrip(v2);
+
+            Assert.Equal(PasswordVault.CurrentVersion, vault.Version);
+            var credential = Assert.Single(vault.Credentials);
+            Assert.Equal(CredentialType.Login, credential.Type);
+            Assert.Null(credential.SshKey);
+        }
+
+        [Fact]
+        public void SshKeyEntry_SurvivesFile()
+        {
+            var credential = Credential.CreateNew(CredentialType.SshKey);
+            credential.SshKey.PrivateKey = "private";
+            credential.SshKey.PublicKey = "ssh-ed25519 AAAA";
+            credential.SshKey.Passphrase = "pass";
+
+            var stored = Assert.Single(RoundTrip(new PasswordVault { Credentials = [credential] }).Credentials);
+
+            Assert.Equal(CredentialType.SshKey, stored.Type);
+            Assert.Equal("private", stored.SshKey.PrivateKey);
+            Assert.Equal("ssh-ed25519 AAAA", stored.SshKey.PublicKey);
+            Assert.Equal("pass", stored.SshKey.Passphrase);
+        }
+
+        [Fact]
+        public void NewSshKeyEntry_HasKeyData()
+        {
+            var credential = Credential.CreateNew(CredentialType.SshKey);
+            credential.SshKey.PrivateKey = "key";
+
+            var clone = credential.Clone();
+            clone.SshKey.PrivateKey = "changed";
+
+            Assert.Equal(CredentialType.SshKey, clone.Type);
+            Assert.Equal("key", credential.SshKey.PrivateKey);
+            Assert.Null(Credential.CreateNew().SshKey);
         }
 
         [Fact]

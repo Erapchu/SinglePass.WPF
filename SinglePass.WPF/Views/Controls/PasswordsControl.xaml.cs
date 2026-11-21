@@ -1,3 +1,4 @@
+using SinglePass.Core.Models;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -27,15 +28,30 @@ namespace SinglePass.WPF.Views.Controls
             InitializeComponent();
         }
 
-        private async void AddPasswordButton_Click(object sender, RoutedEventArgs e)
+        private void AddPasswordButton_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is not PasswordsViewModel viewModel || !viewModel.AddCommand.CanExecute(null))
+            if (AddPasswordButton.ContextMenu is { } menu)
+            {
+                menu.PlacementTarget = AddPasswordButton;
+                menu.IsOpen = true;
+            }
+        }
+
+        private async void NewItemMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement { Tag: CredentialType type })
+                await AddItemAsync(type);
+        }
+
+        private async Task AddItemAsync(CredentialType type)
+        {
+            if (DataContext is not PasswordsViewModel viewModel || !viewModel.AddCommand.CanExecute(type))
                 return;
 
             if (Window.GetWindow(this) is MainWindow window)
-                await window.ShowNewCredentialEditorAsync(CredentialsDetailsControl, AddPasswordButton, viewModel);
+                await window.ShowNewCredentialEditorAsync(CredentialsDetailsControl, AddPasswordButton, viewModel, type);
             else
-                await viewModel.AddCommand.ExecuteAsync(null);
+                await viewModel.AddCommand.ExecuteAsync(type);
         }
 
         private void EditPasswordMenuItem_Click(object sender, RoutedEventArgs e) => CredentialsDetailsControl.EditCredential();

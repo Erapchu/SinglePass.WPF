@@ -712,4 +712,61 @@
   <data name="BackupReasonRestore" xml:space="preserve">
     <value>Перед восстановлением</value>
   </data>
+  <data name="SshKey" xml:space="preserve">
+    <value>SSH-ключ</value>
+  </data>
+  <data name="PrivateKey" xml:space="preserve">
+    <value>Приватный ключ</value>
+  </data>
+  <data name="PublicKey" xml:space="preserve">
+    <value>Публичный ключ</value>
+  </data>
+  <data name="Passphrase" xml:space="preserve">
+    <value>Парольная фраза</value>
+  </data>
+  <data name="Fingerprint" xml:space="preserve">
+    <value>Отпечаток</value>
+  </data>
+  <data name="CopyPrivateKey" xml:space="preserve">
+    <value>Скопировать приватный ключ</value>
+  </data>
+  <data name="CopyPublicKey" xml:space="preserve">
+    <value>Скопировать публичный ключ</value>
+  </data>
+  <data name="CopyPassphrase" xml:space="preserve">
+    <value>Скопировать парольную фразу</value>
+  </data>
+  <data name="ShowHidePrivateKey" xml:space="preserve">
+    <value>Показать/скрыть приватный ключ</value>
+  </data>
+  <data name="ShowHidePassphrase" xml:space="preserve">
+    <value>Показать/скрыть парольную фразу</value>
+  </data>
+  <data name="SavePrivateKey" xml:space="preserve">
+    <value>Сохранить приватный ключ в файл</value>
+  </data>
+  <data name="ImportSshKey" xml:space="preserve">
+    <value>Импорт из файла</value>
+  </data>
+  <data name="GenerateSshKey" xml:space="preserve">
+    <value>Создать ключ Ed25519</value>
+  </data>
+  <data name="SshKeyEncrypted" xml:space="preserve">
+    <value>Приватный ключ защищён парольной фразой.</value>
+  </data>
+  <data name="InvalidSshKeyFile" xml:space="preserve">
+    <value>Файл не является SSH-ключом.</value>
+  </data>
+  <data name="SshKeyFileTooLarge" xml:space="preserve">
+    <value>Файл слишком большой для SSH-ключа.</value>
+  </data>
+  <data name="PrivateKeySaved" xml:space="preserve">
+    <value>Приватный ключ сохранён</value>
+  </data>
+  <data name="SshKeyFiles" xml:space="preserve">
+    <value>SSH-ключи</value>
+  </data>
+  <data name="AllFiles" xml:space="preserve">
+    <value>Все файлы</value>
+  </data>
 </root>

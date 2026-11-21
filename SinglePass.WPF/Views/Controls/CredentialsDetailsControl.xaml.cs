@@ -4,6 +4,9 @@ using SinglePass.Core.Localization;
 using SinglePass.WPF.ViewModels;
 using SinglePass.WPF.Views.Windows;
 using System;
+using System.Text;
+using System.IO;
+using Microsoft.Win32;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
@@ -239,6 +242,143 @@ namespace SinglePass.WPF.Views.Controls
         }
 
         private void ShowQrStatus(string resourceKey) => TotpQrStatus.Text = LocalizationManager.Instance[resourceKey];
+
+        #region SSH key
+        // Real key files are a few kilobytes; anything much larger is not a key.
+        private const long MaxSshKeyFileSize = 64 * 1024;
+
+        private static string SshKeyFileFilter =>
+            $"{LocalizationManager.Instance["SshKeyFiles"]}|id_*;*.pem;*.key;*.pub|{LocalizationManager.Instance["AllFiles"]}|*.*";
+
+        private static string SshDirectory
+        {
+            get
+            {
+                var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ssh");
+                return Directory.Exists(path) ? path : null;
+            }
+        }
+
+        private void PrivateKeyEditBox_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e) =>
+            SshKeyStatus?.SetCurrentValue(TextBlock.TextProperty, string.Empty);
+
+        private void ShowSshKeyStatus(string resourceKey) =>
+            SshKeyStatus.Text = resourceKey == null ? string.Empty : LocalizationManager.Instance[resourceKey];
+
+        private void ImportSshKey_Click(object sender, RoutedEventArgs e)
+        {
+            if (DisplayedDraft is not { IsSshKey: true } draft)
+                return;
+
+            var dialog = new OpenFileDialog { Filter = SshKeyFileFilter, InitialDirectory = SshDirectory };
+            if (dialog.ShowDialog(Window.GetWindow(this)) != true || !ReferenceEquals(DisplayedDraft, draft))
+                return;
+
+            try
+            {
+                var path = dialog.FileName;
+                var isPublicFile = path.EndsWith(".pub", StringComparison.OrdinalIgnoreCase);
+                var keyPath = isPublicFile ? path[..^4] : path;
+                var text = ReadKeyFile(path);
+                string privateKey = null, publicKey = null;
+                if (SshKeys.TryParsePublicKey(text, out _, out _, out _))
+                {
+                    // A public key was picked: take the private key from the file next to it, if there is one.
+                    publicKey = text.Trim();
+                    if (isPublicFile && File.Exists(keyPath))
+                        privateKey = ReadKeyFile(keyPath);
+                }
+                else if (text.Contains("PRIVATE KEY-----", StringComparison.Ordinal))
+                {
+                    privateKey = text;
+                    var publicPath = path + ".pub";
+                    if (File.Exists(publicPath) && ReadKeyFile(publicPath) is var publicText &&
+                        SshKeys.TryParsePublicKey(publicText, out _, out _, out _))
+                        publicKey = publicText.Trim();
+                }
+                else
+                {
+                    ShowSshKeyStatus("InvalidSshKeyFile");
+                    return;
+                }
+
+                // The public key goes last: setting the private key may replace it with one without a comment.
+                if (privateKey != null)
+                    draft.SshPrivateKey = SshKeys.NormalizePrivateKey(privateKey);
+                if (publicKey != null)
+                    draft.SshPublicKey = publicKey;
+                if (!draft.NameFieldVM.HasText)
+                    draft.NameFieldVM.Value = Path.GetFileName(keyPath);
+                ShowSshKeyStatus(null);
+            }
+            catch (InvalidDataException)
+            {
+                ShowSshKeyStatus("SshKeyFileTooLarge");
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                ShowSshKeyStatus("InvalidSshKeyFile");
+            }
+        }
+
+        private static string ReadKeyFile(string path)
+        {
+            if (new FileInfo(path).Length > MaxSshKeyFileSize)
+                throw new InvalidDataException("The file is too large to be an SSH key.");
+
+            return File.ReadAllText(path);
+        }
+
+        private void GenerateSshKey_Click(object sender, RoutedEventArgs e)
+        {
+            if (DisplayedDraft is not { IsSshKey: true, HasSshPrivateKey: false } draft)
+                return;
+
+            // Same default comment as ssh-keygen.
+            var (privateKey, publicKey) = SshKeys.GenerateEd25519($"{Environment.UserName}@{Environment.MachineName}");
+            draft.SshPrivateKey = privateKey;
+            draft.SshPublicKey = publicKey;
+            draft.SshPassphrase = null;
+            ShowSshKeyStatus(null);
+        }
+
+        private void SavePrivateKey_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not PasswordsViewModel viewModel ||
+                viewModel.SelectedCredentialVM is not { IsSshKey: true, HasSshPrivateKey: true } credential)
+                return;
+
+            var keyType = credential.SshKeyInfo?.KeyType;
+            var fileName = keyType switch
+            {
+                "ssh-ed25519" => "id_ed25519",
+                "ssh-rsa" => "id_rsa",
+                _ when keyType?.StartsWith("ecdsa-", StringComparison.Ordinal) == true => "id_ecdsa",
+                _ => "id_key"
+            };
+            var dialog = new SaveFileDialog
+            {
+                Filter = SshKeyFileFilter,
+                FileName = fileName,
+                InitialDirectory = SshDirectory,
+                AddExtension = false,
+            };
+            if (dialog.ShowDialog(Window.GetWindow(this)) != true)
+                return;
+
+            try
+            {
+                // OpenSSH rejects keys with CRLF line endings or without a final newline.
+                File.WriteAllText(dialog.FileName, SshKeys.NormalizePrivateKey(credential.SshPrivateKey), new UTF8Encoding(false));
+                viewModel.ShowStatus(LocalizationManager.Instance["PrivateKeySaved"]);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                MessageBox.Show(Window.GetWindow(this), ex.Message, LocalizationManager.Instance["SavePrivateKey"],
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        #endregion
 
         private void NameEditBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {

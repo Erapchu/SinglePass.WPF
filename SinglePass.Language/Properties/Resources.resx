@@ -692,4 +692,61 @@ Sync to update the cloud copy and other devices.</value>
   <data name="BackupReasonRestore" xml:space="preserve">
     <value>Before restore</value>
   </data>
+  <data name="SshKey" xml:space="preserve">
+    <value>SSH key</value>
+  </data>
+  <data name="PrivateKey" xml:space="preserve">
+    <value>Private key</value>
+  </data>
+  <data name="PublicKey" xml:space="preserve">
+    <value>Public key</value>
+  </data>
+  <data name="Passphrase" xml:space="preserve">
+    <value>Passphrase</value>
+  </data>
+  <data name="Fingerprint" xml:space="preserve">
+    <value>Fingerprint</value>
+  </data>
+  <data name="CopyPrivateKey" xml:space="preserve">
+    <value>Copy private key</value>
+  </data>
+  <data name="CopyPublicKey" xml:space="preserve">
+    <value>Copy public key</value>
+  </data>
+  <data name="CopyPassphrase" xml:space="preserve">
+    <value>Copy passphrase</value>
+  </data>
+  <data name="ShowHidePrivateKey" xml:space="preserve">
+    <value>Show/hide private key</value>
+  </data>
+  <data name="ShowHidePassphrase" xml:space="preserve">
+    <value>Show/hide passphrase</value>
+  </data>
+  <data name="SavePrivateKey" xml:space="preserve">
+    <value>Save private key to file</value>
+  </data>
+  <data name="ImportSshKey" xml:space="preserve">
+    <value>Import from file</value>
+  </data>
+  <data name="GenerateSshKey" xml:space="preserve">
+    <value>Generate Ed25519 key</value>
+  </data>
+  <data name="SshKeyEncrypted" xml:space="preserve">
+    <value>The private key is protected by a passphrase.</value>
+  </data>
+  <data name="InvalidSshKeyFile" xml:space="preserve">
+    <value>The file is not an SSH key.</value>
+  </data>
+  <data name="SshKeyFileTooLarge" xml:space="preserve">
+    <value>The file is too large to be an SSH key.</value>
+  </data>
+  <data name="PrivateKeySaved" xml:space="preserve">
+    <value>Private key saved</value>
+  </data>
+  <data name="SshKeyFiles" xml:space="preserve">
+    <value>SSH keys</value>
+  </data>
+  <data name="AllFiles" xml:space="preserve">
+    <value>All files</value>
+  </data>
 </root>

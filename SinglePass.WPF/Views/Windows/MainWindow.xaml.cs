@@ -1,4 +1,5 @@
-﻿using SinglePass.WPF.Helpers;
+﻿using SinglePass.Core.Models;
+using SinglePass.WPF.Helpers;
 using SinglePass.Core.Localization;
 using SinglePass.WPF.Services;
 using SinglePass.WPF.Settings;
@@ -79,8 +80,9 @@ namespace SinglePass.WPF.Views.Windows
         internal void ShowCredentialEditor(CredentialsDetailsControl card, Decorator anchor, Button source, PasswordsViewModel viewModel) =>
             ModalHost.OpenForEdit(card, anchor, source, viewModel);
 
-        internal Task ShowNewCredentialEditorAsync(CredentialsDetailsControl details, Button source, PasswordsViewModel viewModel) =>
-            ModalHost.OpenForAddAsync(details, source, viewModel);
+        internal Task ShowNewCredentialEditorAsync(CredentialsDetailsControl details, Button source, PasswordsViewModel viewModel,
+            CredentialType type) =>
+            ModalHost.OpenForAddAsync(details, source, viewModel, type);
 
         internal void ShowCredentialDeletion(CredentialsDetailsControl details, Decorator anchor, Button source, PasswordsViewModel viewModel) =>
             ModalHost.OpenForDelete(details, anchor, source, viewModel);

@@ -19,7 +19,8 @@ namespace SinglePass.WPF.Helpers
             Matches(credential.NameFieldVM.Value)
             || Matches(credential.LoginFieldVM.Value)
             || Matches(credential.SiteFieldVM.Value)
-            || Matches(credential.OtherFieldVM.Value);
+            || Matches(credential.OtherFieldVM.Value)
+            || Matches(credential.SshPublicKey);
 
         private bool Matches(string value) =>
             value is not null

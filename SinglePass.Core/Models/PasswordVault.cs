@@ -7,7 +7,9 @@ namespace SinglePass.Core.Models
     {
         // Version 2 adds credential tombstones. Older clients must refuse it: they would drop the
         // unknown field on their next write and deleted credentials would come back on sync.
-        internal const int CurrentVersion = 2;
+        // Version 3 adds entry types (Credential.Type, Credential.SshKey). An older client would
+        // drop the SSH key data on its next write and turn the entry into an empty login.
+        internal const int CurrentVersion = 3;
 
         public int Version { get; init; } = CurrentVersion;
         public List<Credential> Credentials { get; init; } = new();

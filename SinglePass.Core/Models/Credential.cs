@@ -11,6 +11,7 @@ namespace SinglePass.Core.Models
         internal const int PasswordHistoryLimit = 10;
 
         public Guid Id { get; init; }
+        public CredentialType Type { get; set; }
         public PassField NameField { get; set; } = new PassField() { Name = "Name" };
         public PassField LoginField { get; set; } = new PassField() { Name = "Login" };
         public PassField PasswordField { get; set; } = new PassField() { Name = "Password" };
@@ -20,6 +21,8 @@ namespace SinglePass.Core.Models
         public PassField SiteField { get; set; } = new PassField() { Name = "Site" };
         public List<PassField> AdditionalFields { get; set; } = new List<PassField>();
         public TotpConfiguration Totp { get; set; }
+        /// <summary>Set for <see cref="CredentialType.SshKey"/> entries only.</summary>
+        public SshKeyData SshKey { get; set; }
         // Stored in UTC: sync compares these across devices and time zones. Older vaults hold local
         // times with an offset (or without one), which are converted when read.
         public DateTime LastModifiedTime { get; set => field = ToUtc(value); }
@@ -30,11 +33,13 @@ namespace SinglePass.Core.Models
 
         public Credential() { }
 
-        public static Credential CreateNew()
+        public static Credential CreateNew(CredentialType type = CredentialType.Login)
         {
             var credential = new Credential
             {
-                Id = Guid.NewGuid()
+                Id = Guid.NewGuid(),
+                Type = type,
+                SshKey = type == CredentialType.SshKey ? new SshKeyData() : null,
             };
             return credential;
         }
@@ -44,6 +49,7 @@ namespace SinglePass.Core.Models
             var clone = new Credential
             {
                 Id = Id,
+                Type = Type,
                 NameField = NameField.Clone(),
                 LoginField = LoginField.Clone(),
                 PasswordField = PasswordField.Clone(),
@@ -51,6 +57,7 @@ namespace SinglePass.Core.Models
                 OtherField = OtherField.Clone(),
                 SiteField = SiteField.Clone(),
                 Totp = Totp,
+                SshKey = SshKey?.Clone(),
                 LastModifiedTime = LastModifiedTime,
                 CreationTime = CreationTime
             };

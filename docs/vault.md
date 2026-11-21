@@ -43,7 +43,7 @@ Every write goes to a temporary file `singlePass.dat.<guid>.tmp`, is flushed to 
 
 ```jsonc
 {
-  "Version": 2,
+  "Version": 3,
   "Credentials": [ /* Credential */ ],
   "Groups":             { "<group id>":      { "Group": {...} | null, "ModifiedAt": "...", "IsDeleted": false } },
   "Assignments":        { "<credential id>": { "GroupId": "<group id>" | null, "ModifiedAt": "..." } },
@@ -57,14 +57,18 @@ Every write goes to a temporary file `singlePass.dat.<guid>.tmp`, is flushed to 
 | — | A bare JSON array of credentials (before groups). Still readable. |
 | 1 | Object with `Credentials`, `Groups`, `Assignments`. |
 | 2 | Adds `DeletedCredentials` (credential tombstones) and `MasterPasswordChangedAt`. |
+| 3 | Adds entry types: `Credential.Type` and `Credential.SshKey`. |
 
-- A vault with a newer `Version` than the application supports is rejected, both locally and on sync. Builds that only know version 1 cannot open a version 2 vault. This is intentional: an old build would drop `DeletedCredentials` on its next write and deleted credentials would return.
+- A vault with a newer `Version` than the application supports is rejected, both locally and on sync. Builds that only know version 1 cannot open a version 2 vault. This is intentional: an old build would drop `DeletedCredentials` on its next write and deleted credentials would return. For the same reason builds that only know version 2 cannot open a version 3 vault: they would drop the SSH key data and turn SSH entries into empty logins.
 - Older vaults are upgraded in memory and written as the current version on the next change.
 - A missing collection is read as empty; an explicit `null` makes the file invalid.
 
 ### Credential
 
 `Credential` holds the fixed fields (name, login, password, notes, site), additional fields, TOTP setup and:
+
+- `Type` — kind of entry: `0` login (also when the field is missing), `1` SSH key. The type is chosen when the entry is created (**New item** menu) and never changes.
+- `SshKey` — for SSH key entries only: `PrivateKey` (OpenSSH or PEM text, possibly encrypted), `PublicKey` (`authorized_keys` line) and `Passphrase`. Null for logins. SSH entries do not use login, password, TOTP and site; merge and tombstones treat them like any other entry.
 
 - `Id` — GUID, the identity of the entry. Equality compares `Id` only.
 - `LastModifiedTime`, `CreationTime` — UTC, set by the UI on save. Older vaults stored local time with an offset; the model converts any value to UTC when it is assigned, and the UI shows local time.

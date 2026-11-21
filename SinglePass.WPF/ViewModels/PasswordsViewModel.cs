@@ -64,6 +64,8 @@ namespace SinglePass.WPF.ViewModels
         public event Action<CredentialViewModel> ScrollIntoViewRequired;
         public event Action<string> StatusMessageRequested;
 
+        internal void ShowStatus(string message) => StatusMessageRequested?.Invoke(message);
+
         public ObservableCollectionDelayed<CredentialViewModel> DisplayedCredentials { get; private set; } = new();
         public ListCollectionView GroupedCredentials { get; private set; }
 
@@ -74,6 +76,8 @@ namespace SinglePass.WPF.ViewModels
         partial void OnSelectedCredentialVMChanged(CredentialViewModel value)
         {
             DraftCredential = null;
+            IsPrivateKeyVisible = false;
+            IsPassphraseVisible = false;
             OnPropertyChanged(nameof(CurrentGroup));
             EditCommand.NotifyCanExecuteChanged();
             CredentialSelected?.Invoke(value);
@@ -205,6 +209,13 @@ namespace SinglePass.WPF.ViewModels
 
         [ObservableProperty]
         public partial bool IsPasswordVisible { get; set; }
+
+        // SSH secrets are hidden again whenever another entry is selected.
+        [ObservableProperty]
+        public partial bool IsPrivateKeyVisible { get; set; }
+
+        [ObservableProperty]
+        public partial bool IsPassphraseVisible { get; set; }
 
         private PasswordsViewModel()
         {
@@ -382,7 +393,7 @@ namespace SinglePass.WPF.ViewModels
         private bool CanAdd() => !IsSavingEdit;
 
         [RelayCommand(CanExecute = nameof(CanAdd))]
-        private async Task Add(CancellationToken cancellationToken)
+        private async Task Add(CredentialType type, CancellationToken cancellationToken)
         {
             if (_initialLoad is not null)
                 await _initialLoad;
@@ -391,7 +402,7 @@ namespace SinglePass.WPF.ViewModels
                 return;
 
             DraftCredential = null;
-            StartDraft(_credentialViewModelFactory.ProvideNew(Credential.CreateNew()), _selectedGroupId, isNew: true);
+            StartDraft(_credentialViewModelFactory.ProvideNew(Credential.CreateNew(type)), _selectedGroupId, isNew: true);
         }
 
         [RelayCommand]

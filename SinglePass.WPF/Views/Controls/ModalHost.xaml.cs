@@ -1,3 +1,4 @@
+using SinglePass.Core.Models;
 using SinglePass.WPF.Controls;
 using SinglePass.WPF.Helpers;
 using SinglePass.WPF.ViewModels;
@@ -152,7 +153,8 @@ namespace SinglePass.WPF.Views.Controls
                 Close();
         }
 
-        internal async Task OpenForAddAsync(CredentialsDetailsControl details, Button source, PasswordsViewModel viewModel)
+        internal async Task OpenForAddAsync(CredentialsDetailsControl details, Button source, PasswordsViewModel viewModel,
+            CredentialType type)
         {
             if (_session != null)
                 return;
@@ -163,7 +165,7 @@ namespace SinglePass.WPF.Views.Controls
             Open(session);
             try
             {
-                await viewModel.AddCommand.ExecuteAsync(null);
+                await viewModel.AddCommand.ExecuteAsync(type);
             }
             finally
             {

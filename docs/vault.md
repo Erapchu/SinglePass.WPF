@@ -4,7 +4,7 @@ This document describes how the password vault is stored, changed and synchroniz
 
 - `Services/CryptoService.cs` — file encryption format.
 - `Services/CredentialsCryptoService.cs` — vault in memory, local changes, merge.
-- `Services/SyncService.cs` — cloud synchronization.
+- `Services/SyncService.cs` — cloud synchronization, described in [cloud-sync.md](cloud-sync.md).
 - `Models/PasswordVault.cs` — vault contents.
 
 Tests for the merge rules and the vault format are in `SinglePass.Core.Tests`.
@@ -104,26 +104,11 @@ Tombstones of credentials and groups are never removed.
 
 ## Cloud synchronization
 
-Providers: Google Drive (scope `drive.file`; the oldest non-trashed file named `singlePass.dat` the app can see) and Yandex Disk (`app:/singlePass.dat` in the application folder).
-
-**Sync** is the only cloud operation (`SyncService.Synchronize`). Each attempt:
-
-1. Download the cloud file and remember its MD5 as the expected revision. If there is no file, go to step 4.
-2. Decrypt it: with the local master password, then with a password entered in a previous attempt, then by asking the user until the password works or the user cancels.
-3. Merge it into the local vault (`CredentialsCryptoService.MergeFromCloud`) and write the local file. When the cloud vault used a different master password, the more recently changed one wins (`MasterPasswordChangedAt`, unknown counts as oldest):
-   - cloud password newer: the local vault is re-encrypted with it and this device uses it from now on;
-   - local password newer or both unknown: the local file keeps the local password and the cloud copy will be re-encrypted by the upload.
-   Then decide whether the cloud copy needs an upload: it does when merging the local vault into the downloaded one would change it, when the cloud password has to be replaced, or when the cloud file is in the legacy format. Otherwise sync ends here.
-4. Read the local file, ask the provider for the current MD5 of the cloud file (`GetRevision`) and compare it with the expected revision. If it differs (or a file appeared or disappeared), another device uploaded in the meantime: start the next attempt.
-5. Upload the local file as is.
-
-After 3 attempts without a successful upload, sync fails with "the cloud copy kept changing"; whatever was already merged stays in the local vault.
-
-The result shows new, changed and deleted credentials, group changes, whether this device switched to the cloud master password and whether the cloud copy was updated (or re-encrypted). Only one sync per provider runs at a time. Locking the vault cancels it.
+See [cloud-sync.md](cloud-sync.md).
 
 ## Known limitations
 
-- **Revision check is not atomic.** Neither Google Drive v3 nor Yandex Disk offers a conditional write, so steps 4 and 5 are a check followed by a write. An upload from another device in the short window between them is still overwritten. That device keeps the data in its local vault and puts it back into the cloud on its next sync, so it is lost only if that local vault is lost first.
 - **Clock-based conflict resolution.** Credential conflicts, edit-vs-delete and master password changes are decided by timestamps from the device clock. Clock skew picks the wrong winner. Concurrent edits of different fields of one credential are not combined.
-- **No forced overwrite.** If the cloud vault cannot be decrypted (unknown password, damaged file), sync cannot proceed; the cloud file has to be removed manually.
 - **No backups.** A wrong merge or deletion cannot be undone from local data.
+
+Sync-specific limitations are listed in [cloud-sync.md](cloud-sync.md#known-limitations).

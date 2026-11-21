@@ -56,7 +56,7 @@ Application data is stored under `%LOCALAPPDATA%\SinglePass`:
 - `yandexDisk.token` — Yandex Disk authorization data protected by Windows for the current user.
 - `Cache` — cached data; logs are stored in `Logs`.
 
-The vault uses AES-256-GCM encryption with a key derived from the master password using Argon2id. SinglePass upgrades older local vaults after you unlock them successfully. Vaults written by this version cannot be opened by older versions, so update SinglePass on every device that syncs the same vault. The file format, merge rules and sync behavior are described in [docs/vault.md](docs/vault.md).
+The vault uses AES-256-GCM encryption with a key derived from the master password using Argon2id. SinglePass upgrades older local vaults after you unlock them successfully. Vaults written by this version cannot be opened by older versions, so update SinglePass on every device that syncs the same vault. The file format and merge rules are described in [docs/vault.md](docs/vault.md), synchronization in [docs/cloud-sync.md](docs/cloud-sync.md).
 
 ## Build from source
 

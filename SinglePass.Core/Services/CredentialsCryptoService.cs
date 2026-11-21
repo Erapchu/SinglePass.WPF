@@ -25,17 +25,29 @@ namespace SinglePass.Core.Services
         Failed
     }
 
+    /// <summary>What restoring a backup changed.</summary>
+    internal sealed record BackupRestoreResult(
+        IReadOnlyList<Credential> Restored, IReadOnlyList<Credential> Reverted, bool GroupsChanged)
+    {
+        public static BackupRestoreResult Empty { get; } = new([], [], false);
+        public bool AnyChanges => Restored.Count > 0 || Reverted.Count > 0 || GroupsChanged;
+    }
+
     public class CredentialsCryptoService
     {
         private readonly ILogger<CredentialsCryptoService> _logger;
         private readonly CryptoService _cryptoService;
         private readonly AsyncKeyedLocker<string> _asyncKeyedLocker;
         private readonly object _passwordLock = new();
+        private readonly VaultBackups _backups = new(Constants.PasswordsFilePath, Constants.BackupsDirectoryPath);
         private volatile PasswordVault _vault = new();
         private volatile bool _locked;
         internal bool IsLocked => _locked;
 
         public List<Credential> Credentials => _vault.Credentials.ToList();
+
+        /// <summary>Backups of the vault file, newest first.</summary>
+        internal IReadOnlyList<VaultBackupInfo> Backups => _backups.List();
 
         internal IReadOnlyList<PasswordGroup> PasswordGroups =>
             _vault.Groups.Values.Where(change => !change.IsDeleted).Select(change => change.Group).ToList();
@@ -321,6 +333,12 @@ namespace SinglePass.Core.Services
                 (incoming.MasterPasswordChangedAt ?? DateTimeOffset.MinValue) > (_vault.MasterPasswordChangedAt ?? DateTimeOffset.MinValue);
 
             var merged = MergeVaults(_vault, incoming, result);
+            if (adoptCloudPassword || !ReferenceEquals(merged, _vault))
+            {
+                // Sync writes changes that came from elsewhere: keep the vault as it was before them.
+                _backups.Create(adoptCloudPassword ? VaultBackupReason.Password : VaultBackupReason.Sync, DateTimeOffset.UtcNow);
+            }
+
             if (adoptCloudPassword)
             {
                 var cloudPasswordSecure = SecureStringHelper.MakeSecureString(cloudPassword);
@@ -497,9 +515,192 @@ namespace SinglePass.Core.Services
             if (ReferenceEquals(updated, _vault))
                 return;
 
+            CreateDailyBackupIfDue();
             WriteVault(updated, GetPassword());
             _vault = updated;
         });
+
+        /// <summary>
+        /// Reads a backup file. Returns null when <paramref name="password"/> does not open it;
+        /// other failures (missing file, no access) throw.
+        /// </summary>
+        internal Task<PasswordVault> ReadBackup(string path, string password) => Task.Run(() =>
+        {
+            using var stream = File.OpenRead(path);
+            try
+            {
+                return ReadVault(_cryptoService, stream, password, out _);
+            }
+            catch (Exception ex) when (ex is System.Security.Cryptography.CryptographicException or JsonException
+                or InvalidDataException or EndOfStreamException or ArgumentException)
+            {
+                return null;
+            }
+        });
+
+        /// <summary>
+        /// Brings back credentials and earlier versions from <paramref name="backup"/> as a new change of this
+        /// vault (see <see cref="ApplyBackup"/>). The current vault is backed up first.
+        /// </summary>
+        internal async Task<BackupRestoreResult> RestoreBackup(PasswordVault backup)
+        {
+            ArgumentNullException.ThrowIfNull(backup);
+            var result = BackupRestoreResult.Empty;
+            await Task.Run(async () =>
+            {
+                using var locker = await _asyncKeyedLocker.LockAsync(Constants.PasswordsFilePath).ConfigureAwait(false);
+                if (_locked)
+                    throw new InvalidOperationException("The password vault is locked.");
+
+                var now = DateTimeOffset.UtcNow;
+                var updated = ApplyBackup(_vault, backup, now, out result);
+                if (ReferenceEquals(updated, _vault))
+                    return;
+
+                _backups.Create(VaultBackupReason.Restore, now);
+                WriteVault(updated, GetPassword());
+                _vault = updated;
+            }).ConfigureAwait(false);
+            return result;
+        }
+
+        /// <summary>
+        /// Applies a backup on top of <paramref name="current"/> without losing anything:
+        /// credentials missing now are added back; credentials that differ are reverted to the backup
+        /// version (the current password goes to the password history); credentials created after the
+        /// backup stay; groups and group links of the backup credentials are reverted too.
+        /// Every restored item gets the time <paramref name="now"/>, so on sync it wins over the changes and
+        /// deletions it undoes, in the cloud copy and on other devices as well. A group deleted since the
+        /// backup comes back under a new id, because a group tombstone always wins.
+        /// </summary>
+        internal static PasswordVault ApplyBackup(PasswordVault current, PasswordVault backup, DateTimeOffset now,
+            out BackupRestoreResult result)
+        {
+            var restored = new List<Credential>();
+            var reverted = new List<Credential>();
+            var credentials = current.Credentials.ToList();
+            var deleted = new Dictionary<Guid, DateTimeOffset>(current.DeletedCredentials);
+            foreach (var saved in backup.Credentials)
+            {
+                var index = credentials.IndexOf(saved);
+                if (index >= 0 && HasSameContent(credentials[index], saved))
+                    continue;
+
+                var copy = saved.Clone();
+                copy.LastModifiedTime = now.UtcDateTime;
+                if (index >= 0)
+                {
+                    copy.PasswordHistory = CombineHistory(copy, credentials[index], now);
+                    credentials[index] = copy;
+                    reverted.Add(copy);
+                }
+                else
+                {
+                    credentials.Add(copy);
+                    restored.Add(copy);
+                }
+
+                deleted.Remove(saved.Id);
+            }
+
+            var groupsChanged = false;
+            var groups = new Dictionary<Guid, GroupChange>(current.Groups);
+            var groupIds = new Dictionary<Guid, Guid>(); // backup group id to its id in the result
+            foreach (var (id, change) in backup.Groups)
+            {
+                if (change.IsDeleted)
+                    continue;
+
+                if (groups.TryGetValue(id, out var existing) && !existing.IsDeleted)
+                {
+                    groupIds[id] = id;
+                    if (existing.Group != change.Group)
+                    {
+                        groups[id] = new GroupChange(change.Group, now);
+                        groupsChanged = true;
+                    }
+                    continue;
+                }
+
+                var targetId = existing is null ? id : Guid.NewGuid();
+                groups[targetId] = new GroupChange(change.Group with { Id = targetId }, now);
+                groupIds[id] = targetId;
+                groupsChanged = true;
+            }
+
+            var assignments = new Dictionary<Guid, GroupAssignment>(current.Assignments);
+            foreach (var saved in backup.Credentials)
+            {
+                Guid? target = backup.Assignments.TryGetValue(saved.Id, out var assignment) &&
+                    assignment.GroupId is { } savedGroupId && groupIds.TryGetValue(savedGroupId, out var mapped)
+                    ? mapped
+                    : null;
+                Guid? currentGroup = assignments.TryGetValue(saved.Id, out var currentAssignment) &&
+                    currentAssignment.GroupId is { } groupId && groups.TryGetValue(groupId, out var group) && !group.IsDeleted
+                    ? groupId
+                    : null;
+                if (target != currentGroup)
+                {
+                    assignments[saved.Id] = new GroupAssignment(target, now);
+                    groupsChanged = true;
+                }
+            }
+
+            result = new BackupRestoreResult(restored, reverted, groupsChanged);
+            if (!result.AnyChanges)
+                return current;
+
+            return current with
+            {
+                Credentials = credentials,
+                Groups = groups,
+                Assignments = assignments,
+                DeletedCredentials = deleted
+            };
+        }
+
+        /// <summary>Same entry apart from modification time and password history.</summary>
+        private static bool HasSameContent(Credential first, Credential second)
+        {
+            static string Content(Credential credential)
+            {
+                var copy = credential.Clone();
+                copy.LastModifiedTime = default;
+                copy.PasswordHistory = [];
+                return JsonSerializer.Serialize(copy);
+            }
+
+            return Content(first) == Content(second);
+        }
+
+        private static IReadOnlyList<PasswordHistoryEntry> CombineHistory(Credential restored, Credential current, DateTimeOffset now)
+        {
+            IEnumerable<PasswordHistoryEntry> entries = restored.PasswordHistory.Concat(current.PasswordHistory);
+            var currentPassword = current.PasswordField.Value;
+            if (!string.IsNullOrEmpty(currentPassword) &&
+                !string.Equals(currentPassword, restored.PasswordField.Value, StringComparison.Ordinal))
+                entries = entries.Append(new PasswordHistoryEntry { Password = currentPassword, ChangedAtUtc = now });
+
+            return entries
+                .DistinctBy(entry => (entry.ChangedAtUtc, entry.Password))
+                .OrderByDescending(entry => entry.ChangedAtUtc)
+                .ThenBy(entry => entry.Password, StringComparer.Ordinal)
+                .Take(Credential.PasswordHistoryLimit)
+                .ToArray();
+        }
+
+        private void CreateDailyBackupIfDue()
+        {
+            try
+            {
+                _backups.CreateDailyIfDue(DateTimeOffset.UtcNow);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                // A missed daily backup must not block saving the user's change.
+                _logger.LogError(ex, "Failed to back up the password vault.");
+            }
+        }
 
         private void WriteVault(PasswordVault vault, string password)
         {
@@ -544,6 +745,7 @@ namespace SinglePass.Core.Services
                     if (!string.Equals(currentPassword, GetPassword(), StringComparison.Ordinal))
                         return PasswordChangeResult.IncorrectCurrentPassword;
 
+                    _backups.Create(VaultBackupReason.Password, DateTimeOffset.UtcNow);
                     var newPasswordSecure = SecureStringHelper.MakeSecureString(newPassword);
                     var updated = _vault with { MasterPasswordChangedAt = DateTimeOffset.UtcNow };
                     try

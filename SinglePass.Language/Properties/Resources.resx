@@ -646,4 +646,50 @@
   <data name="LastSyncFormatted" xml:space="preserve">
     <value>Last sync: {0:dd-MM-yyyy, HH:mm}</value>
   </data>
+  <data name="Backups" xml:space="preserve">
+    <value>Backups</value>
+  </data>
+  <data name="BackupsDescription" xml:space="preserve">
+    <value>Copies of the vault are made automatically: once a day when you change it, before a sync brings in changes, before the master password changes and before a restore. The last 20 are kept.</value>
+  </data>
+  <data name="NoBackups" xml:space="preserve">
+    <value>No backups yet.</value>
+  </data>
+  <data name="OpenBackupsFolder" xml:space="preserve">
+    <value>Open folder</value>
+  </data>
+  <data name="Restore" xml:space="preserve">
+    <value>Restore</value>
+  </data>
+  <data name="RestoreBackupTitle" xml:space="preserve">
+    <value>Restore backup</value>
+  </data>
+  <data name="RestoreBackupConfirm" xml:space="preserve">
+    <value>Bring back credentials and their versions from the backup of {0:dd-MM-yyyy, HH:mm:ss}?
+
+Deleted credentials come back, changed ones return to the backup version (the current password is kept in the password history). Credentials added later stay. The current vault is backed up first. Sync afterwards to update the cloud copy and other devices.</value>
+  </data>
+  <data name="BackupRestored" xml:space="preserve">
+    <value>Restored credentials: {0}. Returned to the backup version: {1}.
+
+Sync to update the cloud copy and other devices.</value>
+  </data>
+  <data name="BackupNothingToRestore" xml:space="preserve">
+    <value>The vault already contains everything from this backup.</value>
+  </data>
+  <data name="BackupRestoreFailed" xml:space="preserve">
+    <value>Could not restore the backup.</value>
+  </data>
+  <data name="BackupReasonDaily" xml:space="preserve">
+    <value>Daily</value>
+  </data>
+  <data name="BackupReasonSync" xml:space="preserve">
+    <value>Before sync</value>
+  </data>
+  <data name="BackupReasonPassword" xml:space="preserve">
+    <value>Before master password change</value>
+  </data>
+  <data name="BackupReasonRestore" xml:space="preserve">
+    <value>Before restore</value>
+  </data>
 </root>

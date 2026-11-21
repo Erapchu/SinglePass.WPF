@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
 using SinglePass.Language.Properties;
 using SinglePass.WPF.Hotkeys;
 using SinglePass.Core.Localization;
@@ -9,7 +10,11 @@ using SinglePass.WPF.ViewModels.Dialogs;
 using SinglePass.WPF.Views.Controls;
 using SinglePass.WPF.Views.Helpers;
 using System;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
+using SinglePass.Core.Helpers;
 using SinglePass.Core.Services;
 
 namespace SinglePass.WPF.ViewModels
@@ -31,6 +36,16 @@ namespace SinglePass.WPF.ViewModels
         private readonly AppSettingsService _appSettingsService;
         private readonly CredentialsCryptoService _credentialsCryptoService;
         private readonly HotkeysService _hotkeysService;
+        private readonly ILogger<SettingsViewModel> _logger;
+
+        /// <summary>Raised after a backup restore changed the vault, so the lists can reload it.</summary>
+        public event Action VaultRestored;
+
+        /// <summary>Vault backups, newest first.</summary>
+        public ObservableCollection<BackupItem> Backups { get; } = new();
+
+        [ObservableProperty]
+        public partial bool RestoringBackup { get; set; }
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(ChangeHelperPopupHotkeyCommand))]
@@ -57,7 +72,8 @@ namespace SinglePass.WPF.ViewModels
             ThemeService themeService,
             AppSettingsService appSettingsService,
             CredentialsCryptoService credentialsCryptoService,
-            HotkeysService hotkeysService)
+            HotkeysService hotkeysService,
+            ILogger<SettingsViewModel> logger)
         {
             ThemeMode = appSettingsService.ThemeMode;
             AnimationsEnabled = appSettingsService.Settings.AnimationsEnabled;
@@ -70,6 +86,93 @@ namespace SinglePass.WPF.ViewModels
             _appSettingsService = appSettingsService;
             _credentialsCryptoService = credentialsCryptoService;
             _hotkeysService = hotkeysService;
+            _logger = logger;
+        }
+
+        [RelayCommand]
+        private void LoadBackups()
+        {
+            if (_credentialsCryptoService is null)
+                return;
+
+            Backups.Clear();
+            try
+            {
+                foreach (var backup in _credentialsCryptoService.Backups)
+                    Backups.Add(new BackupItem(backup));
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                _logger.LogError(ex, "Failed to list vault backups");
+            }
+        }
+
+        [RelayCommand]
+        private void OpenBackupsFolder()
+        {
+            try
+            {
+                Directory.CreateDirectory(Constants.BackupsDirectoryPath);
+                Process.Start(new ProcessStartInfo(Constants.BackupsDirectoryPath) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to open the backups folder");
+            }
+        }
+
+        [RelayCommand]
+        private async Task RestoreBackup(BackupItem item)
+        {
+            if (item is null || RestoringBackup)
+                return;
+
+            var confirm = await MessageDialog.ShowAsync(
+                LocalizationManager.Instance["RestoreBackupTitle"],
+                string.Format(LocalizationManager.Instance["RestoreBackupConfirm"], item.CreatedAt),
+                MessageDialogButtons.OKCancel,
+                "\uE777");
+            if (confirm != DialogChoice.OK)
+                return;
+
+            RestoringBackup = true;
+            try
+            {
+                // Backups made before a password change open only with the password of that time.
+                var backup = await _credentialsCryptoService.ReadBackup(item.Info.Path, _credentialsCryptoService.GetPassword());
+                while (backup is null)
+                {
+                    var dialog = new SyncPasswordDialog();
+                    await ModalDialog.ShowAsync(dialog);
+                    if (dialog.Password is null)
+                        return;
+
+                    backup = await _credentialsCryptoService.ReadBackup(item.Info.Path, dialog.Password);
+                }
+
+                var result = await _credentialsCryptoService.RestoreBackup(backup);
+                LoadBackups();
+                if (result.AnyChanges)
+                    VaultRestored?.Invoke();
+
+                await MessageDialog.ShowAsync(
+                    Resources.Success,
+                    result.AnyChanges
+                        ? string.Format(LocalizationManager.Instance["BackupRestored"], result.Restored.Count, result.Reverted.Count)
+                        : LocalizationManager.Instance["BackupNothingToRestore"],
+                    MessageDialogButtons.OK,
+                    "\uE73E");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to restore a vault backup");
+                await MessageDialog.ShowAsync(Resources.Error, LocalizationManager.Instance["BackupRestoreFailed"],
+                    MessageDialogButtons.OK, "\uEA39");
+            }
+            finally
+            {
+                RestoringBackup = false;
+            }
         }
 
         [RelayCommand]
@@ -147,5 +250,13 @@ namespace SinglePass.WPF.ViewModels
                     MessageDialogButtons.OK, "\uEA39");
             }
         }
+    }
+
+    /// <summary>A vault backup in the Security settings list.</summary>
+    public sealed class BackupItem(VaultBackupInfo info)
+    {
+        internal VaultBackupInfo Info { get; } = info;
+        public DateTime CreatedAt { get; } = info.CreatedAt.LocalDateTime;
+        public string Reason { get; } = LocalizationManager.Instance["BackupReason" + info.Reason];
     }
 }

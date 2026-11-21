@@ -37,7 +37,7 @@ A file that does not start with the magic is read as the old format: a 16-byte I
 
 ### Writing
 
-Every write goes to a temporary file `singlePass.dat.<guid>.tmp`, is flushed to disk and then replaces `singlePass.dat` with `File.Replace` (or `File.Move` for the first write). A crash during a write leaves the old file intact. No backup copy is kept.
+Every write goes to a temporary file `singlePass.dat.<guid>.tmp`, is flushed to disk and then replaces `singlePass.dat` with `File.Replace` (or `File.Move` for the first write). A crash during a write leaves the old file intact. Backups are described [below](#backups).
 
 ## Contents
 
@@ -82,7 +82,7 @@ All operations take an in-process lock keyed by the vault path, apply an immutab
 | Save group | Stores the group with `ModifiedAt = UtcNow`. Editing a deleted group does nothing. |
 | Delete group | Replaces the group with a tombstone (`Group = null`, `IsDeleted = true`). Assignments to it stay but are ignored. |
 | Move credentials | Sets the assignment of each existing credential, `ModifiedAt = UtcNow`. |
-| Change master password | Checks the current password, sets `MasterPasswordChangedAt = UtcNow` and rewrites the vault with the new password. |
+| Change master password | Checks the current password, makes a `password` backup, sets `MasterPasswordChangedAt = UtcNow` and rewrites the vault with the new password. |
 | Lock | Marks the vault locked, clears it and the password from memory, cancels cloud transfers. |
 
 Group assignments that point to a missing or deleted group are treated as "no group".
@@ -102,6 +102,30 @@ The result lists new, changed (winning version) and deleted credentials and whet
 
 Tombstones of credentials and groups are never removed.
 
+## Backups
+
+`Services/VaultBackups.cs` copies the encrypted vault file to `%LOCALAPPDATA%\SinglePass\Backups\singlePass-<UTC yyyyMMdd-HHmmss-fff>-<reason>.dat`. A backup is the file exactly as it was, so it opens with the master password of that moment. The newest 20 are kept; older ones are deleted when a new one is made.
+
+| Reason | When |
+|---|---|
+| `daily` | Before a local change, if the newest backup of any kind is at least a day old. A failure is logged and the change is saved anyway. |
+| `sync` | Before a sync writes changes that came from the cloud. |
+| `password` | Before the master password is changed, or replaced by the cloud one during sync. |
+| `restore` | Before a backup is restored. |
+
+Except for `daily`, a failed backup cancels the operation.
+
+### Restore
+
+**Settings → Security → Backups** lists the backups. Restoring one (`CredentialsCryptoService.ApplyBackup`) applies it on top of the current vault as a new change and never removes anything:
+
+- credentials missing now are added back; credentials that differ are reverted to the backup version, and the current password goes to the password history;
+- credentials created after the backup stay;
+- groups and group links of the backup credentials are reverted; a group deleted since the backup comes back under a new id, because a group tombstone always wins on sync;
+- every restored item gets the current time, so the next sync spreads the restore to the cloud copy and other devices instead of undoing it (a restored credential is newer than the tombstone that deleted it).
+
+The backup is decrypted with the current master password first; if that fails, the user is asked for the password of that backup. Restoring a backup by copying the file over `singlePass.dat` also works, but then the next sync merges the newer cloud changes and deletions back in.
+
 ## Cloud synchronization
 
 See [cloud-sync.md](cloud-sync.md).
@@ -109,6 +133,6 @@ See [cloud-sync.md](cloud-sync.md).
 ## Known limitations
 
 - **Clock-based conflict resolution.** Credential conflicts, edit-vs-delete and master password changes are decided by timestamps from the device clock. Clock skew picks the wrong winner. Concurrent edits of different fields of one credential are not combined.
-- **No backups.** A wrong merge or deletion cannot be undone from local data.
+- **Backups are local.** They live next to the vault on this device only; losing the device loses them.
 
 Sync-specific limitations are listed in [cloud-sync.md](cloud-sync.md#known-limitations).

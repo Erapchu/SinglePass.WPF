@@ -54,6 +54,7 @@ Application data is stored under `%LOCALAPPDATA%\SinglePass`:
 - `commonSettings.json` — application settings.
 - `googleDrive.token` — Google Drive authorization data protected by Windows for the current user. SinglePass migrates the former `googleDrive.json` and removes it after saving the protected token.
 - `yandexDisk.token` — Yandex Disk authorization data protected by Windows for the current user.
+- `Backups` — automatic copies of the vault, restorable from **Settings → Security → Backups**.
 - `Cache` — cached data; logs are stored in `Logs`.
 
 The vault uses AES-256-GCM encryption with a key derived from the master password using Argon2id. SinglePass upgrades older local vaults after you unlock them successfully. Vaults written by this version cannot be opened by older versions, so update SinglePass on every device that syncs the same vault. The file format and merge rules are described in [docs/vault.md](docs/vault.md), synchronization in [docs/cloud-sync.md](docs/cloud-sync.md).

@@ -303,12 +303,51 @@ namespace SinglePass.Core.Services
             return changed ? vault with { Assignments = assignments } : vault;
         }
 
-        internal async Task<CredentialsMergeResult> Merge(PasswordVault incoming)
+        /// <summary>
+        /// Merges a vault downloaded from the cloud that was decrypted with <paramref name="cloudPassword"/>.
+        /// When the cloud vault uses another master password, the more recently changed password is kept:
+        /// either this device switches to the cloud password, or the cloud copy has to be re-encrypted.
+        /// Adds the changes to <paramref name="result"/>, which may already hold changes of a previous attempt.
+        /// </summary>
+        internal Task MergeFromCloud(PasswordVault incoming, string cloudPassword, CredentialsMergeResult result) => Task.Run(async () =>
         {
-            var result = CredentialsMergeResult.SuccessMergeResult;
-            await UpdateVault(vault => MergeVaults(vault, incoming, result));
-            return result;
-        }
+            using var locker = await _asyncKeyedLocker.LockAsync(Constants.PasswordsFilePath).ConfigureAwait(false);
+            if (_locked)
+                throw new InvalidOperationException("The password vault is locked.");
+
+            var localPassword = GetPassword();
+            var samePassword = string.Equals(cloudPassword, localPassword, StringComparison.Ordinal);
+            var adoptCloudPassword = !samePassword &&
+                (incoming.MasterPasswordChangedAt ?? DateTimeOffset.MinValue) > (_vault.MasterPasswordChangedAt ?? DateTimeOffset.MinValue);
+
+            var merged = MergeVaults(_vault, incoming, result);
+            if (adoptCloudPassword)
+            {
+                var cloudPasswordSecure = SecureStringHelper.MakeSecureString(cloudPassword);
+                try
+                {
+                    WriteVault(merged, cloudPassword);
+                }
+                catch
+                {
+                    cloudPasswordSecure.Dispose();
+                    throw;
+                }
+
+                _vault = merged;
+                ReplacePassword(cloudPasswordSecure);
+                result.MasterPasswordAdopted = true;
+            }
+            else if (!ReferenceEquals(merged, _vault))
+            {
+                WriteVault(merged, localPassword);
+                _vault = merged;
+            }
+
+            result.CloudPasswordReplaced = !samePassword && !adoptCloudPassword;
+            result.CloudNeedsUpdate = result.CloudPasswordReplaced ||
+                !ReferenceEquals(MergeVaults(incoming, merged, new CredentialsMergeResult()), incoming);
+        });
 
         /// <summary>
         /// Merges <paramref name="incoming"/> into <paramref name="local"/>. Returns <paramref name="local"/>
@@ -411,6 +450,13 @@ namespace SinglePass.Core.Services
                 }
             }
 
+            var passwordChangedAt = local.MasterPasswordChangedAt;
+            if (incoming.MasterPasswordChangedAt > (passwordChangedAt ?? DateTimeOffset.MinValue))
+            {
+                passwordChangedAt = incoming.MasterPasswordChangedAt;
+                changed = true;
+            }
+
             if (!changed && !result.AnyChanges)
                 return local;
 
@@ -419,7 +465,8 @@ namespace SinglePass.Core.Services
                 Credentials = credentials,
                 Groups = groups,
                 Assignments = assignments,
-                DeletedCredentials = deleted
+                DeletedCredentials = deleted,
+                MasterPasswordChangedAt = passwordChangedAt
             };
         }
 
@@ -498,9 +545,10 @@ namespace SinglePass.Core.Services
                         return PasswordChangeResult.IncorrectCurrentPassword;
 
                     var newPasswordSecure = SecureStringHelper.MakeSecureString(newPassword);
+                    var updated = _vault with { MasterPasswordChangedAt = DateTimeOffset.UtcNow };
                     try
                     {
-                        WriteVault(_vault, newPassword);
+                        WriteVault(updated, newPassword);
                     }
                     catch
                     {
@@ -508,6 +556,7 @@ namespace SinglePass.Core.Services
                         throw;
                     }
 
+                    _vault = updated;
                     ReplacePassword(newPasswordSecure);
                     return PasswordChangeResult.Changed;
                 }

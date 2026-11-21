@@ -20,8 +20,13 @@ namespace SinglePass.Core.Models
         public PassField SiteField { get; set; } = new PassField() { Name = "Site" };
         public List<PassField> AdditionalFields { get; set; } = new List<PassField>();
         public TotpConfiguration Totp { get; set; }
-        public DateTime LastModifiedTime { get; set; }
-        public DateTime CreationTime { get; set; }
+        // Stored in UTC: sync compares these across devices and time zones. Older vaults hold local
+        // times with an offset (or without one), which are converted when read.
+        public DateTime LastModifiedTime { get; set => field = ToUtc(value); }
+        public DateTime CreationTime { get; set => field = ToUtc(value); }
+
+        private static DateTime ToUtc(DateTime value) =>
+            value.Kind == DateTimeKind.Utc ? value : value.ToUniversalTime();
 
         public Credential() { }
 

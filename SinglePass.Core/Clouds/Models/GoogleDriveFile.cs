@@ -15,5 +15,8 @@ namespace SinglePass.Core.Clouds.Models
 
         [JsonPropertyName("mimeType")]
         public string MimeType { get; init; }
+
+        [JsonPropertyName("md5Checksum")]
+        public string Md5Checksum { get; init; }
     }
 }

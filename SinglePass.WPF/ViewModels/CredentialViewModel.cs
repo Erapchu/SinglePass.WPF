@@ -130,15 +130,16 @@ namespace SinglePass.WPF.ViewModels
                 : null;
         }
 
+        // The model keeps UTC; the UI shows and groups by local time.
         public DateTime LastModifiedTime
         {
-            get => Model.LastModifiedTime;
+            get => Model.LastModifiedTime.ToLocalTime();
             set => Model.LastModifiedTime = value;
         }
 
         public DateTime CreationTime
         {
-            get => Model.CreationTime;
+            get => Model.CreationTime.ToLocalTime();
             set => Model.CreationTime = value;
         }
 

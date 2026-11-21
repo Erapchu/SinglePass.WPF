@@ -261,9 +261,6 @@
   <data name="SignOut" xml:space="preserve">
     <value>Выйти</value>
   </data>
-  <data name="Upload" xml:space="preserve">
-    <value>Отгрузка</value>
-  </data>
   <data name="Created" xml:space="preserve">
     <value>Создан</value>
   </data>
@@ -289,16 +286,13 @@
     <value>Расшифровка...</value>
   </data>
   <data name="DownloadingFile" xml:space="preserve">
-    <value>Загрузка файла...</value>
+    <value>Скачивание из облака...</value>
   </data>
   <data name="Error" xml:space="preserve">
     <value>Ошибка</value>
   </data>
-  <data name="UploadFailed" xml:space="preserve">
-    <value>Отгрузка не выполнена</value>
-  </data>
   <data name="Uploading" xml:space="preserve">
-    <value>Отгрузка...</value>
+    <value>Загрузка в облако...</value>
   </data>
   <data name="InputPasswordOfFile" xml:space="preserve">
     <value>Введите пароль от файла</value>
@@ -308,9 +302,6 @@
   </data>
   <data name="SyncFailed" xml:space="preserve">
     <value>Синхронизация не выполнена</value>
-  </data>
-  <data name="UploadSuccess" xml:space="preserve">
-    <value>Отгрузка завершена успешно</value>
   </data>
   <data name="Delete" xml:space="preserve">
     <value>Удалить</value>
@@ -653,5 +644,26 @@
   </data>
   <data name="UpdateAvailableShort" xml:space="preserve">
     <value>Доступно обновление {0}</value>
+  </data>
+  <data name="MasterPasswordAdoptedFromCloud" xml:space="preserve">
+    <value>Мастер-пароль был изменён на другом устройстве. Теперь это хранилище открывается новым паролем.</value>
+  </data>
+  <data name="CloudVaultUpdated" xml:space="preserve">
+    <value>Копия в облаке обновлена.</value>
+  </data>
+  <data name="CloudVaultReencrypted" xml:space="preserve">
+    <value>Копия в облаке обновлена и теперь зашифрована мастер-паролем этого устройства.</value>
+  </data>
+  <data name="CloudVaultKeptChanging" xml:space="preserve">
+    <value>Копия в облаке менялась во время синхронизации. Повторите попытку позже.</value>
+  </data>
+  <data name="Merging" xml:space="preserve">
+    <value>Объединение изменений...</value>
+  </data>
+  <data name="SyncRetrying" xml:space="preserve">
+    <value>Копия в облаке изменилась, синхронизирую заново...</value>
+  </data>
+  <data name="LastSyncFormatted" xml:space="preserve">
+    <value>Последняя синхронизация: {0:dd-MM-yyyy, HH:mm}</value>
   </data>
 </root>

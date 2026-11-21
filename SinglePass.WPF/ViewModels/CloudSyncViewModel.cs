@@ -6,6 +6,7 @@ using SinglePass.Core.Clouds.Enums;
 using SinglePass.Core.Clouds.Services;
 using SinglePass.Core.Localization;
 using SinglePass.WPF.Services;
+using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels.Dialogs;
 using SinglePass.WPF.Views.Controls;
 using SinglePass.WPF.Views.Helpers;
@@ -34,6 +35,7 @@ namespace SinglePass.WPF.ViewModels
         private readonly ILogger<CloudSyncViewModel> _logger;
         private readonly ImageService _imageService;
         private readonly SyncService _syncService;
+        private readonly AppSettingsService _appSettingsService;
 
         public event Action SyncCompleted;
 
@@ -58,14 +60,44 @@ namespace SinglePass.WPF.ViewModels
             SyncService syncService,
             ILogger<CloudSyncViewModel> logger,
             GoogleOAuthProvider googleOAuthProvider,
-            YandexOAuthProvider yandexOAuthProvider)
+            YandexOAuthProvider yandexOAuthProvider,
+            AppSettingsService appSettingsService)
         {
             _cloudServiceProvider = cloudServiceProvider;
             _imageService = imageService;
             _syncService = syncService;
             _logger = logger;
+            _appSettingsService = appSettingsService;
             GoogleDrive = new CloudAccount(CloudType.GoogleDrive) { CanSignIn = googleOAuthProvider.IsConfigured };
             YandexDisk = new CloudAccount(CloudType.YandexDisk) { CanSignIn = yandexOAuthProvider.IsConfigured };
+            // Both live in the vault scope and are disposed together, so the subscription needs no removal.
+            _syncService.SyncStateChanged += (cloudType, state) => GetAccount(cloudType).SyncState = state;
+            foreach (var account in new[] { GoogleDrive, YandexDisk })
+            {
+                if (_appSettingsService.Settings.LastSyncTimes.TryGetValue(account.Type, out var time))
+                    account.LastSyncTime = time.LocalDateTime;
+            }
+        }
+
+        /// <summary>Remembers (or forgets, with null) the last successful sync of the account on this device.</summary>
+        private async Task SaveLastSyncTime(CloudAccount account, DateTimeOffset? time)
+        {
+            account.LastSyncTime = time?.LocalDateTime;
+            var times = _appSettingsService.Settings.LastSyncTimes;
+            if (time.HasValue)
+                times[account.Type] = time.Value;
+            else if (!times.Remove(account.Type))
+                return;
+
+            try
+            {
+                await _appSettingsService.Save();
+            }
+            catch (Exception ex)
+            {
+                // Only an informational value: keep it in memory and carry on.
+                _logger.LogError(ex, "Failed to save the last sync time");
+            }
         }
 
         [RelayCommand]
@@ -137,6 +169,7 @@ namespace SinglePass.WPF.ViewModels
                         account.UserName = null;
                         account.ProfileLoaded = false;
                         account.IsConnected = false;
+                        await SaveLastSyncTime(account, null);
                     });
             }
             catch (OperationCanceledException)
@@ -214,6 +247,9 @@ namespace SinglePass.WPF.ViewModels
                 if (_syncService.IsLocked)
                     return;
 
+                if (mergeResult.Success)
+                    await SaveLastSyncTime(account, DateTimeOffset.UtcNow);
+
                 await MessageDialog.ShowAsync(
                     mergeResult.Success
                     ? SinglePass.Language.Properties.Resources.SyncSuccess
@@ -221,44 +257,6 @@ namespace SinglePass.WPF.ViewModels
                     mergeResult.ToString(),
                     MessageDialogButtons.OK,
                     mergeResult.Success
-                    ? "\uE73E"
-                    : "\uEA39");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, string.Empty);
-            }
-            finally
-            {
-                if (!_syncService.IsLocked)
-                    SyncCompleted?.Invoke();
-                TransferInProgress = account.Transferring = false;
-            }
-        }
-
-        [RelayCommand]
-        private async Task UploadCredentials(CloudType cloudType)
-        {
-            var account = GetAccount(cloudType);
-            if (!account.IsConnected || account.SigningOut || TransferInProgress)
-                return;
-
-            try
-            {
-                TransferInProgress = account.Transferring = true;
-                var success = await _syncService.Upload(cloudType);
-                if (_syncService.IsLocked)
-                    return;
-
-                await MessageDialog.ShowAsync(
-                    success
-                    ? SinglePass.Language.Properties.Resources.Success
-                    : SinglePass.Language.Properties.Resources.Error,
-                    success
-                    ? SinglePass.Language.Properties.Resources.UploadSuccess
-                    : SinglePass.Language.Properties.Resources.UploadFailed,
-                    MessageDialogButtons.OK,
-                    success
                     ? "\uE73E"
                     : "\uEA39");
             }
@@ -311,6 +309,14 @@ namespace SinglePass.WPF.ViewModels
 
         [ObservableProperty]
         public partial bool Transferring { get; set; }
+
+        /// <summary>Local time of the last successful sync on this device; null if unknown.</summary>
+        [ObservableProperty]
+        public partial DateTime? LastSyncTime { get; set; }
+
+        /// <summary>Current sync stage shown under the progress bar.</summary>
+        [ObservableProperty]
+        public partial string SyncState { get; set; }
 
         [ObservableProperty]
         public partial ImageSource ProfileImage { get; set; }

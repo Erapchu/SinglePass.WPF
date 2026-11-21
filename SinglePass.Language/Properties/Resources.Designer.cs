@@ -1581,23 +1581,7 @@ namespace SinglePass.Language.Properties {
             }
         }
         
-        /// <summary>
-        ///   Looks up a localized string similar to Upload.
-        /// </summary>
-        public static string Upload {
-            get {
-                return ResourceManager.GetString("Upload", resourceCulture);
-            }
-        }
         
-        /// <summary>
-        ///   Looks up a localized string similar to Upload failed.
-        /// </summary>
-        public static string UploadFailed {
-            get {
-                return ResourceManager.GetString("UploadFailed", resourceCulture);
-            }
-        }
         
         /// <summary>
         ///   Looks up a localized string similar to Uploading....
@@ -1608,14 +1592,6 @@ namespace SinglePass.Language.Properties {
             }
         }
         
-        /// <summary>
-        ///   Looks up a localized string similar to Upload success.
-        /// </summary>
-        public static string UploadSuccess {
-            get {
-                return ResourceManager.GetString("UploadSuccess", resourceCulture);
-            }
-        }
         
         /// <summary>
         ///   Looks up a localized string similar to Website.

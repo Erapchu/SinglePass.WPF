@@ -261,9 +261,6 @@
   <data name="SignOut" xml:space="preserve">
     <value>Выйти</value>
   </data>
-  <data name="Upload" xml:space="preserve">
-    <value>Отгрузка</value>
-  </data>
   <data name="Created" xml:space="preserve">
     <value>Создан</value>
   </data>
@@ -294,9 +291,6 @@
   <data name="Error" xml:space="preserve">
     <value>Ошибка</value>
   </data>
-  <data name="UploadFailed" xml:space="preserve">
-    <value>Отгрузка не выполнена</value>
-  </data>
   <data name="Uploading" xml:space="preserve">
     <value>Отгрузка...</value>
   </data>
@@ -308,9 +302,6 @@
   </data>
   <data name="SyncFailed" xml:space="preserve">
     <value>Синхронизация не выполнена</value>
-  </data>
-  <data name="UploadSuccess" xml:space="preserve">
-    <value>Отгрузка завершена успешно</value>
   </data>
   <data name="Delete" xml:space="preserve">
     <value>Удалить</value>
@@ -653,5 +644,17 @@
   </data>
   <data name="UpdateAvailableShort" xml:space="preserve">
     <value>Доступно обновление {0}</value>
+  </data>
+  <data name="MasterPasswordAdoptedFromCloud" xml:space="preserve">
+    <value>Мастер-пароль был изменён на другом устройстве. Теперь это хранилище открывается новым паролем.</value>
+  </data>
+  <data name="CloudVaultUpdated" xml:space="preserve">
+    <value>Копия в облаке обновлена.</value>
+  </data>
+  <data name="CloudVaultReencrypted" xml:space="preserve">
+    <value>Копия в облаке обновлена и теперь зашифрована мастер-паролем этого устройства.</value>
+  </data>
+  <data name="CloudVaultKeptChanging" xml:space="preserve">
+    <value>Копия в облаке менялась во время синхронизации. Повторите попытку позже.</value>
   </data>
 </root>

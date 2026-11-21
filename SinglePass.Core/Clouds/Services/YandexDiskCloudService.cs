@@ -47,7 +47,7 @@ namespace SinglePass.Core.Clouds.Services
             response.EnsureSuccessStatusCode();
         }
 
-        public async Task<Stream> Download(string fileName, CancellationToken cancellationToken)
+        public async Task<byte[]> Download(string fileName, CancellationToken cancellationToken)
         {
             var path = Uri.EscapeDataString("app:/" + fileName);
             using var client = _httpClientFactory.CreateClient(HttpClientName);
@@ -57,9 +57,24 @@ namespace SinglePass.Core.Clouds.Services
                 return null;
 
             var downloadUri = await ReadLinkAsync(linkResponse, cancellationToken).ConfigureAwait(false);
-            var bytes = await client.GetByteArrayAsync(downloadUri, cancellationToken).ConfigureAwait(false);
-            // The vault reader seeks back to the start when retrying the master password.
-            return new MemoryStream(bytes, writable: false);
+            return await client.GetByteArrayAsync(downloadUri, cancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task<string> GetRevision(string fileName, CancellationToken cancellationToken)
+        {
+            var path = Uri.EscapeDataString("app:/" + fileName);
+            using var client = _httpClientFactory.CreateClient(HttpClientName);
+            using var response = await GetAuthorizedAsync(client,
+                $"{ResourcesEndpoint}?path={path}&fields=md5", cancellationToken).ConfigureAwait(false);
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                return null;
+
+            response.EnsureSuccessStatusCode();
+            var resource = await response.Content.ReadFromJsonAsync<ResourceInfo>(cancellationToken).ConfigureAwait(false);
+            if (string.IsNullOrEmpty(resource?.Md5))
+                throw new InvalidDataException("Yandex Disk did not return the file checksum.");
+
+            return resource.Md5.ToLowerInvariant();
         }
 
         public async Task<BaseUserInfo> GetUserInfo(CancellationToken cancellationToken)
@@ -150,6 +165,8 @@ namespace SinglePass.Core.Clouds.Services
         }
 
         private sealed record TransferLink(string Href);
+
+        private sealed record ResourceInfo([property: JsonPropertyName("md5")] string Md5);
 
         private sealed record UserProfile(
             string Login,

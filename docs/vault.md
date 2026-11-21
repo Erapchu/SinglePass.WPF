@@ -4,7 +4,7 @@ This document describes how the password vault is stored, changed and synchroniz
 
 - `Services/CryptoService.cs` — file encryption format.
 - `Services/CredentialsCryptoService.cs` — vault in memory, local changes, merge.
-- `Services/SyncService.cs` — cloud download/merge and upload.
+- `Services/SyncService.cs` — cloud synchronization.
 - `Models/PasswordVault.cs` — vault contents.
 
 Tests for the merge rules and the vault format are in `SinglePass.Core.Tests`.
@@ -47,7 +47,8 @@ Every write goes to a temporary file `singlePass.dat.<guid>.tmp`, is flushed to 
   "Credentials": [ /* Credential */ ],
   "Groups":             { "<group id>":      { "Group": {...} | null, "ModifiedAt": "...", "IsDeleted": false } },
   "Assignments":        { "<credential id>": { "GroupId": "<group id>" | null, "ModifiedAt": "..." } },
-  "DeletedCredentials": { "<credential id>": "<deleted at, UTC>" }
+  "DeletedCredentials": { "<credential id>": "<deleted at, UTC>" },
+  "MasterPasswordChangedAt": "<UTC>" | null
 }
 ```
 
@@ -55,7 +56,7 @@ Every write goes to a temporary file `singlePass.dat.<guid>.tmp`, is flushed to 
 |---|---|
 | — | A bare JSON array of credentials (before groups). Still readable. |
 | 1 | Object with `Credentials`, `Groups`, `Assignments`. |
-| 2 | Adds `DeletedCredentials` (credential tombstones). |
+| 2 | Adds `DeletedCredentials` (credential tombstones) and `MasterPasswordChangedAt`. |
 
 - A vault with a newer `Version` than the application supports is rejected, both locally and on sync. Builds that only know version 1 cannot open a version 2 vault. This is intentional: an old build would drop `DeletedCredentials` on its next write and deleted credentials would return.
 - Older vaults are upgraded in memory and written as the current version on the next change.
@@ -66,7 +67,7 @@ Every write goes to a temporary file `singlePass.dat.<guid>.tmp`, is flushed to 
 `Credential` holds the fixed fields (name, login, password, notes, site), additional fields, TOTP setup and:
 
 - `Id` — GUID, the identity of the entry. Equality compares `Id` only.
-- `LastModifiedTime`, `CreationTime` — set by the UI from the local clock (`DateTime.Now`) on save.
+- `LastModifiedTime`, `CreationTime` — UTC, set by the UI on save. Older vaults stored local time with an offset; the model converts any value to UTC when it is assigned, and the UI shows local time.
 - `PasswordHistory` — up to 10 previous passwords, newest first. When a save changes a non-empty password, the old one is added with the current UTC time.
 
 ## Local operations
@@ -81,7 +82,7 @@ All operations take an in-process lock keyed by the vault path, apply an immutab
 | Save group | Stores the group with `ModifiedAt = UtcNow`. Editing a deleted group does nothing. |
 | Delete group | Replaces the group with a tombstone (`Group = null`, `IsDeleted = true`). Assignments to it stay but are ignored. |
 | Move credentials | Sets the assignment of each existing credential, `ModifiedAt = UtcNow`. |
-| Change master password | Checks the current password and rewrites the same vault with the new one. |
+| Change master password | Checks the current password, sets `MasterPasswordChangedAt = UtcNow` and rewrites the vault with the new password. |
 | Lock | Marks the vault locked, clears it and the password from memory, cancels cloud transfers. |
 
 Group assignments that point to a missing or deleted group are treated as "no group".
@@ -95,6 +96,7 @@ Group assignments that point to a missing or deleted group are treated as "no gr
 3. **Apply tombstones.** A credential with a tombstone is removed, unless its `LastModifiedTime` (converted to UTC) is later than the deletion. In that case the edit wins: the credential stays and the tombstone is dropped.
 4. **Groups.** An unknown group is added. A deleted group stays deleted. Otherwise a deletion wins, then the later `ModifiedAt`.
 5. **Assignments.** Kept only for credentials that exist after step 3. For the same credential the later `ModifiedAt` wins.
+6. **Master password time.** The later `MasterPasswordChangedAt` is kept.
 
 The result lists new, changed (winning version) and deleted credentials and whether groups changed; the UI shows it after sync. Changes that only touch tombstones or clean up assignments are written but not reported.
 
@@ -102,17 +104,26 @@ Tombstones of credentials and groups are never removed.
 
 ## Cloud synchronization
 
-Providers: Google Drive (scope `drive.file`, file found by name among non-trashed files the app can see) and Yandex Disk (`app:/singlePass.dat` in the application folder).
+Providers: Google Drive (scope `drive.file`; the oldest non-trashed file named `singlePass.dat` the app can see) and Yandex Disk (`app:/singlePass.dat` in the application folder).
 
-- **Sync** downloads the cloud file, decrypts it with the current master password (asking for another password while decryption fails), merges it into the local vault and writes the local file with the **local** password. It does not upload.
-- **Upload** sends the local file and overwrites the cloud copy unconditionally.
+**Sync** is the only cloud operation (`SyncService.Synchronize`). Each attempt:
 
-Only one transfer per provider runs at a time. Locking the vault cancels transfers.
+1. Download the cloud file and remember its MD5 as the expected revision. If there is no file, go to step 4.
+2. Decrypt it: with the local master password, then with a password entered in a previous attempt, then by asking the user until the password works or the user cancels.
+3. Merge it into the local vault (`CredentialsCryptoService.MergeFromCloud`) and write the local file. When the cloud vault used a different master password, the more recently changed one wins (`MasterPasswordChangedAt`, unknown counts as oldest):
+   - cloud password newer: the local vault is re-encrypted with it and this device uses it from now on;
+   - local password newer or both unknown: the local file keeps the local password and the cloud copy will be re-encrypted by the upload.
+   Then decide whether the cloud copy needs an upload: it does when merging the local vault into the downloaded one would change it, when the cloud password has to be replaced, or when the cloud file is in the legacy format. Otherwise sync ends here.
+4. Read the local file, ask the provider for the current MD5 of the cloud file (`GetRevision`) and compare it with the expected revision. If it differs (or a file appeared or disappeared), another device uploaded in the meantime: start the next attempt.
+5. Upload the local file as is.
+
+After 3 attempts without a successful upload, sync fails with "the cloud copy kept changing"; whatever was already merged stays in the local vault.
+
+The result shows new, changed and deleted credentials, group changes, whether this device switched to the cloud master password and whether the cloud copy was updated (or re-encrypted). Only one sync per provider runs at a time. Locking the vault cancels it.
 
 ## Known limitations
 
-- **Lost updates.** Upload has no precondition (no ETag/revision check), and Sync and Upload are separate steps. Uploading without syncing first, or another device uploading between them, overwrites changes in the cloud copy.
-- **Clock-based conflict resolution.** Credential conflicts and edit-vs-delete are decided by `LastModifiedTime` from the device clock. Clock skew picks the wrong winner. Concurrent edits of different fields of one credential are not combined.
-- **Master password follows the uploading device.** After Sync with a different cloud password, the local file keeps the local password, so the next Upload re-encrypts the cloud copy with it.
-- **Google Drive upload** creates a file and renames it in a second request. If the rename fails, an unnamed file is left behind and the next upload creates another one. With several files of the same name, an arbitrary one is used.
+- **Revision check is not atomic.** Neither Google Drive v3 nor Yandex Disk offers a conditional write, so steps 4 and 5 are a check followed by a write. An upload from another device in the short window between them is still overwritten. That device keeps the data in its local vault and puts it back into the cloud on its next sync, so it is lost only if that local vault is lost first.
+- **Clock-based conflict resolution.** Credential conflicts, edit-vs-delete and master password changes are decided by timestamps from the device clock. Clock skew picks the wrong winner. Concurrent edits of different fields of one credential are not combined.
+- **No forced overwrite.** If the cloud vault cannot be decrypted (unknown password, damaged file), sync cannot proceed; the cloud file has to be removed manually.
 - **No backups.** A wrong merge or deletion cannot be undone from local data.

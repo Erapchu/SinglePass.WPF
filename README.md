@@ -10,7 +10,7 @@ SinglePass is a Windows password manager with a local encrypted vault, a quick-a
 - Generate and copy time-based one-time passwords (TOTP) from a saved entry.
 - Search by name, login, website or notes, including transliterated text.
 - Open a quick-access popup with a configurable global hotkey. The popup can suggest entries based on the current browser address and paste a login and password or individual fields.
-- Synchronize or upload credentials to Google Drive or Yandex Disk after signing in.
+- Synchronize credentials with Google Drive or Yandex Disk after signing in.
 - Change the master password, choose a theme and select English, Russian or the system language.
 - Automatically lock the vault when the Windows session locks or after five minutes without keyboard or mouse input. Enter the master password to reopen it.
 - Access the application from the Windows notification area.
@@ -38,7 +38,7 @@ The popup uses the clipboard and simulates keyboard input. Filling both fields a
 
 ### Cloud synchronization
 
-Open **Settings → Cloud Sync** and sign in to Google Drive or Yandex Disk. **Upload** sends the encrypted local vault to the selected provider. **Sync** downloads the provider's vault and merges it into the local vault, including groups and group assignments.
+Open **Settings → Cloud Sync** and sign in to Google Drive or Yandex Disk. **Sync** downloads the provider's vault, merges it into the local vault (credentials, deletions, groups and group assignments) and uploads the result when the cloud copy is missing something or does not exist yet. If another device uploaded in the meantime, sync merges again before uploading. When the master password was changed on one device, the most recent change is applied to the other devices and the cloud copy on their next sync.
 
 #### Configure Yandex Disk
 

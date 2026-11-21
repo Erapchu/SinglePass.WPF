@@ -15,6 +15,22 @@ namespace SinglePass.Core.Models
         public IList<Credential> ChangedCredentials { get; } = new List<Credential>();
         public IList<Credential> DeletedCredentials { get; } = new List<Credential>();
         internal bool GroupChanges { get; set; }
+
+        /// <summary>This device switched to the master password of the cloud vault.</summary>
+        internal bool MasterPasswordAdopted { get; set; }
+
+        /// <summary>The cloud vault used an older master password and is re-encrypted with this device's one.</summary>
+        internal bool CloudPasswordReplaced { get; set; }
+
+        /// <summary>The cloud copy lacks something the local vault has and has to be uploaded.</summary>
+        internal bool CloudNeedsUpdate { get; set; }
+
+        /// <summary>The cloud copy was uploaded during this sync.</summary>
+        internal bool CloudUpdated { get; set; }
+
+        /// <summary>Why the sync failed, when it is worth telling the user.</summary>
+        internal string FailureReason { get; init; }
+
         public bool AnyChanges => NewCredentials.Count > 0 || ChangedCredentials.Count > 0 || DeletedCredentials.Count > 0 || GroupChanges;
 
         public CredentialsMergeResult()
@@ -48,23 +64,29 @@ namespace SinglePass.Core.Models
                 {
                     if (newCreds || changedCreds)
                         sb.AppendLine();
-                    sb.AppendLine(SinglePass.Core.Localization.LocalizationManager.Instance["CredentialsDeleted"]);
+                    sb.AppendLine(Localize("CredentialsDeleted"));
                     sb.Append(string.Join(Environment.NewLine, DeletedCredentials.Select(c => c.NameField.Value)));
                     sb.AppendLine();
                 }
                 if (GroupChanges)
-                    sb.AppendLine(SinglePass.Core.Localization.LocalizationManager.Instance["PasswordGroupsSynchronized"]);
-                if (!AnyChanges)
+                    sb.AppendLine(Localize("PasswordGroupsSynchronized"));
+                if (MasterPasswordAdopted)
+                    sb.AppendLine(Localize("MasterPasswordAdoptedFromCloud"));
+                if (CloudUpdated)
+                    sb.AppendLine(Localize(CloudPasswordReplaced ? "CloudVaultReencrypted" : "CloudVaultUpdated"));
+                if (!AnyChanges && !MasterPasswordAdopted && !CloudUpdated)
                 {
                     sb.AppendLine(SinglePass.Language.Properties.Resources.NoAnyChanges);
                 }
             }
             else
             {
-                sb.AppendLine(SinglePass.Language.Properties.Resources.CanTMergeCredentials);
+                sb.AppendLine(FailureReason ?? SinglePass.Language.Properties.Resources.CanTMergeCredentials);
             }
 
             return sb.ToString();
         }
+
+        private static string Localize(string key) => SinglePass.Core.Localization.LocalizationManager.Instance[key];
     }
 }

@@ -236,44 +236,6 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
-        [RelayCommand]
-        private async Task UploadCredentials(CloudType cloudType)
-        {
-            var account = GetAccount(cloudType);
-            if (!account.IsConnected || account.SigningOut || TransferInProgress)
-                return;
-
-            try
-            {
-                TransferInProgress = account.Transferring = true;
-                var success = await _syncService.Upload(cloudType);
-                if (_syncService.IsLocked)
-                    return;
-
-                await MessageDialog.ShowAsync(
-                    success
-                    ? SinglePass.Language.Properties.Resources.Success
-                    : SinglePass.Language.Properties.Resources.Error,
-                    success
-                    ? SinglePass.Language.Properties.Resources.UploadSuccess
-                    : SinglePass.Language.Properties.Resources.UploadFailed,
-                    MessageDialogButtons.OK,
-                    success
-                    ? "\uE73E"
-                    : "\uEA39");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, string.Empty);
-            }
-            finally
-            {
-                if (!_syncService.IsLocked)
-                    SyncCompleted?.Invoke();
-                TransferInProgress = account.Transferring = false;
-            }
-        }
-
         private static async Task<string> SyncPasswordRequired()
         {
             var dialog = new SyncPasswordDialog();

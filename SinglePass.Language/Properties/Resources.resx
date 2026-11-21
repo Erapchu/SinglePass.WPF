@@ -238,9 +238,6 @@
   <data name="Sync" xml:space="preserve">
     <value>Sync</value>
   </data>
-  <data name="Upload" xml:space="preserve">
-    <value>Upload</value>
-  </data>
   <data name="Loading" xml:space="preserve">
     <value>Loading...</value>
   </data>
@@ -265,9 +262,6 @@
   <data name="Error" xml:space="preserve">
     <value>Error</value>
   </data>
-  <data name="UploadFailed" xml:space="preserve">
-    <value>Upload failed</value>
-  </data>
   <data name="SyncSuccess" xml:space="preserve">
     <value>Sync succeed</value>
   </data>
@@ -288,9 +282,6 @@
   </data>
   <data name="Success" xml:space="preserve">
     <value>Success</value>
-  </data>
-  <data name="UploadSuccess" xml:space="preserve">
-    <value>Upload success</value>
   </data>
   <data name="Delete" xml:space="preserve">
     <value>Delete</value>
@@ -633,5 +624,17 @@
   </data>
   <data name="UpdateAvailableShort" xml:space="preserve">
     <value>Update available: {0}</value>
+  </data>
+  <data name="MasterPasswordAdoptedFromCloud" xml:space="preserve">
+    <value>The master password was changed on another device. Use the new password to unlock this vault from now on.</value>
+  </data>
+  <data name="CloudVaultUpdated" xml:space="preserve">
+    <value>The cloud copy was updated.</value>
+  </data>
+  <data name="CloudVaultReencrypted" xml:space="preserve">
+    <value>The cloud copy was updated and is now encrypted with this device's master password.</value>
+  </data>
+  <data name="CloudVaultKeptChanging" xml:space="preserve">
+    <value>The cloud copy kept changing during synchronization. Try again later.</value>
   </data>
 </root>

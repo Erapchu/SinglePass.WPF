@@ -543,7 +543,7 @@ namespace SinglePass.WPF.ViewModels
             IsSavingEdit = true;
             try
             {
-                draft.LastModifiedTime = DateTime.Now;
+                draft.LastModifiedTime = DateTime.UtcNow;
                 draft.Model.Totp = totp;
                 if (isNew)
                     draft.CreationTime = draft.LastModifiedTime;

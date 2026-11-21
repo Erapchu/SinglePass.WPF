@@ -138,11 +138,6 @@
                                 CommandParameter="{Binding Type}"
                                 Content="{Binding [Sync], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
                             <Button
-                                Margin="0,0,8,4"
-                                Command="{Binding DataContext.UploadCredentialsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                CommandParameter="{Binding Type}"
-                                Content="{Binding [Upload], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
-                            <Button
                                 Margin="0,0,0,4"
                                 Command="{Binding DataContext.LogoutCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                 CommandParameter="{Binding Type}"

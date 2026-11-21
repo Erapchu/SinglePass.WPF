@@ -14,6 +14,13 @@ namespace SinglePass.Core.Models
         public Dictionary<Guid, GroupChange> Groups { get; init; } = new();
         public Dictionary<Guid, GroupAssignment> Assignments { get; init; } = new();
         public Dictionary<Guid, DateTimeOffset> DeletedCredentials { get; init; } = new();
+
+        /// <summary>
+        /// When the master password was last changed. On sync the most recent change wins,
+        /// so a new password spreads to the cloud and other devices instead of being reverted.
+        /// Null for vaults whose password has not been changed since this field was added.
+        /// </summary>
+        public DateTimeOffset? MasterPasswordChangedAt { get; init; }
     }
 
     internal sealed record GroupChange(PasswordGroup Group, DateTimeOffset ModifiedAt, bool IsDeleted = false);

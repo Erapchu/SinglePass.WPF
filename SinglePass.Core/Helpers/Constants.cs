@@ -12,6 +12,7 @@ namespace SinglePass.Core.Helpers
         public const string CommonSettingsFileName = "commonSettings.json";
         public const string GoogleDriveFileName = "googleDrive.json";
         public const string CacheDirectoryName = "Cache";
+        public const string BackupsDirectoryName = "Backups";
 
         public static string LocalAppDataDirectoryPath { get; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), AppName);
         //public static string RoamingAppDataDirectoryPath { get; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppName);
@@ -19,6 +20,7 @@ namespace SinglePass.Core.Helpers
         public static string CommonSettingsFilePath { get; } = Path.Combine(LocalAppDataDirectoryPath, CommonSettingsFileName);
         public static string GoogleDriveFilePath { get; } = Path.Combine(LocalAppDataDirectoryPath, GoogleDriveFileName);
         public static string CacheDirectoryPath { get; } = Path.Combine(LocalAppDataDirectoryPath, CacheDirectoryName);
+        public static string BackupsDirectoryPath { get; } = Path.Combine(LocalAppDataDirectoryPath, BackupsDirectoryName);
 
         public static void EnsurePaths()
         {

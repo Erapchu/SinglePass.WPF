@@ -68,6 +68,8 @@ namespace SinglePass.WPF.ViewModels
             PasswordsVM.CredentialSelected += PasswordsViewModel_CredentialSelected;
             PasswordsVM.ScrollIntoViewRequired += PasswordsVM_ScrollIntoViewRequired;
             CloudSyncVM.SyncCompleted += SettingsViewModel_SyncCompleted;
+            // A restored backup changes credentials and groups the same way a sync does.
+            SettingsVM.VaultRestored += SettingsViewModel_SyncCompleted;
 
             AllPasswordsNavigation = new NavigationItemViewModel(
                 "AllPasswords",

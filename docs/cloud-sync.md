@@ -19,7 +19,7 @@ Each attempt:
 
 1. **Download** `singlePass.dat`. Remember its MD5 as the *expected revision*. No file in the cloud → go to step 4.
 2. **Decrypt** with the local master password, then with a password entered in a previous attempt, then ask the user until a password works or the user cancels (cancel = sync fails, nothing uploaded).
-3. **Merge** into the local vault and write the local file. Deletions (tombstones) are applied here, so deleted credentials do not come back. If the cloud vault used another master password, see [Master password](#master-password).
+3. **Merge** into the local vault and write the local file. If the merge changes anything, a `sync` backup of the local vault is made first (see [vault.md](vault.md#backups)). Deletions (tombstones) are applied here, so deleted credentials do not come back. If the cloud vault used another master password, see [Master password](#master-password).
 4. **Decide whether to upload.** Upload is needed when:
    - the cloud has no file;
    - merging the local vault into the downloaded one would change it (the cloud lacks something: new or edited credential, deletion, group change, newer password timestamp);

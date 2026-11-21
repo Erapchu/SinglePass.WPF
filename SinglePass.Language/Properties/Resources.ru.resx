@@ -666,4 +666,50 @@
   <data name="LastSyncFormatted" xml:space="preserve">
     <value>Последняя синхронизация: {0:dd-MM-yyyy, HH:mm}</value>
   </data>
+  <data name="Backups" xml:space="preserve">
+    <value>Резервные копии</value>
+  </data>
+  <data name="BackupsDescription" xml:space="preserve">
+    <value>Копии хранилища создаются автоматически: раз в день при изменениях, перед синхронизацией, которая приносит изменения, перед сменой мастер-пароля и перед восстановлением. Хранятся последние 20.</value>
+  </data>
+  <data name="NoBackups" xml:space="preserve">
+    <value>Резервных копий пока нет.</value>
+  </data>
+  <data name="OpenBackupsFolder" xml:space="preserve">
+    <value>Открыть папку</value>
+  </data>
+  <data name="Restore" xml:space="preserve">
+    <value>Восстановить</value>
+  </data>
+  <data name="RestoreBackupTitle" xml:space="preserve">
+    <value>Восстановление из копии</value>
+  </data>
+  <data name="RestoreBackupConfirm" xml:space="preserve">
+    <value>Вернуть пароли и их версии из копии от {0:dd-MM-yyyy, HH:mm:ss}?
+
+Удалённые пароли вернутся, изменённые станут такими, как в копии (текущий пароль сохранится в истории паролей). Пароли, добавленные позже, останутся. Текущее хранилище сначала будет сохранено в копию. После восстановления выполните синхронизацию, чтобы обновить облако и другие устройства.</value>
+  </data>
+  <data name="BackupRestored" xml:space="preserve">
+    <value>Восстановлено паролей: {0}. Возвращено к версии из копии: {1}.
+
+Выполните синхронизацию, чтобы обновить облако и другие устройства.</value>
+  </data>
+  <data name="BackupNothingToRestore" xml:space="preserve">
+    <value>В хранилище уже есть всё из этой копии.</value>
+  </data>
+  <data name="BackupRestoreFailed" xml:space="preserve">
+    <value>Не удалось восстановить копию.</value>
+  </data>
+  <data name="BackupReasonDaily" xml:space="preserve">
+    <value>Ежедневная</value>
+  </data>
+  <data name="BackupReasonSync" xml:space="preserve">
+    <value>Перед синхронизацией</value>
+  </data>
+  <data name="BackupReasonPassword" xml:space="preserve">
+    <value>Перед сменой мастер-пароля</value>
+  </data>
+  <data name="BackupReasonRestore" xml:space="preserve">
+    <value>Перед восстановлением</value>
+  </data>
 </root>

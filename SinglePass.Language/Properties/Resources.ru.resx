@@ -814,4 +814,34 @@
   <data name="CardNumberSuspicious" xml:space="preserve">
     <value>Номер не прошёл проверку контрольной суммы. Проверьте, нет ли опечатки.</value>
   </data>
+  <data name="PaymentSystem" xml:space="preserve">
+    <value>Платёжная система</value>
+  </data>
+  <data name="CardBrandOther" xml:space="preserve">
+    <value>Другая</value>
+  </data>
+  <data name="CardBrandDetected" xml:space="preserve">
+    <value>Определена автоматически. Можно изменить вручную.</value>
+  </data>
+  <data name="CardBrandNotDetected" xml:space="preserve">
+    <value>Не удалось определить по номеру. Выберите вручную.</value>
+  </data>
+  <data name="CardBrandFromNumber" xml:space="preserve">
+    <value>Определится автоматически по номеру карты.</value>
+  </data>
+  <data name="CardBrandChosen" xml:space="preserve">
+    <value>Выбрана вручную.</value>
+  </data>
+  <data name="DetectCardBrand" xml:space="preserve">
+    <value>Определять автоматически</value>
+  </data>
+  <data name="CardExpiryInput" xml:space="preserve">
+    <value>Срок (ММ/ГГ)</value>
+  </data>
+  <data name="CardExpiryFormat" xml:space="preserve">
+    <value>Введите срок действия в формате ММ/ГГ.</value>
+  </data>
+  <data name="CardExpired" xml:space="preserve">
+    <value>Срок действия карты истёк.</value>
+  </data>
 </root>

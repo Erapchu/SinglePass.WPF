@@ -76,7 +76,7 @@ A credential holds the fields every entry has, its type and one data block for t
   "CreationTime": "...", "LastModifiedTime": "...",
   "Login":  { "LoginField": {...}, "PasswordField": {...}, "SiteField": {...}, "Totp": {...} | null, "PasswordHistory": [...] } | null,
   "SshKey": { "PrivateKey": "...", "PublicKey": "...", "Passphrase": "..." } | null,
-  "Card":   { "Number": "...", "Holder": "...", "Expiry": "MM/YY", "Cvv": "...", "Pin": "..." } | null
+  "Card":   { "Number": "...", "Holder": "...", "Expiry": "MM/YY", "Cvv": "...", "Pin": "...", "Brand": 2 | null } | null
 }
 ```
 
@@ -85,7 +85,7 @@ A credential holds the fields every entry has, its type and one data block for t
 - Only the block of the entry's type is set; the others are null. `Credential.EnsureTypeData` enforces this when a vault is read and when an entry is added or edited, so the rule does not depend on the UI.
 - `Login.PasswordHistory` — up to 10 previous passwords, newest first. When a save changes a non-empty password, the old one is added with the current UTC time.
 - `SshKey.PrivateKey` is the key file text (OpenSSH or PEM, possibly encrypted with `Passphrase`); `PublicKey` is an `authorized_keys` line.
-- `Card` values are stored as typed. The brand, the Luhn check and the grouped number are derived when shown (`CardNumbers`); a number that fails the check is still saved, with a warning in the editor.
+- `Card.Brand` is the payment network the user chose (`CardBrand`, a number); null means it is detected from the number when shown. The editor accepts only digits in the number, `MM/YY` in the expiry and digits in CVV and PIN (`CardNumbers`, `CardInput`); values saved before these rules stay as they are until edited. A number that fails the Luhn check is still saved, with a warning in the editor.
 - `LastModifiedTime`, `CreationTime` — UTC, set by the UI on save. Older vaults stored local time with an offset; the model converts any value to UTC when it is assigned, and the UI shows local time.
 
 Merge, tombstones, groups and backups do not depend on the type: an entry wins or loses as a whole. Password histories are combined only for logins.

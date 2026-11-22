@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ctl="clr-namespace:SinglePass.WPF.Views.Controls"
+    xmlns:entries="clr-namespace:SinglePass.WPF.Views.Controls.Entries"
     xmlns:evm="clr-namespace:SinglePass.WPF.ViewModels.Entries"
     xmlns:loc="clr-namespace:SinglePass.Core.Localization;assembly=SinglePass.Core"
     d:DataContext="{d:DesignInstance Type=evm:CardViewModel}"
@@ -15,7 +16,7 @@
         <ResourceDictionary Source="EntryResources.xaml" />
     </UserControl.Resources>
     <!-- Read-only view of a payment card. DataContext: CardViewModel. Number, CVV and PIN are hidden
-         again for every card shown; the hidden number keeps its last four digits visible. -->
+         again for every card shown; the hidden number keeps its groups and its last four digits. -->
     <StackPanel>
         <StackPanel Visibility="{Binding HasNumber, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock Margin="0,0,0,6" Text="{Binding [CardNumber], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
@@ -32,6 +33,7 @@
                         <TextBlock Style="{StaticResource SymbolText}" Text="&#xE8C8;" />
                     </Button>
                 </StackPanel>
+                <entries:CardBrandIcon DockPanel.Dock="Right" Margin="8,0,4,0" Brand="{Binding Brand}" ToolTip="{Binding BrandName}" />
                 <Grid>
                     <TextBox IsReadOnly="True" FontFamily="{StaticResource PasswordFontFamily}" FontSize="{StaticResource PasswordFontSize}"
                              AutomationProperties.Name="{Binding [CardNumber], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
@@ -39,7 +41,7 @@
                              Visibility="{Binding IsChecked, ElementName=RevealNumber, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     <TextBox IsReadOnly="True" Focusable="False" IsHitTestVisible="False"
                              FontFamily="{StaticResource PasswordFontFamily}" FontSize="{StaticResource PasswordFontSize}"
-                             Text="{Binding MaskedNumber, Mode=OneWay, TargetNullValue=&#x25CF;&#x25CF;&#x25CF;&#x25CF;}"
+                             Text="{Binding MaskedNumber, Mode=OneWay}"
                              Visibility="{Binding IsChecked, ElementName=RevealNumber, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                 </Grid>
             </DockPanel>
@@ -79,6 +81,9 @@
                 <TextBox x:Name="ExpiryTextBox" IsReadOnly="True" FontFamily="{StaticResource PasswordFontFamily}" FontSize="{StaticResource PasswordFontSize}"
                          Text="{Binding Expiry, Mode=OneWay}" />
             </DockPanel>
+            <TextBlock Margin="0,6,0,0" TextWrapping="Wrap" Foreground="{DynamicResource SystemFillColorCautionBrush}"
+                       Text="{Binding [CardExpired], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                       Visibility="{Binding IsExpired, Converter={StaticResource BooleanToVisibilityConverter}}" />
         </StackPanel>
         <StackPanel Visibility="{Binding HasCvv, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock Margin="0,12,0,6" Text="{Binding [CardCvv], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />

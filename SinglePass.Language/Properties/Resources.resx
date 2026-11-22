@@ -794,4 +794,34 @@ Sync to update the cloud copy and other devices.</value>
   <data name="CardNumberSuspicious" xml:space="preserve">
     <value>This number fails the card number check. Check it for typos.</value>
   </data>
+  <data name="PaymentSystem" xml:space="preserve">
+    <value>Payment system</value>
+  </data>
+  <data name="CardBrandOther" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="CardBrandDetected" xml:space="preserve">
+    <value>Detected from the number. You can change it.</value>
+  </data>
+  <data name="CardBrandNotDetected" xml:space="preserve">
+    <value>Could not detect it from the number. Choose it manually.</value>
+  </data>
+  <data name="CardBrandFromNumber" xml:space="preserve">
+    <value>Detected from the card number once it is entered.</value>
+  </data>
+  <data name="CardBrandChosen" xml:space="preserve">
+    <value>Chosen manually.</value>
+  </data>
+  <data name="DetectCardBrand" xml:space="preserve">
+    <value>Detect automatically</value>
+  </data>
+  <data name="CardExpiryInput" xml:space="preserve">
+    <value>Valid thru (MM/YY)</value>
+  </data>
+  <data name="CardExpiryFormat" xml:space="preserve">
+    <value>Enter the expiry date as MM/YY.</value>
+  </data>
+  <data name="CardExpired" xml:space="preserve">
+    <value>The card has expired.</value>
+  </data>
 </root>

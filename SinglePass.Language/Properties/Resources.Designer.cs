@@ -1943,5 +1943,95 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("CardNumberSuspicious", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Payment system.
+        /// </summary>
+        public static string PaymentSystem {
+            get {
+                return ResourceManager.GetString("PaymentSystem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Other.
+        /// </summary>
+        public static string CardBrandOther {
+            get {
+                return ResourceManager.GetString("CardBrandOther", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Detected from the number. You can change it..
+        /// </summary>
+        public static string CardBrandDetected {
+            get {
+                return ResourceManager.GetString("CardBrandDetected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not detect it from the number. Choose it manually..
+        /// </summary>
+        public static string CardBrandNotDetected {
+            get {
+                return ResourceManager.GetString("CardBrandNotDetected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Detected from the card number once it is entered..
+        /// </summary>
+        public static string CardBrandFromNumber {
+            get {
+                return ResourceManager.GetString("CardBrandFromNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Chosen manually..
+        /// </summary>
+        public static string CardBrandChosen {
+            get {
+                return ResourceManager.GetString("CardBrandChosen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Detect automatically.
+        /// </summary>
+        public static string DetectCardBrand {
+            get {
+                return ResourceManager.GetString("DetectCardBrand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Valid thru (MM/YY).
+        /// </summary>
+        public static string CardExpiryInput {
+            get {
+                return ResourceManager.GetString("CardExpiryInput", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter the expiry date as MM/YY..
+        /// </summary>
+        public static string CardExpiryFormat {
+            get {
+                return ResourceManager.GetString("CardExpiryFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The card has expired..
+        /// </summary>
+        public static string CardExpired {
+            get {
+                return ResourceManager.GetString("CardExpired", resourceCulture);
+            }
+        }
     }
 }

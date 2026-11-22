@@ -11,6 +11,7 @@ SinglePass is a Windows password manager with a local encrypted vault, a quick-a
 - Keep SSH keys and SSH hosts. The built-in SSH agent lets `ssh`, `git` and other OpenSSH clients sign in with the keys of the vault, asking for confirmation before each use; a host copies a ready `ssh` command. See [docs/ssh-agent.md](docs/ssh-agent.md).
 - Search by name, login, website or notes, including transliterated text.
 - Optionally open a quick-access popup with a global hotkey and paste a login and password or individual fields into the active window.
+- Fill logins in Chrome and Edge with the SinglePass browser extension, which matches entries by the site of the tab, so a look-alike site gets nothing. In development; see [docs/browser-extension.md](docs/browser-extension.md).
 - Synchronize credentials with Google Drive or Yandex Disk after signing in.
 - Change the master password, choose a theme and select English, Russian or the system language.
 - Automatically lock the vault when the Windows session locks or after five minutes without keyboard or mouse input. Enter the master password to reopen it.

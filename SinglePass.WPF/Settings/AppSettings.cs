@@ -37,6 +37,11 @@ namespace SinglePass.WPF.Settings
         /// <summary>Serve the SSH keys of the vault to ssh, git and other programs (see SshAgentServer).</summary>
         public bool SshAgentEnabled { get; set; } = true;
 
+        /// <summary>
+        /// Answer the SinglePass browser extension (see BrowserPipeServer). Off by default until the extension is published.
+        /// </summary>
+        public bool BrowserIntegrationEnabled { get; set; }
+
         /// <summary>Time of the last successful sync on this device, per cloud.</summary>
         public Dictionary<CloudType, DateTimeOffset> LastSyncTimes { get; set => field = value ?? new(); } = new();
 

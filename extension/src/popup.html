@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <img src="icons/32.png" width="20" height="20" alt="">
+    <span data-i18n="extensionName"></span>
+    <span id="host" class="host"></span>
+  </header>
+  <main id="content">
+    <p class="muted" data-i18n="loading"></p>
+  </main>
+  <template id="login-row">
+    <li class="login">
+      <button class="fill" type="button">
+        <span class="name"></span>
+        <span class="user"></span>
+      </button>
+      <button class="icon copy-login" type="button">&#x1F464;</button>
+      <button class="icon copy-password" type="button">&#x1F511;</button>
+    </li>
+  </template>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

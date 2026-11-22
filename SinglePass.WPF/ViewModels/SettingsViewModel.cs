@@ -17,6 +17,8 @@ using System.IO;
 using System.Threading.Tasks;
 using SinglePass.Core.Helpers;
 using SinglePass.Core.Services;
+using SinglePass.Core.Services.Browser;
+using System.Linq;
 
 namespace SinglePass.WPF.ViewModels
 {
@@ -38,7 +40,16 @@ namespace SinglePass.WPF.ViewModels
         private readonly CredentialsCryptoService _credentialsCryptoService;
         private readonly HotkeysService _hotkeysService;
         private readonly SshAgentServer _sshAgent;
+        private readonly BrowserPipeServer _browserServer;
+        private readonly BrowserPairingStore _browserPairings;
+        private readonly NativeMessagingRegistration _nativeMessaging;
         private readonly ILogger<SettingsViewModel> _logger;
+
+        [ObservableProperty]
+        public partial bool BrowserIntegrationEnabled { get; set; }
+
+        /// <summary>Browsers allowed to ask for logins, most recently used first.</summary>
+        public ObservableCollection<BrowserPairingItem> BrowserPairings { get; } = new();
 
         /// <summary>Raised after a backup restore changed the vault, so the lists can reload it.</summary>
         public event Action VaultRestored;
@@ -89,11 +100,19 @@ namespace SinglePass.WPF.ViewModels
             CredentialsCryptoService credentialsCryptoService,
             HotkeysService hotkeysService,
             SshAgentServer sshAgent,
+            BrowserPipeServer browserServer,
+            BrowserPairingStore browserPairings,
+            NativeMessagingRegistration nativeMessaging,
             ILogger<SettingsViewModel> logger)
         {
             // Before _sshAgent is set: loading the setting must not start or stop the agent.
             SshAgentEnabled = appSettingsService.Settings.SshAgentEnabled;
             _sshAgent = sshAgent;
+            // The same for the browser server.
+            BrowserIntegrationEnabled = appSettingsService.Settings.BrowserIntegrationEnabled;
+            _browserServer = browserServer;
+            _browserPairings = browserPairings;
+            _nativeMessaging = nativeMessaging;
             ThemeMode = appSettingsService.ThemeMode;
             AnimationsEnabled = appSettingsService.Settings.AnimationsEnabled;
             Language = LocalizationManager.Normalize(appSettingsService.Language);
@@ -319,6 +338,58 @@ namespace SinglePass.WPF.ViewModels
             SaveSecuritySettings();
         }
 
+        partial void OnBrowserIntegrationEnabledChanged(bool value)
+        {
+            if (_browserServer is null)
+                return;
+
+            if (value)
+            {
+                if (_nativeMessaging.Register())
+                {
+                    try
+                    {
+                        _browserServer.Start();
+                    }
+                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                    {
+                        _logger.LogError(ex, "The browser server could not start");
+                        _ = MessageDialog.ShowAsync(Resources.Error, ex.Message, MessageDialogButtons.OK, "\uEA39");
+                    }
+                }
+                LoadBrowserPairings();
+            }
+            else
+            {
+                _browserServer.Stop();
+                NativeMessagingRegistration.Unregister(_logger);
+            }
+
+            SaveSecuritySettings();
+        }
+
+        [RelayCommand]
+        private void LoadBrowserPairings()
+        {
+            if (_browserPairings is null)
+                return;
+
+            BrowserPairings.Clear();
+            foreach (var pairing in _browserPairings.GetAll().OrderByDescending(pairing => pairing.LastUsedAt))
+                BrowserPairings.Add(new BrowserPairingItem(pairing));
+        }
+
+        [RelayCommand]
+        private void RemoveBrowserPairing(BrowserPairingItem item)
+        {
+            if (item is null || _browserPairings is null)
+                return;
+
+            _browserPairings.Remove(item.Id);
+            _browserServer.Disconnect(item.Id);
+            BrowserPairings.Remove(item);
+        }
+
         [RelayCommand]
         private void CopySshAgentPipePath()
         {
@@ -340,6 +411,7 @@ namespace SinglePass.WPF.ViewModels
             _appSettingsService.Settings.IdleLockTimeout = IdleLockTimeout;
             _appSettingsService.Settings.LockOnWindowsLock = LockOnWindowsLock;
             _appSettingsService.Settings.SshAgentEnabled = SshAgentEnabled;
+            _appSettingsService.Settings.BrowserIntegrationEnabled = BrowserIntegrationEnabled;
             try
             {
                 await _appSettingsService.Save();
@@ -350,6 +422,17 @@ namespace SinglePass.WPF.ViewModels
                     MessageDialogButtons.OK, "\uEA39");
             }
         }
+    }
+
+    /// <summary>A paired browser in the Security settings list.</summary>
+    public sealed class BrowserPairingItem(BrowserPairing pairing)
+    {
+        public Guid Id { get; } = pairing.Id;
+
+        public string Title { get; } = pairing.Browser is null or "?" ? pairing.Name : $"{pairing.Name} ({pairing.Browser})";
+
+        public string LastUsed { get; } = string.Format(LocalizationManager.Instance["BrowserLastUsed"],
+            pairing.LastUsedAt.LocalDateTime.ToString("dd-MM-yyyy, HH:mm"));
     }
 
     /// <summary>A vault backup in the Security settings list.</summary>

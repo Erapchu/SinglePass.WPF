@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SinglePass.Core", "SinglePa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SinglePass.Core.Tests", "SinglePass.Core.Tests\SinglePass.Core.Tests.csproj", "{102867E4-E0DE-44F8-8142-F9CBF9F2870F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SinglePass.NativeHost", "SinglePass.NativeHost\SinglePass.NativeHost.csproj", "{BB309686-9D90-48F5-BD3E-4E202AC11B36}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -97,6 +99,18 @@ Global
 		{102867E4-E0DE-44F8-8142-F9CBF9F2870F}.Release|x64.Build.0 = Release|Any CPU
 		{102867E4-E0DE-44F8-8142-F9CBF9F2870F}.Release|x86.ActiveCfg = Release|Any CPU
 		{102867E4-E0DE-44F8-8142-F9CBF9F2870F}.Release|x86.Build.0 = Release|Any CPU
+		{BB309686-9D90-48F5-BD3E-4E202AC11B36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB309686-9D90-48F5-BD3E-4E202AC11B36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB309686-9D90-48F5-BD3E-4E202AC11B36}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{BB309686-9D90-48F5-BD3E-4E202AC11B36}.Debug|x64.Build.0 = Debug|Any CPU
+		{BB309686-9D90-48F5-BD3E-4E202AC11B36}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BB309686-9D90-48F5-BD3E-4E202AC11B36}.Debug|x86.Build.0 = Debug|Any CPU
+		{BB309686-9D90-48F5-BD3E-4E202AC11B36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB309686-9D90-48F5-BD3E-4E202AC11B36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BB309686-9D90-48F5-BD3E-4E202AC11B36}.Release|x64.ActiveCfg = Release|Any CPU
+		{BB309686-9D90-48F5-BD3E-4E202AC11B36}.Release|x64.Build.0 = Release|Any CPU
+		{BB309686-9D90-48F5-BD3E-4E202AC11B36}.Release|x86.ActiveCfg = Release|Any CPU
+		{BB309686-9D90-48F5-BD3E-4E202AC11B36}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

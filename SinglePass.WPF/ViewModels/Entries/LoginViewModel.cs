@@ -125,31 +125,9 @@ namespace SinglePass.WPF.ViewModels.Entries
             }
         }
 
-        private static Uri ParseWebsite(string site, out int authorityStart)
-        {
-            authorityStart = 0;
-            if (string.IsNullOrEmpty(site))
-                return null;
-
-            if (site.StartsWith("//", StringComparison.Ordinal))
-            {
-                authorityStart = 2;
-                site = "https:" + site;
-            }
-            else
-            {
-                var schemeEnd = site.IndexOf("://", StringComparison.Ordinal);
-                var firstSeparator = site.IndexOfAny(['/', '?', '#', '\\']);
-                if (schemeEnd >= 0 && firstSeparator == schemeEnd + 1)
-                    authorityStart = schemeEnd + 3;
-                else
-                    site = "https://" + site;
-            }
-
-            return Uri.TryCreate(site, UriKind.Absolute, out var uri) && !string.IsNullOrEmpty(uri.Host)
-                ? uri
-                : null;
-        }
+        // Shared with the browser extension's matching, so the details pane and the extension read the field alike.
+        private static Uri ParseWebsite(string site, out int authorityStart) =>
+            Core.Services.WebsiteMatcher.ParseEntrySite(site, out authorityStart);
         #endregion
     }
 }

@@ -3,10 +3,12 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SinglePass.WPF.Services;
+using SinglePass.WPF.Services.WindowsHello;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using SinglePass.Core.Localization;
 using SinglePass.Core.Services;
 
 namespace SinglePass.WPF.ViewModels
@@ -27,6 +29,9 @@ namespace SinglePass.WPF.ViewModels
         private AsyncRelayCommand _loadCredentialsCommand;
         public AsyncRelayCommand LoadCredentialsCommand => _loadCredentialsCommand ??= new AsyncRelayCommand(LoadCredentialsAsync);
 
+        private AsyncRelayCommand _unlockWithWindowsHelloCommand;
+        public AsyncRelayCommand UnlockWithWindowsHelloCommand => _unlockWithWindowsHelloCommand ??= new AsyncRelayCommand(UnlockWithWindowsHelloAsync);
+
         private RelayCommand<KeyEventArgs> _refreshCapsLockCommand;
         public RelayCommand<KeyEventArgs> RefreshCapsLockCommand => _refreshCapsLockCommand ??= new RelayCommand<KeyEventArgs>(RefreshCapsLock);
 
@@ -42,10 +47,18 @@ namespace SinglePass.WPF.ViewModels
 
         public string Password { get; set; }
 
+        /// <summary>Whether the vault can be unlocked with Windows Hello instead of the master password.</summary>
+        [ObservableProperty]
+        public partial bool WindowsHelloOffered { get; set; }
+
+        /// <summary>The window over which Windows shows the Windows Hello prompt.</summary>
+        internal IntPtr OwnerHandle { get; set; }
+
         internal LoginWindowViewModel(Func<Task<IServiceProvider>> prepareServices, bool credentialsFileExists)
         {
             _prepareServices = prepareServices;
             _allowCreate = !credentialsFileExists;
+            WindowsHelloOffered = credentialsFileExists && WindowsHelloUnlock.IsOffered();
             HintText = !credentialsFileExists
                 ? SinglePass.Language.Properties.Resources.NewPassword
                 : SinglePass.Language.Properties.Resources.Password;
@@ -66,13 +79,64 @@ namespace SinglePass.WPF.ViewModels
                 HelperText = string.Empty;
             }
 
+            await UnlockAsync(password, typed: true);
+        }
+
+        private async Task UnlockWithWindowsHelloAsync()
+        {
+            if (Loading)
+                return;
+
+            HelperText = string.Empty;
             ILogger<LoginWindowViewModel> logger = null;
             try
             {
                 Loading = true;
-                _cancellationTokenSource?.Cancel();
-                _cancellationTokenSource = new();
-                var cancellationToken = _cancellationTokenSource.Token;
+                var cancellationToken = RestartCancellation();
+                var services = await _prepareServices();
+                cancellationToken.ThrowIfCancellationRequested();
+                logger = services.GetRequiredService<ILogger<LoginWindowViewModel>>();
+
+                var (outcome, password) = await services.GetRequiredService<WindowsHelloUnlock>().UnlockAsync(OwnerHandle);
+                cancellationToken.ThrowIfCancellationRequested();
+                switch (outcome)
+                {
+                    case WindowsHelloOutcome.Unlocked:
+                        Loading = false;
+                        if (!await UnlockAsync(password, typed: false))
+                            HelperText = LocalizationManager.Instance["WindowsHelloPasswordOutdated"];
+                        break;
+                    case WindowsHelloOutcome.KeyLost:
+                        WindowsHelloOffered = false;
+                        HelperText = LocalizationManager.Instance["WindowsHelloKeyLost"];
+                        break;
+                    case WindowsHelloOutcome.Failed:
+                        HelperText = LocalizationManager.Instance["WindowsHelloFailed"];
+                        break;
+                }
+            }
+            catch (OperationCanceledException) { }
+            catch (Exception ex)
+            {
+                logger?.LogError(ex, string.Empty);
+            }
+            finally
+            {
+                Loading = false;
+            }
+        }
+
+        /// <summary>
+        /// Opens the vault with <paramref name="password"/>. A password the user typed also refreshes the copy
+        /// kept for Windows Hello unlock, if it is turned on.
+        /// </summary>
+        private async Task<bool> UnlockAsync(string password, bool typed)
+        {
+            ILogger<LoginWindowViewModel> logger = null;
+            try
+            {
+                Loading = true;
+                var cancellationToken = RestartCancellation();
 
                 var services = await _prepareServices();
                 cancellationToken.ThrowIfCancellationRequested();
@@ -86,9 +150,13 @@ namespace SinglePass.WPF.ViewModels
                 if (result == CredentialLoadResult.Loaded)
                 {
                     credentialsCryptoService.SetPassword(password);
+                    if (typed)
+                        services.GetRequiredService<WindowsHelloUnlock>().Remember(password);
                     Accept?.Invoke();
+                    return true;
                 }
-                else
+
+                if (typed)
                     HelperText = SinglePass.Language.Properties.Resources.PasswordIsIncorrect;
             }
             catch (OperationCanceledException) { }
@@ -101,6 +169,15 @@ namespace SinglePass.WPF.ViewModels
             {
                 Loading = false;
             }
+
+            return false;
+        }
+
+        private CancellationToken RestartCancellation()
+        {
+            _cancellationTokenSource?.Cancel();
+            _cancellationTokenSource = new();
+            return _cancellationTokenSource.Token;
         }
 
         private void RefreshCapsLock(KeyEventArgs args)

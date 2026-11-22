@@ -6,6 +6,7 @@ using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Hotkeys;
 using SinglePass.Core.Localization;
 using SinglePass.WPF.Services;
+using SinglePass.WPF.Services.WindowsHello;
 using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels.Dialogs;
 using SinglePass.WPF.Views.Controls;
@@ -15,6 +16,8 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Interop;
 using SinglePass.Core.Helpers;
 using SinglePass.Core.Services;
 
@@ -38,6 +41,8 @@ namespace SinglePass.WPF.ViewModels
         private readonly CredentialsCryptoService _credentialsCryptoService;
         private readonly HotkeysService _hotkeysService;
         private readonly SshAgentServer _sshAgent;
+        private readonly WindowsHelloUnlock _windowsHello;
+        private bool _revertingWindowsHello;
         private readonly ILogger<SettingsViewModel> _logger;
 
         /// <summary>Raised after a backup restore changed the vault, so the lists can reload it.</summary>
@@ -71,6 +76,13 @@ namespace SinglePass.WPF.ViewModels
         [ObservableProperty]
         public partial bool SshAgentEnabled { get; set; } = true;
 
+        /// <summary>Unlock the vault with Windows Hello instead of the master password.</summary>
+        [ObservableProperty]
+        public partial bool WindowsHelloEnabled { get; set; }
+
+        /// <summary>The user has set up Windows Hello (at least a PIN) on this computer.</summary>
+        public bool IsWindowsHelloAvailable { get; }
+
         /// <summary>The agent answers on its pipe. False when it is turned off or could not start.</summary>
         public bool IsSshAgentRunning => _sshAgent?.IsRunning == true;
 
@@ -85,8 +97,13 @@ namespace SinglePass.WPF.ViewModels
             CredentialsCryptoService credentialsCryptoService,
             HotkeysService hotkeysService,
             SshAgentServer sshAgent,
+            WindowsHelloUnlock windowsHello,
             ILogger<SettingsViewModel> logger)
         {
+            // Before _windowsHello is set: loading the state must not turn Windows Hello unlock on or off.
+            IsWindowsHelloAvailable = WindowsHelloUnlock.IsAvailable;
+            WindowsHelloEnabled = WindowsHelloUnlock.IsEnabled;
+            _windowsHello = windowsHello;
             // Before _sshAgent is set: loading the setting must not start or stop the agent.
             SshAgentEnabled = appSettingsService.Settings.SshAgentEnabled;
             _sshAgent = sshAgent;
@@ -247,6 +264,41 @@ namespace SinglePass.WPF.ViewModels
         partial void OnIdleLockTimeoutChanged(IdleLockTimeout value) => SaveSecuritySettings();
 
         partial void OnLockOnWindowsLockChanged(bool value) => SaveSecuritySettings();
+
+        partial void OnWindowsHelloEnabledChanged(bool value)
+        {
+            if (_windowsHello is null || _revertingWindowsHello)
+                return;
+
+            if (value)
+                _ = EnableWindowsHelloAsync();
+            else
+                _windowsHello.Disable();
+        }
+
+        private async Task EnableWindowsHelloAsync()
+        {
+            bool enabled;
+            try
+            {
+                var owner = Application.Current.MainWindow is { } window ? new WindowInteropHelper(window).Handle : IntPtr.Zero;
+                enabled = await _windowsHello.EnableAsync(_credentialsCryptoService.GetPassword(), owner);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to turn Windows Hello unlock on");
+                enabled = false;
+                _ = MessageDialog.ShowAsync(Resources.Error, LocalizationManager.Instance["WindowsHelloEnableFailed"],
+                    MessageDialogButtons.OK, "\uEA39");
+            }
+
+            if (!enabled)
+            {
+                _revertingWindowsHello = true;
+                WindowsHelloEnabled = false;
+                _revertingWindowsHello = false;
+            }
+        }
 
         partial void OnSshAgentEnabledChanged(bool value)
         {

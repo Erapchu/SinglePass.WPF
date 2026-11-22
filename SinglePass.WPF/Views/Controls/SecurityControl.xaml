@@ -57,6 +57,47 @@
             <Border Margin="0,8,0,0" Style="{StaticResource Card}">
                 <StackPanel>
                     <DockPanel>
+                        <controls:ToggleSwitch x:Name="WindowsHelloToggle" DockPanel.Dock="Right" Margin="12,0,0,0"
+                                      VerticalAlignment="Center"
+                                      AutomationProperties.LabeledBy="{Binding ElementName=WindowsHelloLabel}"
+                                      IsChecked="{Binding WindowsHelloEnabled, Mode=TwoWay}">
+                            <controls:ToggleSwitch.Style>
+                                <Style TargetType="controls:ToggleSwitch">
+                                    <Style.Triggers>
+                                        <!-- Turning it off stays possible after Windows Hello was removed from the computer -->
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding IsWindowsHelloAvailable}" Value="False" />
+                                                <Condition Binding="{Binding WindowsHelloEnabled}" Value="False" />
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="IsEnabled" Value="False" />
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </controls:ToggleSwitch.Style>
+                        </controls:ToggleSwitch>
+                        <Label x:Name="WindowsHelloLabel" Padding="0" VerticalAlignment="Center" FontWeight="SemiBold"
+                               Target="{Binding ElementName=WindowsHelloToggle}"
+                               Content="{Binding [UnlockWithWindowsHello], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
+                    </DockPanel>
+                    <TextBlock Margin="0,4,0,0" FontSize="12" TextWrapping="Wrap"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Text" Value="{Binding [WindowsHelloDescription], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsWindowsHelloAvailable}" Value="False">
+                                        <Setter Property="Text" Value="{Binding [WindowsHelloUnavailable], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+            <Border Margin="0,8,0,0" Style="{StaticResource Card}">
+                <StackPanel>
+                    <DockPanel>
                         <controls:ToggleSwitch x:Name="SshAgentToggle" DockPanel.Dock="Right" Margin="12,0,0,0"
                                       VerticalAlignment="Center"
                                       AutomationProperties.LabeledBy="{Binding ElementName=SshAgentLabel}"

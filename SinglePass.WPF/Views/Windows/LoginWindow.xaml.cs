@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using SinglePass.WPF.ViewModels;
 using System.Windows.Controls;
+using System.Windows.Interop;
 
 namespace SinglePass.WPF.Views.Windows
 {
@@ -71,6 +72,19 @@ namespace SinglePass.WPF.Views.Windows
         {
             ViewModel.Accept -= LoginWindowViewModel_Accept;
             ViewModel.CancelLogin();
+        }
+
+        private void Window_SourceInitialized(object sender, System.EventArgs e)
+        {
+            ViewModel.OwnerHandle = new WindowInteropHelper(this).Handle;
+        }
+
+        private void Window_ContentRendered(object sender, System.EventArgs e)
+        {
+            // Offer Windows Hello right away; cancelling its prompt leaves the master password field ready.
+            ContentRendered -= Window_ContentRendered;
+            if (ViewModel.WindowsHelloOffered)
+                ViewModel.UnlockWithWindowsHelloCommand.Execute(null);
         }
 
         private void Window_Activated(object sender, System.EventArgs e)

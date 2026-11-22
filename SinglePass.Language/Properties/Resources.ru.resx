@@ -1006,4 +1006,28 @@
   <data name="ConnectSshFailed" xml:space="preserve">
     <value>Не удалось запустить терминал: {0}</value>
   </data>
+  <data name="WindowsHelloPrompt" xml:space="preserve">
+    <value>Разблокировать SinglePass</value>
+  </data>
+  <data name="UnlockWithWindowsHello" xml:space="preserve">
+    <value>Разблокировка через Windows Hello</value>
+  </data>
+  <data name="WindowsHelloDescription" xml:space="preserve">
+    <value>Открывать хранилище PIN-кодом Windows, отпечатком пальца или лицом вместо мастер-пароля. Мастер-пароль всё равно потребуется раз в 14 дней, чтобы вы его не забыли.</value>
+  </data>
+  <data name="WindowsHelloUnavailable" xml:space="preserve">
+    <value>Чтобы пользоваться этим, настройте Windows Hello (хотя бы PIN-код) в Параметрах Windows → Учётные записи → Варианты входа.</value>
+  </data>
+  <data name="WindowsHelloPasswordOutdated" xml:space="preserve">
+    <value>Мастер-пароль, сохранённый для Windows Hello, больше не открывает хранилище. Введите мастер-пароль, в следующий раз Windows Hello будет использовать его.</value>
+  </data>
+  <data name="WindowsHelloKeyLost" xml:space="preserve">
+    <value>Разблокировка через Windows Hello отключена: её ключ больше недоступен, например после сброса PIN-кода Windows. Введите мастер-пароль и включите её снова в настройках.</value>
+  </data>
+  <data name="WindowsHelloFailed" xml:space="preserve">
+    <value>Windows Hello не удалось разблокировать хранилище. Введите мастер-пароль.</value>
+  </data>
+  <data name="WindowsHelloEnableFailed" xml:space="preserve">
+    <value>Не удалось включить разблокировку через Windows Hello.</value>
+  </data>
 </root>

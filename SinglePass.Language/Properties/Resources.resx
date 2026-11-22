@@ -986,4 +986,28 @@ Sync to update the cloud copy and other devices.</value>
   <data name="ConnectSshFailed" xml:space="preserve">
     <value>Could not start the terminal: {0}</value>
   </data>
+  <data name="WindowsHelloPrompt" xml:space="preserve">
+    <value>Unlock SinglePass</value>
+  </data>
+  <data name="UnlockWithWindowsHello" xml:space="preserve">
+    <value>Unlock with Windows Hello</value>
+  </data>
+  <data name="WindowsHelloDescription" xml:space="preserve">
+    <value>Open the vault with your Windows PIN, fingerprint or face instead of the master password. The master password is still required every 14 days, so keep remembering it.</value>
+  </data>
+  <data name="WindowsHelloUnavailable" xml:space="preserve">
+    <value>Set up Windows Hello (at least a PIN) in Windows Settings → Accounts → Sign-in options to use it here.</value>
+  </data>
+  <data name="WindowsHelloPasswordOutdated" xml:space="preserve">
+    <value>The master password kept for Windows Hello no longer opens the vault. Enter the master password; Windows Hello will use it next time.</value>
+  </data>
+  <data name="WindowsHelloKeyLost" xml:space="preserve">
+    <value>Windows Hello unlock was turned off because its key is no longer available, for example after the Windows PIN was reset. Enter the master password and turn it on again in Settings.</value>
+  </data>
+  <data name="WindowsHelloFailed" xml:space="preserve">
+    <value>Windows Hello could not unlock the vault. Enter the master password.</value>
+  </data>
+  <data name="WindowsHelloEnableFailed" xml:space="preserve">
+    <value>Windows Hello unlock could not be turned on.</value>
+  </data>
 </root>

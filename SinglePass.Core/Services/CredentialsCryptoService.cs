@@ -46,6 +46,7 @@ namespace SinglePass.Core.Services
         private readonly ILogger<CredentialsCryptoService> _logger;
         private readonly CryptoService _cryptoService;
         private readonly AsyncKeyedLocker<string> _asyncKeyedLocker;
+        private readonly IMasterPasswordObserver _passwordObserver;
         private readonly object _passwordLock = new();
         private readonly VaultBackups _backups = new(Constants.PasswordsFilePath, Constants.BackupsDirectoryPath);
         private volatile PasswordVault _vault = new();
@@ -112,11 +113,13 @@ namespace SinglePass.Core.Services
         public CredentialsCryptoService(
             ILogger<CredentialsCryptoService> logger,
             CryptoService cryptoService,
-            AsyncKeyedLocker<string> asyncKeyedLocker)
+            AsyncKeyedLocker<string> asyncKeyedLocker,
+            IMasterPasswordObserver passwordObserver = null)
         {
             _logger = logger;
             _cryptoService = cryptoService;
             _asyncKeyedLocker = asyncKeyedLocker;
+            _passwordObserver = passwordObserver;
         }
 
         public void SetPassword(string password)
@@ -128,6 +131,19 @@ namespace SinglePass.Core.Services
         {
             lock (_passwordLock)
                 return SecureStringHelper.GetString(PasswordSecure);
+        }
+
+        private void NotifyPasswordChanged(string password)
+        {
+            try
+            {
+                _passwordObserver?.OnMasterPasswordChanged(password);
+            }
+            catch (Exception ex)
+            {
+                // The vault already uses the new password; a stale observer must not undo that.
+                _logger.LogError(ex, "Failed to pass the new master password on.");
+            }
         }
 
         private void ReplacePassword(SecureString password)
@@ -496,6 +512,7 @@ namespace SinglePass.Core.Services
                 _vault = merged;
                 ReplacePassword(cloudPasswordSecure);
                 result.MasterPasswordAdopted = true;
+                NotifyPasswordChanged(cloudPassword);
             }
             else if (!ReferenceEquals(merged, _vault))
             {
@@ -961,6 +978,7 @@ namespace SinglePass.Core.Services
 
                     _vault = updated;
                     ReplacePassword(newPasswordSecure);
+                    NotifyPasswordChanged(newPassword);
                     return PasswordChangeResult.Changed;
                 }
                 catch (Exception ex)

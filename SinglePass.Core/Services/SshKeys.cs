@@ -3,7 +3,6 @@ using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Crypto.Utilities;
 using Org.BouncyCastle.Security;
 using System;
-using System.Buffers.Binary;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -228,65 +227,6 @@ namespace SinglePass.Core.Services
             writer.WriteString(curve);
             writer.WriteBytes(point);
             return writer.ToArray();
-        }
-
-        private sealed class SshReader(byte[] data, int position = 0)
-        {
-            private int _position = position;
-
-            public uint ReadUInt32()
-            {
-                if (data.Length - _position < 4)
-                    throw new EndOfStreamException();
-
-                var value = BinaryPrimitives.ReadUInt32BigEndian(data.AsSpan(_position));
-                _position += 4;
-                return value;
-            }
-
-            public byte[] ReadBytes()
-            {
-                var length = ReadUInt32();
-                if (length > data.Length - _position)
-                    throw new EndOfStreamException();
-
-                var value = data.AsSpan(_position, (int)length).ToArray();
-                _position += (int)length;
-                return value;
-            }
-
-            public string ReadString() => Encoding.ASCII.GetString(ReadBytes());
-        }
-
-        private sealed class SshWriter
-        {
-            private readonly MemoryStream _stream = new();
-
-            public void WriteBytes(ReadOnlySpan<byte> value)
-            {
-                Span<byte> length = stackalloc byte[4];
-                BinaryPrimitives.WriteUInt32BigEndian(length, (uint)value.Length);
-                _stream.Write(length);
-                _stream.Write(value);
-            }
-
-            public void WriteString(string value) => WriteBytes(Encoding.ASCII.GetBytes(value));
-
-            /// <summary>Unsigned big-endian integer: no leading zeros, plus one zero byte if the top bit is set.</summary>
-            public void WriteMpint(byte[] value)
-            {
-                var span = value.AsSpan().TrimStart((byte)0);
-                if (span.Length > 0 && (span[0] & 0x80) != 0)
-                {
-                    var padded = new byte[span.Length + 1];
-                    span.CopyTo(padded.AsSpan(1));
-                    WriteBytes(padded);
-                }
-                else
-                    WriteBytes(span);
-            }
-
-            public byte[] ToArray() => _stream.ToArray();
         }
     }
 }

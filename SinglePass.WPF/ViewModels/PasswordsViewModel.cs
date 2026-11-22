@@ -51,6 +51,7 @@ namespace SinglePass.WPF.ViewModels
         private readonly List<CredentialViewModel> _credentialVMs = new();
         private readonly AppSettingsService _appSettingsService;
         private readonly CredentialViewModelFactory _credentialViewModelFactory;
+        private readonly SshAgentServer _sshAgent;
         private Task _initialLoad;
         private Guid? _selectedGroupId;
 
@@ -224,12 +225,14 @@ namespace SinglePass.WPF.ViewModels
             CredentialsCryptoService credentialsCryptoService,
             ILogger<PasswordsViewModel> logger,
             AppSettingsService appSettingsService,
-            CredentialViewModelFactory credentialViewModelFactory) : this()
+            CredentialViewModelFactory credentialViewModelFactory,
+            SshAgentServer sshAgent) : this()
         {
             _credentialsCryptoService = credentialsCryptoService;
             _logger = logger;
             _appSettingsService = appSettingsService;
             _credentialViewModelFactory = credentialViewModelFactory;
+            _sshAgent = sshAgent;
             RefreshGroupOptions();
 
             _sort = _appSettingsService.Sort is SortType.Created or SortType.Modified
@@ -376,6 +379,7 @@ namespace SinglePass.WPF.ViewModels
                 if (request != _displayRequest)
                     return;
 
+                RefreshSshKeyOptions();
                 var selection = preferredSelection ?? (keepSelection ? SelectedCredentialVM : null);
                 DisplayedCredentials = new ObservableCollectionDelayed<CredentialViewModel>(filtered);
                 GroupedCredentials = CreateGroupedView(DisplayedCredentials, sort);
@@ -620,7 +624,8 @@ namespace SinglePass.WPF.ViewModels
 
             var result = await MessageDialog.ShowAsync(
                 SinglePass.Language.Properties.Resources.DeleteItem,
-                string.Format(SinglePass.Language.Properties.Resources.Name0, credential.NameFieldVM.Value),
+                string.Format(SinglePass.Language.Properties.Resources.Name0, credential.NameFieldVM.Value) +
+                    Environment.NewLine + Environment.NewLine + MoveToTrashHint,
                 MessageDialogButtons.YesNo,
                 "\uE74D");
 
@@ -628,10 +633,17 @@ namespace SinglePass.WPF.ViewModels
                 await DeleteCredentialAsync(credential);
         }
 
+        /// <summary>What happens to a deleted entry, shown when deletion is confirmed.</summary>
+        public static string MoveToTrashHint =>
+            string.Format(LocalizationManager.Instance["MoveToTrashHint"], TrashViewModel.RetentionDays);
+
+        /// <summary>Moves the entry to the trash ("Deleted"), where it can be restored for a while.</summary>
         internal async Task<bool> DeleteCredentialAsync(CredentialViewModel credential)
         {
-            if (!await SaveCredentialAsync(() => _credentialsCryptoService.DeleteCredential(credential.Model)))
+            if (!await SaveCredentialAsync(() => _credentialsCryptoService.MoveToTrash(credential.Model)))
                 return false;
+
+            StatusMessageRequested?.Invoke(string.Format(LocalizationManager.Instance["MovedToTrash"], credential.NameFieldVM.Value));
 
             _credentialVMs.Remove(credential);
             var index = Math.Min(DisplayedCredentials.IndexOf(credential), DisplayedCredentials.Count - 2);
@@ -682,6 +694,80 @@ namespace SinglePass.WPF.ViewModels
             if (TotpService.TryGetCode(configuration, DateTime.UtcNow, out var code, out _))
                 CopyToClipboard(code);
         }
+
+        #region Hosts
+        /// <summary>An SSH key entry a host can sign in with; the first option is "no key".</summary>
+        public sealed record SshKeyOption(Guid? Id, string Name, string KeyType, bool IsMissing = false);
+
+        /// <summary>The SSH key entries, for the key picker of the host editor and the host view.</summary>
+        public IReadOnlyList<SshKeyOption> SshKeyOptions { get; private set; } = [];
+
+        private void RefreshSshKeyOptions()
+        {
+            var options = new List<SshKeyOption> { new(null, LocalizationManager.Instance["NoSshKey"], null) };
+            options.AddRange(_credentialVMs
+                .Where(item => item.SshKey != null)
+                .OrderBy(item => item.NameFieldVM.Value, StringComparer.CurrentCultureIgnoreCase)
+                .Select(item => new SshKeyOption(item.Model.Id, item.NameFieldVM.Value, item.SshKey.KeyInfo?.KeyType)));
+
+            // A new list only when something changed: the picker of an open editor would lose its selection.
+            if (options.SequenceEqual(SshKeyOptions))
+                return;
+
+            SshKeyOptions = options;
+            OnPropertyChanged(nameof(SshKeyOptions));
+        }
+
+        [RelayCommand]
+        private void CopySshCommand(HostViewModel host)
+        {
+            if (host is { HasHostname: true })
+                CopyToClipboard(SshCommands.BuildCommandLine(GetSshArguments(host)));
+        }
+
+        /// <summary>Opens the connection in Windows Terminal (a tab of the SinglePass window) or a console window.</summary>
+        [RelayCommand]
+        private void ConnectSsh(HostViewModel host)
+        {
+            if (host is not { HasHostname: true })
+                return;
+
+            var title = _credentialVMs.Find(item => ReferenceEquals(item.Host, host))?.NameFieldVM.Value;
+            try
+            {
+                SshCommands.Connect(string.IsNullOrWhiteSpace(title) ? host.Destination : title, GetSshArguments(host));
+            }
+            catch (System.IO.FileNotFoundException)
+            {
+                StatusMessageRequested?.Invoke(LocalizationManager.Instance["SshClientMissing"]);
+            }
+            catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException)
+            {
+                _logger.LogError(ex, "Failed to start the SSH connection");
+                StatusMessageRequested?.Invoke(string.Format(LocalizationManager.Instance["ConnectSshFailed"], ex.Message));
+            }
+        }
+
+        /// <summary>ssh arguments for the host; with a linked key and a running agent, sign-in goes through the agent.</summary>
+        private IReadOnlyList<string> GetSshArguments(HostViewModel host)
+        {
+            string identityFile = null;
+            if (_sshAgent?.IsRunning == true && host.SshKeyId is { } keyId &&
+                _credentialVMs.Find(item => item.Model.Id == keyId)?.SshKey is { HasPublicKey: true } key)
+            {
+                try
+                {
+                    identityFile = SshCommands.WritePublicKey(keyId, key.PublicKey);
+                }
+                catch (Exception ex) when (ex is System.IO.IOException or UnauthorizedAccessException)
+                {
+                    _logger.LogError(ex, "Failed to write the public key file");
+                }
+            }
+
+            return SshCommands.BuildArguments(host, identityFile, identityFile == null ? null : _sshAgent.IdentityAgentPath);
+        }
+        #endregion
 
         private static bool CanOpenInBrowser(Uri address) =>
             address?.IsAbsoluteUri == true &&

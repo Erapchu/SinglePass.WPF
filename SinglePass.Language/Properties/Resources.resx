@@ -836,4 +836,154 @@ Sync to update the cloud copy and other devices.</value>
   <data name="CategoryCards" xml:space="preserve">
     <value>Bank cards</value>
   </data>
+  <data name="Trash" xml:space="preserve">
+    <value>Deleted</value>
+  </data>
+  <data name="RecentlyDeleted" xml:space="preserve">
+    <value>Recently deleted</value>
+  </data>
+  <data name="TrashDescription" xml:space="preserve">
+    <value>Deleted items are removed permanently after {0} days.</value>
+  </data>
+  <data name="TrashEmpty" xml:space="preserve">
+    <value>No deleted items</value>
+  </data>
+  <data name="TrashItemsCountOne" xml:space="preserve">
+    <value>{0} item</value>
+  </data>
+  <data name="TrashItemsCountFew" xml:space="preserve">
+    <value>{0} items</value>
+  </data>
+  <data name="TrashItemsCountMany" xml:space="preserve">
+    <value>{0} items</value>
+  </data>
+  <data name="TrashDaysLeftOne" xml:space="preserve">
+    <value>{0} day left</value>
+  </data>
+  <data name="TrashDaysLeftFew" xml:space="preserve">
+    <value>{0} days left</value>
+  </data>
+  <data name="TrashDaysLeftMany" xml:space="preserve">
+    <value>{0} days left</value>
+  </data>
+  <data name="TrashItemRestored" xml:space="preserve">
+    <value>“{0}” restored</value>
+  </data>
+  <data name="TrashItemsRestoredOne" xml:space="preserve">
+    <value>{0} item restored</value>
+  </data>
+  <data name="TrashItemsRestoredFew" xml:space="preserve">
+    <value>{0} items restored</value>
+  </data>
+  <data name="TrashItemsRestoredMany" xml:space="preserve">
+    <value>{0} items restored</value>
+  </data>
+  <data name="RestoreAll" xml:space="preserve">
+    <value>Restore all</value>
+  </data>
+  <data name="DeleteForever" xml:space="preserve">
+    <value>Delete permanently</value>
+  </data>
+  <data name="DeleteForeverTitle" xml:space="preserve">
+    <value>Delete permanently?</value>
+  </data>
+  <data name="DeleteForeverConfirmation" xml:space="preserve">
+    <value>“{0}” will be deleted permanently. This cannot be undone.</value>
+  </data>
+  <data name="EmptyTrash" xml:space="preserve">
+    <value>Empty trash</value>
+  </data>
+  <data name="EmptyTrashTitle" xml:space="preserve">
+    <value>Empty trash?</value>
+  </data>
+  <data name="EmptyTrashConfirmation" xml:space="preserve">
+    <value>All items in the trash ({0}) will be deleted permanently. This cannot be undone.</value>
+  </data>
+  <data name="MoveToTrashHint" xml:space="preserve">
+    <value>The item moves to Deleted, where it can be restored within {0} days.</value>
+  </data>
+  <data name="MovedToTrash" xml:space="preserve">
+    <value>“{0}” moved to Deleted</value>
+  </data>
+  <data name="TrashSynchronized" xml:space="preserve">
+    <value>Deleted items synchronized</value>
+  </data>
+  <data name="Host" xml:space="preserve">
+    <value>Host</value>
+  </data>
+  <data name="CategoryHosts" xml:space="preserve">
+    <value>Hosts</value>
+  </data>
+  <data name="Hostname" xml:space="preserve">
+    <value>Hostname</value>
+  </data>
+  <data name="Port" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="Username" xml:space="preserve">
+    <value>Username</value>
+  </data>
+  <data name="CopyHostname" xml:space="preserve">
+    <value>Copy hostname</value>
+  </data>
+  <data name="CopyUsername" xml:space="preserve">
+    <value>Copy username</value>
+  </data>
+  <data name="NoSshKey" xml:space="preserve">
+    <value>No key</value>
+  </data>
+  <data name="SshKeyNotFound" xml:space="preserve">
+    <value>Key not found: the entry was deleted</value>
+  </data>
+  <data name="PortInvalid" xml:space="preserve">
+    <value>The port must be a number from 1 to 65535.</value>
+  </data>
+  <data name="HostSshKeyHint" xml:space="preserve">
+    <value>The SinglePass SSH agent signs in with this key; the private key does not leave the vault.</value>
+  </data>
+  <data name="CopySshCommand" xml:space="preserve">
+    <value>Copy SSH command</value>
+  </data>
+  <data name="CopySshCommandHint" xml:space="preserve">
+    <value>Copies an ssh command that signs in with the linked key through the SinglePass agent.</value>
+  </data>
+  <data name="SshAgent" xml:space="preserve">
+    <value>SSH agent</value>
+  </data>
+  <data name="SshAgentDescription" xml:space="preserve">
+    <value>ssh, git and other programs can sign in with the SSH keys of the vault. Every use asks for your confirmation, and the keys are unavailable while the vault is locked. To use the agent everywhere, set the SSH_AUTH_SOCK user environment variable to the address below. Copy SSH command of a host already includes it.</value>
+  </data>
+  <data name="CopySshAgentPipe" xml:space="preserve">
+    <value>Copy address</value>
+  </data>
+  <data name="SshAgentConfirmHeader" xml:space="preserve">
+    <value>Allow use of an SSH key?</value>
+  </data>
+  <data name="SshAgentConfirmKey" xml:space="preserve">
+    <value>Key</value>
+  </data>
+  <data name="SshAgentConfirmProgram" xml:space="preserve">
+    <value>Requested by</value>
+  </data>
+  <data name="SshAgentRemember" xml:space="preserve">
+    <value>Allow this program until the vault is locked</value>
+  </data>
+  <data name="SshAgentAllow" xml:space="preserve">
+    <value>Allow</value>
+  </data>
+  <data name="SshAgentDeny" xml:space="preserve">
+    <value>Deny</value>
+  </data>
+  <data name="ConnectSsh" xml:space="preserve">
+    <value>Connect</value>
+  </data>
+  <data name="ConnectSshHint" xml:space="preserve">
+    <value>Opens the connection in Windows Terminal, as a tab of the SinglePass window, or in a console window.</value>
+  </data>
+  <data name="SshClientMissing" xml:space="preserve">
+    <value>The OpenSSH client of Windows is not installed. Add it in Settings → System → Optional features.</value>
+  </data>
+  <data name="ConnectSshFailed" xml:space="preserve">
+    <value>Could not start the terminal: {0}</value>
+  </data>
 </root>

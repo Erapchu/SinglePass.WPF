@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using SinglePass.Language.Properties;
+using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Hotkeys;
 using SinglePass.Core.Localization;
 using SinglePass.WPF.Services;
@@ -36,6 +37,7 @@ namespace SinglePass.WPF.ViewModels
         private readonly AppSettingsService _appSettingsService;
         private readonly CredentialsCryptoService _credentialsCryptoService;
         private readonly HotkeysService _hotkeysService;
+        private readonly SshAgentServer _sshAgent;
         private readonly ILogger<SettingsViewModel> _logger;
 
         /// <summary>Raised after a backup restore changed the vault, so the lists can reload it.</summary>
@@ -66,6 +68,15 @@ namespace SinglePass.WPF.ViewModels
         [ObservableProperty]
         public partial bool LockOnWindowsLock { get; set; } = true;
 
+        [ObservableProperty]
+        public partial bool SshAgentEnabled { get; set; } = true;
+
+        /// <summary>The agent answers on its pipe. False when it is turned off or could not start.</summary>
+        public bool IsSshAgentRunning => _sshAgent?.IsRunning == true;
+
+        /// <summary>Value for <c>SSH_AUTH_SOCK</c> or <c>IdentityAgent</c>.</summary>
+        public string SshAgentPipePath => _sshAgent?.PipePath;
+
         private SettingsViewModel() { }
 
         public SettingsViewModel(
@@ -73,8 +84,12 @@ namespace SinglePass.WPF.ViewModels
             AppSettingsService appSettingsService,
             CredentialsCryptoService credentialsCryptoService,
             HotkeysService hotkeysService,
+            SshAgentServer sshAgent,
             ILogger<SettingsViewModel> logger)
         {
+            // Before _sshAgent is set: loading the setting must not start or stop the agent.
+            SshAgentEnabled = appSettingsService.Settings.SshAgentEnabled;
+            _sshAgent = sshAgent;
             ThemeMode = appSettingsService.ThemeMode;
             AnimationsEnabled = appSettingsService.Settings.AnimationsEnabled;
             Language = LocalizationManager.Normalize(appSettingsService.Language);
@@ -233,6 +248,43 @@ namespace SinglePass.WPF.ViewModels
 
         partial void OnLockOnWindowsLockChanged(bool value) => SaveSecuritySettings();
 
+        partial void OnSshAgentEnabledChanged(bool value)
+        {
+            if (_sshAgent is null)
+                return;
+
+            if (value)
+            {
+                try
+                {
+                    _sshAgent.Start();
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                    _logger.LogError(ex, "The SSH agent could not start");
+                    _ = MessageDialog.ShowAsync(Resources.Error, ex.Message, MessageDialogButtons.OK, "");
+                }
+            }
+            else
+                _sshAgent.Stop();
+
+            OnPropertyChanged(nameof(IsSshAgentRunning));
+            SaveSecuritySettings();
+        }
+
+        [RelayCommand]
+        private void CopySshAgentPipePath()
+        {
+            try
+            {
+                WindowsClipboard.SetText(SshAgentPipePath);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, string.Empty);
+            }
+        }
+
         private async void SaveSecuritySettings()
         {
             if (_appSettingsService is null)
@@ -240,6 +292,7 @@ namespace SinglePass.WPF.ViewModels
 
             _appSettingsService.Settings.IdleLockTimeout = IdleLockTimeout;
             _appSettingsService.Settings.LockOnWindowsLock = LockOnWindowsLock;
+            _appSettingsService.Settings.SshAgentEnabled = SshAgentEnabled;
             try
             {
                 await _appSettingsService.Save();

@@ -111,6 +111,10 @@
                 </Border>
                 <StackPanel DockPanel.Dock="Bottom">
                     <Separator Margin="4,4,4,2" />
+                    <Border DataContext="{Binding TrashNavigation}" Style="{StaticResource NavigationRow}">
+                        <Button Style="{StaticResource NavigationButton}" Content="{Binding}" ContentTemplate="{StaticResource NavigationItemTemplate}"
+                                Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" />
+                    </Border>
                     <Border DataContext="{Binding SettingsNavigation}" Style="{StaticResource NavigationRow}">
                         <Button Style="{StaticResource NavigationButton}" Content="{Binding}" ContentTemplate="{StaticResource NavigationItemTemplate}"
                                 Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" />

@@ -16,6 +16,9 @@ namespace SinglePass.Core.Models
         public IList<Credential> DeletedCredentials { get; } = new List<Credential>();
         internal bool GroupChanges { get; set; }
 
+        /// <summary>Entries were moved to the trash or restored from it on another device.</summary>
+        internal bool TrashChanges { get; set; }
+
         /// <summary>This device switched to the master password of the cloud vault.</summary>
         internal bool MasterPasswordAdopted { get; set; }
 
@@ -31,7 +34,7 @@ namespace SinglePass.Core.Models
         /// <summary>Why the sync failed, when it is worth telling the user.</summary>
         internal string FailureReason { get; init; }
 
-        public bool AnyChanges => NewCredentials.Count > 0 || ChangedCredentials.Count > 0 || DeletedCredentials.Count > 0 || GroupChanges;
+        public bool AnyChanges => NewCredentials.Count > 0 || ChangedCredentials.Count > 0 || DeletedCredentials.Count > 0 || GroupChanges || TrashChanges;
 
         public CredentialsMergeResult()
         {
@@ -70,6 +73,8 @@ namespace SinglePass.Core.Models
                 }
                 if (GroupChanges)
                     sb.AppendLine(Localize("PasswordGroupsSynchronized"));
+                if (TrashChanges)
+                    sb.AppendLine(Localize("TrashSynchronized"));
                 if (MasterPasswordAdopted)
                     sb.AppendLine(Localize("MasterPasswordAdoptedFromCloud"));
                 if (CloudUpdated)

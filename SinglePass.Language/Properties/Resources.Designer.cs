@@ -468,6 +468,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hosts.
+        /// </summary>
+        public static string CategoryHosts {
+            get {
+                return ResourceManager.GetString("CategoryHosts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Passwords.
         /// </summary>
         public static string CategoryLogins {
@@ -585,6 +594,33 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Connect.
+        /// </summary>
+        public static string ConnectSsh {
+            get {
+                return ResourceManager.GetString("ConnectSsh", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not start the terminal: {0}.
+        /// </summary>
+        public static string ConnectSshFailed {
+            get {
+                return ResourceManager.GetString("ConnectSshFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Opens the connection in Windows Terminal, as a tab of the SinglePass window, or in a console window..
+        /// </summary>
+        public static string ConnectSshHint {
+            get {
+                return ResourceManager.GetString("ConnectSshHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Copy expiry date.
         /// </summary>
         public static string CopyCardExpiry {
@@ -617,6 +653,15 @@ namespace SinglePass.Language.Properties {
         public static string CopyCvv {
             get {
                 return ResourceManager.GetString("CopyCvv", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy hostname.
+        /// </summary>
+        public static string CopyHostname {
+            get {
+                return ResourceManager.GetString("CopyHostname", resourceCulture);
             }
         }
         
@@ -675,11 +720,47 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Copy address.
+        /// </summary>
+        public static string CopySshAgentPipe {
+            get {
+                return ResourceManager.GetString("CopySshAgentPipe", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy SSH command.
+        /// </summary>
+        public static string CopySshCommand {
+            get {
+                return ResourceManager.GetString("CopySshCommand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copies an ssh command that signs in with the linked key through the SinglePass agent..
+        /// </summary>
+        public static string CopySshCommandHint {
+            get {
+                return ResourceManager.GetString("CopySshCommandHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Copy verification code.
         /// </summary>
         public static string CopyTotp {
             get {
                 return ResourceManager.GetString("CopyTotp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy username.
+        /// </summary>
+        public static string CopyUsername {
+            get {
+                return ResourceManager.GetString("CopyUsername", resourceCulture);
             }
         }
         
@@ -765,6 +846,33 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Delete permanently.
+        /// </summary>
+        public static string DeleteForever {
+            get {
+                return ResourceManager.GetString("DeleteForever", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to “{0}” will be deleted permanently. This cannot be undone..
+        /// </summary>
+        public static string DeleteForeverConfirmation {
+            get {
+                return ResourceManager.GetString("DeleteForeverConfirmation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete permanently?.
+        /// </summary>
+        public static string DeleteForeverTitle {
+            get {
+                return ResourceManager.GetString("DeleteForeverTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete item?.
         /// </summary>
         public static string DeleteItem {
@@ -842,6 +950,33 @@ namespace SinglePass.Language.Properties {
         public static string EditPasswordGroup {
             get {
                 return ResourceManager.GetString("EditPasswordGroup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Empty trash.
+        /// </summary>
+        public static string EmptyTrash {
+            get {
+                return ResourceManager.GetString("EmptyTrash", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to All items in the trash ({0}) will be deleted permanently. This cannot be undone..
+        /// </summary>
+        public static string EmptyTrashConfirmation {
+            get {
+                return ResourceManager.GetString("EmptyTrashConfirmation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Empty trash?.
+        /// </summary>
+        public static string EmptyTrashTitle {
+            get {
+                return ResourceManager.GetString("EmptyTrashTitle", resourceCulture);
             }
         }
         
@@ -1067,6 +1202,33 @@ namespace SinglePass.Language.Properties {
         public static string GroupIconWork {
             get {
                 return ResourceManager.GetString("GroupIconWork", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Host.
+        /// </summary>
+        public static string Host {
+            get {
+                return ResourceManager.GetString("Host", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hostname.
+        /// </summary>
+        public static string Hostname {
+            get {
+                return ResourceManager.GetString("Hostname", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The SinglePass SSH agent signs in with this key; the private key does not leave the vault..
+        /// </summary>
+        public static string HostSshKeyHint {
+            get {
+                return ResourceManager.GetString("HostSshKeyHint", resourceCulture);
             }
         }
         
@@ -1314,6 +1476,24 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to “{0}” moved to Deleted.
+        /// </summary>
+        public static string MovedToTrash {
+            get {
+                return ResourceManager.GetString("MovedToTrash", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The item moves to Deleted, where it can be restored within {0} days..
+        /// </summary>
+        public static string MoveToTrashHint {
+            get {
+                return ResourceManager.GetString("MoveToTrashHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Name.
         /// </summary>
         public static string Name {
@@ -1436,6 +1616,15 @@ namespace SinglePass.Language.Properties {
         public static string NoPasswordGroup {
             get {
                 return ResourceManager.GetString("NoPasswordGroup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No key.
+        /// </summary>
+        public static string NoSshKey {
+            get {
+                return ResourceManager.GetString("NoSshKey", resourceCulture);
             }
         }
         
@@ -1656,6 +1845,24 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Port.
+        /// </summary>
+        public static string Port {
+            get {
+                return ResourceManager.GetString("Port", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The port must be a number from 1 to 65535..
+        /// </summary>
+        public static string PortInvalid {
+            get {
+                return ResourceManager.GetString("PortInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Private key.
         /// </summary>
         public static string PrivateKey {
@@ -1683,6 +1890,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Recently deleted.
+        /// </summary>
+        public static string RecentlyDeleted {
+            get {
+                return ResourceManager.GetString("RecentlyDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Remove verification code.
         /// </summary>
         public static string RemoveTotp {
@@ -1706,6 +1922,15 @@ namespace SinglePass.Language.Properties {
         public static string Restore {
             get {
                 return ResourceManager.GetString("Restore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Restore all.
+        /// </summary>
+        public static string RestoreAll {
+            get {
+                return ResourceManager.GetString("RestoreAll", resourceCulture);
             }
         }
         
@@ -1910,6 +2135,87 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to SSH agent.
+        /// </summary>
+        public static string SshAgent {
+            get {
+                return ResourceManager.GetString("SshAgent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Allow.
+        /// </summary>
+        public static string SshAgentAllow {
+            get {
+                return ResourceManager.GetString("SshAgentAllow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Allow use of an SSH key?.
+        /// </summary>
+        public static string SshAgentConfirmHeader {
+            get {
+                return ResourceManager.GetString("SshAgentConfirmHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Key.
+        /// </summary>
+        public static string SshAgentConfirmKey {
+            get {
+                return ResourceManager.GetString("SshAgentConfirmKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Requested by.
+        /// </summary>
+        public static string SshAgentConfirmProgram {
+            get {
+                return ResourceManager.GetString("SshAgentConfirmProgram", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Deny.
+        /// </summary>
+        public static string SshAgentDeny {
+            get {
+                return ResourceManager.GetString("SshAgentDeny", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ssh, git and other programs can sign in with the SSH keys of the vault. Every use asks for your confirmation, and the keys are unavailable while the vault is locked. To use the agent everywhere, set the SSH_AUTH_SOCK user environment variable to the address below. Copy SSH command of a host already includes it..
+        /// </summary>
+        public static string SshAgentDescription {
+            get {
+                return ResourceManager.GetString("SshAgentDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Allow this program until the vault is locked.
+        /// </summary>
+        public static string SshAgentRemember {
+            get {
+                return ResourceManager.GetString("SshAgentRemember", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The OpenSSH client of Windows is not installed. Add it in Settings → System → Optional features..
+        /// </summary>
+        public static string SshClientMissing {
+            get {
+                return ResourceManager.GetString("SshClientMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to SSH key.
         /// </summary>
         public static string SshKey {
@@ -1942,6 +2248,15 @@ namespace SinglePass.Language.Properties {
         public static string SshKeyFileTooLarge {
             get {
                 return ResourceManager.GetString("SshKeyFileTooLarge", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Key not found: the entry was deleted.
+        /// </summary>
+        public static string SshKeyNotFound {
+            get {
+                return ResourceManager.GetString("SshKeyNotFound", resourceCulture);
             }
         }
         
@@ -2099,6 +2414,132 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Deleted.
+        /// </summary>
+        public static string Trash {
+            get {
+                return ResourceManager.GetString("Trash", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} days left.
+        /// </summary>
+        public static string TrashDaysLeftFew {
+            get {
+                return ResourceManager.GetString("TrashDaysLeftFew", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} days left.
+        /// </summary>
+        public static string TrashDaysLeftMany {
+            get {
+                return ResourceManager.GetString("TrashDaysLeftMany", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} day left.
+        /// </summary>
+        public static string TrashDaysLeftOne {
+            get {
+                return ResourceManager.GetString("TrashDaysLeftOne", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Deleted items are removed permanently after {0} days..
+        /// </summary>
+        public static string TrashDescription {
+            get {
+                return ResourceManager.GetString("TrashDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No deleted items.
+        /// </summary>
+        public static string TrashEmpty {
+            get {
+                return ResourceManager.GetString("TrashEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to “{0}” restored.
+        /// </summary>
+        public static string TrashItemRestored {
+            get {
+                return ResourceManager.GetString("TrashItemRestored", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} items.
+        /// </summary>
+        public static string TrashItemsCountFew {
+            get {
+                return ResourceManager.GetString("TrashItemsCountFew", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} items.
+        /// </summary>
+        public static string TrashItemsCountMany {
+            get {
+                return ResourceManager.GetString("TrashItemsCountMany", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} item.
+        /// </summary>
+        public static string TrashItemsCountOne {
+            get {
+                return ResourceManager.GetString("TrashItemsCountOne", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} items restored.
+        /// </summary>
+        public static string TrashItemsRestoredFew {
+            get {
+                return ResourceManager.GetString("TrashItemsRestoredFew", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} items restored.
+        /// </summary>
+        public static string TrashItemsRestoredMany {
+            get {
+                return ResourceManager.GetString("TrashItemsRestoredMany", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} item restored.
+        /// </summary>
+        public static string TrashItemsRestoredOne {
+            get {
+                return ResourceManager.GetString("TrashItemsRestoredOne", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Deleted items synchronized.
+        /// </summary>
+        public static string TrashSynchronized {
+            get {
+                return ResourceManager.GetString("TrashSynchronized", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Update available.
         /// </summary>
         public static string UpdateAvailableHeader {
@@ -2221,6 +2662,15 @@ namespace SinglePass.Language.Properties {
         public static string Uploading {
             get {
                 return ResourceManager.GetString("Uploading", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Username.
+        /// </summary>
+        public static string Username {
+            get {
+                return ResourceManager.GetString("Username", resourceCulture);
             }
         }
         

@@ -43,11 +43,12 @@ Every write goes to a temporary file `singlePass.dat.<guid>.tmp`, is flushed to 
 
 ```jsonc
 {
-  "Version": 3,
+  "Version": 6,
   "Credentials": [ /* Credential */ ],
   "Groups":             { "<group id>":      { "Group": {...} | null, "ModifiedAt": "...", "IsDeleted": false } },
   "Assignments":        { "<credential id>": { "GroupId": "<group id>" | null, "ModifiedAt": "..." } },
   "DeletedCredentials": { "<credential id>": "<deleted at, UTC>" },
+  "Trash":              { "<credential id>": { "DeletedAt": "<UTC>" | null, "ModifiedAt": "<UTC>" } },
   "MasterPasswordChangedAt": "<UTC>" | null
 }
 ```
@@ -59,8 +60,10 @@ Every write goes to a temporary file `singlePass.dat.<guid>.tmp`, is flushed to 
 | 2 | Adds `DeletedCredentials` (credential tombstones) and `MasterPasswordChangedAt`. |
 | 3 | Adds entry types: `Credential.Type`, one data block per type (`Login`, `SshKey`). The login fields move from the credential into `Login`. |
 | 4 | Adds payment cards: `Credential.Card`. |
+| 5 | Adds the trash: `Trash`. |
+| 6 | Adds SSH hosts: `Credential.Host`. |
 
-- A vault with a newer `Version` than the application supports is rejected, both locally and on sync. Builds that only know version 1 cannot open a version 2 vault. This is intentional: an old build would drop `DeletedCredentials` on its next write and deleted credentials would return. For the same reason builds that only know version 2 cannot open a version 3 vault: they would not find the login fields, which moved into `Login`, and would drop the SSH key data. Builds that only know version 3 cannot open a version 4 vault: they would drop card data.
+- A vault with a newer `Version` than the application supports is rejected, both locally and on sync. Builds that only know version 1 cannot open a version 2 vault. This is intentional: an old build would drop `DeletedCredentials` on its next write and deleted credentials would return. For the same reason builds that only know version 2 cannot open a version 3 vault: they would not find the login fields, which moved into `Login`, and would drop the SSH key data. Builds that only know version 3 cannot open a version 4 vault: they would drop card data. Builds that only know version 4 cannot open a version 5 vault: they would show entries in the trash as regular ones and drop the trash state. Builds that only know version 5 cannot open a version 6 vault: they would drop host data.
 - Older vaults are upgraded in memory and written as the current version on the next change. For versions before 3, `LoginField`, `PasswordField`, `SiteField`, `Totp` and `PasswordHistory` of every credential are moved into a `Login` object before the JSON is read. This happens in `ReadVault`, so the local vault, backups and the cloud copy are all converted.
 - A missing collection is read as empty; an explicit `null` makes the file invalid.
 
@@ -71,12 +74,13 @@ A credential holds the fields every entry has, its type and one data block for t
 ```jsonc
 {
   "Id": "<guid>",
-  "Type": 0,                         // 0 login (also when missing), 1 SSH key, 2 card
+  "Type": 0,                         // 0 login (also when missing), 1 SSH key, 2 card, 3 host
   "NameField": {...}, "OtherField": {...}, "AdditionalFields": [...],
   "CreationTime": "...", "LastModifiedTime": "...",
   "Login":  { "LoginField": {...}, "PasswordField": {...}, "SiteField": {...}, "Totp": {...} | null, "PasswordHistory": [...] } | null,
   "SshKey": { "PrivateKey": "...", "PublicKey": "...", "Passphrase": "..." } | null,
-  "Card":   { "Number": "...", "Holder": "...", "Expiry": "MM/YY", "Cvv": "...", "Pin": "...", "Brand": 2 | null } | null
+  "Card":   { "Number": "...", "Holder": "...", "Expiry": "MM/YY", "Cvv": "...", "Pin": "...", "Brand": 2 | null } | null,
+  "Host":   { "Hostname": "...", "Port": 2222 | null, "Username": "...", "SshKeyId": "<guid>" | null } | null
 }
 ```
 
@@ -86,6 +90,7 @@ A credential holds the fields every entry has, its type and one data block for t
 - `Login.PasswordHistory` — up to 10 previous passwords, newest first. When a save changes a non-empty password, the old one is added with the current UTC time.
 - `SshKey.PrivateKey` is the key file text (OpenSSH or PEM, possibly encrypted with `Passphrase`); `PublicKey` is an `authorized_keys` line.
 - `Card.Brand` is the payment network the user chose (`CardBrand`, a number); null means it is detected from the number when shown. The editor accepts only digits in the number, `MM/YY` in the expiry and digits in CVV and PIN (`CardNumbers`, `CardInput`); values saved before these rules stay as they are until edited. A number that fails the Luhn check is still saved, with a warning in the editor.
+- `Host.Port` null means 22. `Host.SshKeyId` is the `Id` of an SSH key entry to sign in with. It is a plain reference: deleting or trashing the key does not change the host, which then shows the key as missing. The private key is used through the SSH agent, see [ssh-agent.md](ssh-agent.md).
 - `LastModifiedTime`, `CreationTime` — UTC, set by the UI on save. Older vaults stored local time with an offset; the model converts any value to UTC when it is assigned, and the UI shows local time.
 
 Merge, tombstones, groups and backups do not depend on the type: an entry wins or loses as a whole. Password histories are combined only for logins.
@@ -112,7 +117,9 @@ All operations take an in-process lock keyed by the vault path, apply an immutab
 |---|---|
 | Add credential | Appends it, optionally assigns a group. Removes a tombstone with the same `Id`, if any. |
 | Edit credential | Replaces it, updates password history, optionally reassigns the group. |
-| Delete credential | Removes it and its group assignment, adds tombstone `DeletedCredentials[id] = UtcNow`. |
+| Move to trash | Sets `Trash[id] = { DeletedAt: UtcNow, ModifiedAt: UtcNow }`. The credential and its group link stay. |
+| Restore from trash | Sets `Trash[id] = { DeletedAt: null, ModifiedAt: UtcNow }`. |
+| Delete credential | Removes it, its group assignment and trash state, adds tombstone `DeletedCredentials[id] = UtcNow`. Used for deleting from the trash, emptying it and for expired entries. |
 | Save group | Stores the group with `ModifiedAt = UtcNow`. Editing a deleted group does nothing. |
 | Delete group | Replaces the group with a tombstone (`Group = null`, `IsDeleted = true`). Assignments to it stay but are ignored. |
 | Move credentials | Sets the assignment of each existing credential, `ModifiedAt = UtcNow`. |
@@ -120,6 +127,14 @@ All operations take an in-process lock keyed by the vault path, apply an immutab
 | Lock | Marks the vault locked, clears it and the password from memory, cancels cloud transfers. |
 
 Group assignments that point to a missing or deleted group are treated as "no group".
+
+### Trash
+
+Deleting an entry in the UI moves it to the trash (**Deleted** in the sidebar, `TrashViewModel`). An entry in the trash keeps all its data and its group, but is not shown in the list, the categories, groups, search or the popup: `CredentialsCryptoService.Credentials` leaves it out, `TrashedCredentials` lists it. From the trash an entry can be restored (one or all) or deleted for good (one, or **Empty trash**).
+
+Entries are deleted for good `PasswordVault.TrashRetention` (30 days) after they were moved to the trash. This happens when the vault is unlocked and when the **Deleted** page is opened, as a regular deletion with a tombstone, so it spreads on sync.
+
+Restoring keeps the trash record with `DeletedAt = null` instead of removing it, so on sync the later of moving to the trash and restoring wins.
 
 ## Merge
 
@@ -130,7 +145,8 @@ Group assignments that point to a missing or deleted group are treated as "no gr
 3. **Apply tombstones.** A credential with a tombstone is removed, unless its `LastModifiedTime` (converted to UTC) is later than the deletion. In that case the edit wins: the credential stays and the tombstone is dropped.
 4. **Groups.** An unknown group is added. A deleted group stays deleted. Otherwise a deletion wins, then the later `ModifiedAt`.
 5. **Assignments.** Kept only for credentials that exist after step 3. For the same credential the later `ModifiedAt` wins.
-6. **Master password time.** The later `MasterPasswordChangedAt` is kept.
+6. **Trash.** Kept only for credentials that exist after step 3. For the same credential the later `ModifiedAt` wins. Entries that end up in the trash are not reported as new or changed.
+7. **Master password time.** The later `MasterPasswordChangedAt` is kept.
 
 The result lists new, changed (winning version) and deleted credentials and whether groups changed; the UI shows it after sync. Changes that only touch tombstones or clean up assignments are written but not reported.
 
@@ -156,6 +172,7 @@ Except for `daily`, a failed backup cancels the operation.
 - credentials missing now are added back; credentials that differ are reverted to the backup version, and the current password goes to the password history;
 - credentials created after the backup stay;
 - groups and group links of the backup credentials are reverted; a group deleted since the backup comes back under a new id, because a group tombstone always wins on sync;
+- entries in the trash now that were not in the trash in the backup are restored from it; entries that were in the trash in the backup are not restored;
 - every restored item gets the current time, so the next sync spreads the restore to the cloud copy and other devices instead of undoing it (a restored credential is newer than the tombstone that deleted it).
 
 The backup is decrypted with the current master password first; if that fails, the user is asked for the password of that backup. Restoring a backup by copying the file over `singlePass.dat` also works, but then the next sync merges the newer cloud changes and deletions back in.

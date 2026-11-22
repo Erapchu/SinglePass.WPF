@@ -31,9 +31,11 @@ namespace SinglePass.WPF.ViewModels
         public PasswordsViewModel PasswordsVM { get; }
         public SettingsViewModel SettingsVM { get; }
         public CloudSyncViewModel CloudSyncVM { get; }
+        public TrashViewModel TrashVM { get; }
         public UpdateService Updates { get; }
         public NavigationItemViewModel AllPasswordsNavigation { get; }
         public NavigationItemViewModel SettingsNavigation { get; }
+        public NavigationItemViewModel TrashNavigation { get; }
         public ObservableCollection<NavigationItemViewModel> GroupNavigation { get; } = new();
 
         /// <summary>One item per entry type. Shown even when there are no entries of that type.</summary>
@@ -51,7 +53,9 @@ namespace SinglePass.WPF.ViewModels
                 if (_selectedNavigationItem != null)
                     _selectedNavigationItem.IsSelected = false;
                 value.IsSelected = true;
-                if (value != SettingsNavigation)
+                if (value == TrashNavigation)
+                    _ = TrashVM.RefreshAsync();
+                else if (value != SettingsNavigation)
                     PasswordsVM.SelectFilter(value.Group?.Id, value.Category);
                 SetProperty(ref _selectedNavigationItem, value);
             }
@@ -63,11 +67,15 @@ namespace SinglePass.WPF.ViewModels
             PasswordsViewModel passwordsViewModel,
             SettingsViewModel settingsViewModel,
             CloudSyncViewModel cloudsViewModel,
+            TrashViewModel trashViewModel,
             UpdateService updateService)
         {
             PasswordsVM = passwordsViewModel;
             CloudSyncVM = cloudsViewModel;
             SettingsVM = settingsViewModel;
+            TrashVM = trashViewModel;
+            // Entries restored from the trash go back to the list.
+            TrashVM.VaultChanged += TrashViewModel_VaultChanged;
 
             PasswordsVM.CredentialSelected += PasswordsViewModel_CredentialSelected;
             PasswordsVM.ScrollIntoViewRequired += PasswordsVM_ScrollIntoViewRequired;
@@ -84,7 +92,12 @@ namespace SinglePass.WPF.ViewModels
                 new NavigationItemViewModel("CategoryLogins", "", CredentialType.Login, AllPasswordsNavigation),
                 new NavigationItemViewModel("CategorySshKeys", "", CredentialType.SshKey, AllPasswordsNavigation),
                 new NavigationItemViewModel("CategoryCards", "", CredentialType.Card, AllPasswordsNavigation),
+                new NavigationItemViewModel("CategoryHosts", "", CredentialType.Host, AllPasswordsNavigation),
             ];
+            TrashNavigation = new NavigationItemViewModel(
+                "Trash",
+                "\uE74D",
+                () => new TrashControl { DataContext = TrashVM });
             SettingsNavigation = new NavigationItemViewModel(
                 nameof(SinglePass.Language.Properties.Resources.Settings),
                 "\uE713",
@@ -160,7 +173,11 @@ namespace SinglePass.WPF.ViewModels
                 GroupNavigation.Add(new NavigationItemViewModel(group, AllPasswordsNavigation));
 
             await PasswordsVM.ReloadCredentialsAsync();
+            if (SelectedNavigationItem == TrashNavigation)
+                await TrashVM.RefreshAsync();
         }
+
+        private async void TrashViewModel_VaultChanged() => await PasswordsVM.ReloadCredentialsAsync();
 
         private void PasswordsViewModel_CredentialSelected(CredentialViewModel credVM)
         {

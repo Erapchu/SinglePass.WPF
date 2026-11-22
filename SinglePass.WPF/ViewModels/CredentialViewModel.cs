@@ -47,6 +47,9 @@ namespace SinglePass.WPF.ViewModels
         /// <summary>Same object as <see cref="Data"/> for SSH keys; null for other types.</summary>
         public SshKeyViewModel SshKey => Data as SshKeyViewModel;
 
+        /// <summary>Same object as <see cref="Data"/> for hosts; null for other types.</summary>
+        public HostViewModel Host => Data as HostViewModel;
+
         public bool IsLogin => Login != null;
 
         public PassFieldViewModel NameFieldVM { get; }
@@ -112,6 +115,7 @@ namespace SinglePass.WPF.ViewModels
             CredentialType.Login => new LoginViewModel(credential.Login),
             CredentialType.SshKey => new SshKeyViewModel(credential.SshKey),
             CredentialType.Card => new CardViewModel(credential.Card),
+            CredentialType.Host => new HostViewModel(credential.Host),
             _ => throw new NotSupportedException($"Entry type {credential.Type} is not supported.")
         };
 

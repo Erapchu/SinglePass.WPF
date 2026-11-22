@@ -61,6 +61,7 @@ namespace SinglePass.WPF.Views.Windows
 
             mainViewModel.ScrollIntoViewRequired += MainViewModel_ScrollIntoViewRequired;
             mainViewModel.PasswordsVM.StatusMessageRequested += ShowStatusMessage;
+            mainViewModel.TrashVM.StatusMessageRequested += ShowStatusMessage;
             mainViewModel.PropertyChanged += ViewModel_PropertyChanged;
             _statusTimer.Tick += StatusTimer_Tick;
 
@@ -354,6 +355,7 @@ namespace SinglePass.WPF.Views.Windows
             _statusTimer.Stop();
             ViewModel.PropertyChanged -= ViewModel_PropertyChanged;
             ViewModel.PasswordsVM.StatusMessageRequested -= ShowStatusMessage;
+            ViewModel.TrashVM.StatusMessageRequested -= ShowStatusMessage;
 
             var saveRequired = false;
             if (ViewModel.SettingsVM.Language != _appSettingsService.Language)

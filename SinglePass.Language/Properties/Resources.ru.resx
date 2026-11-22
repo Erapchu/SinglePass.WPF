@@ -856,4 +856,154 @@
   <data name="CategoryCards" xml:space="preserve">
     <value>Банковские карты</value>
   </data>
+  <data name="Trash" xml:space="preserve">
+    <value>Удалённые</value>
+  </data>
+  <data name="RecentlyDeleted" xml:space="preserve">
+    <value>Недавно удалённые</value>
+  </data>
+  <data name="TrashDescription" xml:space="preserve">
+    <value>Удалённые записи автоматически очищаются через {0} дней.</value>
+  </data>
+  <data name="TrashEmpty" xml:space="preserve">
+    <value>Нет удалённых записей</value>
+  </data>
+  <data name="TrashItemsCountOne" xml:space="preserve">
+    <value>{0} запись</value>
+  </data>
+  <data name="TrashItemsCountFew" xml:space="preserve">
+    <value>{0} записи</value>
+  </data>
+  <data name="TrashItemsCountMany" xml:space="preserve">
+    <value>{0} записей</value>
+  </data>
+  <data name="TrashDaysLeftOne" xml:space="preserve">
+    <value>Осталось {0} дн.</value>
+  </data>
+  <data name="TrashDaysLeftFew" xml:space="preserve">
+    <value>Осталось {0} дн.</value>
+  </data>
+  <data name="TrashDaysLeftMany" xml:space="preserve">
+    <value>Осталось {0} дн.</value>
+  </data>
+  <data name="TrashItemRestored" xml:space="preserve">
+    <value>Запись «{0}» восстановлена</value>
+  </data>
+  <data name="TrashItemsRestoredOne" xml:space="preserve">
+    <value>Восстановлена {0} запись</value>
+  </data>
+  <data name="TrashItemsRestoredFew" xml:space="preserve">
+    <value>Восстановлено {0} записи</value>
+  </data>
+  <data name="TrashItemsRestoredMany" xml:space="preserve">
+    <value>Восстановлено {0} записей</value>
+  </data>
+  <data name="RestoreAll" xml:space="preserve">
+    <value>Восстановить все</value>
+  </data>
+  <data name="DeleteForever" xml:space="preserve">
+    <value>Удалить навсегда</value>
+  </data>
+  <data name="DeleteForeverTitle" xml:space="preserve">
+    <value>Удалить навсегда?</value>
+  </data>
+  <data name="DeleteForeverConfirmation" xml:space="preserve">
+    <value>Запись «{0}» будет удалена без возможности восстановления.</value>
+  </data>
+  <data name="EmptyTrash" xml:space="preserve">
+    <value>Очистить корзину</value>
+  </data>
+  <data name="EmptyTrashTitle" xml:space="preserve">
+    <value>Очистить корзину?</value>
+  </data>
+  <data name="EmptyTrashConfirmation" xml:space="preserve">
+    <value>Все записи в корзине ({0}) будут удалены без возможности восстановления.</value>
+  </data>
+  <data name="MoveToTrashHint" xml:space="preserve">
+    <value>Запись будет перемещена в «Удалённые», откуда её можно восстановить в течение {0} дней.</value>
+  </data>
+  <data name="MovedToTrash" xml:space="preserve">
+    <value>Запись «{0}» перемещена в «Удалённые»</value>
+  </data>
+  <data name="TrashSynchronized" xml:space="preserve">
+    <value>Удалённые записи синхронизированы</value>
+  </data>
+  <data name="Host" xml:space="preserve">
+    <value>Хост</value>
+  </data>
+  <data name="CategoryHosts" xml:space="preserve">
+    <value>Хосты</value>
+  </data>
+  <data name="Hostname" xml:space="preserve">
+    <value>Имя хоста</value>
+  </data>
+  <data name="Port" xml:space="preserve">
+    <value>Порт</value>
+  </data>
+  <data name="Username" xml:space="preserve">
+    <value>Пользователь</value>
+  </data>
+  <data name="CopyHostname" xml:space="preserve">
+    <value>Копировать имя хоста</value>
+  </data>
+  <data name="CopyUsername" xml:space="preserve">
+    <value>Копировать имя пользователя</value>
+  </data>
+  <data name="NoSshKey" xml:space="preserve">
+    <value>Без ключа</value>
+  </data>
+  <data name="SshKeyNotFound" xml:space="preserve">
+    <value>Ключ не найден: запись удалена</value>
+  </data>
+  <data name="PortInvalid" xml:space="preserve">
+    <value>Порт должен быть числом от 1 до 65535.</value>
+  </data>
+  <data name="HostSshKeyHint" xml:space="preserve">
+    <value>Вход выполняется этим ключом через SSH-агент SinglePass; приватный ключ не покидает хранилище.</value>
+  </data>
+  <data name="CopySshCommand" xml:space="preserve">
+    <value>Копировать команду SSH</value>
+  </data>
+  <data name="CopySshCommandHint" xml:space="preserve">
+    <value>Копирует команду ssh, которая входит привязанным ключом через агент SinglePass.</value>
+  </data>
+  <data name="SshAgent" xml:space="preserve">
+    <value>SSH-агент</value>
+  </data>
+  <data name="SshAgentDescription" xml:space="preserve">
+    <value>ssh, git и другие программы могут входить с SSH-ключами из хранилища. Каждое использование требует подтверждения, а пока хранилище заблокировано, ключи недоступны. Чтобы агент работал везде, задайте переменную среды пользователя SSH_AUTH_SOCK с адресом ниже. Команда SSH, скопированная у хоста, уже его содержит.</value>
+  </data>
+  <data name="CopySshAgentPipe" xml:space="preserve">
+    <value>Копировать адрес</value>
+  </data>
+  <data name="SshAgentConfirmHeader" xml:space="preserve">
+    <value>Разрешить использование SSH-ключа?</value>
+  </data>
+  <data name="SshAgentConfirmKey" xml:space="preserve">
+    <value>Ключ</value>
+  </data>
+  <data name="SshAgentConfirmProgram" xml:space="preserve">
+    <value>Запрашивает</value>
+  </data>
+  <data name="SshAgentRemember" xml:space="preserve">
+    <value>Разрешать этой программе до блокировки хранилища</value>
+  </data>
+  <data name="SshAgentAllow" xml:space="preserve">
+    <value>Разрешить</value>
+  </data>
+  <data name="SshAgentDeny" xml:space="preserve">
+    <value>Запретить</value>
+  </data>
+  <data name="ConnectSsh" xml:space="preserve">
+    <value>Подключиться</value>
+  </data>
+  <data name="ConnectSshHint" xml:space="preserve">
+    <value>Открывает подключение в Windows Terminal (вкладкой в окне SinglePass) или в консольном окне.</value>
+  </data>
+  <data name="SshClientMissing" xml:space="preserve">
+    <value>Клиент OpenSSH для Windows не установлен. Добавьте его в Параметры → Система → Дополнительные компоненты.</value>
+  </data>
+  <data name="ConnectSshFailed" xml:space="preserve">
+    <value>Не удалось запустить терминал: {0}</value>
+  </data>
 </root>

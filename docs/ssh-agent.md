@@ -55,13 +55,16 @@ Every signature is confirmed in a window on top of the others. It shows the key 
 
 ## Hosts
 
-A host entry (`HostData`) keeps the address, port, user and a link to an SSH key entry. **Copy SSH command** builds:
+A host entry (`HostData`) keeps the address, port, user and a link to an SSH key entry. The ssh arguments are built by `SinglePass.WPF/Helpers/SshCommands.cs`:
 
 ```
-ssh -o IdentityAgent=//./pipe/singlepass-ssh-agent-<SID> -o IdentitiesOnly=yes -i "%LOCALAPPDATA%\SinglePass\ssh\<key id>.pub" -p <port> user@host
+-o IdentityAgent=//./pipe/singlepass-ssh-agent-<SID> -o IdentitiesOnly=yes -i "%LOCALAPPDATA%\SinglePass\ssh\<key id>.pub" -p <port> -- user@host
 ```
 
-The public key is written to `%LOCALAPPDATA%\SinglePass\ssh\<key id>.pub` (public keys are not secret). With `-i` pointing to it and `IdentitiesOnly=yes`, ssh offers only that key and has the agent sign with it. Without a linked key, or with the agent turned off, the command is plain `ssh -p <port> user@host`.
+The public key is written to `%LOCALAPPDATA%\SinglePass\ssh\<key id>.pub` (public keys are not secret). With `-i` pointing to it and `IdentitiesOnly=yes`, ssh offers only that key and has the agent sign with it. Without a linked key, or with the agent turned off, only `-p <port> -- user@host` remains. `-p` is left out for port 22. `--` keeps a host or user that starts with `-` (for example `-oProxyCommand=…` from a synced vault) from being read as an option.
+
+- **Connect** starts `C:\Windows\System32\OpenSSH\ssh.exe` with these arguments in a new tab of the Windows Terminal window named `SinglePass` (`wt -w SinglePass new-tab --title <entry name> …`), so all connections share one window. `;` in arguments is escaped as `\;`, because `wt` splits commands at it. Without Windows Terminal, ssh opens in its own console window. The full path is used because the ssh of Git for Windows, which may come first in `PATH`, cannot talk to the agent.
+- **Copy SSH command** copies `ssh` with the same arguments, to paste into any terminal.
 
 ## Limits
 

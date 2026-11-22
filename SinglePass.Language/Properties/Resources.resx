@@ -974,4 +974,16 @@ Sync to update the cloud copy and other devices.</value>
   <data name="SshAgentDeny" xml:space="preserve">
     <value>Deny</value>
   </data>
+  <data name="ConnectSsh" xml:space="preserve">
+    <value>Connect</value>
+  </data>
+  <data name="ConnectSshHint" xml:space="preserve">
+    <value>Opens the connection in Windows Terminal, as a tab of the SinglePass window, or in a console window.</value>
+  </data>
+  <data name="SshClientMissing" xml:space="preserve">
+    <value>The OpenSSH client of Windows is not installed. Add it in Settings → System → Optional features.</value>
+  </data>
+  <data name="ConnectSshFailed" xml:space="preserve">
+    <value>Could not start the terminal: {0}</value>
+  </data>
 </root>

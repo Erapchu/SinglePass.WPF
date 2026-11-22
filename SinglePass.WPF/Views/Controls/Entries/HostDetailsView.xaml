@@ -85,15 +85,25 @@
                 </ContentControl.ContentTemplate>
             </ContentControl>
         </StackPanel>
-        <Button Margin="0,16,0,0" HorizontalAlignment="Left"
-                Command="{Binding DataContext.CopySshCommandCommand, RelativeSource={RelativeSource AncestorType=ctl:CredentialsDetailsControl}}"
-                CommandParameter="{Binding}"
-                IsEnabled="{Binding HasHostname}"
-                ToolTip="{Binding [CopySshCommandHint], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Style="{StaticResource SymbolText}" Text="&#xE8C8;" />
-                <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Text="{Binding [CopySshCommand], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
-            </StackPanel>
-        </Button>
+        <WrapPanel Margin="0,16,0,0" IsEnabled="{Binding HasHostname}">
+            <Button Margin="0,0,8,6" Style="{DynamicResource AccentButtonStyle}"
+                    Command="{Binding DataContext.ConnectSshCommand, RelativeSource={RelativeSource AncestorType=ctl:CredentialsDetailsControl}}"
+                    CommandParameter="{Binding}"
+                    ToolTip="{Binding [ConnectSshHint], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Style="{StaticResource SymbolText}" Text="&#xE756;" />
+                    <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Text="{Binding [ConnectSsh], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
+                </StackPanel>
+            </Button>
+            <Button Margin="0,0,8,6"
+                    Command="{Binding DataContext.CopySshCommandCommand, RelativeSource={RelativeSource AncestorType=ctl:CredentialsDetailsControl}}"
+                    CommandParameter="{Binding}"
+                    ToolTip="{Binding [CopySshCommandHint], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Style="{StaticResource SymbolText}" Text="&#xE8C8;" />
+                    <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" Text="{Binding [CopySshCommand], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
+                </StackPanel>
+            </Button>
+        </WrapPanel>
     </StackPanel>
 </UserControl>

@@ -594,6 +594,33 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Connect.
+        /// </summary>
+        public static string ConnectSsh {
+            get {
+                return ResourceManager.GetString("ConnectSsh", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not start the terminal: {0}.
+        /// </summary>
+        public static string ConnectSshFailed {
+            get {
+                return ResourceManager.GetString("ConnectSshFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Opens the connection in Windows Terminal, as a tab of the SinglePass window, or in a console window..
+        /// </summary>
+        public static string ConnectSshHint {
+            get {
+                return ResourceManager.GetString("ConnectSshHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Copy expiry date.
         /// </summary>
         public static string CopyCardExpiry {
@@ -2176,6 +2203,15 @@ namespace SinglePass.Language.Properties {
         public static string SshAgentRemember {
             get {
                 return ResourceManager.GetString("SshAgentRemember", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The OpenSSH client of Windows is not installed. Add it in Settings → System → Optional features..
+        /// </summary>
+        public static string SshClientMissing {
+            get {
+                return ResourceManager.GetString("SshClientMissing", resourceCulture);
             }
         }
         

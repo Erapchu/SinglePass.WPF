@@ -994,4 +994,16 @@
   <data name="SshAgentDeny" xml:space="preserve">
     <value>Запретить</value>
   </data>
+  <data name="ConnectSsh" xml:space="preserve">
+    <value>Подключиться</value>
+  </data>
+  <data name="ConnectSshHint" xml:space="preserve">
+    <value>Открывает подключение в Windows Terminal (вкладкой в окне SinglePass) или в консольном окне.</value>
+  </data>
+  <data name="SshClientMissing" xml:space="preserve">
+    <value>Клиент OpenSSH для Windows не установлен. Добавьте его в Параметры → Система → Дополнительные компоненты.</value>
+  </data>
+  <data name="ConnectSshFailed" xml:space="preserve">
+    <value>Не удалось запустить терминал: {0}</value>
+  </data>
 </root>

@@ -721,16 +721,43 @@ namespace SinglePass.WPF.ViewModels
         [RelayCommand]
         private void CopySshCommand(HostViewModel host)
         {
+            if (host is { HasHostname: true })
+                CopyToClipboard(SshCommands.BuildCommandLine(GetSshArguments(host)));
+        }
+
+        /// <summary>Opens the connection in Windows Terminal (a tab of the SinglePass window) or a console window.</summary>
+        [RelayCommand]
+        private void ConnectSsh(HostViewModel host)
+        {
             if (host is not { HasHostname: true })
                 return;
 
+            var title = _credentialVMs.Find(item => ReferenceEquals(item.Host, host))?.NameFieldVM.Value;
+            try
+            {
+                SshCommands.Connect(string.IsNullOrWhiteSpace(title) ? host.Destination : title, GetSshArguments(host));
+            }
+            catch (System.IO.FileNotFoundException)
+            {
+                StatusMessageRequested?.Invoke(LocalizationManager.Instance["SshClientMissing"]);
+            }
+            catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException)
+            {
+                _logger.LogError(ex, "Failed to start the SSH connection");
+                StatusMessageRequested?.Invoke(string.Format(LocalizationManager.Instance["ConnectSshFailed"], ex.Message));
+            }
+        }
+
+        /// <summary>ssh arguments for the host; with a linked key and a running agent, sign-in goes through the agent.</summary>
+        private IReadOnlyList<string> GetSshArguments(HostViewModel host)
+        {
             string identityFile = null;
             if (_sshAgent?.IsRunning == true && host.SshKeyId is { } keyId &&
                 _credentialVMs.Find(item => item.Model.Id == keyId)?.SshKey is { HasPublicKey: true } key)
             {
                 try
                 {
-                    identityFile = SshPublicKeyFiles.Write(keyId, key.PublicKey);
+                    identityFile = SshCommands.WritePublicKey(keyId, key.PublicKey);
                 }
                 catch (Exception ex) when (ex is System.IO.IOException or UnauthorizedAccessException)
                 {
@@ -738,7 +765,7 @@ namespace SinglePass.WPF.ViewModels
                 }
             }
 
-            CopyToClipboard(SshPublicKeyFiles.BuildCommand(host, identityFile, identityFile == null ? null : _sshAgent.IdentityAgentPath));
+            return SshCommands.BuildArguments(host, identityFile, identityFile == null ? null : _sshAgent.IdentityAgentPath);
         }
         #endregion
 

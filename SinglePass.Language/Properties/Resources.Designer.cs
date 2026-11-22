@@ -1242,6 +1242,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} is already used by another program. Choose another key combination..
+        /// </summary>
+        public static string HotkeyInUse {
+            get {
+                return ResourceManager.GetString("HotkeyInUse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Hotkeys.
         /// </summary>
         public static string Hotkeys {

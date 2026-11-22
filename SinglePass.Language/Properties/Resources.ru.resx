@@ -1018,4 +1018,7 @@
   <data name="SaveHotkeySettingsFailed" xml:space="preserve">
     <value>Не удалось сохранить настройки горячих клавиш.</value>
   </data>
+  <data name="HotkeyInUse" xml:space="preserve">
+    <value>Сочетание {0} уже занято другой программой. Выберите другое.</value>
+  </data>
 </root>

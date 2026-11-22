@@ -214,11 +214,18 @@ namespace SinglePass.WPF.ViewModels
         [RelayCommand]
         private void ChangeHelperPopupHotkey(System.Windows.Input.KeyEventArgs args)
         {
-            if (_hotkeysService.GetHotkeyForKeyPress(args, out Hotkey hotkey))
+            if (!_hotkeysService.GetHotkeyForKeyPress(args, out Hotkey hotkey))
+                return;
+
+            if (_hotkeysService.ApplyPopupHotkey(PopupHotkeyEnabled, hotkey))
             {
-                _hotkeysService.ApplyPopupHotkey(PopupHotkeyEnabled, hotkey);
                 ShowPopupHotkey = hotkey;
+                return;
             }
+
+            // Keep the previous hotkey: the new one belongs to another program.
+            _hotkeysService.ApplyPopupHotkey(PopupHotkeyEnabled, ShowPopupHotkey);
+            ShowHotkeyInUse(hotkey);
         }
 
         [RelayCommand]
@@ -233,8 +240,17 @@ namespace SinglePass.WPF.ViewModels
             if (_hotkeysService is null)
                 return;
 
-            _hotkeysService.ApplyPopupHotkey(value, ShowPopupHotkey);
+            if (!_hotkeysService.ApplyPopupHotkey(value, ShowPopupHotkey))
+                ShowHotkeyInUse(ShowPopupHotkey);
+
             SavePopupHotkeySettings();
+        }
+
+        private static void ShowHotkeyInUse(Hotkey hotkey)
+        {
+            _ = MessageDialog.ShowAsync(Resources.Error,
+                string.Format(LocalizationManager.Instance["HotkeyInUse"], hotkey),
+                MessageDialogButtons.OK, "\uEA39");
         }
 
         private async void SavePopupHotkeySettings()

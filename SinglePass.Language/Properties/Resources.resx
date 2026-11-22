@@ -998,4 +998,7 @@ Sync to update the cloud copy and other devices.</value>
   <data name="SaveHotkeySettingsFailed" xml:space="preserve">
     <value>Could not save the hotkey settings.</value>
   </data>
+  <data name="HotkeyInUse" xml:space="preserve">
+    <value>{0} is already used by another program. Choose another key combination.</value>
+  </data>
 </root>

@@ -102,7 +102,7 @@ namespace SinglePass.WPF.ViewModels
         {
             // Before _windowsHello is set: loading the state must not turn Windows Hello unlock on or off.
             IsWindowsHelloAvailable = WindowsHelloUnlock.IsAvailable;
-            WindowsHelloEnabled = WindowsHelloUnlock.IsEnabled;
+            WindowsHelloEnabled = windowsHello.IsEnabled;
             _windowsHello = windowsHello;
             // Before _sshAgent is set: loading the setting must not start or stop the agent.
             SshAgentEnabled = appSettingsService.Settings.SshAgentEnabled;
@@ -270,10 +270,19 @@ namespace SinglePass.WPF.ViewModels
             if (_windowsHello is null || _revertingWindowsHello)
                 return;
 
-            if (value)
-                _ = EnableWindowsHelloAsync();
-            else
-                _windowsHello.Disable();
+            _ = value ? EnableWindowsHelloAsync() : DisableWindowsHelloAsync();
+        }
+
+        private async Task DisableWindowsHelloAsync()
+        {
+            try
+            {
+                await _windowsHello.DisableAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to turn Windows Hello unlock off");
+            }
         }
 
         private async Task EnableWindowsHelloAsync()

@@ -30,6 +30,9 @@ namespace SinglePass.WPF.Settings
         /// <summary>Serve the SSH keys of the vault to ssh, git and other programs (see SshAgentServer).</summary>
         public bool SshAgentEnabled { get; set; } = true;
 
+        /// <summary>Reopen a locked vault with Windows Hello (see WindowsHelloUnlock).</summary>
+        public bool WindowsHelloEnabled { get; set; }
+
         /// <summary>Time of the last successful sync on this device, per cloud.</summary>
         public Dictionary<CloudType, DateTimeOffset> LastSyncTimes { get; set => field = value ?? new(); } = new();
 

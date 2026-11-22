@@ -993,7 +993,7 @@ Sync to update the cloud copy and other devices.</value>
     <value>Unlock with Windows Hello</value>
   </data>
   <data name="WindowsHelloDescription" xml:space="preserve">
-    <value>Open the vault with your Windows PIN, fingerprint or face instead of the master password. The master password is still required every 14 days, so keep remembering it.</value>
+    <value>Reopen the locked vault with your Windows PIN, fingerprint or face. The master password is still required after SinglePass or Windows restarts and every 14 days.</value>
   </data>
   <data name="WindowsHelloUnavailable" xml:space="preserve">
     <value>Set up Windows Hello (at least a PIN) in Windows Settings → Accounts → Sign-in options to use it here.</value>

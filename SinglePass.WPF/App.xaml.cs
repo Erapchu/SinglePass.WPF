@@ -289,7 +289,8 @@ namespace SinglePass.WPF
 
             _vaultScope = _rootServices.CreateScope();
             Services = _vaultScope.ServiceProvider;
-            var login = new LoginWindow(new LoginWindowViewModel(() => Task.FromResult(Services), true));
+            var login = new LoginWindow(new LoginWindowViewModel(() => Task.FromResult(Services), true,
+                _rootServices.GetRequiredService<WindowsHelloUnlock>().IsOffered));
             _loginWindow = login;
             var accepted = login.ShowDialog() == true;
             _loginWindow = null;

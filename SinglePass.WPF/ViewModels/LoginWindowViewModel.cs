@@ -54,11 +54,14 @@ namespace SinglePass.WPF.ViewModels
         /// <summary>The window over which Windows shows the Windows Hello prompt.</summary>
         internal IntPtr OwnerHandle { get; set; }
 
-        internal LoginWindowViewModel(Func<Task<IServiceProvider>> prepareServices, bool credentialsFileExists)
+        /// <param name="windowsHelloOffered">
+        /// Offer Windows Hello: it is turned on and holds the master password typed earlier in this run (<see cref="WindowsHelloUnlock.IsOffered"/>).
+        /// </param>
+        internal LoginWindowViewModel(Func<Task<IServiceProvider>> prepareServices, bool credentialsFileExists, bool windowsHelloOffered = false)
         {
             _prepareServices = prepareServices;
             _allowCreate = !credentialsFileExists;
-            WindowsHelloOffered = credentialsFileExists && WindowsHelloUnlock.IsOffered();
+            WindowsHelloOffered = credentialsFileExists && windowsHelloOffered;
             HintText = !credentialsFileExists
                 ? SinglePass.Language.Properties.Resources.NewPassword
                 : SinglePass.Language.Properties.Resources.Password;

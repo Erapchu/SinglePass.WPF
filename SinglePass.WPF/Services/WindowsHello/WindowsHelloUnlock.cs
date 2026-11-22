@@ -1,13 +1,11 @@
 using Microsoft.Extensions.Logging;
-using SinglePass.Core.Helpers;
 using SinglePass.Core.Localization;
 using SinglePass.Core.Services;
+using SinglePass.WPF.Settings;
 using System;
 using System.ComponentModel;
-using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace SinglePass.WPF.Services.WindowsHello
@@ -22,146 +20,129 @@ namespace SinglePass.WPF.Services.WindowsHello
     }
 
     /// <summary>
-    /// Unlocks the vault with Windows Hello instead of the master password.
+    /// Reopens a locked vault with Windows Hello instead of the master password.
     /// <para>
-    /// The master password is kept in <c>windowsHello.dat</c>, encrypted with AES-256-GCM under a random key, which in turn
-    /// is encrypted with the public key of a Windows Hello key (<see cref="NgcKey"/>). Only that key can decrypt it, and only
-    /// after the user's PIN, fingerprint or face, on this computer. Re-encrypting with the public key needs no prompt, so
-    /// the copy follows password changes silently.
+    /// Nothing is written to disk. After the user types the master password, it is kept in memory only in encrypted form:
+    /// AES-256-GCM under a random key, which is encrypted with the public key of a Windows Hello key (<see cref="NgcKey"/>).
+    /// Only that key can decrypt it, and only after the user's PIN, fingerprint or face. Encrypting with the public key
+    /// needs no prompt, so the copy follows password changes silently.
     /// </para>
     /// <para>
-    /// The master password is still required every <see cref="MasterPasswordInterval"/> so that the user keeps remembering it;
-    /// the time it was last entered is authenticated together with the encrypted password.
+    /// The copy lives as long as the process: after SinglePass or Windows restarts, the master password is required again.
+    /// It is also required <see cref="MasterPasswordInterval"/> after it was last typed, so that the user keeps remembering it
+    /// even when SinglePass runs for weeks.
     /// </para>
     /// </summary>
     public sealed class WindowsHelloUnlock : IMasterPasswordObserver
     {
         public static readonly TimeSpan MasterPasswordInterval = TimeSpan.FromDays(14);
 
-        private const int FormatVersion = 1;
         private const int KeySize = 32;
         private const int NonceSize = 12;
         private const int TagSize = 16;
 
-        internal static string FilePath { get; } = Path.Combine(Constants.LocalAppDataDirectoryPath, "windowsHello.dat");
-
+        private readonly AppSettingsService _settings;
         private readonly ILogger<WindowsHelloUnlock> _logger;
-        private readonly object _fileLock = new();
+        private readonly object _sync = new();
+        private SealedPassword _sealed;
 
-        public WindowsHelloUnlock(ILogger<WindowsHelloUnlock> logger)
+        public WindowsHelloUnlock(AppSettingsService settings, ILogger<WindowsHelloUnlock> logger)
         {
+            _settings = settings;
             _logger = logger;
         }
 
-        /// <summary>Whether the user has set up Windows Hello on this computer.</summary>
+        /// <summary>Whether the user has set up Windows Hello (at least a PIN) on this computer.</summary>
         public static bool IsAvailable => NgcKey.IsAvailable();
 
-        /// <summary>Whether Windows Hello unlock is turned on for this vault.</summary>
-        public static bool IsEnabled => File.Exists(FilePath);
+        /// <summary>Whether Windows Hello unlock is turned on in Settings.</summary>
+        public bool IsEnabled => _settings.Settings.WindowsHelloEnabled;
 
         /// <summary>Whether the unlock window should offer Windows Hello instead of the master password right now.</summary>
-        public static bool IsOffered()
+        public bool IsOffered
         {
-            try
+            get
             {
-                var stored = Read();
-                return stored is not null && DateTimeOffset.UtcNow - stored.PasswordEnteredAt < MasterPasswordInterval && IsAvailable;
-            }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
-            {
-                return false;
+                SealedPassword current;
+                lock (_sync)
+                    current = _sealed;
+                return IsEnabled && current is not null && DateTimeOffset.UtcNow - current.EnteredAt < MasterPasswordInterval;
             }
         }
 
         /// <summary>
-        /// Creates the Windows Hello key, which shows the Windows Hello prompt, and stores <paramref name="password"/>.
+        /// Creates the Windows Hello key, which shows the Windows Hello prompt over <paramref name="owner"/>,
+        /// keeps <paramref name="password"/> for the next unlock and saves the setting.
         /// Returns false when the user cancelled the prompt.
         /// </summary>
-        public Task<bool> EnableAsync(string password, IntPtr owner) => Task.Run(() =>
+        public async Task<bool> EnableAsync(string password, IntPtr owner)
         {
             byte[] publicKey;
             try
             {
-                publicKey = NgcKey.Create(owner, Prompt);
+                publicKey = await Task.Run(() => NgcKey.Create(owner, Prompt));
             }
             catch (Win32Exception ex) when (IsCancellation(ex))
             {
                 return false;
             }
 
-            Store(publicKey, password);
+            Seal(publicKey, password);
+            _settings.Settings.WindowsHelloEnabled = true;
+            await _settings.Save();
             _logger.LogInformation("Windows Hello unlock was turned on");
             return true;
-        });
+        }
 
-        /// <summary>Turns Windows Hello unlock off: forgets the stored password and deletes the key.</summary>
-        public void Disable()
+        /// <summary>Turns Windows Hello unlock off: forgets the kept password, deletes the key and saves the setting.</summary>
+        public async Task DisableAsync()
         {
-            lock (_fileLock)
-            {
-                try
-                {
-                    File.Delete(FilePath);
-                }
-                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-                {
-                    _logger.LogError(ex, "Failed to delete the Windows Hello unlock data");
-                }
-            }
-
-            NgcKey.Delete();
+            lock (_sync)
+                _sealed = null;
+            await Task.Run(NgcKey.Delete);
+            _settings.Settings.WindowsHelloEnabled = false;
+            await _settings.Save();
             _logger.LogInformation("Windows Hello unlock was turned off");
         }
 
         /// <summary>
-        /// Updates the stored password after the user typed the master password, which also restarts
-        /// <see cref="MasterPasswordInterval"/>. Does nothing while Windows Hello unlock is off.
+        /// Keeps the master password the user just typed for the next unlock and restarts <see cref="MasterPasswordInterval"/>.
+        /// Does nothing while Windows Hello unlock is off.
         /// </summary>
         public void Remember(string password)
         {
+            if (!IsEnabled)
+                return;
+
             try
             {
-                var stored = Read();
-                if (stored is not null)
-                    Store(stored.PublicKey, password);
+                Seal(NgcKey.GetPublicKey(), password);
             }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException or CryptographicException)
+            catch (Exception ex) when (ex is Win32Exception or CryptographicException)
             {
-                _logger.LogError(ex, "Failed to update the Windows Hello unlock data");
+                // Without the key the vault reopens with the master password; unlocking with Windows Hello reports why.
+                lock (_sync)
+                    _sealed = null;
+                _logger.LogError(ex, "Failed to keep the master password for Windows Hello unlock");
             }
         }
 
+        // A password change or a password adopted by sync: the user typed it on this device.
         void IMasterPasswordObserver.OnMasterPasswordChanged(string password) => Remember(password);
 
         /// <summary>Asks for the Windows Hello gesture over <paramref name="owner"/> and returns the master password.</summary>
-        internal Task<(WindowsHelloOutcome Outcome, string Password)> UnlockAsync(IntPtr owner) => Task.Run(() =>
+        internal async Task<(WindowsHelloOutcome Outcome, string Password)> UnlockAsync(IntPtr owner)
         {
-            StoredPassword stored;
-            try
-            {
-                stored = Read();
-            }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
-            {
-                _logger.LogError(ex, "Failed to read the Windows Hello unlock data");
-                return (WindowsHelloOutcome.Failed, null);
-            }
-
-            if (stored is null)
+            SealedPassword current;
+            lock (_sync)
+                current = _sealed;
+            if (current is null)
                 return (WindowsHelloOutcome.Failed, null);
 
-            byte[] key = null;
-            byte[] plaintext = null;
             try
             {
-                key = NgcKey.Decrypt(stored.WrappedKey, owner, Prompt);
-                if (key.Length != KeySize)
-                    throw new CryptographicException("Unexpected Windows Hello unlock key size.");
-
-                plaintext = new byte[stored.Ciphertext.Length];
-                using (var aes = new AesGcm(key, TagSize))
-                    aes.Decrypt(stored.Nonce, stored.Ciphertext, stored.Tag, plaintext, AssociatedData(stored.PasswordEnteredAt));
-                return (WindowsHelloOutcome.Unlocked, Encoding.UTF8.GetString(plaintext));
+                var password = await Task.Run(() => Unseal(current, owner));
+                return (WindowsHelloOutcome.Unlocked, password);
             }
             catch (Win32Exception ex) when (IsCancellation(ex))
             {
@@ -170,7 +151,7 @@ namespace SinglePass.WPF.Services.WindowsHello
             catch (Win32Exception ex) when (IsKeyLost(ex))
             {
                 _logger.LogWarning(ex, "The Windows Hello key is no longer usable; Windows Hello unlock is turned off");
-                Disable();
+                await DisableAsync();
                 return (WindowsHelloOutcome.KeyLost, null);
             }
             catch (Exception ex) when (ex is Win32Exception or CryptographicException)
@@ -178,20 +159,12 @@ namespace SinglePass.WPF.Services.WindowsHello
                 _logger.LogError(ex, "Windows Hello unlock failed");
                 return (WindowsHelloOutcome.Failed, null);
             }
-            finally
-            {
-                if (key is not null)
-                    CryptographicOperations.ZeroMemory(key);
-                if (plaintext is not null)
-                    CryptographicOperations.ZeroMemory(plaintext);
-            }
-        });
+        }
 
         private static string Prompt => LocalizationManager.Instance["WindowsHelloPrompt"];
 
-        private void Store(byte[] publicKey, string password)
+        private void Seal(byte[] publicKey, string password)
         {
-            var enteredAt = DateTimeOffset.UtcNow;
             var key = RandomNumberGenerator.GetBytes(KeySize);
             var nonce = RandomNumberGenerator.GetBytes(NonceSize);
             var plaintext = Encoding.UTF8.GetBytes(password);
@@ -200,7 +173,7 @@ namespace SinglePass.WPF.Services.WindowsHello
                 var ciphertext = new byte[plaintext.Length];
                 var tag = new byte[TagSize];
                 using (var aes = new AesGcm(key, TagSize))
-                    aes.Encrypt(nonce, plaintext, ciphertext, tag, AssociatedData(enteredAt));
+                    aes.Encrypt(nonce, plaintext, ciphertext, tag);
 
                 byte[] wrappedKey;
                 using (var rsa = RSA.Create())
@@ -209,7 +182,8 @@ namespace SinglePass.WPF.Services.WindowsHello
                     wrappedKey = rsa.Encrypt(key, RSAEncryptionPadding.Pkcs1);
                 }
 
-                Write(new StoredPassword(FormatVersion, publicKey, wrappedKey, nonce, tag, ciphertext, enteredAt));
+                lock (_sync)
+                    _sealed = new SealedPassword(wrappedKey, nonce, tag, ciphertext, DateTimeOffset.UtcNow);
             }
             finally
             {
@@ -218,40 +192,25 @@ namespace SinglePass.WPF.Services.WindowsHello
             }
         }
 
-        private static byte[] AssociatedData(DateTimeOffset enteredAt)
+        private static string Unseal(SealedPassword sealedPassword, IntPtr owner)
         {
-            var data = new byte[sizeof(int) + sizeof(long)];
-            BitConverter.TryWriteBytes(data, FormatVersion);
-            BitConverter.TryWriteBytes(data.AsSpan(sizeof(int)), enteredAt.UtcTicks);
-            return data;
-        }
-
-        private static StoredPassword Read()
-        {
-            if (!File.Exists(FilePath))
-                return null;
-
-            var stored = JsonSerializer.Deserialize<StoredPassword>(File.ReadAllBytes(FilePath));
-            return stored is { Version: FormatVersion, PublicKey: not null, WrappedKey: not null, Nonce.Length: NonceSize, Tag.Length: TagSize, Ciphertext: not null }
-                ? stored
-                : throw new JsonException("Unsupported Windows Hello unlock data.");
-        }
-
-        private void Write(StoredPassword stored)
-        {
-            lock (_fileLock)
+            byte[] key = null;
+            var plaintext = new byte[sealedPassword.Ciphertext.Length];
+            try
             {
-                var tempPath = $"{FilePath}.{Guid.NewGuid():N}.tmp";
-                try
-                {
-                    File.WriteAllBytes(tempPath, JsonSerializer.SerializeToUtf8Bytes(stored));
-                    File.Move(tempPath, FilePath, overwrite: true);
-                }
-                catch
-                {
-                    try { File.Delete(tempPath); } catch (IOException) { } catch (UnauthorizedAccessException) { }
-                    throw;
-                }
+                key = NgcKey.Decrypt(sealedPassword.WrappedKey, owner, Prompt);
+                if (key.Length != KeySize)
+                    throw new CryptographicException("Unexpected Windows Hello unlock key size.");
+
+                using var aes = new AesGcm(key, TagSize);
+                aes.Decrypt(sealedPassword.Nonce, sealedPassword.Ciphertext, sealedPassword.Tag, plaintext);
+                return Encoding.UTF8.GetString(plaintext);
+            }
+            finally
+            {
+                if (key is not null)
+                    CryptographicOperations.ZeroMemory(key);
+                CryptographicOperations.ZeroMemory(plaintext);
             }
         }
 
@@ -263,7 +222,6 @@ namespace SinglePass.WPF.Services.WindowsHello
             ex.NativeErrorCode is NgcKey.NoKey or NgcKey.BadKeyset or NgcKey.NotFound ||
             (ex.NativeErrorCode & unchecked((int)0xFFFF0000)) == unchecked((int)0x80280000);
 
-        private sealed record StoredPassword(
-            int Version, byte[] PublicKey, byte[] WrappedKey, byte[] Nonce, byte[] Tag, byte[] Ciphertext, DateTimeOffset PasswordEnteredAt);
+        private sealed record SealedPassword(byte[] WrappedKey, byte[] Nonce, byte[] Tag, byte[] Ciphertext, DateTimeOffset EnteredAt);
     }
 }

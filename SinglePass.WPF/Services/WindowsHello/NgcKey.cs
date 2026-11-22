@@ -32,6 +32,7 @@ namespace SinglePass.WPF.Services.WindowsHello
         private const int AllowSigning = 0x2;
         private const int CacheAuthMandatory = 0x1; // ask for the gesture on every use
         private const int OverwriteKey = 0x80;
+        private const int Silent = 0x40; // NCRYPT_SILENT_FLAG: fail instead of showing UI
         private const int PadPkcs1 = 0x2;
         private const int RsaPublicMagic = 0x31415352; // "RSA1"
 
@@ -76,6 +77,15 @@ namespace SinglePass.WPF.Services.WindowsHello
                 Check(NCryptFinalizeKey(key, 0));
                 return ExportPublicKey(key);
             }
+        }
+
+        /// <summary>Returns the public key (SubjectPublicKeyInfo) of the existing key without any prompt.</summary>
+        internal static byte[] GetPublicKey()
+        {
+            using var provider = OpenProvider();
+            Check(NCryptOpenKey(provider, out var key, KeyName, 0, Silent));
+            using (key)
+                return ExportPublicKey(key);
         }
 
         /// <summary>Decrypts PKCS#1 v1.5 data with the private key, which asks for the Windows Hello gesture.</summary>

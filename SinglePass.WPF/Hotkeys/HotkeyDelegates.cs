@@ -54,6 +54,9 @@ namespace SinglePass.WPF.Hotkeys
                 popup.Top = caretRect.bottom * DpiUtilities.DefaultDpiY / dpiAtPoint;
                 WindowPositionHelper.ShiftWindowToScreen(popup);
                 popup.ForegroundHWND = hwndFocus;
+                // The popup pastes only into this window; see PopupViewModel.ActivateTargetWindowAsync.
+                popup.TargetWindow = WinApiProvider.GetAncestor(
+                    hwndFocus != IntPtr.Zero ? hwndFocus : info.hwndActive, WinApiProvider.GA_ROOT);
                 popup.Show();
                 var popuHandle = new WindowInteropHelper(popup).EnsureHandle();
                 WinApiProvider.SetForegroundWindow(popuHandle);

@@ -6,8 +6,8 @@ using SinglePass.WPF.Helpers;
 using SinglePass.WPF.Services;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -49,6 +49,23 @@ namespace SinglePass.WPF.ViewModels
 
         public IntPtr ForegroundHWND { get; set; }
 
+        /// <summary>
+        /// The top-level window that was active when the popup opened. Credentials are pasted only into it.
+        /// </summary>
+        public IntPtr TargetWindow { get; set; }
+
+        private static readonly TimeSpan TargetActivationTimeout = TimeSpan.FromMilliseconds(500);
+        private static readonly TimeSpan TargetActivationPollInterval = TimeSpan.FromMilliseconds(20);
+        private static readonly TimeSpan PasteDelay = TimeSpan.FromMilliseconds(100);
+
+        private static readonly INPUT[] CtrlV =
+        [
+            KeyInput(WindowsKeyboard.VK_CONTROL), KeyInput(WindowsKeyboard.VK_V),
+            KeyInput(WindowsKeyboard.VK_V, up: true), KeyInput(WindowsKeyboard.VK_CONTROL, up: true)
+        ];
+
+        private static readonly INPUT[] TabCtrlV = [KeyInput(WindowsKeyboard.VK_TAB), KeyInput(WindowsKeyboard.VK_TAB, up: true), .. CtrlV];
+
         private PopupViewModel() { }
 
         public PopupViewModel(
@@ -68,64 +85,30 @@ namespace SinglePass.WPF.ViewModels
         }
 
         [RelayCommand]
-        private void SetFullAndClose(CredentialViewModel credentialViewModel)
+        private async Task SetFullAndCloseAsync(CredentialViewModel credentialViewModel)
         {
             try
             {
                 Accept?.Invoke();
+                if (!await ActivateTargetWindowAsync())
+                    return;
 
                 WindowsClipboard.SetText(credentialViewModel.Login.LoginFieldVM.Value);
+                SendKeys(CtrlV);
 
-                INPUT[] inputs = new INPUT[4];
+                // Let the target read the login from the clipboard before it is replaced with the password
+                await Task.Delay(PasteDelay);
 
-                // Ctrl+V
-                inputs[0].type = WindowsKeyboard.INPUT_KEYBOARD;
-                inputs[0].U.ki.wVk = WindowsKeyboard.VK_CONTROL;
-
-                inputs[1].type = WindowsKeyboard.INPUT_KEYBOARD;
-                inputs[1].U.ki.wVk = WindowsKeyboard.VK_V;
-
-                inputs[2].type = WindowsKeyboard.INPUT_KEYBOARD;
-                inputs[2].U.ki.wVk = WindowsKeyboard.VK_V;
-                inputs[2].U.ki.dwFlags = WindowsKeyboard.KEYEVENTF_KEYUP;
-
-                inputs[3].type = WindowsKeyboard.INPUT_KEYBOARD;
-                inputs[3].U.ki.wVk = WindowsKeyboard.VK_CONTROL;
-                inputs[3].U.ki.dwFlags = WindowsKeyboard.KEYEVENTF_KEYUP;
-
-                var uSent = WindowsKeyboard.SendInput((uint)inputs.Length, inputs, INPUT.Size);
-
-                // Pause between Ctrl+V and set clipboard
-                Thread.Sleep(100);
+                // Focus may have moved while the login was pasted: check again before the password leaves the vault
+                if (!IsTargetWindowActive())
+                {
+                    _logger.LogWarning("The target window lost focus after the login was pasted; the password was not pasted.");
+                    WindowsClipboard.ClearIfOwned();
+                    return;
+                }
 
                 WindowsClipboard.SetText(credentialViewModel.Login.PasswordFieldVM.Value);
-
-                inputs = new INPUT[6];
-
-                // Tab
-                inputs[0].type = WindowsKeyboard.INPUT_KEYBOARD;
-                inputs[0].U.ki.wVk = WindowsKeyboard.VK_TAB;
-
-                inputs[1].type = WindowsKeyboard.INPUT_KEYBOARD;
-                inputs[1].U.ki.wVk = WindowsKeyboard.VK_TAB;
-                inputs[1].U.ki.dwFlags = WindowsKeyboard.KEYEVENTF_KEYUP;
-
-                // Ctrl+V
-                inputs[2].type = WindowsKeyboard.INPUT_KEYBOARD;
-                inputs[2].U.ki.wVk = WindowsKeyboard.VK_CONTROL;
-
-                inputs[3].type = WindowsKeyboard.INPUT_KEYBOARD;
-                inputs[3].U.ki.wVk = WindowsKeyboard.VK_V;
-
-                inputs[4].type = WindowsKeyboard.INPUT_KEYBOARD;
-                inputs[4].U.ki.wVk = WindowsKeyboard.VK_V;
-                inputs[4].U.ki.dwFlags = WindowsKeyboard.KEYEVENTF_KEYUP;
-
-                inputs[5].type = WindowsKeyboard.INPUT_KEYBOARD;
-                inputs[5].U.ki.wVk = WindowsKeyboard.VK_CONTROL;
-                inputs[5].U.ki.dwFlags = WindowsKeyboard.KEYEVENTF_KEYUP;
-
-                uSent = WindowsKeyboard.SendInput((uint)inputs.Length, inputs, INPUT.Size);
+                SendKeys(TabCtrlV);
             }
             catch (Exception ex)
             {
@@ -134,41 +117,69 @@ namespace SinglePass.WPF.ViewModels
         }
 
         [RelayCommand]
-        private void SetAndClose(PassFieldViewModel passFieldViewModel)
+        private async Task SetAndCloseAsync(PassFieldViewModel passFieldViewModel)
         {
             try
             {
                 Accept?.Invoke();
 
                 var inputData = passFieldViewModel.Value;
-                if (!string.IsNullOrWhiteSpace(inputData))
-                {
-                    WindowsClipboard.SetText(inputData);
+                if (string.IsNullOrWhiteSpace(inputData) || !await ActivateTargetWindowAsync())
+                    return;
 
-                    INPUT[] inputs = new INPUT[4];
-
-                    inputs[0].type = WindowsKeyboard.INPUT_KEYBOARD;
-                    inputs[0].U.ki.wVk = WindowsKeyboard.VK_CONTROL;
-
-                    inputs[1].type = WindowsKeyboard.INPUT_KEYBOARD;
-                    inputs[1].U.ki.wVk = WindowsKeyboard.VK_V;
-
-                    inputs[2].type = WindowsKeyboard.INPUT_KEYBOARD;
-                    inputs[2].U.ki.wVk = WindowsKeyboard.VK_V;
-                    inputs[2].U.ki.dwFlags = WindowsKeyboard.KEYEVENTF_KEYUP;
-
-                    inputs[3].type = WindowsKeyboard.INPUT_KEYBOARD;
-                    inputs[3].U.ki.wVk = WindowsKeyboard.VK_CONTROL;
-                    inputs[3].U.ki.dwFlags = WindowsKeyboard.KEYEVENTF_KEYUP;
-
-                    // Send input simulate Ctrl + V
-                    var uSent = WindowsKeyboard.SendInput((uint)inputs.Length, inputs, INPUT.Size);
-                }
+                WindowsClipboard.SetText(inputData);
+                SendKeys(CtrlV);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, null);
             }
+        }
+
+        /// <summary>
+        /// Returns focus to <see cref="TargetWindow"/> after the popup closes and waits until it is the foreground window.
+        /// Returns false when another window took the focus, so that nothing is pasted into it.
+        /// </summary>
+        private async Task<bool> ActivateTargetWindowAsync()
+        {
+            if (TargetWindow == IntPtr.Zero)
+            {
+                _logger.LogWarning("The window to paste into is unknown; nothing was pasted.");
+                return false;
+            }
+
+            if (!IsTargetWindowActive())
+                WinApiProvider.SetForegroundWindow(TargetWindow);
+
+            var started = Stopwatch.GetTimestamp();
+            while (!IsTargetWindowActive())
+            {
+                if (Stopwatch.GetElapsedTime(started) >= TargetActivationTimeout)
+                {
+                    _logger.LogWarning("Another window is in the foreground; nothing was pasted.");
+                    return false;
+                }
+
+                await Task.Delay(TargetActivationPollInterval);
+            }
+
+            return true;
+        }
+
+        private bool IsTargetWindowActive() => WinApiProvider.GetForegroundWindow() == TargetWindow;
+
+        private static void SendKeys(INPUT[] inputs)
+        {
+            WindowsKeyboard.SendInput((uint)inputs.Length, inputs, INPUT.Size);
+        }
+
+        private static INPUT KeyInput(byte virtualKey, bool up = false)
+        {
+            var input = new INPUT { type = WindowsKeyboard.INPUT_KEYBOARD };
+            input.U.ki.wVk = virtualKey;
+            if (up)
+                input.U.ki.dwFlags = WindowsKeyboard.KEYEVENTF_KEYUP;
+            return input;
         }
 
         [RelayCommand]

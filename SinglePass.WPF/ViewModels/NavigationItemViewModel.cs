@@ -25,6 +25,9 @@ namespace SinglePass.WPF.ViewModels
         private readonly string _glyph;
         public PasswordGroup Group { get; private set; }
 
+        /// <summary>Entry type this item shows (a category), or null. An item is a category or a group, not both.</summary>
+        public CredentialType? Category { get; }
+
         private bool _isSelected;
         public bool IsSelected
         {
@@ -65,6 +68,16 @@ namespace SinglePass.WPF.ViewModels
             _nameKey = nameKey;
             _glyph = glyph;
             _lazyContent = new Lazy<Control>(createContent);
+            PropertyChangedEventManager.AddHandler(LocalizationManager.Instance, OnLanguageChanged, "Item[]");
+        }
+
+        /// <summary>A category: the entries of one type, shown in the same list as all entries.</summary>
+        public NavigationItemViewModel(string nameKey, string glyph, CredentialType category, NavigationItemViewModel passwords)
+        {
+            _nameKey = nameKey;
+            _glyph = glyph;
+            Category = category;
+            _lazyContent = passwords._lazyContent;
             PropertyChangedEventManager.AddHandler(LocalizationManager.Instance, OnLanguageChanged, "Item[]");
         }
 

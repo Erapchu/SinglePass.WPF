@@ -116,19 +116,34 @@
                                 Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" />
                     </Border>
                 </StackPanel>
-                <DockPanel>
-                    <DockPanel DockPanel.Dock="Top" Margin="12,6,4,4">
-                        <Button DockPanel.Dock="Right" Width="28" Height="28" Padding="0" Background="Transparent" BorderThickness="0" Click="AddGroup_Click"
-                                AutomationProperties.Name="{Binding [AddPasswordGroup], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
-                                ToolTip="{Binding [AddPasswordGroup], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}">
-                            <TextBlock Style="{StaticResource SymbolText}" FontSize="12" Text="&#xE710;" />
-                        </Button>
-                        <TextBlock VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"
+                <!-- Categories and groups scroll together, so a short window still reaches every item.
+                     One item is selected in the whole sidebar: a category, a group, all entries or settings. -->
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" Focusable="False">
+                    <StackPanel>
+                        <TextBlock Margin="12,10,4,6" FontSize="12" FontWeight="SemiBold"
                                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                                   Text="{Binding [PasswordGroups], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
-                    </DockPanel>
-                    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" Focusable="False">
-                        <ItemsControl ItemsSource="{Binding GroupNavigation}">
+                                   Text="{Binding [Categories], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
+                        <ItemsControl ItemsSource="{Binding CategoryNavigation}" Focusable="False">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource NavigationRow}">
+                                        <Button Style="{StaticResource NavigationButton}" Content="{Binding}" ContentTemplate="{StaticResource NavigationItemTemplate}"
+                                                Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" />
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <DockPanel Margin="12,6,4,4">
+                            <Button DockPanel.Dock="Right" Width="28" Height="28" Padding="0" Background="Transparent" BorderThickness="0" Click="AddGroup_Click"
+                                    AutomationProperties.Name="{Binding [AddPasswordGroup], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                                    ToolTip="{Binding [AddPasswordGroup], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}">
+                                <TextBlock Style="{StaticResource SymbolText}" FontSize="12" Text="&#xE710;" />
+                            </Button>
+                            <TextBlock VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                       Text="{Binding [PasswordGroups], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
+                        </DockPanel>
+                        <ItemsControl ItemsSource="{Binding GroupNavigation}" Focusable="False">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Border x:Name="GroupRow" Style="{StaticResource NavigationRow}"
@@ -176,8 +191,8 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
-                    </ScrollViewer>
-                </DockPanel>
+                    </StackPanel>
+                </ScrollViewer>
             </DockPanel>
             <DockPanel Grid.Column="1" ClipToBounds="True">
                 <TextBlock x:Name="PasswordsHeading" DockPanel.Dock="Top" Margin="2,4,8,8" Height="39"

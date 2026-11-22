@@ -1,5 +1,6 @@
 using SinglePass.WPF.ViewModels;
 using System;
+using System.Linq;
 using Unidecode.NET;
 
 namespace SinglePass.WPF.Helpers
@@ -17,9 +18,8 @@ namespace SinglePass.WPF.Helpers
 
         public bool Matches(CredentialViewModel credential) =>
             Matches(credential.NameFieldVM.Value)
-            || Matches(credential.LoginFieldVM.Value)
-            || Matches(credential.SiteFieldVM.Value)
-            || Matches(credential.OtherFieldVM.Value);
+            || Matches(credential.OtherFieldVM.Value)
+            || credential.Data.SearchableTexts.Any(Matches);
 
         private bool Matches(string value) =>
             value is not null

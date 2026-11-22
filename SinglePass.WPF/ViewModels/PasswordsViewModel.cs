@@ -9,6 +9,7 @@ using SinglePass.Core.Models;
 using SinglePass.WPF.Services;
 using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels.Dialogs;
+using SinglePass.WPF.ViewModels.Entries;
 using SinglePass.WPF.Views.Helpers;
 using System;
 using System.Collections.Generic;
@@ -36,8 +37,8 @@ namespace SinglePass.WPF.ViewModels
             var vm = new PasswordsViewModel();
             var cred = Credential.CreateNew();
             cred.NameField.Value = "Test";
-            cred.LoginField.Value = "TestLogin";
-            cred.PasswordField.Value = "TestPass";
+            cred.Login.LoginField.Value = "TestLogin";
+            cred.Login.PasswordField.Value = "TestPass";
             cred.OtherField.Value = "TestOther";
             var credVm = new CredentialViewModel(cred, null);
             vm.DisplayedCredentials.Add(credVm);
@@ -53,6 +54,12 @@ namespace SinglePass.WPF.ViewModels
         private Task _initialLoad;
         private Guid? _selectedGroupId;
 
+        /// <summary>
+        /// Entry type the list is limited to (a category in the sidebar), or null for all types.
+        /// The sidebar selects either a category or a group, never both.
+        /// </summary>
+        public CredentialType? SelectedCategory { get; private set; }
+
         public IReadOnlyList<PasswordGroup> PasswordGroups => _credentialsCryptoService?.PasswordGroups ?? [];
 
         internal bool IsSavingGroups { get; private set; }
@@ -63,6 +70,8 @@ namespace SinglePass.WPF.ViewModels
         public event Action<CredentialViewModel> CredentialSelected;
         public event Action<CredentialViewModel> ScrollIntoViewRequired;
         public event Action<string> StatusMessageRequested;
+
+        internal void ShowStatus(string message) => StatusMessageRequested?.Invoke(message);
 
         public ObservableCollectionDelayed<CredentialViewModel> DisplayedCredentials { get; private set; } = new();
         public ListCollectionView GroupedCredentials { get; private set; }
@@ -238,12 +247,15 @@ namespace SinglePass.WPF.ViewModels
 
         public Task LoadInitialCredentialsAsync() => _initialLoad ??= LoadInitialCredentialsCoreAsync();
 
-        internal void SelectGroup(Guid? groupId)
+        /// <summary>Limits the list to a group or to an entry type; both null shows every entry.</summary>
+        internal void SelectFilter(Guid? groupId, CredentialType? category)
         {
-            if (_selectedGroupId == groupId)
+            if (_selectedGroupId == groupId && SelectedCategory == category)
                 return;
 
             _selectedGroupId = groupId;
+            SelectedCategory = category;
+            OnPropertyChanged(nameof(SelectedCategory));
             _ = DisplayCredentialsAsync(keepSelection: true);
         }
 
@@ -343,11 +355,14 @@ namespace SinglePass.WPF.ViewModels
                 var order = Order;
                 var credentials = _credentialVMs.ToList();
                 var groupId = _selectedGroupId;
+                var category = SelectedCategory;
                 var assignments = _credentialsCryptoService?.GroupAssignments;
                 var filtered = await Task.Run(() =>
                 {
                     if (groupId.HasValue)
                         credentials.RemoveAll(item => !assignments.TryGetValue(item.Model.Id, out var assignedGroupId) || assignedGroupId != groupId);
+                    if (category.HasValue)
+                        credentials.RemoveAll(item => item.Type != category);
 
                     if (!string.IsNullOrEmpty(filterText))
                     {
@@ -382,7 +397,7 @@ namespace SinglePass.WPF.ViewModels
         private bool CanAdd() => !IsSavingEdit;
 
         [RelayCommand(CanExecute = nameof(CanAdd))]
-        private async Task Add(CancellationToken cancellationToken)
+        private async Task Add(CredentialType type, CancellationToken cancellationToken)
         {
             if (_initialLoad is not null)
                 await _initialLoad;
@@ -391,7 +406,7 @@ namespace SinglePass.WPF.ViewModels
                 return;
 
             DraftCredential = null;
-            StartDraft(_credentialViewModelFactory.ProvideNew(Credential.CreateNew()), _selectedGroupId, isNew: true);
+            StartDraft(_credentialViewModelFactory.ProvideNew(Credential.CreateNew(type)), _selectedGroupId, isNew: true);
         }
 
         [RelayCommand]
@@ -525,15 +540,12 @@ namespace SinglePass.WPF.ViewModels
             if (draft.NameFieldVM.HasErrors)
                 return;
 
-            var originalTotp = draft.Model.Totp;
-            var totp = originalTotp;
-            if (draft.RemoveTotp)
-                totp = null;
-            else if (draft.ShowTotpSetup &&
-                     (draft.ReplaceTotp || !string.IsNullOrWhiteSpace(draft.TotpSetupInput)) &&
-                     !TotpService.TryParse(draft.TotpSetupInput ?? string.Empty, out totp))
+            var login = draft.Login;
+            var originalTotp = login?.Model.Totp;
+            TotpConfiguration totp = null;
+            if (login != null && !TryGetEditedTotp(login, out totp))
             {
-                draft.HasInvalidTotp = true;
+                login.HasInvalidTotp = true;
                 return;
             }
 
@@ -544,7 +556,8 @@ namespace SinglePass.WPF.ViewModels
             try
             {
                 draft.LastModifiedTime = DateTime.UtcNow;
-                draft.Model.Totp = totp;
+                if (login != null)
+                    login.Model.Totp = totp;
                 if (isNew)
                     draft.CreationTime = draft.LastModifiedTime;
 
@@ -558,7 +571,8 @@ namespace SinglePass.WPF.ViewModels
                                 await _credentialsCryptoService.EditCredential(draft.Model, groupId, changeGroup));
                     }))
                 {
-                    draft.Model.Totp = originalTotp;
+                    if (login != null)
+                        login.Model.Totp = originalTotp;
                     return;
                 }
 
@@ -569,9 +583,7 @@ namespace SinglePass.WPF.ViewModels
                     _credentialVMs.Add(draft);
 
                 var stillEditingDraft = ReferenceEquals(DraftCredential, draft);
-                draft.TotpSetupInput = null;
-                draft.RemoveTotp = false;
-                draft.ReplaceTotp = false;
+                login?.ResetTotpEditing();
                 if (stillEditingDraft)
                     DraftCredential = null;
 
@@ -582,6 +594,22 @@ namespace SinglePass.WPF.ViewModels
             {
                 IsSavingEdit = false;
             }
+        }
+
+        /// <summary>The TOTP setup the login editor asks for. False when the entered setup cannot be read.</summary>
+        private static bool TryGetEditedTotp(LoginViewModel login, out TotpConfiguration totp)
+        {
+            totp = login.Model.Totp;
+            if (login.RemoveTotp)
+            {
+                totp = null;
+                return true;
+            }
+
+            if (login.ShowTotpSetup && (login.ReplaceTotp || !string.IsNullOrWhiteSpace(login.TotpSetupInput)))
+                return TotpService.TryParse(login.TotpSetupInput ?? string.Empty, out totp);
+
+            return true;
         }
 
         [RelayCommand(CanExecute = nameof(CanEditCredential))]
@@ -649,8 +677,8 @@ namespace SinglePass.WPF.ViewModels
         private void CopyTotp()
         {
             var configuration = IsEditing
-                ? DraftCredential is { ShowCurrentTotp: true } draft ? draft.Totp : null
-                : SelectedCredentialVM?.Totp;
+                ? DraftCredential?.Login is { ShowCurrentTotp: true } draft ? draft.Totp : null
+                : SelectedCredentialVM?.Login?.Totp;
             if (TotpService.TryGetCode(configuration, DateTime.UtcNow, out var code, out _))
                 CopyToClipboard(code);
         }

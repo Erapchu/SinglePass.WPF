@@ -391,7 +391,7 @@
     <value>Без даты</value>
   </data>
   <data name="AllPasswords" xml:space="preserve">
-    <value>Все пароли</value>
+    <value>Все записи</value>
   </data>
   <data name="PasswordGroupsSynchronized" xml:space="preserve">
     <value>Группы паролей обновлены.</value>
@@ -711,5 +711,149 @@
   </data>
   <data name="BackupReasonRestore" xml:space="preserve">
     <value>Перед восстановлением</value>
+  </data>
+  <data name="SshKey" xml:space="preserve">
+    <value>SSH-ключ</value>
+  </data>
+  <data name="PrivateKey" xml:space="preserve">
+    <value>Приватный ключ</value>
+  </data>
+  <data name="PublicKey" xml:space="preserve">
+    <value>Публичный ключ</value>
+  </data>
+  <data name="Passphrase" xml:space="preserve">
+    <value>Парольная фраза</value>
+  </data>
+  <data name="Fingerprint" xml:space="preserve">
+    <value>Отпечаток</value>
+  </data>
+  <data name="CopyPrivateKey" xml:space="preserve">
+    <value>Скопировать приватный ключ</value>
+  </data>
+  <data name="CopyPublicKey" xml:space="preserve">
+    <value>Скопировать публичный ключ</value>
+  </data>
+  <data name="CopyPassphrase" xml:space="preserve">
+    <value>Скопировать парольную фразу</value>
+  </data>
+  <data name="ShowHidePrivateKey" xml:space="preserve">
+    <value>Показать/скрыть приватный ключ</value>
+  </data>
+  <data name="ShowHidePassphrase" xml:space="preserve">
+    <value>Показать/скрыть парольную фразу</value>
+  </data>
+  <data name="SavePrivateKey" xml:space="preserve">
+    <value>Сохранить приватный ключ в файл</value>
+  </data>
+  <data name="ImportSshKey" xml:space="preserve">
+    <value>Импорт из файла</value>
+  </data>
+  <data name="GenerateSshKey" xml:space="preserve">
+    <value>Создать ключ Ed25519</value>
+  </data>
+  <data name="SshKeyEncrypted" xml:space="preserve">
+    <value>Приватный ключ защищён парольной фразой.</value>
+  </data>
+  <data name="InvalidSshKeyFile" xml:space="preserve">
+    <value>Файл не является SSH-ключом.</value>
+  </data>
+  <data name="SshKeyFileTooLarge" xml:space="preserve">
+    <value>Файл слишком большой для SSH-ключа.</value>
+  </data>
+  <data name="PrivateKeySaved" xml:space="preserve">
+    <value>Приватный ключ сохранён</value>
+  </data>
+  <data name="SshKeyFiles" xml:space="preserve">
+    <value>SSH-ключи</value>
+  </data>
+  <data name="AllFiles" xml:space="preserve">
+    <value>Все файлы</value>
+  </data>
+  <data name="Card" xml:space="preserve">
+    <value>Банковская карта</value>
+  </data>
+  <data name="CardNumber" xml:space="preserve">
+    <value>Номер карты</value>
+  </data>
+  <data name="CardHolder" xml:space="preserve">
+    <value>Владелец карты</value>
+  </data>
+  <data name="CardExpiry" xml:space="preserve">
+    <value>Срок действия</value>
+  </data>
+  <data name="CardCvv" xml:space="preserve">
+    <value>CVV/CVC</value>
+  </data>
+  <data name="CardPin" xml:space="preserve">
+    <value>PIN-код</value>
+  </data>
+  <data name="CopyCardNumber" xml:space="preserve">
+    <value>Скопировать номер карты</value>
+  </data>
+  <data name="CopyCardHolder" xml:space="preserve">
+    <value>Скопировать владельца карты</value>
+  </data>
+  <data name="CopyCardExpiry" xml:space="preserve">
+    <value>Скопировать срок действия</value>
+  </data>
+  <data name="CopyCvv" xml:space="preserve">
+    <value>Скопировать CVV/CVC</value>
+  </data>
+  <data name="CopyPin" xml:space="preserve">
+    <value>Скопировать PIN-код</value>
+  </data>
+  <data name="ShowHideCardNumber" xml:space="preserve">
+    <value>Показать/скрыть номер карты</value>
+  </data>
+  <data name="ShowHideCvv" xml:space="preserve">
+    <value>Показать/скрыть CVV/CVC</value>
+  </data>
+  <data name="ShowHidePin" xml:space="preserve">
+    <value>Показать/скрыть PIN-код</value>
+  </data>
+  <data name="CardNumberSuspicious" xml:space="preserve">
+    <value>Номер не прошёл проверку контрольной суммы. Проверьте, нет ли опечатки.</value>
+  </data>
+  <data name="PaymentSystem" xml:space="preserve">
+    <value>Платёжная система</value>
+  </data>
+  <data name="CardBrandOther" xml:space="preserve">
+    <value>Другая</value>
+  </data>
+  <data name="CardBrandDetected" xml:space="preserve">
+    <value>Определена автоматически. Можно изменить вручную.</value>
+  </data>
+  <data name="CardBrandNotDetected" xml:space="preserve">
+    <value>Не удалось определить по номеру. Выберите вручную.</value>
+  </data>
+  <data name="CardBrandFromNumber" xml:space="preserve">
+    <value>Определится автоматически по номеру карты.</value>
+  </data>
+  <data name="CardBrandChosen" xml:space="preserve">
+    <value>Выбрана вручную.</value>
+  </data>
+  <data name="DetectCardBrand" xml:space="preserve">
+    <value>Определять автоматически</value>
+  </data>
+  <data name="CardExpiryInput" xml:space="preserve">
+    <value>Срок (ММ/ГГ)</value>
+  </data>
+  <data name="CardExpiryFormat" xml:space="preserve">
+    <value>Введите срок действия в формате ММ/ГГ.</value>
+  </data>
+  <data name="CardExpired" xml:space="preserve">
+    <value>Срок действия карты истёк.</value>
+  </data>
+  <data name="Categories" xml:space="preserve">
+    <value>Категории</value>
+  </data>
+  <data name="CategoryLogins" xml:space="preserve">
+    <value>Пароли</value>
+  </data>
+  <data name="CategorySshKeys" xml:space="preserve">
+    <value>SSH-ключи</value>
+  </data>
+  <data name="CategoryCards" xml:space="preserve">
+    <value>Банковские карты</value>
   </data>
 </root>

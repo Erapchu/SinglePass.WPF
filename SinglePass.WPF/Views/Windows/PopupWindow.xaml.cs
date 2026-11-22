@@ -82,14 +82,14 @@ namespace SinglePass.WPF.Views.Windows
                 // Ctrl+1
                 if (e.Key == Key.NumPad1 || e.Key == Key.D1)
                 {
-                    ViewModel.SetAndCloseCommand.Execute(ViewModel.SelectedCredentialVM.LoginFieldVM);
+                    ViewModel.SetAndCloseCommand.Execute(ViewModel.SelectedCredentialVM.Login.LoginFieldVM);
                     return;
                 }
 
                 // Ctrl+2
                 if (e.Key == Key.NumPad2 || e.Key == Key.D2)
                 {
-                    ViewModel.SetAndCloseCommand.Execute(ViewModel.SelectedCredentialVM.PasswordFieldVM);
+                    ViewModel.SetAndCloseCommand.Execute(ViewModel.SelectedCredentialVM.Login.PasswordFieldVM);
                     return;
                 }
             }

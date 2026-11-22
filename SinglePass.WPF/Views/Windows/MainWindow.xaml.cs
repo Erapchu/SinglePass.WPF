@@ -1,4 +1,5 @@
-﻿using SinglePass.WPF.Helpers;
+﻿using SinglePass.Core.Models;
+using SinglePass.WPF.Helpers;
 using SinglePass.Core.Localization;
 using SinglePass.WPF.Services;
 using SinglePass.WPF.Settings;
@@ -58,7 +59,6 @@ namespace SinglePass.WPF.Views.Windows
                 }
             }
 
-            mainViewModel.CredentialSelected += Vm_CredentialSelected;
             mainViewModel.ScrollIntoViewRequired += MainViewModel_ScrollIntoViewRequired;
             mainViewModel.PasswordsVM.StatusMessageRequested += ShowStatusMessage;
             mainViewModel.PropertyChanged += ViewModel_PropertyChanged;
@@ -79,8 +79,9 @@ namespace SinglePass.WPF.Views.Windows
         internal void ShowCredentialEditor(CredentialsDetailsControl card, Decorator anchor, Button source, PasswordsViewModel viewModel) =>
             ModalHost.OpenForEdit(card, anchor, source, viewModel);
 
-        internal Task ShowNewCredentialEditorAsync(CredentialsDetailsControl details, Button source, PasswordsViewModel viewModel) =>
-            ModalHost.OpenForAddAsync(details, source, viewModel);
+        internal Task ShowNewCredentialEditorAsync(CredentialsDetailsControl details, Button source, PasswordsViewModel viewModel,
+            CredentialType type) =>
+            ModalHost.OpenForAddAsync(details, source, viewModel, type);
 
         internal void ShowCredentialDeletion(CredentialsDetailsControl details, Decorator anchor, Button source, PasswordsViewModel viewModel) =>
             ModalHost.OpenForDelete(details, anchor, source, viewModel);
@@ -318,15 +319,6 @@ namespace SinglePass.WPF.Views.Windows
         {
             _statusTimer.Stop();
             StatusBanner.Visibility = Visibility.Collapsed;
-        }
-
-        private void Vm_CredentialSelected(CredentialViewModel credVM)
-        {
-            var passStringLength = credVM?.PasswordFieldVM?.Value?.Length ?? 0;
-            if (ViewModel.SelectedNavigationItem?.Content is PasswordsControl passwordsControl)
-            {
-                passwordsControl.CredentialsDetailsControl.PasswordFieldBox.Password = new string('*', passStringLength);
-            }
         }
 
         private bool _closingForVaultLock;

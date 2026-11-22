@@ -371,7 +371,7 @@
     <value>No date</value>
   </data>
   <data name="AllPasswords" xml:space="preserve">
-    <value>All passwords</value>
+    <value>All entries</value>
   </data>
   <data name="PasswordGroupsSynchronized" xml:space="preserve">
     <value>Password groups updated.</value>
@@ -691,5 +691,149 @@ Sync to update the cloud copy and other devices.</value>
   </data>
   <data name="BackupReasonRestore" xml:space="preserve">
     <value>Before restore</value>
+  </data>
+  <data name="SshKey" xml:space="preserve">
+    <value>SSH key</value>
+  </data>
+  <data name="PrivateKey" xml:space="preserve">
+    <value>Private key</value>
+  </data>
+  <data name="PublicKey" xml:space="preserve">
+    <value>Public key</value>
+  </data>
+  <data name="Passphrase" xml:space="preserve">
+    <value>Passphrase</value>
+  </data>
+  <data name="Fingerprint" xml:space="preserve">
+    <value>Fingerprint</value>
+  </data>
+  <data name="CopyPrivateKey" xml:space="preserve">
+    <value>Copy private key</value>
+  </data>
+  <data name="CopyPublicKey" xml:space="preserve">
+    <value>Copy public key</value>
+  </data>
+  <data name="CopyPassphrase" xml:space="preserve">
+    <value>Copy passphrase</value>
+  </data>
+  <data name="ShowHidePrivateKey" xml:space="preserve">
+    <value>Show/hide private key</value>
+  </data>
+  <data name="ShowHidePassphrase" xml:space="preserve">
+    <value>Show/hide passphrase</value>
+  </data>
+  <data name="SavePrivateKey" xml:space="preserve">
+    <value>Save private key to file</value>
+  </data>
+  <data name="ImportSshKey" xml:space="preserve">
+    <value>Import from file</value>
+  </data>
+  <data name="GenerateSshKey" xml:space="preserve">
+    <value>Generate Ed25519 key</value>
+  </data>
+  <data name="SshKeyEncrypted" xml:space="preserve">
+    <value>The private key is protected by a passphrase.</value>
+  </data>
+  <data name="InvalidSshKeyFile" xml:space="preserve">
+    <value>The file is not an SSH key.</value>
+  </data>
+  <data name="SshKeyFileTooLarge" xml:space="preserve">
+    <value>The file is too large to be an SSH key.</value>
+  </data>
+  <data name="PrivateKeySaved" xml:space="preserve">
+    <value>Private key saved</value>
+  </data>
+  <data name="SshKeyFiles" xml:space="preserve">
+    <value>SSH keys</value>
+  </data>
+  <data name="AllFiles" xml:space="preserve">
+    <value>All files</value>
+  </data>
+  <data name="Card" xml:space="preserve">
+    <value>Bank card</value>
+  </data>
+  <data name="CardNumber" xml:space="preserve">
+    <value>Card number</value>
+  </data>
+  <data name="CardHolder" xml:space="preserve">
+    <value>Cardholder</value>
+  </data>
+  <data name="CardExpiry" xml:space="preserve">
+    <value>Valid thru</value>
+  </data>
+  <data name="CardCvv" xml:space="preserve">
+    <value>CVV/CVC</value>
+  </data>
+  <data name="CardPin" xml:space="preserve">
+    <value>PIN</value>
+  </data>
+  <data name="CopyCardNumber" xml:space="preserve">
+    <value>Copy card number</value>
+  </data>
+  <data name="CopyCardHolder" xml:space="preserve">
+    <value>Copy cardholder</value>
+  </data>
+  <data name="CopyCardExpiry" xml:space="preserve">
+    <value>Copy expiry date</value>
+  </data>
+  <data name="CopyCvv" xml:space="preserve">
+    <value>Copy CVV/CVC</value>
+  </data>
+  <data name="CopyPin" xml:space="preserve">
+    <value>Copy PIN</value>
+  </data>
+  <data name="ShowHideCardNumber" xml:space="preserve">
+    <value>Show/hide card number</value>
+  </data>
+  <data name="ShowHideCvv" xml:space="preserve">
+    <value>Show/hide CVV/CVC</value>
+  </data>
+  <data name="ShowHidePin" xml:space="preserve">
+    <value>Show/hide PIN</value>
+  </data>
+  <data name="CardNumberSuspicious" xml:space="preserve">
+    <value>This number fails the card number check. Check it for typos.</value>
+  </data>
+  <data name="PaymentSystem" xml:space="preserve">
+    <value>Payment system</value>
+  </data>
+  <data name="CardBrandOther" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="CardBrandDetected" xml:space="preserve">
+    <value>Detected from the number. You can change it.</value>
+  </data>
+  <data name="CardBrandNotDetected" xml:space="preserve">
+    <value>Could not detect it from the number. Choose it manually.</value>
+  </data>
+  <data name="CardBrandFromNumber" xml:space="preserve">
+    <value>Detected from the card number once it is entered.</value>
+  </data>
+  <data name="CardBrandChosen" xml:space="preserve">
+    <value>Chosen manually.</value>
+  </data>
+  <data name="DetectCardBrand" xml:space="preserve">
+    <value>Detect automatically</value>
+  </data>
+  <data name="CardExpiryInput" xml:space="preserve">
+    <value>Valid thru (MM/YY)</value>
+  </data>
+  <data name="CardExpiryFormat" xml:space="preserve">
+    <value>Enter the expiry date as MM/YY.</value>
+  </data>
+  <data name="CardExpired" xml:space="preserve">
+    <value>The card has expired.</value>
+  </data>
+  <data name="Categories" xml:space="preserve">
+    <value>Categories</value>
+  </data>
+  <data name="CategoryLogins" xml:space="preserve">
+    <value>Passwords</value>
+  </data>
+  <data name="CategorySshKeys" xml:space="preserve">
+    <value>SSH keys</value>
+  </data>
+  <data name="CategoryCards" xml:space="preserve">
+    <value>Bank cards</value>
   </data>
 </root>

@@ -4,6 +4,7 @@ using SinglePass.Core.Models;
 using SinglePass.WPF.Services;
 using SinglePass.WPF.Views.Controls;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -35,6 +36,9 @@ namespace SinglePass.WPF.ViewModels
         public NavigationItemViewModel SettingsNavigation { get; }
         public ObservableCollection<NavigationItemViewModel> GroupNavigation { get; } = new();
 
+        /// <summary>One item per entry type. Shown even when there are no entries of that type.</summary>
+        public IReadOnlyList<NavigationItemViewModel> CategoryNavigation { get; }
+
         private NavigationItemViewModel _selectedNavigationItem;
         public NavigationItemViewModel SelectedNavigationItem
         {
@@ -48,7 +52,7 @@ namespace SinglePass.WPF.ViewModels
                     _selectedNavigationItem.IsSelected = false;
                 value.IsSelected = true;
                 if (value != SettingsNavigation)
-                    PasswordsVM.SelectGroup(value.Group?.Id);
+                    PasswordsVM.SelectFilter(value.Group?.Id, value.Category);
                 SetProperty(ref _selectedNavigationItem, value);
             }
         }
@@ -75,6 +79,12 @@ namespace SinglePass.WPF.ViewModels
                 "AllPasswords",
                 "\uE72E",
                 () => new PasswordsControl { DataContext = PasswordsVM });
+            CategoryNavigation =
+            [
+                new NavigationItemViewModel("CategoryLogins", "", CredentialType.Login, AllPasswordsNavigation),
+                new NavigationItemViewModel("CategorySshKeys", "", CredentialType.SshKey, AllPasswordsNavigation),
+                new NavigationItemViewModel("CategoryCards", "", CredentialType.Card, AllPasswordsNavigation),
+            ];
             SettingsNavigation = new NavigationItemViewModel(
                 nameof(SinglePass.Language.Properties.Resources.Settings),
                 "\uE713",

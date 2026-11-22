@@ -39,7 +39,7 @@
                         Margin="4,0,0,0"
                         Padding="4"
                         Command="{Binding Data.SetAndCloseCommand, Source={StaticResource Proxy}}"
-                        CommandParameter="{Binding LoginFieldVM}"
+                        CommandParameter="{Binding Login.LoginFieldVM}"
                         AutomationProperties.Name="{Binding [Login], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
                         ToolTip="{Binding [Login], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}">
                         <TextBlock Style="{StaticResource SymbolText}" Text="&#xE77B;" />
@@ -48,7 +48,7 @@
                         Margin="4,0,0,0"
                         Padding="4"
                         Command="{Binding Data.SetAndCloseCommand, Source={StaticResource Proxy}}"
-                        CommandParameter="{Binding PasswordFieldVM}"
+                        CommandParameter="{Binding Login.PasswordFieldVM}"
                         AutomationProperties.Name="{Binding [Password], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
                         ToolTip="{Binding [Password], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}">
                         <TextBlock Style="{StaticResource SymbolText}" Text="&#xE72E;" />

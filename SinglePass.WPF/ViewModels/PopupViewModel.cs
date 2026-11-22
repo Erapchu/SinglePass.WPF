@@ -74,7 +74,7 @@ namespace SinglePass.WPF.ViewModels
             {
                 Accept?.Invoke();
 
-                WindowsClipboard.SetText(credentialViewModel.LoginFieldVM.Value);
+                WindowsClipboard.SetText(credentialViewModel.Login.LoginFieldVM.Value);
 
                 INPUT[] inputs = new INPUT[4];
 
@@ -98,7 +98,7 @@ namespace SinglePass.WPF.ViewModels
                 // Pause between Ctrl+V and set clipboard
                 Thread.Sleep(100);
 
-                WindowsClipboard.SetText(credentialViewModel.PasswordFieldVM.Value);
+                WindowsClipboard.SetText(credentialViewModel.Login.PasswordFieldVM.Value);
 
                 inputs = new INPUT[6];
 
@@ -180,7 +180,8 @@ namespace SinglePass.WPF.ViewModels
                 try
                 {
                     IsLoading = true;
-                    tempCredentialsVM.AddRange(_credentialViewModelFactory.ProvideAllNew());
+                    // The popup types a login and password into the active window; other entry types have neither.
+                    tempCredentialsVM.AddRange(_credentialViewModelFactory.ProvideAllNew().Where(c => c.IsLogin));
 
                     var addressBarString = _addressBarExtractor.ExtractAddressBar(ForegroundHWND);
                     if (!string.IsNullOrWhiteSpace(addressBarString))
@@ -196,7 +197,7 @@ namespace SinglePass.WPF.ViewModels
                             var domainsString = string.Join('.', domains.TakeLast(2));
 
                             tempCredentialsVM = tempCredentialsVM
-                                .OrderByDescending(c => c.SiteFieldVM.Value is null ? -1 : c.SiteFieldVM.Value.Contains(domainsString) ? 1 : -1)
+                                .OrderByDescending(c => c.Login.SiteFieldVM.Value is null ? -1 : c.Login.SiteFieldVM.Value.Contains(domainsString) ? 1 : -1)
                                 .ThenByDescending(c => c.LastModifiedTime)
                                 .ToList();
                         }

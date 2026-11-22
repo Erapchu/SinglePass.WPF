@@ -1,0 +1,101 @@
+<UserControl
+    x:Class="SinglePass.WPF.Views.Controls.Entries.CardEditor"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:evm="clr-namespace:SinglePass.WPF.ViewModels.Entries"
+    xmlns:helpers="clr-namespace:SinglePass.WPF.Helpers"
+    xmlns:loc="clr-namespace:SinglePass.Core.Localization;assembly=SinglePass.Core"
+    d:DataContext="{d:DesignInstance Type=evm:CardViewModel}"
+    mc:Ignorable="d"
+    IsTabStop="False" Focusable="False">
+    <UserControl.Resources>
+        <ResourceDictionary Source="EntryResources.xaml" />
+    </UserControl.Resources>
+    <!-- Editor of a payment card draft. DataContext: CardViewModel of the draft. The fields accept only
+         what they may hold (see CardInput); values saved before these rules are kept until edited. -->
+    <StackPanel>
+        <Label Padding="0,0,0,6" Content="{Binding [CardNumber], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Target="{Binding ElementName=NumberEditBox}" />
+        <TextBox x:Name="NumberEditBox" MaxLength="40" helpers:CardInput.Kind="Number"
+                 FontFamily="{StaticResource PasswordFontFamily}" FontSize="{StaticResource PasswordFontSize}"
+                 Text="{Binding Number, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBlock Margin="0,6,0,0" TextWrapping="Wrap" Foreground="{DynamicResource SystemFillColorCautionBrush}"
+                   Text="{Binding [CardNumberSuspicious], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                   Visibility="{Binding IsNumberSuspicious, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+        <Label Margin="0,12,0,0" Padding="0,0,0,6" Content="{Binding [PaymentSystem], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Target="{Binding ElementName=BrandSelector}" />
+        <ComboBox x:Name="BrandSelector" HorizontalAlignment="Stretch"
+                  ItemsSource="{Binding BrandOptions}" DisplayMemberPath="Name" SelectedValuePath="Brand"
+                  SelectedValue="{Binding SelectedBrand, Mode=TwoWay}" />
+        <DockPanel Margin="0,6,0,0">
+            <Button DockPanel.Dock="Right" Margin="8,0,0,0" Padding="8,2" VerticalAlignment="Center"
+                    Command="{Binding DetectBrandCommand}"
+                    Content="{Binding [DetectCardBrand], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                    Visibility="{Binding IsBrandChosen, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Text" Value="{Binding [CardBrandDetected], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding DetectedBrand}" Value="Unknown">
+                                <Setter Property="Text" Value="{Binding [CardBrandNotDetected], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding HasNumber}" Value="False">
+                                <Setter Property="Text" Value="{Binding [CardBrandFromNumber], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsBrandChosen}" Value="True">
+                                <Setter Property="Text" Value="{Binding [CardBrandChosen], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </DockPanel>
+
+        <Label Margin="0,12,0,0" Padding="0,0,0,6" Content="{Binding [CardHolder], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Target="{Binding ElementName=HolderEditBox}" />
+        <TextBox x:Name="HolderEditBox" MaxLength="200" Text="{Binding Holder, UpdateSourceTrigger=PropertyChanged}" />
+
+        <UniformGrid Margin="0,12,0,0" Rows="1" Columns="3">
+            <StackPanel Margin="0,0,8,0">
+                <Label Padding="0,0,0,6" Content="{Binding [CardExpiryInput], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Target="{Binding ElementName=ExpiryEditBox}" />
+                <TextBox x:Name="ExpiryEditBox" MaxLength="10" helpers:CardInput.Kind="Expiry"
+                         FontFamily="{StaticResource PasswordFontFamily}" FontSize="{StaticResource PasswordFontSize}"
+                         Text="{Binding Expiry, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+            <StackPanel Margin="4,0,4,0">
+                <Label Padding="0,0,0,6" Content="{Binding [CardCvv], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Target="{Binding ElementName=CvvEditBox}" />
+                <TextBox x:Name="CvvEditBox" MaxLength="10" helpers:CardInput.Kind="Cvv"
+                         FontFamily="{StaticResource PasswordFontFamily}" FontSize="{StaticResource PasswordFontSize}"
+                         Text="{Binding Cvv, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+            <StackPanel Margin="8,0,0,0">
+                <Label Padding="0,0,0,6" Content="{Binding [CardPin], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Target="{Binding ElementName=PinEditBox}" />
+                <TextBox x:Name="PinEditBox" MaxLength="12" helpers:CardInput.Kind="Pin"
+                         FontFamily="{StaticResource PasswordFontFamily}" FontSize="{StaticResource PasswordFontSize}"
+                         Text="{Binding Pin, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+        </UniformGrid>
+        <!-- Shown once the user leaves the field, not while the date is still being typed. -->
+        <TextBlock Margin="0,6,0,0" TextWrapping="Wrap" Foreground="{DynamicResource SystemFillColorCautionBrush}"
+                   Text="{Binding [CardExpiryFormat], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsExpiryInvalid}" Value="True" />
+                                <Condition Binding="{Binding IsKeyboardFocusWithin, ElementName=ExpiryEditBox}" Value="False" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Visibility" Value="Visible" />
+                        </MultiDataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+        <TextBlock Margin="0,6,0,0" TextWrapping="Wrap" Foreground="{DynamicResource SystemFillColorCautionBrush}"
+                   Text="{Binding [CardExpired], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                   Visibility="{Binding IsExpired, Converter={StaticResource BooleanToVisibilityConverter}}" />
+    </StackPanel>
+</UserControl>

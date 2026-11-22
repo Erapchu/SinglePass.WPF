@@ -59,6 +59,8 @@ namespace SinglePass.WPF.Views.Controls
         private Rect _layout;
         private bool _closing;
         private bool _waitingForDraft;
+        // A new entry's card is hidden until its editor has settled; see RevealNewEntryCard.
+        private bool _revealPending;
         private TaskCompletionSource _released = NewReleasedSignal();
 
         public ModalHost()
@@ -392,19 +394,40 @@ namespace SinglePass.WPF.Views.Controls
                     var animate = UiAnimations.ShouldAnimate(this);
                     footer.Opacity = animate && !isAdding ? 0 : 1;
                     _session.Card.DisplayedDraft = draft;
-                    UpdateEditorLayout(animate: !isAdding, opening: true);
-                    if (animate && !isAdding)
-                        RevealFooter(footer);
-
                     if (_waitingForDraft)
                     {
                         _waitingForDraft = false;
-                        RevealCenteredCard(animate);
+                        RevealNewEntryCard(_session, animate);
+                        return;
                     }
+
+                    UpdateEditorLayout(animate: !isAdding, opening: true);
+                    if (animate && !isAdding)
+                        RevealFooter(footer);
                 }
                 else if (!_waitingForDraft)
                     Close();
             }
+        }
+
+        /// <summary>
+        /// Sizes and shows the still hidden card of a new entry. The editor of the entry type comes from a
+        /// DataTemplate created during the first layout, and WPF applies its bindings (which hide parts of
+        /// the form) only after that pass. Measured at once, the card would open too tall and then shrink;
+        /// so wait until layout has settled, which happens before work at Loaded priority.
+        /// </summary>
+        private void RevealNewEntryCard(ModalSession session, bool animate)
+        {
+            _revealPending = true;
+            Dispatcher.InvokeAsync(() =>
+            {
+                if (!ReferenceEquals(_session, session) || _closing || !_revealPending)
+                    return;
+
+                _revealPending = false;
+                UpdateEditorLayout(animate: false, opening: true);
+                RevealCenteredCard(animate);
+            }, DispatcherPriority.Loaded);
         }
 
         private void Close()
@@ -464,6 +487,7 @@ namespace SinglePass.WPF.Views.Controls
                 session.ViewModel.AddCommand.Cancel();
 
             _waitingForDraft = false;
+            _revealPending = false;
             _closing = false;
             Visibility = Visibility.Collapsed;
             Backdrop.BeginAnimation(OpacityProperty, null);
@@ -536,7 +560,7 @@ namespace SinglePass.WPF.Views.Controls
 
         private void UpdateEditorLayout(bool animate, bool opening = false)
         {
-            if (_session is not { } session || _closing || (!opening && _waitingForDraft))
+            if (_session is not { } session || _closing || (!opening && (_waitingForDraft || _revealPending)))
                 return;
 
             var origin = session.Origin is { } originElement ? GetBounds(originElement) : Rect.Empty;

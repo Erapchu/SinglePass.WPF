@@ -986,4 +986,16 @@ Sync to update the cloud copy and other devices.</value>
   <data name="ConnectSshFailed" xml:space="preserve">
     <value>Could not start the terminal: {0}</value>
   </data>
+  <data name="Hotkey" xml:space="preserve">
+    <value>Hotkey</value>
+  </data>
+  <data name="PopupHotkey" xml:space="preserve">
+    <value>Quick-access popup</value>
+  </data>
+  <data name="PopupHotkeyDescription" xml:space="preserve">
+    <value>A hotkey opens a list of logins and types the chosen one into the active window, for example into a desktop application. The popup does not check which site is open in a browser.</value>
+  </data>
+  <data name="SaveHotkeySettingsFailed" xml:space="preserve">
+    <value>Could not save the hotkey settings.</value>
+  </data>
 </root>

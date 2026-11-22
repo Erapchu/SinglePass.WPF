@@ -1006,4 +1006,16 @@
   <data name="ConnectSshFailed" xml:space="preserve">
     <value>Не удалось запустить терминал: {0}</value>
   </data>
+  <data name="Hotkey" xml:space="preserve">
+    <value>Горячая клавиша</value>
+  </data>
+  <data name="PopupHotkey" xml:space="preserve">
+    <value>Окно быстрого доступа</value>
+  </data>
+  <data name="PopupHotkeyDescription" xml:space="preserve">
+    <value>Горячая клавиша открывает список логинов и вводит выбранный в активное окно, например в настольное приложение. Какой сайт открыт в браузере, окно не проверяет.</value>
+  </data>
+  <data name="SaveHotkeySettingsFailed" xml:space="preserve">
+    <value>Не удалось сохранить настройки горячих клавиш.</value>
+  </data>
 </root>

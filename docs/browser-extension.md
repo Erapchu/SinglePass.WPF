@@ -5,7 +5,7 @@ Status: **design, not implemented.** This document describes how a SinglePass br
 ## Goals
 
 - Suggest and fill logins in Chrome, Edge and Firefox (and other Chromium-based browsers) from the vault of the running SinglePass.
-- Match entries by the address the browser reports for the tab, so a look-alike site gets no suggestions. This replaces the address bar reading and clipboard pasting of the quick-access popup for browsers; the popup stays for other applications.
+- Match entries by the address the browser reports for the tab, so a look-alike site gets no suggestions. The quick-access popup no longer reads the browser address bar (UI Automation could not tell the scheme, the right edit field or text being typed from the page address); it is off by default and stays for other applications.
 - The vault never leaves the desktop application. The extension gets one entry at a time, after a user action, and keeps no secrets in browser storage.
 
 Not in the first version: saving new logins from the browser, passkeys, cards and identities, filling without SinglePass running.
@@ -168,9 +168,6 @@ Rules:
 4. IP addresses and single-label hosts (`localhost`, `router`) match only exactly.
 5. An entry saved with `https` is not offered on an `http` page (downgrade). An `http` entry is offered on `https`.
 6. Only `http` and `https` pages; never `file:`, `chrome:`, `about:` or extension pages.
-
-The popup now matches by the last two labels of the host and a substring check (`PopupViewModel`), so `example.com.evil.net` contains `example.com`. The popup should switch to `WebsiteMatcher` as well.
-
 ## Extension
 
 Manifest V3, one code base for Chromium and Firefox.
@@ -195,7 +192,7 @@ Filling rules:
 
 ## Implementation order
 
-1. `SinglePass.Core`: `WebsiteMatcher` with tests; switch the popup to it.
+1. `SinglePass.Core`: `WebsiteMatcher` with tests.
 2. `NamedPipeServer` base extracted from `SshAgentServer`; `BrowserPipeServer` with the protocol, pairing and session crypto, with tests (a test client plays the extension).
 3. `SinglePass.NativeHost` (Native AOT), registration in Velopack hooks and for the portable build, packaging.
 4. Pairing window and **Settings → Browser** in `SinglePass.WPF`.

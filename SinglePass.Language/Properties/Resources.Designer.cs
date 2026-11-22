@@ -1233,6 +1233,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hotkey.
+        /// </summary>
+        public static string Hotkey {
+            get {
+                return ResourceManager.GetString("Hotkey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Hotkeys.
         /// </summary>
         public static string Hotkeys {
@@ -1845,6 +1854,24 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Quick-access popup.
+        /// </summary>
+        public static string PopupHotkey {
+            get {
+                return ResourceManager.GetString("PopupHotkey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A hotkey opens a list of logins and types the chosen one into the active window, for example into a desktop application. The popup does not check which site is open in a browser..
+        /// </summary>
+        public static string PopupHotkeyDescription {
+            get {
+                return ResourceManager.GetString("PopupHotkeyDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Port.
         /// </summary>
         public static string Port {
@@ -1978,6 +2005,15 @@ namespace SinglePass.Language.Properties {
         public static string SaveAppearanceSettingsFailed {
             get {
                 return ResourceManager.GetString("SaveAppearanceSettingsFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not save the hotkey settings..
+        /// </summary>
+        public static string SaveHotkeySettingsFailed {
+            get {
+                return ResourceManager.GetString("SaveHotkeySettingsFailed", resourceCulture);
             }
         }
         

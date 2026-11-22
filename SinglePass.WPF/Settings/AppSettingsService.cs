@@ -38,6 +38,16 @@ namespace SinglePass.WPF.Settings
             set => Settings.ShowPopupHotkey = value;
         }
 
+        /// <summary>
+        /// Whether the popup hotkey is registered. Settings saved before the switch existed have no value:
+        /// the hotkey stays on for those who set one.
+        /// </summary>
+        public bool PopupHotkeyEnabled
+        {
+            get => Settings.PopupHotkeyEnabled ?? Settings.ShowPopupHotkey is { Key: not System.Windows.Input.Key.None };
+            set => Settings.PopupHotkeyEnabled = value;
+        }
+
         public WindowSettings MainWindowSettings
         {
             get => Settings.MainWindowSettings;

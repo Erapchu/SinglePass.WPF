@@ -53,6 +53,10 @@ namespace SinglePass.WPF.ViewModels
         [NotifyCanExecuteChangedFor(nameof(ChangeHelperPopupHotkeyCommand))]
         public partial Hotkey ShowPopupHotkey { get; set; }
 
+        /// <summary>The popup hotkey is registered. Off by default.</summary>
+        [ObservableProperty]
+        public partial bool PopupHotkeyEnabled { get; set; }
+
         [ObservableProperty]
         public partial AppTheme ThemeMode { get; set; }
 
@@ -94,6 +98,8 @@ namespace SinglePass.WPF.ViewModels
             AnimationsEnabled = appSettingsService.Settings.AnimationsEnabled;
             Language = LocalizationManager.Normalize(appSettingsService.Language);
             ShowPopupHotkey = appSettingsService.ShowPopupHotkey;
+            // Before _hotkeysService is set: loading the setting must not register or save anything.
+            PopupHotkeyEnabled = appSettingsService.PopupHotkeyEnabled;
             IdleLockTimeout = appSettingsService.Settings.IdleLockTimeout;
             LockOnWindowsLock = appSettingsService.Settings.LockOnWindowsLock;
 
@@ -210,7 +216,7 @@ namespace SinglePass.WPF.ViewModels
         {
             if (_hotkeysService.GetHotkeyForKeyPress(args, out Hotkey hotkey))
             {
-                _hotkeysService.UpdateKey(hotkey, nameof(_appSettingsService.ShowPopupHotkey), HotkeyDelegates.PopupHotkeyHandler);
+                _hotkeysService.ApplyPopupHotkey(PopupHotkeyEnabled, hotkey);
                 ShowPopupHotkey = hotkey;
             }
         }
@@ -218,7 +224,32 @@ namespace SinglePass.WPF.ViewModels
         [RelayCommand]
         private void ClearShowPopupHotkey()
         {
+            _hotkeysService?.ApplyPopupHotkey(PopupHotkeyEnabled, Hotkey.Empty);
             ShowPopupHotkey = Hotkey.Empty;
+        }
+
+        partial void OnPopupHotkeyEnabledChanged(bool value)
+        {
+            if (_hotkeysService is null)
+                return;
+
+            _hotkeysService.ApplyPopupHotkey(value, ShowPopupHotkey);
+            SavePopupHotkeySettings();
+        }
+
+        private async void SavePopupHotkeySettings()
+        {
+            _appSettingsService.PopupHotkeyEnabled = PopupHotkeyEnabled;
+            _appSettingsService.ShowPopupHotkey = ShowPopupHotkey;
+            try
+            {
+                await _appSettingsService.Save();
+            }
+            catch (Exception)
+            {
+                await MessageDialog.ShowAsync(Resources.Error, LocalizationManager.Instance["SaveHotkeySettingsFailed"],
+                    MessageDialogButtons.OK, "\uEA39");
+            }
         }
 
         partial void OnLanguageChanged(string value) => LocalizationManager.Instance.Apply(value);

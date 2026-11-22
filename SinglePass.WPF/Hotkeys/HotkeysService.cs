@@ -19,7 +19,13 @@ namespace SinglePass.WPF.Hotkeys
             _logger = logger;
 
             HotkeyManager.Current.IsEnabled = true;
-            UpdateKey(_appSettingsService.ShowPopupHotkey, nameof(_appSettingsService.ShowPopupHotkey), HotkeyDelegates.PopupHotkeyHandler);
+            ApplyPopupHotkey(_appSettingsService.PopupHotkeyEnabled, _appSettingsService.ShowPopupHotkey);
+        }
+
+        /// <summary>Registers the popup hotkey, or removes it when the popup is turned off or has no hotkey.</summary>
+        public void ApplyPopupHotkey(bool enabled, Hotkey hotkey)
+        {
+            UpdateKey(enabled ? hotkey : Hotkey.Empty, nameof(AppSettingsService.ShowPopupHotkey), HotkeyDelegates.PopupHotkeyHandler);
         }
 
         public void UpdateKey(Hotkey hotkey, string hotkeyName, Action action)

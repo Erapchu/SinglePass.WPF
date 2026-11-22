@@ -10,7 +10,7 @@ SinglePass is a Windows password manager with a local encrypted vault, a quick-a
 - Generate and copy time-based one-time passwords (TOTP) from a saved entry.
 - Keep SSH keys and SSH hosts. The built-in SSH agent lets `ssh`, `git` and other OpenSSH clients sign in with the keys of the vault, asking for confirmation before each use; a host copies a ready `ssh` command. See [docs/ssh-agent.md](docs/ssh-agent.md).
 - Search by name, login, website or notes, including transliterated text.
-- Open a quick-access popup with a configurable global hotkey. The popup can suggest entries based on the current browser address and paste a login and password or individual fields.
+- Optionally open a quick-access popup with a global hotkey and paste a login and password or individual fields into the active window.
 - Synchronize credentials with Google Drive or Yandex Disk after signing in.
 - Change the master password, choose a theme and select English, Russian or the system language.
 - Automatically lock the vault when the Windows session locks or after five minutes without keyboard or mouse input. Enter the master password to reopen it.
@@ -30,12 +30,13 @@ On first launch, enter a master password of at least eight characters. Use that 
 
 ### Quick-access popup
 
-1. Add a credential and fill in its website address.
-2. Set a popup hotkey in **Settings**.
-3. Open the website in a Chromium-based browser, focus the login field and press the configured hotkey.
-4. Select an entry in the popup to paste the credentials. You can also search or paste individual fields.
+The popup is off by default.
 
-The popup uses the clipboard and simulates keyboard input. Filling both fields assumes that pressing Tab moves focus from the login field to the password field; behavior depends on the target application and page.
+1. In **Settings**, turn on **Quick-access popup** and set a hotkey.
+2. In any application, focus the login field and press the hotkey.
+3. Select an entry in the popup to paste the credentials. You can also search or paste individual fields. Recently changed entries come first.
+
+The popup does not know which site is open in a browser and offers every login, so make sure you pick the entry for the page you are on. The popup uses the clipboard and simulates keyboard input. Filling both fields assumes that pressing Tab moves focus from the login field to the password field; behavior depends on the target application and page.
 
 ### Cloud synchronization
 

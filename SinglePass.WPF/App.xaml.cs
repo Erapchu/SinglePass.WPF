@@ -120,7 +120,6 @@ namespace SinglePass.WPF
             services.AddSingleton<HotkeysService>();
             services.AddSingleton<ImageService>();
             services.AddScoped<CredentialViewModelFactory>();
-            services.AddSingleton<AddressBarExtractor>();
             services.AddSingleton<UpdateService>();
 
             // SSH agent: lives as long as the application and finds the vault of the current unlock itself.

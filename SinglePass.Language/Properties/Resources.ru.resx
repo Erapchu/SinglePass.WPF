@@ -1019,7 +1019,7 @@
     <value>Чтобы пользоваться этим, настройте Windows Hello (хотя бы PIN-код) в Параметрах Windows → Учётные записи → Варианты входа.</value>
   </data>
   <data name="WindowsHelloPasswordOutdated" xml:space="preserve">
-    <value>Мастер-пароль, сохранённый для Windows Hello, больше не открывает хранилище. Введите мастер-пароль, в следующий раз Windows Hello будет использовать его.</value>
+    <value>Windows Hello больше не открывает хранилище: его ключ изменился. Введите мастер-пароль, и в следующий раз Windows Hello снова будет работать.</value>
   </data>
   <data name="WindowsHelloKeyLost" xml:space="preserve">
     <value>Разблокировка через Windows Hello отключена: её ключ больше недоступен, например после сброса PIN-кода Windows. Введите мастер-пароль и включите её снова в настройках.</value>
@@ -1029,5 +1029,14 @@
   </data>
   <data name="WindowsHelloEnableFailed" xml:space="preserve">
     <value>Не удалось включить разблокировку через Windows Hello.</value>
+  </data>
+  <data name="BackupReasonUpgrade" xml:space="preserve">
+    <value>Перед переводом в новый формат</value>
+  </data>
+  <data name="VaultNewerVersion" xml:space="preserve">
+    <value>Хранилище сохранено более новой версией SinglePass. Обновите SinglePass, чтобы открыть его.</value>
+  </data>
+  <data name="CloudVaultNewerVersion" xml:space="preserve">
+    <value>Облачная копия сохранена более новой версией SinglePass на другом устройстве. Обновите SinglePass на этом устройстве, чтобы синхронизироваться.</value>
   </data>
 </root>

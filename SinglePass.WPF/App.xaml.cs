@@ -124,7 +124,7 @@ namespace SinglePass.WPF
             services.AddSingleton<AddressBarExtractor>();
             services.AddSingleton<UpdateService>();
             services.AddSingleton<WindowsHelloUnlock>();
-            services.AddSingleton<IMasterPasswordObserver>(sp => sp.GetRequiredService<WindowsHelloUnlock>());
+            services.AddSingleton<IVaultKeyObserver>(sp => sp.GetRequiredService<WindowsHelloUnlock>());
 
             // SSH agent: lives as long as the application and finds the vault of the current unlock itself.
             services.AddSingleton<SshAgentKeyStore>();

@@ -47,7 +47,7 @@ The master password is still required:
 - the first time after SinglePass or Windows starts;
 - 14 days after it was last typed, so that you keep remembering it.
 
-SinglePass writes nothing for this to disk. After you type the master password, it keeps the password in memory only encrypted: with a random AES-256-GCM key, which is encrypted with an RSA key that Windows Hello keeps for the current user on this computer, in the TPM where there is one. Decrypting it requires the Windows Hello gesture. When the master password changes on this device or sync adopts the password of another device, SinglePass updates that copy without a prompt.
+SinglePass writes nothing for this to disk and does not keep the master password. After you type it, SinglePass keeps the vault key (see below) in memory only encrypted with an RSA key that Windows Hello keeps for the current user on this computer, in the TPM where there is one. Decrypting it requires the Windows Hello gesture. When the vault key changes because the master password changed on this device or sync adopted the key of another device, SinglePass updates that copy without a prompt.
 
 If the Windows Hello key is lost, for example after the Windows PIN is reset, SinglePass turns Windows Hello unlock off and asks for the master password; turn it on again in Settings. Turning it off deletes the key.
 
@@ -75,7 +75,7 @@ Application data is stored under `%LOCALAPPDATA%\SinglePass`:
 - `ssh` — public keys of SSH key entries, written for the commands copied from hosts. Private keys stay in the vault.
 - `Cache` — cached data; logs are stored in `Logs`.
 
-The vault uses AES-256-GCM encryption with a key derived from the master password using Argon2id. SinglePass upgrades older local vaults after you unlock them successfully. Vaults written by this version cannot be opened by older versions, so update SinglePass on every device that syncs the same vault. The file format and merge rules are described in [docs/vault.md](docs/vault.md), synchronization in [docs/cloud-sync.md](docs/cloud-sync.md).
+The vault is encrypted with AES-256-GCM using a random vault key. The file keeps that key encrypted with a key derived from the master password using Argon2id, so unlocking takes a moment, while saving and syncing need no key derivation. Changing the master password also replaces the vault key. SinglePass converts vaults of version 1.x after you unlock them successfully and keeps the old file as a backup. Vaults written by this version cannot be opened by older versions, so update SinglePass on every device that syncs the same vault. After the update each device may ask for the master password once during its first sync, while the devices agree on one vault key. The file format and merge rules are described in [docs/vault.md](docs/vault.md), synchronization in [docs/cloud-sync.md](docs/cloud-sync.md).
 
 ## Build from source
 

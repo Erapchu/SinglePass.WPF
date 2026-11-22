@@ -170,8 +170,8 @@ namespace SinglePass.WPF.ViewModels
             RestoringBackup = true;
             try
             {
-                // Backups made before a password change open only with the password of that time.
-                var backup = await _credentialsCryptoService.ReadBackup(item.Info.Path, _credentialsCryptoService.GetPassword());
+                // Backups made before a password change use another vault key and open only with the password of that time.
+                var backup = await _credentialsCryptoService.ReadBackup(item.Info.Path);
                 while (backup is null)
                 {
                     var dialog = new SyncPasswordDialog();
@@ -291,7 +291,7 @@ namespace SinglePass.WPF.ViewModels
             try
             {
                 var owner = Application.Current.MainWindow is { } window ? new WindowInteropHelper(window).Handle : IntPtr.Zero;
-                enabled = await _windowsHello.EnableAsync(_credentialsCryptoService.GetPassword(), owner);
+                enabled = await _windowsHello.EnableAsync(_credentialsCryptoService.CopyVaultKey, owner);
             }
             catch (Exception ex)
             {

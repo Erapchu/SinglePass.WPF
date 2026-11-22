@@ -13,7 +13,43 @@ Tests for the merge rules and the vault format are in `SinglePass.Core.Tests`.
 
 The vault is a single file, `%LOCALAPPDATA%\SinglePass\singlePass.dat`. The cloud copy has the same name and the same bytes: upload sends the local file as is.
 
-### Encryption format (format version 1)
+### Keys
+
+The contents are encrypted with the **vault key**: 32 random bytes, created once for a vault (`VaultKey`). The master password does not encrypt the contents; it opens the **password slot**, the vault key encrypted with a key derived from the password. So:
+
+- Unlocking with the password runs Argon2 once: password → slot → vault key → contents. Windows Hello unlock keeps the vault key instead and needs no Argon2 (see README).
+- Saving encrypts with the vault key only, without Argon2. The header, including the slot, stays the same.
+- While the vault is unlocked, memory holds the vault key, not the password. Locking zeroes it. The one exception is the first sync after the vault was created or converted on this unlock, see [cloud-sync.md](cloud-sync.md#vault-key-and-master-password).
+- Changing the master password creates a **new** vault key and slot and re-encrypts the contents. The old password together with an old copy of the file therefore does not open files written after the change.
+- All devices that sync a vault end up with the same vault key: it travels inside the cloud file, in the slot, never in the clear (see [cloud-sync.md](cloud-sync.md#vault-key-and-master-password)).
+
+### Encryption format (format version 2)
+
+| Offset | Size | Content |
+|---|---|---|
+| 0 | 8 | Magic `SPVAULT!` |
+| 8 | 1 | Format version, `2` |
+| 9 | 4 | Argon2 memory, KiB (little-endian) |
+| 13 | 4 | Argon2 iterations (little-endian) |
+| 17 | 1 | Argon2 parallelism |
+| 18 | 16 | Argon2 salt, random per slot |
+| 34 | 16 | Vault key id: the first 16 bytes of HMAC-SHA256(vault key, `"SinglePass vault key id"`) |
+| 50 | 12 | Slot: AES-GCM nonce |
+| 62 | 32 | Slot: vault key, encrypted with the password key |
+| 94 | 16 | Slot: AES-GCM tag |
+| 110 | 12 | Contents: AES-GCM nonce, random per write |
+| 122 | 16 | Contents: AES-GCM tag |
+| 138 | rest | Contents: UTF-8 JSON of `PasswordVault`, encrypted with the vault key |
+
+- Password key: Argon2id v1.3 with the parameters of the header (64 MiB, 3 iterations, parallelism 4 for new slots), 32 bytes, from the UTF-8 master password. When reading, they are checked before Argon2 runs: values below 8 MiB, 1 iteration or parallelism 1 make the file invalid; values above 1 GiB, 32 iterations or parallelism 16 are reported as written by a newer SinglePass. They can be raised later without a new format version, up to these limits; a newer version that goes beyond them makes older versions ask to update.
+- Slot: AES-256-GCM with the password key; bytes 0–49 are the associated data.
+- Contents: AES-256-GCM with the vault key; the whole header (bytes 0–109, slot included) is the associated data. Any change to the header or the contents fails decryption.
+- The key id lets a device see whether a file uses its vault key without the password (sync, backups, Windows Hello). It reveals nothing about the key. After the slot is opened, the key must match its id.
+- Key and plaintext buffers are zeroed after use.
+
+The format version byte describes encryption only. The structure of the JSON inside has its own `Version` (see below). A file with a format version above 2 is reported as written by a newer SinglePass (`UnsupportedVaultVersionException`), not as a wrong password.
+
+### Format version 1 (SinglePass 1.x)
 
 | Offset | Size | Content |
 |---|---|---|
@@ -24,20 +60,15 @@ The vault is a single file, `%LOCALAPPDATA%\SinglePass\singlePass.dat`. The clou
 | 37 | 16 | AES-GCM tag |
 | 53 | rest | Ciphertext: UTF-8 JSON of `PasswordVault` |
 
-- Key: Argon2id v1.3, 64 MiB memory, 3 iterations, parallelism 4, 32-byte output, from the UTF-8 master password.
-- Cipher: AES-256-GCM. The 37-byte header is the associated data, so any change to it fails decryption.
-- KDF parameters are fixed by the format version byte. Changing them requires a new format version.
-- Key and plaintext buffers are zeroed after use.
-
-The format version byte describes encryption only. The structure of the JSON inside has its own `Version` (see below).
+The key is derived from the password directly (Argon2id, 64 MiB, 3 iterations, parallelism 4) with a new salt on every write. Format 1 files are only read: old backups, cloud history and devices not updated yet keep them. When a local format 1 vault is unlocked, it gets a vault key and is rewritten in format 2; the old file is kept as an `upgrade` backup. If the file cannot be rewritten (read-only, held by another program, disk full), the vault opens anyway and the file stays in format 1 until the next successful write, which converts it; sync writes it before uploading. A format 1 cloud file is converted when the merged local vault is uploaded.
 
 ### Legacy format
 
-A file that does not start with the magic is read as the old format: a 16-byte IV followed by AES-CBC ciphertext. The key is a fixed 32-byte template with the UTF-8 password bytes written over its start. Legacy files are only read. After a local legacy vault is unlocked, it is immediately rewritten in the current format. A legacy cloud file is converted only when the merged local vault is uploaded.
+A file that does not start with the magic is read as the old format: a 16-byte IV followed by AES-CBC ciphertext. The key is a fixed 32-byte template with the UTF-8 password bytes written over its start. Legacy files are only read and are converted like format 1 files.
 
 ### Writing
 
-Every write goes to a temporary file `singlePass.dat.<guid>.tmp`, is flushed to disk and then replaces `singlePass.dat` with `File.Replace` (or `File.Move` for the first write). A crash during a write leaves the old file intact. Backups are described [below](#backups).
+Every write goes to a temporary file `singlePass.dat.<guid>.tmp` and is flushed to disk. The temporary file is then read back: it must start with exactly the header of the vault key in memory (byte for byte, so it holds the same password slot), the key must match the key id, and the contents must decrypt with that key. The password slot itself is checked when the key is made: a new key (new vault, conversion, password change) must open with its password before it is used, which runs Argon2 once more; a key taken from the cloud comes from a slot that just opened with the password. Only then does the temporary file replace `singlePass.dat` with `File.Replace` (or `File.Move` for the first write). A crash or a failed check leaves the old file intact. Backups are described [below](#backups).
 
 ## Contents
 
@@ -64,6 +95,7 @@ Every write goes to a temporary file `singlePass.dat.<guid>.tmp`, is flushed to 
 | 6 | Adds SSH hosts: `Credential.Host`. |
 
 - A vault with a newer `Version` than the application supports is rejected, both locally and on sync. Builds that only know version 1 cannot open a version 2 vault. This is intentional: an old build would drop `DeletedCredentials` on its next write and deleted credentials would return. For the same reason builds that only know version 2 cannot open a version 3 vault: they would not find the login fields, which moved into `Login`, and would drop the SSH key data. Builds that only know version 3 cannot open a version 4 vault: they would drop card data. Builds that only know version 4 cannot open a version 5 vault: they would show entries in the trash as regular ones and drop the trash state. Builds that only know version 5 cannot open a version 6 vault: they would drop host data.
+- Such a vault is reported as written by a newer SinglePass (`UnsupportedVaultVersionException`): the unlock window and sync ask to update SinglePass instead of asking for another password. SinglePass 1.x cannot tell the two apart and keeps asking for the password of a newer cloud copy; it does not change the copy.
 - Older vaults are upgraded in memory and written as the current version on the next change. For versions before 3, `LoginField`, `PasswordField`, `SiteField`, `Totp` and `PasswordHistory` of every credential are moved into a `Login` object before the JSON is read. This happens in `ReadVault`, so the local vault, backups and the cloud copy are all converted.
 - A missing collection is read as empty; an explicit `null` makes the file invalid.
 
@@ -123,8 +155,8 @@ All operations take an in-process lock keyed by the vault path, apply an immutab
 | Save group | Stores the group with `ModifiedAt = UtcNow`. Editing a deleted group does nothing. |
 | Delete group | Replaces the group with a tombstone (`Group = null`, `IsDeleted = true`). Assignments to it stay but are ignored. |
 | Move credentials | Sets the assignment of each existing credential, `ModifiedAt = UtcNow`. |
-| Change master password | Checks the current password, makes a `password` backup, sets `MasterPasswordChangedAt = UtcNow` and rewrites the vault with the new password. |
-| Lock | Marks the vault locked, clears it and the password from memory, cancels cloud transfers. |
+| Change master password | Checks the current password against the password slot, makes a `password` backup, sets `MasterPasswordChangedAt = UtcNow` and rewrites the vault with a new vault key and a slot for the new password. |
+| Lock | Marks the vault locked, clears it and zeroes the vault key in memory, cancels cloud transfers. |
 
 Group assignments that point to a missing or deleted group are treated as "no group".
 
@@ -154,7 +186,7 @@ Tombstones of credentials and groups are never removed.
 
 ## Backups
 
-`Services/VaultBackups.cs` copies the encrypted vault file to `%LOCALAPPDATA%\SinglePass\Backups\singlePass-<UTC yyyyMMdd-HHmmss-fff>-<reason>.dat`. A backup is the file exactly as it was, so it opens with the master password of that moment. The newest 20 are kept; older ones are deleted when a new one is made.
+`Services/VaultBackups.cs` copies the encrypted vault file to `%LOCALAPPDATA%\SinglePass\Backups\singlePass-<UTC yyyyMMdd-HHmmss-fff>-<reason>.dat`. A backup is the file exactly as it was, so it opens with the master password of that moment, and without a password while it uses the current vault key. The newest 20 are kept; older ones are deleted when a new one is made.
 
 | Reason | When |
 |---|---|
@@ -162,8 +194,9 @@ Tombstones of credentials and groups are never removed.
 | `sync` | Before a sync writes changes that came from the cloud. |
 | `password` | Before the master password is changed, or replaced by the cloud one during sync. |
 | `restore` | Before a backup is restored. |
+| `upgrade` | Before a vault file of SinglePass 1.x is rewritten in format 2. Once per file: if the newest `upgrade` backup holds the same bytes (an earlier conversion could not write), no new one is made. A failure is logged and the conversion goes on. |
 
-Except for `daily`, a failed backup cancels the operation.
+Except for `daily` and `upgrade`, a failed backup cancels the operation.
 
 ### Restore
 
@@ -175,7 +208,7 @@ Except for `daily`, a failed backup cancels the operation.
 - entries in the trash now that were not in the trash in the backup are restored from it; entries that were in the trash in the backup are not restored;
 - every restored item gets the current time, so the next sync spreads the restore to the cloud copy and other devices instead of undoing it (a restored credential is newer than the tombstone that deleted it).
 
-The backup is decrypted with the current master password first; if that fails, the user is asked for the password of that backup. Restoring a backup by copying the file over `singlePass.dat` also works, but then the next sync merges the newer cloud changes and deletions back in.
+A backup that uses the current vault key opens without a password; one made before a password change (another key) or by SinglePass 1.x asks for the password of that backup. Restoring a backup by copying the file over `singlePass.dat` also works, but then the next sync merges the newer cloud changes and deletions back in.
 
 ## Cloud synchronization
 

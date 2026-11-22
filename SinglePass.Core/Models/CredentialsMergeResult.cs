@@ -22,8 +22,8 @@ namespace SinglePass.Core.Models
         /// <summary>This device switched to the master password of the cloud vault.</summary>
         internal bool MasterPasswordAdopted { get; set; }
 
-        /// <summary>The cloud vault used an older master password and is re-encrypted with this device's one.</summary>
-        internal bool CloudPasswordReplaced { get; set; }
+        /// <summary>The cloud vault used another master password and is re-encrypted with this device's one on upload.</summary>
+        internal bool CloudReencrypted { get; set; }
 
         /// <summary>The cloud copy lacks something the local vault has and has to be uploaded.</summary>
         internal bool CloudNeedsUpdate { get; set; }
@@ -78,7 +78,7 @@ namespace SinglePass.Core.Models
                 if (MasterPasswordAdopted)
                     sb.AppendLine(Localize("MasterPasswordAdoptedFromCloud"));
                 if (CloudUpdated)
-                    sb.AppendLine(Localize(CloudPasswordReplaced ? "CloudVaultReencrypted" : "CloudVaultUpdated"));
+                    sb.AppendLine(Localize(CloudReencrypted ? "CloudVaultReencrypted" : "CloudVaultUpdated"));
                 if (!AnyChanges && !MasterPasswordAdopted && !CloudUpdated)
                 {
                     sb.AppendLine(SinglePass.Language.Properties.Resources.NoAnyChanges);

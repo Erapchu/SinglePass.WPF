@@ -160,16 +160,10 @@ namespace SinglePass.WPF.ViewModels.Entries
                 nameof(Subtitle), nameof(SubtitleToolTip));
         #endregion
 
-        public override string Subtitle => (Brand is CardBrand.Unknown or CardBrand.Other ? null : BrandName,
-                CardNumbers.Mask(Number)) switch
-        {
-            (null, null) => null,
-            (null, var masked) => masked,
-            (var brand, null) => brand,
-            (var brand, var masked) => brand + " " + masked,
-        };
+        // The list shows the network as a badge, so the subtitle is just the end of the number.
+        public override string Subtitle => CardNumbers.Mask(Number);
 
-        public override string SubtitleToolTip => HasHolder ? Holder : Subtitle;
+        public override string SubtitleToolTip => HasHolder ? Holder : BrandName;
         public override string Glyph => "";
 
         // Only the last digits are searchable, as they are what the list shows.

@@ -4,7 +4,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:entries="clr-namespace:SinglePass.WPF.Views.Controls.Entries"
     xmlns:evm="clr-namespace:SinglePass.WPF.ViewModels.Entries"
     xmlns:helpers="clr-namespace:SinglePass.WPF.Helpers"
     xmlns:loc="clr-namespace:SinglePass.Core.Localization;assembly=SinglePass.Core"
@@ -18,12 +17,9 @@
          what they may hold (see CardInput); values saved before these rules are kept until edited. -->
     <StackPanel>
         <Label Padding="0,0,0,6" Content="{Binding [CardNumber], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Target="{Binding ElementName=NumberEditBox}" />
-        <DockPanel>
-            <entries:CardBrandIcon DockPanel.Dock="Right" Margin="8,0,0,0" Brand="{Binding Brand}" />
-            <TextBox x:Name="NumberEditBox" MaxLength="40" helpers:CardInput.Kind="Number"
-                     FontFamily="{StaticResource PasswordFontFamily}" FontSize="{StaticResource PasswordFontSize}"
-                     Text="{Binding Number, UpdateSourceTrigger=PropertyChanged}" />
-        </DockPanel>
+        <TextBox x:Name="NumberEditBox" MaxLength="40" helpers:CardInput.Kind="Number"
+                 FontFamily="{StaticResource PasswordFontFamily}" FontSize="{StaticResource PasswordFontSize}"
+                 Text="{Binding Number, UpdateSourceTrigger=PropertyChanged}" />
         <TextBlock Margin="0,6,0,0" TextWrapping="Wrap" Foreground="{DynamicResource SystemFillColorCautionBrush}"
                    Text="{Binding [CardNumberSuspicious], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
                    Visibility="{Binding IsNumberSuspicious, Converter={StaticResource BooleanToVisibilityConverter}}" />

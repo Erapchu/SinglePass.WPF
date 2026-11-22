@@ -5,7 +5,6 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ctl="clr-namespace:SinglePass.WPF.Views.Controls"
-    xmlns:entries="clr-namespace:SinglePass.WPF.Views.Controls.Entries"
     xmlns:evm="clr-namespace:SinglePass.WPF.ViewModels.Entries"
     xmlns:loc="clr-namespace:SinglePass.Core.Localization;assembly=SinglePass.Core"
     d:DataContext="{d:DesignInstance Type=evm:CardViewModel}"
@@ -33,7 +32,6 @@
                         <TextBlock Style="{StaticResource SymbolText}" Text="&#xE8C8;" />
                     </Button>
                 </StackPanel>
-                <entries:CardBrandIcon DockPanel.Dock="Right" Margin="8,0,4,0" Brand="{Binding Brand}" ToolTip="{Binding BrandName}" />
                 <Grid>
                     <TextBox IsReadOnly="True" FontFamily="{StaticResource PasswordFontFamily}" FontSize="{StaticResource PasswordFontSize}"
                              AutomationProperties.Name="{Binding [CardNumber], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
@@ -45,17 +43,6 @@
                              Visibility="{Binding IsChecked, ElementName=RevealNumber, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                 </Grid>
             </DockPanel>
-            <TextBlock Margin="0,6,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding BrandName}">
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding BrandName}" Value="{x:Null}">
-                                <Setter Property="Visibility" Value="Collapsed" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
         </StackPanel>
         <StackPanel Visibility="{Binding HasHolder, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Label Margin="0,12,0,0" Padding="0,0,0,6" Content="{Binding [CardHolder], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Target="{Binding ElementName=HolderTextBox}" />

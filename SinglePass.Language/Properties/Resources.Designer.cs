@@ -124,6 +124,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to All files.
+        /// </summary>
+        public static string AllFiles {
+            get {
+                return ResourceManager.GetString("AllFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to All entries.
         /// </summary>
         public static string AllPasswords {
@@ -187,6 +196,89 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The vault already contains everything from this backup..
+        /// </summary>
+        public static string BackupNothingToRestore {
+            get {
+                return ResourceManager.GetString("BackupNothingToRestore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Daily.
+        /// </summary>
+        public static string BackupReasonDaily {
+            get {
+                return ResourceManager.GetString("BackupReasonDaily", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Before master password change.
+        /// </summary>
+        public static string BackupReasonPassword {
+            get {
+                return ResourceManager.GetString("BackupReasonPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Before restore.
+        /// </summary>
+        public static string BackupReasonRestore {
+            get {
+                return ResourceManager.GetString("BackupReasonRestore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Before sync.
+        /// </summary>
+        public static string BackupReasonSync {
+            get {
+                return ResourceManager.GetString("BackupReasonSync", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Restored credentials: {0}. Returned to the backup version: {1}.
+        ///
+        ///Sync to update the cloud copy and other devices..
+        /// </summary>
+        public static string BackupRestored {
+            get {
+                return ResourceManager.GetString("BackupRestored", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not restore the backup..
+        /// </summary>
+        public static string BackupRestoreFailed {
+            get {
+                return ResourceManager.GetString("BackupRestoreFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Backups.
+        /// </summary>
+        public static string Backups {
+            get {
+                return ResourceManager.GetString("Backups", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copies of the vault are made automatically: once a day when you change it, before a sync brings in changes, before the master password changes and before a restore. The last 20 are kept..
+        /// </summary>
+        public static string BackupsDescription {
+            get {
+                return ResourceManager.GetString("BackupsDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cancel.
         /// </summary>
         public static string Cancel {
@@ -219,6 +311,177 @@ namespace SinglePass.Language.Properties {
         public static string CAPSLOCKEnabled {
             get {
                 return ResourceManager.GetString("CAPSLOCKEnabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bank card.
+        /// </summary>
+        public static string Card {
+            get {
+                return ResourceManager.GetString("Card", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Chosen manually..
+        /// </summary>
+        public static string CardBrandChosen {
+            get {
+                return ResourceManager.GetString("CardBrandChosen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Detected from the number. You can change it..
+        /// </summary>
+        public static string CardBrandDetected {
+            get {
+                return ResourceManager.GetString("CardBrandDetected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Detected from the card number once it is entered..
+        /// </summary>
+        public static string CardBrandFromNumber {
+            get {
+                return ResourceManager.GetString("CardBrandFromNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not detect it from the number. Choose it manually..
+        /// </summary>
+        public static string CardBrandNotDetected {
+            get {
+                return ResourceManager.GetString("CardBrandNotDetected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Other.
+        /// </summary>
+        public static string CardBrandOther {
+            get {
+                return ResourceManager.GetString("CardBrandOther", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CVV/CVC.
+        /// </summary>
+        public static string CardCvv {
+            get {
+                return ResourceManager.GetString("CardCvv", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The card has expired..
+        /// </summary>
+        public static string CardExpired {
+            get {
+                return ResourceManager.GetString("CardExpired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Valid thru.
+        /// </summary>
+        public static string CardExpiry {
+            get {
+                return ResourceManager.GetString("CardExpiry", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter the expiry date as MM/YY..
+        /// </summary>
+        public static string CardExpiryFormat {
+            get {
+                return ResourceManager.GetString("CardExpiryFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Valid thru (MM/YY).
+        /// </summary>
+        public static string CardExpiryInput {
+            get {
+                return ResourceManager.GetString("CardExpiryInput", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cardholder.
+        /// </summary>
+        public static string CardHolder {
+            get {
+                return ResourceManager.GetString("CardHolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Card number.
+        /// </summary>
+        public static string CardNumber {
+            get {
+                return ResourceManager.GetString("CardNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This number fails the card number check. Check it for typos..
+        /// </summary>
+        public static string CardNumberSuspicious {
+            get {
+                return ResourceManager.GetString("CardNumberSuspicious", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PIN.
+        /// </summary>
+        public static string CardPin {
+            get {
+                return ResourceManager.GetString("CardPin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Categories.
+        /// </summary>
+        public static string Categories {
+            get {
+                return ResourceManager.GetString("Categories", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bank cards.
+        /// </summary>
+        public static string CategoryCards {
+            get {
+                return ResourceManager.GetString("CategoryCards", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Passwords.
+        /// </summary>
+        public static string CategoryLogins {
+            get {
+                return ResourceManager.GetString("CategoryLogins", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SSH keys.
+        /// </summary>
+        public static string CategorySshKeys {
+            get {
+                return ResourceManager.GetString("CategorySshKeys", resourceCulture);
             }
         }
         
@@ -295,6 +558,69 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The cloud copy kept changing during synchronization. Try again later..
+        /// </summary>
+        public static string CloudVaultKeptChanging {
+            get {
+                return ResourceManager.GetString("CloudVaultKeptChanging", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The cloud copy was updated and is now encrypted with this device&apos;s master password..
+        /// </summary>
+        public static string CloudVaultReencrypted {
+            get {
+                return ResourceManager.GetString("CloudVaultReencrypted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The cloud copy was updated..
+        /// </summary>
+        public static string CloudVaultUpdated {
+            get {
+                return ResourceManager.GetString("CloudVaultUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy expiry date.
+        /// </summary>
+        public static string CopyCardExpiry {
+            get {
+                return ResourceManager.GetString("CopyCardExpiry", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy cardholder.
+        /// </summary>
+        public static string CopyCardHolder {
+            get {
+                return ResourceManager.GetString("CopyCardHolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy card number.
+        /// </summary>
+        public static string CopyCardNumber {
+            get {
+                return ResourceManager.GetString("CopyCardNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy CVV/CVC.
+        /// </summary>
+        public static string CopyCvv {
+            get {
+                return ResourceManager.GetString("CopyCvv", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Copy login.
         /// </summary>
         public static string CopyLogin {
@@ -304,11 +630,47 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Copy passphrase.
+        /// </summary>
+        public static string CopyPassphrase {
+            get {
+                return ResourceManager.GetString("CopyPassphrase", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Copy password.
         /// </summary>
         public static string CopyPassword {
             get {
                 return ResourceManager.GetString("CopyPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy PIN.
+        /// </summary>
+        public static string CopyPin {
+            get {
+                return ResourceManager.GetString("CopyPin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy private key.
+        /// </summary>
+        public static string CopyPrivateKey {
+            get {
+                return ResourceManager.GetString("CopyPrivateKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy public key.
+        /// </summary>
+        public static string CopyPublicKey {
+            get {
+                return ResourceManager.GetString("CopyPublicKey", resourceCulture);
             }
         }
         
@@ -345,6 +707,15 @@ namespace SinglePass.Language.Properties {
         public static string CredentialsChanged {
             get {
                 return ResourceManager.GetString("CredentialsChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Credentials deleted:.
+        /// </summary>
+        public static string CredentialsDeleted {
+            get {
+                return ResourceManager.GetString("CredentialsDeleted", resourceCulture);
             }
         }
         
@@ -439,6 +810,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Detect automatically.
+        /// </summary>
+        public static string DetectCardBrand {
+            get {
+                return ResourceManager.GetString("DetectCardBrand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Downloading from the cloud....
         /// </summary>
         public static string DownloadingFile {
@@ -489,6 +869,24 @@ namespace SinglePass.Language.Properties {
         public static string Exit {
             get {
                 return ResourceManager.GetString("Exit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Fingerprint.
+        /// </summary>
+        public static string Fingerprint {
+            get {
+                return ResourceManager.GetString("Fingerprint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Generate Ed25519 key.
+        /// </summary>
+        public static string GenerateSshKey {
+            get {
+                return ResourceManager.GetString("GenerateSshKey", resourceCulture);
             }
         }
         
@@ -754,11 +1152,29 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Import from file.
+        /// </summary>
+        public static string ImportSshKey {
+            get {
+                return ResourceManager.GetString("ImportSshKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Input password of file.
         /// </summary>
         public static string InputPasswordOfFile {
             get {
                 return ResourceManager.GetString("InputPasswordOfFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The file is not an SSH key..
+        /// </summary>
+        public static string InvalidSshKeyFile {
+            get {
+                return ResourceManager.GetString("InvalidSshKeyFile", resourceCulture);
             }
         }
         
@@ -786,6 +1202,15 @@ namespace SinglePass.Language.Properties {
         public static string Language {
             get {
                 return ResourceManager.GetString("Language", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Last sync: {0:dd-MM-yyyy, HH:mm}.
+        /// </summary>
+        public static string LastSyncFormatted {
+            get {
+                return ResourceManager.GetString("LastSyncFormatted", resourceCulture);
             }
         }
         
@@ -835,11 +1260,29 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The master password was changed on another device. Use the new password to unlock this vault from now on..
+        /// </summary>
+        public static string MasterPasswordAdoptedFromCloud {
+            get {
+                return ResourceManager.GetString("MasterPasswordAdoptedFromCloud", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Merge.
         /// </summary>
         public static string Merge {
             get {
                 return ResourceManager.GetString("Merge", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Merging changes....
+        /// </summary>
+        public static string Merging {
+            get {
+                return ResourceManager.GetString("Merging", resourceCulture);
             }
         }
         
@@ -961,6 +1404,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No backups yet..
+        /// </summary>
+        public static string NoBackups {
+            get {
+                return ResourceManager.GetString("NoBackups", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No credentials.
         /// </summary>
         public static string NoCredentials {
@@ -1015,6 +1467,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Open folder.
+        /// </summary>
+        public static string OpenBackupsFolder {
+            get {
+                return ResourceManager.GetString("OpenBackupsFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Open in browser.
         /// </summary>
         public static string OpenInBrowser {
@@ -1038,6 +1499,15 @@ namespace SinglePass.Language.Properties {
         public static string Other {
             get {
                 return ResourceManager.GetString("Other", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Passphrase.
+        /// </summary>
+        public static string Passphrase {
+            get {
+                return ResourceManager.GetString("Passphrase", resourceCulture);
             }
         }
         
@@ -1141,6 +1611,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Payment system.
+        /// </summary>
+        public static string PaymentSystem {
+            get {
+                return ResourceManager.GetString("PaymentSystem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Personalize.
         /// </summary>
         public static string Personalize {
@@ -1177,6 +1656,33 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Private key.
+        /// </summary>
+        public static string PrivateKey {
+            get {
+                return ResourceManager.GetString("PrivateKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Private key saved.
+        /// </summary>
+        public static string PrivateKeySaved {
+            get {
+                return ResourceManager.GetString("PrivateKeySaved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Public key.
+        /// </summary>
+        public static string PublicKey {
+            get {
+                return ResourceManager.GetString("PublicKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Remove verification code.
         /// </summary>
         public static string RemoveTotp {
@@ -1191,6 +1697,35 @@ namespace SinglePass.Language.Properties {
         public static string ReplaceTotp {
             get {
                 return ResourceManager.GetString("ReplaceTotp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Restore.
+        /// </summary>
+        public static string Restore {
+            get {
+                return ResourceManager.GetString("Restore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bring back credentials and their versions from the backup of {0:dd-MM-yyyy, HH:mm:ss}?
+        ///
+        ///Deleted credentials come back, changed ones return to the backup version (the current password is kept in the password history). Credentials added later stay. The current vault is backed up first. Sync afterwards to update the cloud copy and other devices..
+        /// </summary>
+        public static string RestoreBackupConfirm {
+            get {
+                return ResourceManager.GetString("RestoreBackupConfirm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Restore backup.
+        /// </summary>
+        public static string RestoreBackupTitle {
+            get {
+                return ResourceManager.GetString("RestoreBackupTitle", resourceCulture);
             }
         }
         
@@ -1240,6 +1775,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Save private key to file.
+        /// </summary>
+        public static string SavePrivateKey {
+            get {
+                return ResourceManager.GetString("SavePrivateKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Could not save the security settings..
         /// </summary>
         public static string SaveSecuritySettingsFailed {
@@ -1276,11 +1820,56 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Show/hide card number.
+        /// </summary>
+        public static string ShowHideCardNumber {
+            get {
+                return ResourceManager.GetString("ShowHideCardNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show/hide CVV/CVC.
+        /// </summary>
+        public static string ShowHideCvv {
+            get {
+                return ResourceManager.GetString("ShowHideCvv", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show/hide passphrase.
+        /// </summary>
+        public static string ShowHidePassphrase {
+            get {
+                return ResourceManager.GetString("ShowHidePassphrase", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Show/hide password.
         /// </summary>
         public static string ShowHidePassword {
             get {
                 return ResourceManager.GetString("ShowHidePassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show/hide PIN.
+        /// </summary>
+        public static string ShowHidePin {
+            get {
+                return ResourceManager.GetString("ShowHidePin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show/hide private key.
+        /// </summary>
+        public static string ShowHidePrivateKey {
+            get {
+                return ResourceManager.GetString("ShowHidePrivateKey", resourceCulture);
             }
         }
         
@@ -1321,6 +1910,42 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to SSH key.
+        /// </summary>
+        public static string SshKey {
+            get {
+                return ResourceManager.GetString("SshKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The private key is protected by a passphrase..
+        /// </summary>
+        public static string SshKeyEncrypted {
+            get {
+                return ResourceManager.GetString("SshKeyEncrypted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SSH keys.
+        /// </summary>
+        public static string SshKeyFiles {
+            get {
+                return ResourceManager.GetString("SshKeyFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The file is too large to be an SSH key..
+        /// </summary>
+        public static string SshKeyFileTooLarge {
+            get {
+                return ResourceManager.GetString("SshKeyFileTooLarge", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Success.
         /// </summary>
         public static string Success {
@@ -1344,6 +1969,15 @@ namespace SinglePass.Language.Properties {
         public static string SyncFailed {
             get {
                 return ResourceManager.GetString("SyncFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The cloud copy changed, syncing again....
+        /// </summary>
+        public static string SyncRetrying {
+            get {
+                return ResourceManager.GetString("SyncRetrying", resourceCulture);
             }
         }
         
@@ -1581,8 +2215,6 @@ namespace SinglePass.Language.Properties {
             }
         }
         
-        
-        
         /// <summary>
         ///   Looks up a localized string similar to Uploading to the cloud....
         /// </summary>
@@ -1591,7 +2223,6 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("Uploading", resourceCulture);
             }
         }
-        
         
         /// <summary>
         ///   Looks up a localized string similar to Website.
@@ -1635,438 +2266,6 @@ namespace SinglePass.Language.Properties {
         public static string Yes {
             get {
                 return ResourceManager.GetString("Yes", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to SSH key.
-        /// </summary>
-        public static string SshKey {
-            get {
-                return ResourceManager.GetString("SshKey", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Private key.
-        /// </summary>
-        public static string PrivateKey {
-            get {
-                return ResourceManager.GetString("PrivateKey", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Public key.
-        /// </summary>
-        public static string PublicKey {
-            get {
-                return ResourceManager.GetString("PublicKey", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Passphrase.
-        /// </summary>
-        public static string Passphrase {
-            get {
-                return ResourceManager.GetString("Passphrase", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Fingerprint.
-        /// </summary>
-        public static string Fingerprint {
-            get {
-                return ResourceManager.GetString("Fingerprint", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Copy private key.
-        /// </summary>
-        public static string CopyPrivateKey {
-            get {
-                return ResourceManager.GetString("CopyPrivateKey", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Copy public key.
-        /// </summary>
-        public static string CopyPublicKey {
-            get {
-                return ResourceManager.GetString("CopyPublicKey", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Copy passphrase.
-        /// </summary>
-        public static string CopyPassphrase {
-            get {
-                return ResourceManager.GetString("CopyPassphrase", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Show/hide private key.
-        /// </summary>
-        public static string ShowHidePrivateKey {
-            get {
-                return ResourceManager.GetString("ShowHidePrivateKey", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Show/hide passphrase.
-        /// </summary>
-        public static string ShowHidePassphrase {
-            get {
-                return ResourceManager.GetString("ShowHidePassphrase", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Save private key to file.
-        /// </summary>
-        public static string SavePrivateKey {
-            get {
-                return ResourceManager.GetString("SavePrivateKey", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Import from file.
-        /// </summary>
-        public static string ImportSshKey {
-            get {
-                return ResourceManager.GetString("ImportSshKey", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Generate Ed25519 key.
-        /// </summary>
-        public static string GenerateSshKey {
-            get {
-                return ResourceManager.GetString("GenerateSshKey", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The private key is protected by a passphrase..
-        /// </summary>
-        public static string SshKeyEncrypted {
-            get {
-                return ResourceManager.GetString("SshKeyEncrypted", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The file is not an SSH key..
-        /// </summary>
-        public static string InvalidSshKeyFile {
-            get {
-                return ResourceManager.GetString("InvalidSshKeyFile", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The file is too large to be an SSH key..
-        /// </summary>
-        public static string SshKeyFileTooLarge {
-            get {
-                return ResourceManager.GetString("SshKeyFileTooLarge", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Private key saved.
-        /// </summary>
-        public static string PrivateKeySaved {
-            get {
-                return ResourceManager.GetString("PrivateKeySaved", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to SSH keys.
-        /// </summary>
-        public static string SshKeyFiles {
-            get {
-                return ResourceManager.GetString("SshKeyFiles", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to All files.
-        /// </summary>
-        public static string AllFiles {
-            get {
-                return ResourceManager.GetString("AllFiles", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Bank card.
-        /// </summary>
-        public static string Card {
-            get {
-                return ResourceManager.GetString("Card", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Card number.
-        /// </summary>
-        public static string CardNumber {
-            get {
-                return ResourceManager.GetString("CardNumber", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Cardholder.
-        /// </summary>
-        public static string CardHolder {
-            get {
-                return ResourceManager.GetString("CardHolder", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Valid thru.
-        /// </summary>
-        public static string CardExpiry {
-            get {
-                return ResourceManager.GetString("CardExpiry", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to CVV/CVC.
-        /// </summary>
-        public static string CardCvv {
-            get {
-                return ResourceManager.GetString("CardCvv", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to PIN.
-        /// </summary>
-        public static string CardPin {
-            get {
-                return ResourceManager.GetString("CardPin", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Copy card number.
-        /// </summary>
-        public static string CopyCardNumber {
-            get {
-                return ResourceManager.GetString("CopyCardNumber", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Copy cardholder.
-        /// </summary>
-        public static string CopyCardHolder {
-            get {
-                return ResourceManager.GetString("CopyCardHolder", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Copy expiry date.
-        /// </summary>
-        public static string CopyCardExpiry {
-            get {
-                return ResourceManager.GetString("CopyCardExpiry", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Copy CVV/CVC.
-        /// </summary>
-        public static string CopyCvv {
-            get {
-                return ResourceManager.GetString("CopyCvv", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Copy PIN.
-        /// </summary>
-        public static string CopyPin {
-            get {
-                return ResourceManager.GetString("CopyPin", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Show/hide card number.
-        /// </summary>
-        public static string ShowHideCardNumber {
-            get {
-                return ResourceManager.GetString("ShowHideCardNumber", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Show/hide CVV/CVC.
-        /// </summary>
-        public static string ShowHideCvv {
-            get {
-                return ResourceManager.GetString("ShowHideCvv", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Show/hide PIN.
-        /// </summary>
-        public static string ShowHidePin {
-            get {
-                return ResourceManager.GetString("ShowHidePin", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to This number fails the card number check. Check it for typos..
-        /// </summary>
-        public static string CardNumberSuspicious {
-            get {
-                return ResourceManager.GetString("CardNumberSuspicious", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Payment system.
-        /// </summary>
-        public static string PaymentSystem {
-            get {
-                return ResourceManager.GetString("PaymentSystem", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Other.
-        /// </summary>
-        public static string CardBrandOther {
-            get {
-                return ResourceManager.GetString("CardBrandOther", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Detected from the number. You can change it..
-        /// </summary>
-        public static string CardBrandDetected {
-            get {
-                return ResourceManager.GetString("CardBrandDetected", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Could not detect it from the number. Choose it manually..
-        /// </summary>
-        public static string CardBrandNotDetected {
-            get {
-                return ResourceManager.GetString("CardBrandNotDetected", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Detected from the card number once it is entered..
-        /// </summary>
-        public static string CardBrandFromNumber {
-            get {
-                return ResourceManager.GetString("CardBrandFromNumber", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Chosen manually..
-        /// </summary>
-        public static string CardBrandChosen {
-            get {
-                return ResourceManager.GetString("CardBrandChosen", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Detect automatically.
-        /// </summary>
-        public static string DetectCardBrand {
-            get {
-                return ResourceManager.GetString("DetectCardBrand", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Valid thru (MM/YY).
-        /// </summary>
-        public static string CardExpiryInput {
-            get {
-                return ResourceManager.GetString("CardExpiryInput", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Enter the expiry date as MM/YY..
-        /// </summary>
-        public static string CardExpiryFormat {
-            get {
-                return ResourceManager.GetString("CardExpiryFormat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The card has expired..
-        /// </summary>
-        public static string CardExpired {
-            get {
-                return ResourceManager.GetString("CardExpired", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Categories.
-        /// </summary>
-        public static string Categories {
-            get {
-                return ResourceManager.GetString("Categories", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Passwords.
-        /// </summary>
-        public static string CategoryLogins {
-            get {
-                return ResourceManager.GetString("CategoryLogins", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to SSH keys.
-        /// </summary>
-        public static string CategorySshKeys {
-            get {
-                return ResourceManager.GetString("CategorySshKeys", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Bank cards.
-        /// </summary>
-        public static string CategoryCards {
-            get {
-                return ResourceManager.GetString("CategoryCards", resourceCulture);
             }
         }
     }

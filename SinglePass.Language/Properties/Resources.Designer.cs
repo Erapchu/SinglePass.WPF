@@ -765,6 +765,33 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Delete permanently.
+        /// </summary>
+        public static string DeleteForever {
+            get {
+                return ResourceManager.GetString("DeleteForever", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to “{0}” will be deleted permanently. This cannot be undone..
+        /// </summary>
+        public static string DeleteForeverConfirmation {
+            get {
+                return ResourceManager.GetString("DeleteForeverConfirmation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete permanently?.
+        /// </summary>
+        public static string DeleteForeverTitle {
+            get {
+                return ResourceManager.GetString("DeleteForeverTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete item?.
         /// </summary>
         public static string DeleteItem {
@@ -842,6 +869,33 @@ namespace SinglePass.Language.Properties {
         public static string EditPasswordGroup {
             get {
                 return ResourceManager.GetString("EditPasswordGroup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Empty trash.
+        /// </summary>
+        public static string EmptyTrash {
+            get {
+                return ResourceManager.GetString("EmptyTrash", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to All items in the trash ({0}) will be deleted permanently. This cannot be undone..
+        /// </summary>
+        public static string EmptyTrashConfirmation {
+            get {
+                return ResourceManager.GetString("EmptyTrashConfirmation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Empty trash?.
+        /// </summary>
+        public static string EmptyTrashTitle {
+            get {
+                return ResourceManager.GetString("EmptyTrashTitle", resourceCulture);
             }
         }
         
@@ -1314,6 +1368,24 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to “{0}” moved to Deleted.
+        /// </summary>
+        public static string MovedToTrash {
+            get {
+                return ResourceManager.GetString("MovedToTrash", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The item moves to Deleted, where it can be restored within {0} days..
+        /// </summary>
+        public static string MoveToTrashHint {
+            get {
+                return ResourceManager.GetString("MoveToTrashHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Name.
         /// </summary>
         public static string Name {
@@ -1683,6 +1755,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Recently deleted.
+        /// </summary>
+        public static string RecentlyDeleted {
+            get {
+                return ResourceManager.GetString("RecentlyDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Remove verification code.
         /// </summary>
         public static string RemoveTotp {
@@ -1706,6 +1787,15 @@ namespace SinglePass.Language.Properties {
         public static string Restore {
             get {
                 return ResourceManager.GetString("Restore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Restore all.
+        /// </summary>
+        public static string RestoreAll {
+            get {
+                return ResourceManager.GetString("RestoreAll", resourceCulture);
             }
         }
         
@@ -2095,6 +2185,132 @@ namespace SinglePass.Language.Properties {
         public static string TotpSetup {
             get {
                 return ResourceManager.GetString("TotpSetup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Deleted.
+        /// </summary>
+        public static string Trash {
+            get {
+                return ResourceManager.GetString("Trash", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} days left.
+        /// </summary>
+        public static string TrashDaysLeftFew {
+            get {
+                return ResourceManager.GetString("TrashDaysLeftFew", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} days left.
+        /// </summary>
+        public static string TrashDaysLeftMany {
+            get {
+                return ResourceManager.GetString("TrashDaysLeftMany", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} day left.
+        /// </summary>
+        public static string TrashDaysLeftOne {
+            get {
+                return ResourceManager.GetString("TrashDaysLeftOne", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Deleted items are removed permanently after {0} days..
+        /// </summary>
+        public static string TrashDescription {
+            get {
+                return ResourceManager.GetString("TrashDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No deleted items.
+        /// </summary>
+        public static string TrashEmpty {
+            get {
+                return ResourceManager.GetString("TrashEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to “{0}” restored.
+        /// </summary>
+        public static string TrashItemRestored {
+            get {
+                return ResourceManager.GetString("TrashItemRestored", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} items.
+        /// </summary>
+        public static string TrashItemsCountFew {
+            get {
+                return ResourceManager.GetString("TrashItemsCountFew", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} items.
+        /// </summary>
+        public static string TrashItemsCountMany {
+            get {
+                return ResourceManager.GetString("TrashItemsCountMany", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} item.
+        /// </summary>
+        public static string TrashItemsCountOne {
+            get {
+                return ResourceManager.GetString("TrashItemsCountOne", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} items restored.
+        /// </summary>
+        public static string TrashItemsRestoredFew {
+            get {
+                return ResourceManager.GetString("TrashItemsRestoredFew", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} items restored.
+        /// </summary>
+        public static string TrashItemsRestoredMany {
+            get {
+                return ResourceManager.GetString("TrashItemsRestoredMany", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} item restored.
+        /// </summary>
+        public static string TrashItemsRestoredOne {
+            get {
+                return ResourceManager.GetString("TrashItemsRestoredOne", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Deleted items synchronized.
+        /// </summary>
+        public static string TrashSynchronized {
+            get {
+                return ResourceManager.GetString("TrashSynchronized", resourceCulture);
             }
         }
         

@@ -59,7 +59,6 @@ namespace SinglePass.WPF.Views.Windows
                 }
             }
 
-            mainViewModel.CredentialSelected += Vm_CredentialSelected;
             mainViewModel.ScrollIntoViewRequired += MainViewModel_ScrollIntoViewRequired;
             mainViewModel.PasswordsVM.StatusMessageRequested += ShowStatusMessage;
             mainViewModel.PropertyChanged += ViewModel_PropertyChanged;
@@ -320,15 +319,6 @@ namespace SinglePass.WPF.Views.Windows
         {
             _statusTimer.Stop();
             StatusBanner.Visibility = Visibility.Collapsed;
-        }
-
-        private void Vm_CredentialSelected(CredentialViewModel credVM)
-        {
-            var passStringLength = credVM?.PasswordFieldVM?.Value?.Length ?? 0;
-            if (ViewModel.SelectedNavigationItem?.Content is PasswordsControl passwordsControl)
-            {
-                passwordsControl.CredentialsDetailsControl.PasswordFieldBox.Password = new string('*', passStringLength);
-            }
         }
 
         private bool _closingForVaultLock;

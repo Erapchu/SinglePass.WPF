@@ -1,0 +1,183 @@
+<UserControl
+    x:Class="SinglePass.WPF.Views.Controls.Entries.LoginDetailsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ctl="clr-namespace:SinglePass.WPF.Views.Controls"
+    xmlns:entries="clr-namespace:SinglePass.WPF.Views.Controls.Entries"
+    xmlns:evm="clr-namespace:SinglePass.WPF.ViewModels.Entries"
+    xmlns:loc="clr-namespace:SinglePass.Core.Localization;assembly=SinglePass.Core"
+    d:DataContext="{d:DesignInstance Type=evm:LoginViewModel}"
+    mc:Ignorable="d"
+    IsTabStop="False" Focusable="False"
+    DataContextChanged="View_DataContextChanged">
+    <UserControl.Resources>
+        <ResourceDictionary Source="EntryResources.xaml" />
+    </UserControl.Resources>
+    <!-- Read-only view of a login. DataContext: LoginViewModel. Commands come from the card's PasswordsViewModel. -->
+    <StackPanel>
+        <Label Padding="0,0,0,6" Content="{Binding [Login], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Target="{Binding ElementName=LoginTextBox}" />
+        <DockPanel>
+            <Button DockPanel.Dock="Right" Margin="4,0,0,0" Padding="6,4"
+                    Command="{Binding DataContext.CopyToClipboardCommand, RelativeSource={RelativeSource AncestorType=ctl:CredentialsDetailsControl}}"
+                    CommandParameter="{Binding LoginFieldVM.Value}"
+                    AutomationProperties.Name="{Binding [CopyLogin], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" ToolTip="{Binding [CopyLogin], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}">
+                <TextBlock Style="{StaticResource SymbolText}" Text="&#xE8C8;" />
+            </Button>
+            <TextBox x:Name="LoginTextBox" IsReadOnly="True" Text="{Binding LoginFieldVM.Value, Mode=OneWay}" />
+        </DockPanel>
+        <TextBlock Margin="0,12,0,6" Text="{Binding [Password], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
+        <DockPanel>
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <ToggleButton x:Name="RevealPassword" Margin="4,0,0,0" Padding="6,4"
+                              IsChecked="{Binding DataContext.IsPasswordVisible, RelativeSource={RelativeSource AncestorType=ctl:CredentialsDetailsControl}}"
+                              AutomationProperties.Name="{Binding [ShowHidePassword], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" ToolTip="{Binding [ShowHidePassword], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}">
+                    <TextBlock Style="{StaticResource RevealGlyph}" />
+                </ToggleButton>
+                <Button Margin="4,0,0,0" Padding="6,4"
+                        Command="{Binding DataContext.CopyToClipboardCommand, RelativeSource={RelativeSource AncestorType=ctl:CredentialsDetailsControl}}"
+                        CommandParameter="{Binding PasswordFieldVM.Value}"
+                        AutomationProperties.Name="{Binding [CopyPassword], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" ToolTip="{Binding [CopyPassword], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}">
+                    <TextBlock Style="{StaticResource SymbolText}" Text="&#xE8C8;" />
+                </Button>
+            </StackPanel>
+            <Grid>
+                <TextBox IsReadOnly="True" AutomationProperties.Name="{Binding [Password], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                         FontFamily="{StaticResource PasswordFontFamily}" FontSize="{StaticResource PasswordFontSize}"
+                         Text="{Binding PasswordFieldVM.Value, Mode=OneWay}"
+                         Visibility="{Binding IsChecked, ElementName=RevealPassword, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <!-- Shows as many dots as the password has characters; filled from code. -->
+                <PasswordBox x:Name="PasswordMask" FontFamily="{StaticResource PasswordFontFamily}" FontSize="{StaticResource PasswordFontSize}"
+                             Focusable="False" IsHitTestVisible="False"
+                             AutomationProperties.Name="{Binding [Password], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                             Visibility="{Binding IsChecked, ElementName=RevealPassword, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+            </Grid>
+        </DockPanel>
+        <StackPanel Margin="0,12,0,0">
+            <StackPanel.Style>
+                <Style TargetType="StackPanel">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Totp}" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </StackPanel.Style>
+            <TextBlock Margin="0,0,0,6" Text="{Binding [TotpCode], Source={x:Static loc:LocalizationManager.Instance}}" />
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Margin="4,0,0,0" Padding="6,4"
+                        IsEnabled="{Binding HasCode, ElementName=TotpCode}"
+                        Command="{Binding DataContext.CopyTotpCommand, RelativeSource={RelativeSource AncestorType=ctl:CredentialsDetailsControl}}"
+                        AutomationProperties.Name="{Binding [CopyTotp], Source={x:Static loc:LocalizationManager.Instance}}"
+                        ToolTip="{Binding [CopyTotp], Source={x:Static loc:LocalizationManager.Instance}}">
+                    <TextBlock Style="{StaticResource SymbolText}" Text="&#xE8C8;" />
+                </Button>
+                <entries:TotpCodeDisplay x:Name="TotpCode" Configuration="{Binding Totp}" />
+            </DockPanel>
+        </StackPanel>
+        <StackPanel Visibility="{Binding HasWebsite, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Label Margin="0,12,0,0" Padding="0,0,0,6" Content="{Binding [Website], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" Target="{Binding ElementName=WebsiteLink}" />
+            <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}">
+                <Hyperlink x:Name="WebsiteLink"
+                           Command="{Binding DataContext.OpenInBrowserCommand, RelativeSource={RelativeSource AncestorType=ctl:CredentialsDetailsControl}}"
+                           CommandParameter="{Binding Website.Address}">
+                    <Hyperlink.Style>
+                        <Style TargetType="Hyperlink">
+                            <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <Setter Property="TextDecorations" Value="{x:Null}" />
+                            <Style.Triggers>
+                                <MultiTrigger>
+                                    <MultiTrigger.Conditions>
+                                        <Condition Property="IsEnabled" Value="True" />
+                                        <Condition Property="IsMouseOver" Value="True" />
+                                    </MultiTrigger.Conditions>
+                                    <Setter Property="TextDecorations" Value="Underline" />
+                                </MultiTrigger>
+                                <Trigger Property="IsKeyboardFocused" Value="True">
+                                    <Setter Property="TextDecorations" Value="Underline" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Hyperlink.Style>
+                    <Run Text="{Binding Website.Prefix, Mode=OneWay}" /><Run Text="{Binding Website.Host, Mode=OneWay}"
+                         Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" /><Run Text="{Binding Website.Suffix, Mode=OneWay}" />
+                </Hyperlink>
+            </TextBlock>
+        </StackPanel>
+        <Expander x:Name="PasswordHistory" Margin="0,12,0,0"
+                  AutomationProperties.Name="{Binding Text, ElementName=PasswordHistoryTitle}"
+                  IsVisibleChanged="PasswordHistory_IsVisibleChanged">
+            <Expander.Header>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Margin="0,0,8,0" Style="{StaticResource SymbolText}" Text="&#xE81C;" />
+                    <TextBlock x:Name="PasswordHistoryTitle" VerticalAlignment="Center">
+                        <TextBlock.Text>
+                            <MultiBinding Mode="OneWay" StringFormat="{}{0} ({1})">
+                                <Binding Path="[PasswordHistory]" Source="{x:Static loc:LocalizationManager.Instance}" />
+                                <Binding Path="PasswordHistory.Count" FallbackValue="0" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                </StackPanel>
+            </Expander.Header>
+            <Expander.Style>
+                <Style TargetType="Expander" BasedOn="{StaticResource {x:Type Expander}}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding PasswordHistory.Count, FallbackValue=0}" Value="0">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Expander.Style>
+            <ItemsControl>
+                <ItemsControl.Style>
+                    <!-- Old passwords are put on screen only while the history is open. -->
+                    <Style TargetType="ItemsControl">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsExpanded, RelativeSource={RelativeSource AncestorType=Expander}}" Value="True">
+                                <Setter Property="ItemsSource" Value="{Binding PasswordHistory}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ItemsControl.Style>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <DockPanel Margin="0,0,0,4">
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                                <ToggleButton x:Name="RevealHistoryEntry" Margin="4,0,0,0" Padding="6,4"
+                                              AutomationProperties.Name="{Binding [ShowHidePassword], Source={x:Static loc:LocalizationManager.Instance}}"
+                                              ToolTip="{Binding [ShowHidePassword], Source={x:Static loc:LocalizationManager.Instance}}">
+                                    <TextBlock Style="{StaticResource RevealGlyph}" />
+                                </ToggleButton>
+                                <Button Margin="4,0,0,0" Padding="6,4" CommandParameter="{Binding Password}"
+                                        Command="{Binding DataContext.CopyToClipboardCommand, RelativeSource={RelativeSource AncestorType=ctl:CredentialsDetailsControl}}"
+                                        AutomationProperties.Name="{Binding [CopyPassword], Source={x:Static loc:LocalizationManager.Instance}}"
+                                        ToolTip="{Binding [CopyPassword], Source={x:Static loc:LocalizationManager.Instance}}">
+                                    <TextBlock Style="{StaticResource SymbolText}" Text="&#xE8C8;" />
+                                </Button>
+                            </StackPanel>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                           Text="{Binding ChangedAtLocal, StringFormat={}{0:dd-MM-yyyy, HH:mm:ss}}" />
+                                <TextBlock FontFamily="{StaticResource PasswordFontFamily}" FontSize="{StaticResource PasswordFontSize}"
+                                           TextWrapping="Wrap" AutomationProperties.Name="{Binding [Password], Source={x:Static loc:LocalizationManager.Instance}}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsChecked, ElementName=RevealHistoryEntry}" Value="True">
+                                                    <Setter Property="Text" Value="{Binding Password, Mode=OneWay}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
+                        </DockPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Expander>
+    </StackPanel>
+</UserControl>

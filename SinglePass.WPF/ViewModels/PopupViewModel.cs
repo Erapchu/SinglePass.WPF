@@ -74,7 +74,7 @@ namespace SinglePass.WPF.ViewModels
             {
                 Accept?.Invoke();
 
-                WindowsClipboard.SetText(credentialViewModel.LoginFieldVM.Value);
+                WindowsClipboard.SetText(credentialViewModel.Login.LoginFieldVM.Value);
 
                 INPUT[] inputs = new INPUT[4];
 
@@ -98,7 +98,7 @@ namespace SinglePass.WPF.ViewModels
                 // Pause between Ctrl+V and set clipboard
                 Thread.Sleep(100);
 
-                WindowsClipboard.SetText(credentialViewModel.PasswordFieldVM.Value);
+                WindowsClipboard.SetText(credentialViewModel.Login.PasswordFieldVM.Value);
 
                 inputs = new INPUT[6];
 
@@ -197,7 +197,7 @@ namespace SinglePass.WPF.ViewModels
                             var domainsString = string.Join('.', domains.TakeLast(2));
 
                             tempCredentialsVM = tempCredentialsVM
-                                .OrderByDescending(c => c.SiteFieldVM.Value is null ? -1 : c.SiteFieldVM.Value.Contains(domainsString) ? 1 : -1)
+                                .OrderByDescending(c => c.Login.SiteFieldVM.Value is null ? -1 : c.Login.SiteFieldVM.Value.Contains(domainsString) ? 1 : -1)
                                 .ThenByDescending(c => c.LastModifiedTime)
                                 .ToList();
                         }

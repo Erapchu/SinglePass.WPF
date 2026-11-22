@@ -9,6 +9,7 @@ using SinglePass.Core.Models;
 using SinglePass.WPF.Services;
 using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels.Dialogs;
+using SinglePass.WPF.ViewModels.Entries;
 using SinglePass.WPF.Views.Helpers;
 using System;
 using System.Collections.Generic;
@@ -76,8 +77,6 @@ namespace SinglePass.WPF.ViewModels
         partial void OnSelectedCredentialVMChanged(CredentialViewModel value)
         {
             DraftCredential = null;
-            IsPrivateKeyVisible = false;
-            IsPassphraseVisible = false;
             OnPropertyChanged(nameof(CurrentGroup));
             EditCommand.NotifyCanExecuteChanged();
             CredentialSelected?.Invoke(value);
@@ -209,13 +208,6 @@ namespace SinglePass.WPF.ViewModels
 
         [ObservableProperty]
         public partial bool IsPasswordVisible { get; set; }
-
-        // SSH secrets are hidden again whenever another entry is selected.
-        [ObservableProperty]
-        public partial bool IsPrivateKeyVisible { get; set; }
-
-        [ObservableProperty]
-        public partial bool IsPassphraseVisible { get; set; }
 
         private PasswordsViewModel()
         {
@@ -536,15 +528,12 @@ namespace SinglePass.WPF.ViewModels
             if (draft.NameFieldVM.HasErrors)
                 return;
 
-            var originalTotp = draft.Model.Login?.Totp;
-            var totp = originalTotp;
-            if (draft.RemoveTotp)
-                totp = null;
-            else if (draft.ShowTotpSetup &&
-                     (draft.ReplaceTotp || !string.IsNullOrWhiteSpace(draft.TotpSetupInput)) &&
-                     !TotpService.TryParse(draft.TotpSetupInput ?? string.Empty, out totp))
+            var login = draft.Login;
+            var originalTotp = login?.Model.Totp;
+            TotpConfiguration totp = null;
+            if (login != null && !TryGetEditedTotp(login, out totp))
             {
-                draft.HasInvalidTotp = true;
+                login.HasInvalidTotp = true;
                 return;
             }
 
@@ -555,8 +544,8 @@ namespace SinglePass.WPF.ViewModels
             try
             {
                 draft.LastModifiedTime = DateTime.UtcNow;
-                if (draft.Model.Login is { } login)
-                    login.Totp = totp;
+                if (login != null)
+                    login.Model.Totp = totp;
                 if (isNew)
                     draft.CreationTime = draft.LastModifiedTime;
 
@@ -570,8 +559,8 @@ namespace SinglePass.WPF.ViewModels
                                 await _credentialsCryptoService.EditCredential(draft.Model, groupId, changeGroup));
                     }))
                 {
-                    if (draft.Model.Login is { } failedLogin)
-                        failedLogin.Totp = originalTotp;
+                    if (login != null)
+                        login.Model.Totp = originalTotp;
                     return;
                 }
 
@@ -582,9 +571,7 @@ namespace SinglePass.WPF.ViewModels
                     _credentialVMs.Add(draft);
 
                 var stillEditingDraft = ReferenceEquals(DraftCredential, draft);
-                draft.TotpSetupInput = null;
-                draft.RemoveTotp = false;
-                draft.ReplaceTotp = false;
+                login?.ResetTotpEditing();
                 if (stillEditingDraft)
                     DraftCredential = null;
 
@@ -595,6 +582,22 @@ namespace SinglePass.WPF.ViewModels
             {
                 IsSavingEdit = false;
             }
+        }
+
+        /// <summary>The TOTP setup the login editor asks for. False when the entered setup cannot be read.</summary>
+        private static bool TryGetEditedTotp(LoginViewModel login, out TotpConfiguration totp)
+        {
+            totp = login.Model.Totp;
+            if (login.RemoveTotp)
+            {
+                totp = null;
+                return true;
+            }
+
+            if (login.ShowTotpSetup && (login.ReplaceTotp || !string.IsNullOrWhiteSpace(login.TotpSetupInput)))
+                return TotpService.TryParse(login.TotpSetupInput ?? string.Empty, out totp);
+
+            return true;
         }
 
         [RelayCommand(CanExecute = nameof(CanEditCredential))]
@@ -662,8 +665,8 @@ namespace SinglePass.WPF.ViewModels
         private void CopyTotp()
         {
             var configuration = IsEditing
-                ? DraftCredential is { ShowCurrentTotp: true } draft ? draft.Totp : null
-                : SelectedCredentialVM?.Totp;
+                ? DraftCredential?.Login is { ShowCurrentTotp: true } draft ? draft.Totp : null
+                : SelectedCredentialVM?.Login?.Totp;
             if (TotpService.TryGetCode(configuration, DateTime.UtcNow, out var code, out _))
                 CopyToClipboard(code);
         }

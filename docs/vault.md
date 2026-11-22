@@ -92,7 +92,12 @@ Merge, tombstones, groups and backups do not depend on the type: an entry wins o
 1. A value in `CredentialType` and a data class (for example `CardData`) with a `Clone` method.
 2. A property on `Credential`, a line in `EnsureTypeData` and in `Clone`.
 3. A new vault `Version`, so that older builds refuse the vault instead of dropping the new block.
-4. UI: an item in the **New item** menu, view and edit sections in `CredentialsDetailsControl`, strings.
+4. UI, in `SinglePass.WPF`:
+   - a view model in `ViewModels/Entries` derived from `CredentialDataViewModel` (list subtitle, glyph, searchable texts) and a case in `CredentialViewModel.CreateData`;
+   - a view and an editor in `Views/Controls/Entries`, registered as `DataTemplate`s for the view model in `CredentialsDetailsControl.xaml`;
+   - an item in the **New item** menu (`PasswordsControl.xaml`) and strings.
+
+   The card itself, the list, search, groups and the save flow need no changes: they show the name, notes, additional fields and dates, and take the rest from the view model of the type.
 
 ## Local operations
 

@@ -391,7 +391,7 @@
     <value>Без даты</value>
   </data>
   <data name="AllPasswords" xml:space="preserve">
-    <value>Все пароли</value>
+    <value>Все записи</value>
   </data>
   <data name="PasswordGroupsSynchronized" xml:space="preserve">
     <value>Группы паролей обновлены.</value>
@@ -843,5 +843,17 @@
   </data>
   <data name="CardExpired" xml:space="preserve">
     <value>Срок действия карты истёк.</value>
+  </data>
+  <data name="Categories" xml:space="preserve">
+    <value>Категории</value>
+  </data>
+  <data name="CategoryLogins" xml:space="preserve">
+    <value>Пароли</value>
+  </data>
+  <data name="CategorySshKeys" xml:space="preserve">
+    <value>SSH-ключи</value>
+  </data>
+  <data name="CategoryCards" xml:space="preserve">
+    <value>Банковские карты</value>
   </data>
 </root>

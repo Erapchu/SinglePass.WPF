@@ -28,8 +28,15 @@ namespace SinglePass.WPF.Views.Controls
             InitializeComponent();
         }
 
-        private void AddPasswordButton_Click(object sender, RoutedEventArgs e)
+        private async void AddPasswordButton_Click(object sender, RoutedEventArgs e)
         {
+            // In a category the type is already chosen; elsewhere the menu asks for it.
+            if (DataContext is PasswordsViewModel { SelectedCategory: { } category })
+            {
+                await AddItemAsync(category);
+                return;
+            }
+
             if (AddPasswordButton.ContextMenu is { } menu)
             {
                 menu.PlacementTarget = AddPasswordButton;

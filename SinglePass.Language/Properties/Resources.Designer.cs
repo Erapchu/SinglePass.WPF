@@ -124,7 +124,7 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to All passwords.
+        ///   Looks up a localized string similar to All entries.
         /// </summary>
         public static string AllPasswords {
             get {
@@ -2031,6 +2031,42 @@ namespace SinglePass.Language.Properties {
         public static string CardExpired {
             get {
                 return ResourceManager.GetString("CardExpired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Categories.
+        /// </summary>
+        public static string Categories {
+            get {
+                return ResourceManager.GetString("Categories", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Passwords.
+        /// </summary>
+        public static string CategoryLogins {
+            get {
+                return ResourceManager.GetString("CategoryLogins", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SSH keys.
+        /// </summary>
+        public static string CategorySshKeys {
+            get {
+                return ResourceManager.GetString("CategorySshKeys", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bank cards.
+        /// </summary>
+        public static string CategoryCards {
+            get {
+                return ResourceManager.GetString("CategoryCards", resourceCulture);
             }
         }
     }

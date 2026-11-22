@@ -371,7 +371,7 @@
     <value>No date</value>
   </data>
   <data name="AllPasswords" xml:space="preserve">
-    <value>All passwords</value>
+    <value>All entries</value>
   </data>
   <data name="PasswordGroupsSynchronized" xml:space="preserve">
     <value>Password groups updated.</value>
@@ -823,5 +823,17 @@ Sync to update the cloud copy and other devices.</value>
   </data>
   <data name="CardExpired" xml:space="preserve">
     <value>The card has expired.</value>
+  </data>
+  <data name="Categories" xml:space="preserve">
+    <value>Categories</value>
+  </data>
+  <data name="CategoryLogins" xml:space="preserve">
+    <value>Passwords</value>
+  </data>
+  <data name="CategorySshKeys" xml:space="preserve">
+    <value>SSH keys</value>
+  </data>
+  <data name="CategoryCards" xml:space="preserve">
+    <value>Bank cards</value>
   </data>
 </root>

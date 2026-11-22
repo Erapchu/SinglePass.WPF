@@ -54,6 +54,12 @@ namespace SinglePass.WPF.ViewModels
         private Task _initialLoad;
         private Guid? _selectedGroupId;
 
+        /// <summary>
+        /// Entry type the list is limited to (a category in the sidebar), or null for all types.
+        /// The sidebar selects either a category or a group, never both.
+        /// </summary>
+        public CredentialType? SelectedCategory { get; private set; }
+
         public IReadOnlyList<PasswordGroup> PasswordGroups => _credentialsCryptoService?.PasswordGroups ?? [];
 
         internal bool IsSavingGroups { get; private set; }
@@ -241,12 +247,15 @@ namespace SinglePass.WPF.ViewModels
 
         public Task LoadInitialCredentialsAsync() => _initialLoad ??= LoadInitialCredentialsCoreAsync();
 
-        internal void SelectGroup(Guid? groupId)
+        /// <summary>Limits the list to a group or to an entry type; both null shows every entry.</summary>
+        internal void SelectFilter(Guid? groupId, CredentialType? category)
         {
-            if (_selectedGroupId == groupId)
+            if (_selectedGroupId == groupId && SelectedCategory == category)
                 return;
 
             _selectedGroupId = groupId;
+            SelectedCategory = category;
+            OnPropertyChanged(nameof(SelectedCategory));
             _ = DisplayCredentialsAsync(keepSelection: true);
         }
 
@@ -346,11 +355,14 @@ namespace SinglePass.WPF.ViewModels
                 var order = Order;
                 var credentials = _credentialVMs.ToList();
                 var groupId = _selectedGroupId;
+                var category = SelectedCategory;
                 var assignments = _credentialsCryptoService?.GroupAssignments;
                 var filtered = await Task.Run(() =>
                 {
                     if (groupId.HasValue)
                         credentials.RemoveAll(item => !assignments.TryGetValue(item.Model.Id, out var assignedGroupId) || assignedGroupId != groupId);
+                    if (category.HasValue)
+                        credentials.RemoveAll(item => item.Type != category);
 
                     if (!string.IsNullOrEmpty(filterText))
                     {

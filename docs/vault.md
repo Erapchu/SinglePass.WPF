@@ -98,7 +98,9 @@ Merge, tombstones, groups and backups do not depend on the type: an entry wins o
 4. UI, in `SinglePass.WPF`:
    - a view model in `ViewModels/Entries` derived from `CredentialDataViewModel` (list subtitle, glyph, searchable texts) and a case in `CredentialViewModel.CreateData`;
    - a view and an editor in `Views/Controls/Entries`, registered as `DataTemplate`s for the view model in `CredentialsDetailsControl.xaml`;
-   - an item in the **New item** menu (`PasswordsControl.xaml`) and strings.
+   - an item in the **New item** menu (`PasswordsControl.xaml`), a category in the sidebar (`MainWindowViewModel.CategoryNavigation`) and strings.
+
+   The sidebar selects one filter at a time: all entries, a category (entry type) or a group. In a category the add button creates an entry of that type at once; elsewhere it asks for the type.
 
    The card itself, the list, search, groups and the save flow need no changes: they show the name, notes, additional fields and dates, and take the rest from the view model of the type.
 

@@ -6,7 +6,7 @@ namespace SinglePass.Core.Models
 {
     /// <summary>
     /// Vault entry. Holds the fields every entry type has; the data of the type itself is in one block
-    /// (<see cref="Login"/>, <see cref="SshKey"/>), and the blocks of other types are null.
+    /// (<see cref="Login"/>, <see cref="SshKey"/>, <see cref="Card"/>), and the blocks of other types are null.
     /// A new type adds a value to <see cref="CredentialType"/>, a block here and a line in
     /// <see cref="EnsureTypeData"/>. Merge, tombstones, groups and backups do not depend on the type.
     /// </summary>
@@ -24,6 +24,9 @@ namespace SinglePass.Core.Models
 
         /// <summary>Set for <see cref="CredentialType.SshKey"/> entries only.</summary>
         public SshKeyData SshKey { get; set; }
+
+        /// <summary>Set for <see cref="CredentialType.Card"/> entries only.</summary>
+        public CardData Card { get; set; }
 
         // Stored in UTC: sync compares these across devices and time zones. Older vaults hold local
         // times with an offset (or without one), which are converted when read.
@@ -51,6 +54,7 @@ namespace SinglePass.Core.Models
         {
             Login = Type == CredentialType.Login ? Login ?? new LoginData() : null;
             SshKey = Type == CredentialType.SshKey ? SshKey ?? new SshKeyData() : null;
+            Card = Type == CredentialType.Card ? Card ?? new CardData() : null;
         }
 
         internal Credential Clone()
@@ -63,6 +67,7 @@ namespace SinglePass.Core.Models
                 OtherField = OtherField.Clone(),
                 Login = Login?.Clone(),
                 SshKey = SshKey?.Clone(),
+                Card = Card?.Clone(),
                 LastModifiedTime = LastModifiedTime,
                 CreationTime = CreationTime
             };

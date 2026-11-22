@@ -373,6 +373,32 @@ namespace SinglePass.Core.Tests
         }
 
         [Fact]
+        public void CardEntry_SurvivesFile()
+        {
+            var credential = Credential.CreateNew(CredentialType.Card);
+            credential.Card.Number = "4111 1111 1111 1111";
+            credential.Card.Holder = "IVAN IVANOV";
+            credential.Card.Expiry = "12/29";
+            credential.Card.Cvv = "123";
+            credential.Card.Pin = "0000";
+
+            var stored = Assert.Single(RoundTrip(new PasswordVault { Credentials = [credential] }).Credentials);
+
+            Assert.Equal(CredentialType.Card, stored.Type);
+            Assert.Null(stored.Login);
+            Assert.Null(stored.SshKey);
+            Assert.Equal("4111 1111 1111 1111", stored.Card.Number);
+            Assert.Equal("IVAN IVANOV", stored.Card.Holder);
+            Assert.Equal("12/29", stored.Card.Expiry);
+            Assert.Equal("123", stored.Card.Cvv);
+            Assert.Equal("0000", stored.Card.Pin);
+
+            var clone = stored.Clone();
+            clone.Card.Cvv = "999";
+            Assert.Equal("123", stored.Card.Cvv);
+        }
+
+        [Fact]
         public void SshKeyEntry_SurvivesFile()
         {
             var credential = Credential.CreateNew(CredentialType.SshKey);

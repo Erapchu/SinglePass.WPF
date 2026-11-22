@@ -749,4 +749,49 @@ Sync to update the cloud copy and other devices.</value>
   <data name="AllFiles" xml:space="preserve">
     <value>All files</value>
   </data>
+  <data name="Card" xml:space="preserve">
+    <value>Bank card</value>
+  </data>
+  <data name="CardNumber" xml:space="preserve">
+    <value>Card number</value>
+  </data>
+  <data name="CardHolder" xml:space="preserve">
+    <value>Cardholder</value>
+  </data>
+  <data name="CardExpiry" xml:space="preserve">
+    <value>Valid thru</value>
+  </data>
+  <data name="CardCvv" xml:space="preserve">
+    <value>CVV/CVC</value>
+  </data>
+  <data name="CardPin" xml:space="preserve">
+    <value>PIN</value>
+  </data>
+  <data name="CopyCardNumber" xml:space="preserve">
+    <value>Copy card number</value>
+  </data>
+  <data name="CopyCardHolder" xml:space="preserve">
+    <value>Copy cardholder</value>
+  </data>
+  <data name="CopyCardExpiry" xml:space="preserve">
+    <value>Copy expiry date</value>
+  </data>
+  <data name="CopyCvv" xml:space="preserve">
+    <value>Copy CVV/CVC</value>
+  </data>
+  <data name="CopyPin" xml:space="preserve">
+    <value>Copy PIN</value>
+  </data>
+  <data name="ShowHideCardNumber" xml:space="preserve">
+    <value>Show/hide card number</value>
+  </data>
+  <data name="ShowHideCvv" xml:space="preserve">
+    <value>Show/hide CVV/CVC</value>
+  </data>
+  <data name="ShowHidePin" xml:space="preserve">
+    <value>Show/hide PIN</value>
+  </data>
+  <data name="CardNumberSuspicious" xml:space="preserve">
+    <value>This number fails the card number check. Check it for typos.</value>
+  </data>
 </root>

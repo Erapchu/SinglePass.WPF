@@ -58,8 +58,9 @@ Every write goes to a temporary file `singlePass.dat.<guid>.tmp`, is flushed to 
 | 1 | Object with `Credentials`, `Groups`, `Assignments`. |
 | 2 | Adds `DeletedCredentials` (credential tombstones) and `MasterPasswordChangedAt`. |
 | 3 | Adds entry types: `Credential.Type`, one data block per type (`Login`, `SshKey`). The login fields move from the credential into `Login`. |
+| 4 | Adds payment cards: `Credential.Card`. |
 
-- A vault with a newer `Version` than the application supports is rejected, both locally and on sync. Builds that only know version 1 cannot open a version 2 vault. This is intentional: an old build would drop `DeletedCredentials` on its next write and deleted credentials would return. For the same reason builds that only know version 2 cannot open a version 3 vault: they would not find the login fields, which moved into `Login`, and would drop the SSH key data.
+- A vault with a newer `Version` than the application supports is rejected, both locally and on sync. Builds that only know version 1 cannot open a version 2 vault. This is intentional: an old build would drop `DeletedCredentials` on its next write and deleted credentials would return. For the same reason builds that only know version 2 cannot open a version 3 vault: they would not find the login fields, which moved into `Login`, and would drop the SSH key data. Builds that only know version 3 cannot open a version 4 vault: they would drop card data.
 - Older vaults are upgraded in memory and written as the current version on the next change. For versions before 3, `LoginField`, `PasswordField`, `SiteField`, `Totp` and `PasswordHistory` of every credential are moved into a `Login` object before the JSON is read. This happens in `ReadVault`, so the local vault, backups and the cloud copy are all converted.
 - A missing collection is read as empty; an explicit `null` makes the file invalid.
 
@@ -70,11 +71,12 @@ A credential holds the fields every entry has, its type and one data block for t
 ```jsonc
 {
   "Id": "<guid>",
-  "Type": 0,                         // 0 login (also when missing), 1 SSH key
+  "Type": 0,                         // 0 login (also when missing), 1 SSH key, 2 card
   "NameField": {...}, "OtherField": {...}, "AdditionalFields": [...],
   "CreationTime": "...", "LastModifiedTime": "...",
   "Login":  { "LoginField": {...}, "PasswordField": {...}, "SiteField": {...}, "Totp": {...} | null, "PasswordHistory": [...] } | null,
-  "SshKey": { "PrivateKey": "...", "PublicKey": "...", "Passphrase": "..." } | null
+  "SshKey": { "PrivateKey": "...", "PublicKey": "...", "Passphrase": "..." } | null,
+  "Card":   { "Number": "...", "Holder": "...", "Expiry": "MM/YY", "Cvv": "...", "Pin": "..." } | null
 }
 ```
 
@@ -83,6 +85,7 @@ A credential holds the fields every entry has, its type and one data block for t
 - Only the block of the entry's type is set; the others are null. `Credential.EnsureTypeData` enforces this when a vault is read and when an entry is added or edited, so the rule does not depend on the UI.
 - `Login.PasswordHistory` — up to 10 previous passwords, newest first. When a save changes a non-empty password, the old one is added with the current UTC time.
 - `SshKey.PrivateKey` is the key file text (OpenSSH or PEM, possibly encrypted with `Passphrase`); `PublicKey` is an `authorized_keys` line.
+- `Card` values are stored as typed. The brand, the Luhn check and the grouped number are derived when shown (`CardNumbers`); a number that fails the check is still saved, with a warning in the editor.
 - `LastModifiedTime`, `CreationTime` — UTC, set by the UI on save. Older vaults stored local time with an offset; the model converts any value to UTC when it is assigned, and the UI shows local time.
 
 Merge, tombstones, groups and backups do not depend on the type: an entry wins or loses as a whole. Password histories are combined only for logins.

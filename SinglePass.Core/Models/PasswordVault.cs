@@ -9,7 +9,8 @@ namespace SinglePass.Core.Models
         // unknown field on their next write and deleted credentials would come back on sync.
         // Version 3 adds entry types (Credential.Type, Credential.SshKey). An older client would
         // drop the SSH key data on its next write and turn the entry into an empty login.
-        internal const int CurrentVersion = 3;
+        // Version 4 adds payment cards (Credential.Card), for the same reason.
+        internal const int CurrentVersion = 4;
 
         public int Version { get; init; } = CurrentVersion;
         public List<Credential> Credentials { get; init; } = new();

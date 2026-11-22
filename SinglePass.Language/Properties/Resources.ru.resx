@@ -769,4 +769,49 @@
   <data name="AllFiles" xml:space="preserve">
     <value>Все файлы</value>
   </data>
+  <data name="Card" xml:space="preserve">
+    <value>Банковская карта</value>
+  </data>
+  <data name="CardNumber" xml:space="preserve">
+    <value>Номер карты</value>
+  </data>
+  <data name="CardHolder" xml:space="preserve">
+    <value>Владелец карты</value>
+  </data>
+  <data name="CardExpiry" xml:space="preserve">
+    <value>Срок действия</value>
+  </data>
+  <data name="CardCvv" xml:space="preserve">
+    <value>CVV/CVC</value>
+  </data>
+  <data name="CardPin" xml:space="preserve">
+    <value>PIN-код</value>
+  </data>
+  <data name="CopyCardNumber" xml:space="preserve">
+    <value>Скопировать номер карты</value>
+  </data>
+  <data name="CopyCardHolder" xml:space="preserve">
+    <value>Скопировать владельца карты</value>
+  </data>
+  <data name="CopyCardExpiry" xml:space="preserve">
+    <value>Скопировать срок действия</value>
+  </data>
+  <data name="CopyCvv" xml:space="preserve">
+    <value>Скопировать CVV/CVC</value>
+  </data>
+  <data name="CopyPin" xml:space="preserve">
+    <value>Скопировать PIN-код</value>
+  </data>
+  <data name="ShowHideCardNumber" xml:space="preserve">
+    <value>Показать/скрыть номер карты</value>
+  </data>
+  <data name="ShowHideCvv" xml:space="preserve">
+    <value>Показать/скрыть CVV/CVC</value>
+  </data>
+  <data name="ShowHidePin" xml:space="preserve">
+    <value>Показать/скрыть PIN-код</value>
+  </data>
+  <data name="CardNumberSuspicious" xml:space="preserve">
+    <value>Номер не прошёл проверку контрольной суммы. Проверьте, нет ли опечатки.</value>
+  </data>
 </root>

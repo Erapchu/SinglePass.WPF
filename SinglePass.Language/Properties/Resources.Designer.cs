@@ -1808,5 +1808,140 @@ namespace SinglePass.Language.Properties {
                 return ResourceManager.GetString("AllFiles", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bank card.
+        /// </summary>
+        public static string Card {
+            get {
+                return ResourceManager.GetString("Card", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Card number.
+        /// </summary>
+        public static string CardNumber {
+            get {
+                return ResourceManager.GetString("CardNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cardholder.
+        /// </summary>
+        public static string CardHolder {
+            get {
+                return ResourceManager.GetString("CardHolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Valid thru.
+        /// </summary>
+        public static string CardExpiry {
+            get {
+                return ResourceManager.GetString("CardExpiry", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CVV/CVC.
+        /// </summary>
+        public static string CardCvv {
+            get {
+                return ResourceManager.GetString("CardCvv", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PIN.
+        /// </summary>
+        public static string CardPin {
+            get {
+                return ResourceManager.GetString("CardPin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy card number.
+        /// </summary>
+        public static string CopyCardNumber {
+            get {
+                return ResourceManager.GetString("CopyCardNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy cardholder.
+        /// </summary>
+        public static string CopyCardHolder {
+            get {
+                return ResourceManager.GetString("CopyCardHolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy expiry date.
+        /// </summary>
+        public static string CopyCardExpiry {
+            get {
+                return ResourceManager.GetString("CopyCardExpiry", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy CVV/CVC.
+        /// </summary>
+        public static string CopyCvv {
+            get {
+                return ResourceManager.GetString("CopyCvv", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy PIN.
+        /// </summary>
+        public static string CopyPin {
+            get {
+                return ResourceManager.GetString("CopyPin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show/hide card number.
+        /// </summary>
+        public static string ShowHideCardNumber {
+            get {
+                return ResourceManager.GetString("ShowHideCardNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show/hide CVV/CVC.
+        /// </summary>
+        public static string ShowHideCvv {
+            get {
+                return ResourceManager.GetString("ShowHideCvv", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show/hide PIN.
+        /// </summary>
+        public static string ShowHidePin {
+            get {
+                return ResourceManager.GetString("ShowHidePin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This number fails the card number check. Check it for typos..
+        /// </summary>
+        public static string CardNumberSuspicious {
+            get {
+                return ResourceManager.GetString("CardNumberSuspicious", resourceCulture);
+            }
+        }
     }
 }

@@ -111,6 +111,7 @@ namespace SinglePass.WPF.ViewModels
         {
             CredentialType.Login => new LoginViewModel(credential.Login),
             CredentialType.SshKey => new SshKeyViewModel(credential.SshKey),
+            CredentialType.Card => new CardViewModel(credential.Card),
             _ => throw new NotSupportedException($"Entry type {credential.Type} is not supported.")
         };
 

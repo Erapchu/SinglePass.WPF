@@ -17,8 +17,8 @@ namespace SinglePass.WPF.Helpers
 
         public bool Matches(CredentialViewModel credential) =>
             Matches(credential.NameFieldVM.Value)
-            || Matches(credential.LoginFieldVM.Value)
-            || Matches(credential.SiteFieldVM.Value)
+            || Matches(credential.LoginFieldVM?.Value)
+            || Matches(credential.SiteFieldVM?.Value)
             || Matches(credential.OtherFieldVM.Value)
             || Matches(credential.SshPublicKey);
 

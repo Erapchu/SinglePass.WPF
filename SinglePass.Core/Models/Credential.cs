@@ -1,28 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text.Json.Serialization;
 
 namespace SinglePass.Core.Models
 {
+    /// <summary>
+    /// Vault entry. Holds the fields every entry type has; the data of the type itself is in one block
+    /// (<see cref="Login"/>, <see cref="SshKey"/>), and the blocks of other types are null.
+    /// A new type adds a value to <see cref="CredentialType"/>, a block here and a line in
+    /// <see cref="EnsureTypeData"/>. Merge, tombstones, groups and backups do not depend on the type.
+    /// </summary>
     [DebuggerDisplay("{NameField.Value}")]
     public class Credential
     {
-        internal const int PasswordHistoryLimit = 10;
-
         public Guid Id { get; init; }
         public CredentialType Type { get; set; }
         public PassField NameField { get; set; } = new PassField() { Name = "Name" };
-        public PassField LoginField { get; set; } = new PassField() { Name = "Login" };
-        public PassField PasswordField { get; set; } = new PassField() { Name = "Password" };
-        [JsonInclude]
-        public IReadOnlyList<PasswordHistoryEntry> PasswordHistory { get; internal set; } = [];
         public PassField OtherField { get; set; } = new PassField() { Name = "Other" };
-        public PassField SiteField { get; set; } = new PassField() { Name = "Site" };
         public List<PassField> AdditionalFields { get; set; } = new List<PassField>();
-        public TotpConfiguration Totp { get; set; }
+
+        /// <summary>Set for <see cref="CredentialType.Login"/> entries only.</summary>
+        public LoginData Login { get; set; } = new LoginData();
+
         /// <summary>Set for <see cref="CredentialType.SshKey"/> entries only.</summary>
         public SshKeyData SshKey { get; set; }
+
         // Stored in UTC: sync compares these across devices and time zones. Older vaults hold local
         // times with an offset (or without one), which are converted when read.
         public DateTime LastModifiedTime { get; set => field = ToUtc(value); }
@@ -39,9 +41,16 @@ namespace SinglePass.Core.Models
             {
                 Id = Guid.NewGuid(),
                 Type = type,
-                SshKey = type == CredentialType.SshKey ? new SshKeyData() : null,
             };
+            credential.EnsureTypeData();
             return credential;
+        }
+
+        /// <summary>Creates the block of the entry's type if it is missing and drops the blocks of other types.</summary>
+        internal void EnsureTypeData()
+        {
+            Login = Type == CredentialType.Login ? Login ?? new LoginData() : null;
+            SshKey = Type == CredentialType.SshKey ? SshKey ?? new SshKeyData() : null;
         }
 
         internal Credential Clone()
@@ -51,12 +60,8 @@ namespace SinglePass.Core.Models
                 Id = Id,
                 Type = Type,
                 NameField = NameField.Clone(),
-                LoginField = LoginField.Clone(),
-                PasswordField = PasswordField.Clone(),
-                PasswordHistory = PasswordHistory,
                 OtherField = OtherField.Clone(),
-                SiteField = SiteField.Clone(),
-                Totp = Totp,
+                Login = Login?.Clone(),
                 SshKey = SshKey?.Clone(),
                 LastModifiedTime = LastModifiedTime,
                 CreationTime = CreationTime

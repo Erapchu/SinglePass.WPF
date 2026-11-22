@@ -57,22 +57,42 @@ Every write goes to a temporary file `singlePass.dat.<guid>.tmp`, is flushed to 
 | — | A bare JSON array of credentials (before groups). Still readable. |
 | 1 | Object with `Credentials`, `Groups`, `Assignments`. |
 | 2 | Adds `DeletedCredentials` (credential tombstones) and `MasterPasswordChangedAt`. |
-| 3 | Adds entry types: `Credential.Type` and `Credential.SshKey`. |
+| 3 | Adds entry types: `Credential.Type`, one data block per type (`Login`, `SshKey`). The login fields move from the credential into `Login`. |
 
-- A vault with a newer `Version` than the application supports is rejected, both locally and on sync. Builds that only know version 1 cannot open a version 2 vault. This is intentional: an old build would drop `DeletedCredentials` on its next write and deleted credentials would return. For the same reason builds that only know version 2 cannot open a version 3 vault: they would drop the SSH key data and turn SSH entries into empty logins.
-- Older vaults are upgraded in memory and written as the current version on the next change.
+- A vault with a newer `Version` than the application supports is rejected, both locally and on sync. Builds that only know version 1 cannot open a version 2 vault. This is intentional: an old build would drop `DeletedCredentials` on its next write and deleted credentials would return. For the same reason builds that only know version 2 cannot open a version 3 vault: they would not find the login fields, which moved into `Login`, and would drop the SSH key data.
+- Older vaults are upgraded in memory and written as the current version on the next change. For versions before 3, `LoginField`, `PasswordField`, `SiteField`, `Totp` and `PasswordHistory` of every credential are moved into a `Login` object before the JSON is read. This happens in `ReadVault`, so the local vault, backups and the cloud copy are all converted.
 - A missing collection is read as empty; an explicit `null` makes the file invalid.
 
 ### Credential
 
-`Credential` holds the fixed fields (name, login, password, notes, site), additional fields, TOTP setup and:
+A credential holds the fields every entry has, its type and one data block for that type:
 
-- `Type` — kind of entry: `0` login (also when the field is missing), `1` SSH key. The type is chosen when the entry is created (**New item** menu) and never changes.
-- `SshKey` — for SSH key entries only: `PrivateKey` (OpenSSH or PEM text, possibly encrypted), `PublicKey` (`authorized_keys` line) and `Passphrase`. Null for logins. SSH entries do not use login, password, TOTP and site; merge and tombstones treat them like any other entry.
+```jsonc
+{
+  "Id": "<guid>",
+  "Type": 0,                         // 0 login (also when missing), 1 SSH key
+  "NameField": {...}, "OtherField": {...}, "AdditionalFields": [...],
+  "CreationTime": "...", "LastModifiedTime": "...",
+  "Login":  { "LoginField": {...}, "PasswordField": {...}, "SiteField": {...}, "Totp": {...} | null, "PasswordHistory": [...] } | null,
+  "SshKey": { "PrivateKey": "...", "PublicKey": "...", "Passphrase": "..." } | null
+}
+```
 
 - `Id` — GUID, the identity of the entry. Equality compares `Id` only.
+- `Type` — chosen when the entry is created (**New item** menu) and never changes; editing an entry into another type is rejected.
+- Only the block of the entry's type is set; the others are null. `Credential.EnsureTypeData` enforces this when a vault is read and when an entry is added or edited, so the rule does not depend on the UI.
+- `Login.PasswordHistory` — up to 10 previous passwords, newest first. When a save changes a non-empty password, the old one is added with the current UTC time.
+- `SshKey.PrivateKey` is the key file text (OpenSSH or PEM, possibly encrypted with `Passphrase`); `PublicKey` is an `authorized_keys` line.
 - `LastModifiedTime`, `CreationTime` — UTC, set by the UI on save. Older vaults stored local time with an offset; the model converts any value to UTC when it is assigned, and the UI shows local time.
-- `PasswordHistory` — up to 10 previous passwords, newest first. When a save changes a non-empty password, the old one is added with the current UTC time.
+
+Merge, tombstones, groups and backups do not depend on the type: an entry wins or loses as a whole. Password histories are combined only for logins.
+
+#### Adding an entry type
+
+1. A value in `CredentialType` and a data class (for example `CardData`) with a `Clone` method.
+2. A property on `Credential`, a line in `EnsureTypeData` and in `Clone`.
+3. A new vault `Version`, so that older builds refuse the vault instead of dropping the new block.
+4. UI: an item in the **New item** menu, view and edit sections in `CredentialsDetailsControl`, strings.
 
 ## Local operations
 

@@ -36,8 +36,8 @@ namespace SinglePass.WPF.ViewModels
             var vm = new PasswordsViewModel();
             var cred = Credential.CreateNew();
             cred.NameField.Value = "Test";
-            cred.LoginField.Value = "TestLogin";
-            cred.PasswordField.Value = "TestPass";
+            cred.Login.LoginField.Value = "TestLogin";
+            cred.Login.PasswordField.Value = "TestPass";
             cred.OtherField.Value = "TestOther";
             var credVm = new CredentialViewModel(cred, null);
             vm.DisplayedCredentials.Add(credVm);
@@ -536,7 +536,7 @@ namespace SinglePass.WPF.ViewModels
             if (draft.NameFieldVM.HasErrors)
                 return;
 
-            var originalTotp = draft.Model.Totp;
+            var originalTotp = draft.Model.Login?.Totp;
             var totp = originalTotp;
             if (draft.RemoveTotp)
                 totp = null;
@@ -555,7 +555,8 @@ namespace SinglePass.WPF.ViewModels
             try
             {
                 draft.LastModifiedTime = DateTime.UtcNow;
-                draft.Model.Totp = totp;
+                if (draft.Model.Login is { } login)
+                    login.Totp = totp;
                 if (isNew)
                     draft.CreationTime = draft.LastModifiedTime;
 
@@ -569,7 +570,8 @@ namespace SinglePass.WPF.ViewModels
                                 await _credentialsCryptoService.EditCredential(draft.Model, groupId, changeGroup));
                     }))
                 {
-                    draft.Model.Totp = originalTotp;
+                    if (draft.Model.Login is { } failedLogin)
+                        failedLogin.Totp = originalTotp;
                     return;
                 }
 

@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Security;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
 namespace SinglePass.Core.Services
@@ -123,20 +124,62 @@ namespace SinglePass.Core.Services
         {
             var json = cryptoService.DecryptFromStream<JsonElement>(stream, password, out isLegacy);
             if (json.ValueKind == JsonValueKind.Array)
-                return new PasswordVault { Credentials = json.Deserialize<List<Credential>>() };
+            {
+                var array = JsonNode.Parse(json.GetRawText());
+                MoveLoginFields(array);
+                var credentials = array.Deserialize<List<Credential>>();
+                credentials.ForEach(credential => credential.EnsureTypeData());
+                return new PasswordVault { Credentials = credentials };
+            }
 
             if (json.ValueKind != JsonValueKind.Object ||
                 !json.TryGetProperty(nameof(PasswordVault.Version), out var version) ||
                 !version.TryGetInt32(out var number) || number < 1 || number > PasswordVault.CurrentVersion)
                 throw new JsonException("Unsupported password vault format.");
 
-            var vault = json.Deserialize<PasswordVault>();
+            // Not limited to versions before 3: early version 3 builds wrote the login fields at the top level too.
+            var node = JsonNode.Parse(json.GetRawText());
+            MoveLoginFields(node[nameof(PasswordVault.Credentials)]);
+            var vault = node.Deserialize<PasswordVault>();
+
             if (vault.Credentials == null || vault.Groups == null || vault.Assignments == null ||
                 vault.DeletedCredentials == null)
                 throw new JsonException("Incomplete password vault.");
 
-            // Version 1 has no tombstones; the next write stores the vault as the current version.
+            foreach (var credential in vault.Credentials)
+                credential.EnsureTypeData();
+
+            // Older versions are upgraded in memory; the next write stores the vault as the current version.
             return vault.Version == PasswordVault.CurrentVersion ? vault : vault with { Version = PasswordVault.CurrentVersion };
+        }
+
+        // Before version 3 the login fields were properties of the credential itself.
+        private static readonly string[] LegacyLoginProperties =
+            [nameof(LoginData.LoginField), nameof(LoginData.PasswordField), nameof(LoginData.SiteField),
+             nameof(LoginData.Totp), nameof(LoginData.PasswordHistory)];
+
+        private static void MoveLoginFields(JsonNode credentials)
+        {
+            if (credentials is not JsonArray array)
+                return;
+
+            foreach (var item in array)
+            {
+                if (item is not JsonObject credential || credential.ContainsKey(nameof(Credential.Login)) ||
+                    !LegacyLoginProperties.Any(credential.ContainsKey))
+                    continue;
+
+                var login = new JsonObject();
+                foreach (var name in LegacyLoginProperties)
+                {
+                    if (!credential.TryGetPropertyValue(name, out var value))
+                        continue;
+
+                    credential.Remove(name);
+                    login[name] = value;
+                }
+                credential[nameof(Credential.Login)] = login;
+            }
         }
 
         internal Task<CredentialLoadResult> LoadCredentialsAsync(string password, bool allowCreate = false) => Task.Run(async () =>
@@ -176,6 +219,7 @@ namespace SinglePass.Core.Services
         internal Task AddCredential(Credential credential, Guid? groupId)
         {
             ArgumentNullException.ThrowIfNull(credential);
+            credential.EnsureTypeData();
             return UpdateVault(vault =>
             {
                 if (vault.Credentials.Contains(credential))
@@ -205,17 +249,23 @@ namespace SinglePass.Core.Services
                     throw new InvalidOperationException("The credential is no longer available.");
 
                 var current = vault.Credentials[index];
-                var previousPassword = current.PasswordField.Value;
-                var history = current.PasswordHistory;
-                if (!string.IsNullOrEmpty(previousPassword) &&
-                    !string.Equals(previousPassword, credential.PasswordField.Value, StringComparison.Ordinal))
-                {
-                    var entry = new PasswordHistoryEntry { Password = previousPassword, ChangedAtUtc = DateTimeOffset.UtcNow };
-                    history = [entry, .. history.Take(Credential.PasswordHistoryLimit - 1)];
-                }
+                if (current.Type != credential.Type)
+                    throw new InvalidOperationException("The type of an entry cannot be changed.");
 
                 saved = credential.Clone();
-                saved.PasswordHistory = history;
+                saved.EnsureTypeData();
+                if (saved.Login is { } login)
+                {
+                    var previousPassword = current.Login.PasswordField.Value;
+                    var history = current.Login.PasswordHistory;
+                    if (!string.IsNullOrEmpty(previousPassword) &&
+                        !string.Equals(previousPassword, login.PasswordField.Value, StringComparison.Ordinal))
+                    {
+                        var entry = new PasswordHistoryEntry { Password = previousPassword, ChangedAtUtc = DateTimeOffset.UtcNow };
+                        history = [entry, .. history.Take(LoginData.PasswordHistoryLimit - 1)];
+                    }
+                    login.PasswordHistory = history;
+                }
                 var credentials = vault.Credentials.ToList();
                 credentials[index] = saved;
                 var updated = vault with { Credentials = credentials };
@@ -401,10 +451,11 @@ namespace SinglePass.Core.Services
                 var current = credentials[index];
                 var winner = current.LastModifiedTime < credential.LastModifiedTime ? credential : current;
                 var history = MergePasswordHistory(winner, ReferenceEquals(winner, current) ? credential : current);
-                if (!ReferenceEquals(winner, current) || !ReferenceEquals(history, current.PasswordHistory))
+                if (!ReferenceEquals(winner, current) || !ReferenceEquals(history, current.Login?.PasswordHistory))
                 {
                     var merged = winner.Clone();
-                    merged.PasswordHistory = history;
+                    if (merged.Login != null)
+                        merged.Login.PasswordHistory = history;
                     result.ChangedCredentials.Add(merged);
                     credentials[index] = merged;
                 }
@@ -491,18 +542,22 @@ namespace SinglePass.Core.Services
         private static bool IsModifiedAfter(Credential credential, DateTimeOffset deletedAt) =>
             credential.LastModifiedTime.ToUniversalTime() > deletedAt.UtcDateTime;
 
+        /// <summary>History of the winning version combined with the other one. Null for entries without a password.</summary>
         private static IReadOnlyList<PasswordHistoryEntry> MergePasswordHistory(Credential winner, Credential other)
         {
-            if (other.PasswordHistory.Count == 0)
-                return winner.PasswordHistory;
+            if (winner.Login is not { } login)
+                return null;
 
-            var history = winner.PasswordHistory.Concat(other.PasswordHistory)
+            if (other.Login is not { PasswordHistory.Count: > 0 } otherLogin)
+                return login.PasswordHistory;
+
+            var history = login.PasswordHistory.Concat(otherLogin.PasswordHistory)
                 .DistinctBy(entry => (entry.ChangedAtUtc, entry.Password))
                 .OrderByDescending(entry => entry.ChangedAtUtc)
                 .ThenBy(entry => entry.Password, StringComparer.Ordinal)
-                .Take(Credential.PasswordHistoryLimit)
+                .Take(LoginData.PasswordHistoryLimit)
                 .ToArray();
-            return history.SequenceEqual(winner.PasswordHistory) ? winner.PasswordHistory : history;
+            return history.SequenceEqual(login.PasswordHistory) ? login.PasswordHistory : history;
         }
 
         private Task UpdateVault(Func<PasswordVault, PasswordVault> update) => Task.Run(async () =>
@@ -590,7 +645,8 @@ namespace SinglePass.Core.Services
                 copy.LastModifiedTime = now.UtcDateTime;
                 if (index >= 0)
                 {
-                    copy.PasswordHistory = CombineHistory(copy, credentials[index], now);
+                    if (copy.Login != null && credentials[index].Login is { } currentLogin)
+                        copy.Login.PasswordHistory = CombineHistory(copy.Login, currentLogin, now);
                     credentials[index] = copy;
                     reverted.Add(copy);
                 }
@@ -666,14 +722,15 @@ namespace SinglePass.Core.Services
             {
                 var copy = credential.Clone();
                 copy.LastModifiedTime = default;
-                copy.PasswordHistory = [];
+                if (copy.Login != null)
+                    copy.Login.PasswordHistory = [];
                 return JsonSerializer.Serialize(copy);
             }
 
             return Content(first) == Content(second);
         }
 
-        private static IReadOnlyList<PasswordHistoryEntry> CombineHistory(Credential restored, Credential current, DateTimeOffset now)
+        private static IReadOnlyList<PasswordHistoryEntry> CombineHistory(LoginData restored, LoginData current, DateTimeOffset now)
         {
             IEnumerable<PasswordHistoryEntry> entries = restored.PasswordHistory.Concat(current.PasswordHistory);
             var currentPassword = current.PasswordField.Value;
@@ -685,7 +742,7 @@ namespace SinglePass.Core.Services
                 .DistinctBy(entry => (entry.ChangedAtUtc, entry.Password))
                 .OrderByDescending(entry => entry.ChangedAtUtc)
                 .ThenBy(entry => entry.Password, StringComparer.Ordinal)
-                .Take(Credential.PasswordHistoryLimit)
+                .Take(LoginData.PasswordHistoryLimit)
                 .ToArray();
         }
 

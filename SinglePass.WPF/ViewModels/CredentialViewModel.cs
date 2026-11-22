@@ -31,7 +31,7 @@ namespace SinglePass.WPF.ViewModels
         private readonly IFavIconCollector _favIconCollector;
 
         public Credential Model { get; }
-        public TotpConfiguration Totp => Model.Totp;
+        public TotpConfiguration Totp => Model.Login?.Totp;
 
         public CredentialType Type => Model.Type;
         public bool IsLogin => Model.Type == CredentialType.Login;
@@ -130,7 +130,7 @@ namespace SinglePass.WPF.ViewModels
         public partial bool ReplaceTotp { get; set; }
 
         public bool ShowCurrentTotp => Totp != null && !RemoveTotp && !ReplaceTotp;
-        public bool ShowTotpSetup => !RemoveTotp && (Totp == null || ReplaceTotp);
+        public bool ShowTotpSetup => IsLogin && !RemoveTotp && (Totp == null || ReplaceTotp);
 
         [ObservableProperty]
         public partial bool HasInvalidTotp { get; set; }
@@ -138,9 +138,11 @@ namespace SinglePass.WPF.ViewModels
         partial void OnTotpSetupInputChanged(string value) => HasInvalidTotp = false;
         partial void OnRemoveTotpChanged(bool value) => HasInvalidTotp = false;
         public PassFieldViewModel NameFieldVM { get; }
+        public PassFieldViewModel OtherFieldVM { get; }
+
+        // Login fields; null for entries of other types.
         public PassFieldViewModel LoginFieldVM { get; }
         public PassFieldViewModel PasswordFieldVM { get; }
-        public PassFieldViewModel OtherFieldVM { get; }
         public PassFieldViewModel SiteFieldVM { get; }
         public ObservableCollection<PassFieldViewModel> AdditionalFields { get; }
 
@@ -148,7 +150,7 @@ namespace SinglePass.WPF.ViewModels
         {
             get
             {
-                var site = SiteFieldVM.Value?.Trim();
+                var site = SiteFieldVM?.Value?.Trim();
                 if (string.IsNullOrEmpty(site))
                     return null;
 
@@ -156,7 +158,7 @@ namespace SinglePass.WPF.ViewModels
             }
         }
 
-        public bool HasWebsite => !string.IsNullOrWhiteSpace(SiteFieldVM.Value);
+        public bool HasWebsite => !string.IsNullOrWhiteSpace(SiteFieldVM?.Value);
 
         public sealed record WebsiteDisplay(string Prefix, string Host, string Suffix, Uri Address);
 
@@ -164,7 +166,7 @@ namespace SinglePass.WPF.ViewModels
         {
             get
             {
-                var site = SiteFieldVM.Value?.Trim() ?? string.Empty;
+                var site = SiteFieldVM?.Value?.Trim() ?? string.Empty;
                 var address = ParseWebsite(site, out var authorityStart);
                 if (address == null || (address.Scheme != Uri.UriSchemeHttp && address.Scheme != Uri.UriSchemeHttps))
                     return new WebsiteDisplay(site, string.Empty, string.Empty, null);
@@ -254,24 +256,29 @@ namespace SinglePass.WPF.ViewModels
             _favIconCollector = favIconCollector;
 
             NameFieldVM = new PassFieldViewModel(credential.NameField);
-            LoginFieldVM = new PassFieldViewModel(credential.LoginField);
-            PasswordFieldVM = new PassFieldViewModel(credential.PasswordField);
             OtherFieldVM = new PassFieldViewModel(credential.OtherField);
-            SiteFieldVM = new PassFieldViewModel(credential.SiteField);
-            SiteFieldVM.PropertyChanged += (_, e) =>
+            if (credential.Login is { } login)
             {
-                if (e.PropertyName == nameof(PassFieldViewModel.Value))
-                {
-                    OnPropertyChanged(nameof(WebsiteDomain));
-                    OnPropertyChanged(nameof(Website));
-                    OnPropertyChanged(nameof(HasWebsite));
-                    _favIcon = null;
-                    OnPropertyChanged(nameof(FavIcon));
-                }
-            };
+                LoginFieldVM = new PassFieldViewModel(login.LoginField);
+                PasswordFieldVM = new PassFieldViewModel(login.PasswordField);
+                SiteFieldVM = new PassFieldViewModel(login.SiteField);
+                SiteFieldVM.PropertyChanged += SiteField_PropertyChanged;
+            }
             AdditionalFields = new ObservableCollection<PassFieldViewModel>(credential.AdditionalFields.Select(f => new PassFieldViewModel(f)));
             LastModifiedTime = credential.LastModifiedTime;
             CreationTime = credential.CreationTime;
+        }
+
+        private void SiteField_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != nameof(PassFieldViewModel.Value))
+                return;
+
+            OnPropertyChanged(nameof(WebsiteDomain));
+            OnPropertyChanged(nameof(Website));
+            OnPropertyChanged(nameof(HasWebsite));
+            _favIcon = null;
+            OnPropertyChanged(nameof(FavIcon));
         }
 
         internal CredentialViewModel Clone()

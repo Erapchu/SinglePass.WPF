@@ -110,7 +110,7 @@ namespace SinglePass.Core.Tests
         {
             var credential = new Credential { Id = id, LastModifiedTime = modified, CreationTime = modified };
             credential.NameField.Value = name;
-            credential.PasswordField.Value = password;
+            credential.Login.PasswordField.Value = password;
             return credential;
         }
 
@@ -151,8 +151,8 @@ namespace SinglePass.Core.Tests
             var restored = Apply(current, backup, out var result);
 
             var credential = Assert.Single(restored.Credentials);
-            Assert.Equal("old", credential.PasswordField.Value);
-            Assert.Contains(credential.PasswordHistory, entry => entry.Password == "new");
+            Assert.Equal("old", credential.Login.PasswordField.Value);
+            Assert.Contains(credential.Login.PasswordHistory, entry => entry.Password == "new");
             Assert.Single(result.Reverted);
         }
 

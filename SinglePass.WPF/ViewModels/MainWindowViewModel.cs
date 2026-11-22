@@ -92,6 +92,7 @@ namespace SinglePass.WPF.ViewModels
                 new NavigationItemViewModel("CategoryLogins", "", CredentialType.Login, AllPasswordsNavigation),
                 new NavigationItemViewModel("CategorySshKeys", "", CredentialType.SshKey, AllPasswordsNavigation),
                 new NavigationItemViewModel("CategoryCards", "", CredentialType.Card, AllPasswordsNavigation),
+                new NavigationItemViewModel("CategoryHosts", "", CredentialType.Host, AllPasswordsNavigation),
             ];
             TrashNavigation = new NavigationItemViewModel(
                 "Trash",

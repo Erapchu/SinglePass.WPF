@@ -51,6 +51,7 @@ namespace SinglePass.WPF.ViewModels
         private readonly List<CredentialViewModel> _credentialVMs = new();
         private readonly AppSettingsService _appSettingsService;
         private readonly CredentialViewModelFactory _credentialViewModelFactory;
+        private readonly SshAgentServer _sshAgent;
         private Task _initialLoad;
         private Guid? _selectedGroupId;
 
@@ -224,12 +225,14 @@ namespace SinglePass.WPF.ViewModels
             CredentialsCryptoService credentialsCryptoService,
             ILogger<PasswordsViewModel> logger,
             AppSettingsService appSettingsService,
-            CredentialViewModelFactory credentialViewModelFactory) : this()
+            CredentialViewModelFactory credentialViewModelFactory,
+            SshAgentServer sshAgent) : this()
         {
             _credentialsCryptoService = credentialsCryptoService;
             _logger = logger;
             _appSettingsService = appSettingsService;
             _credentialViewModelFactory = credentialViewModelFactory;
+            _sshAgent = sshAgent;
             RefreshGroupOptions();
 
             _sort = _appSettingsService.Sort is SortType.Created or SortType.Modified
@@ -376,6 +379,7 @@ namespace SinglePass.WPF.ViewModels
                 if (request != _displayRequest)
                     return;
 
+                RefreshSshKeyOptions();
                 var selection = preferredSelection ?? (keepSelection ? SelectedCredentialVM : null);
                 DisplayedCredentials = new ObservableCollectionDelayed<CredentialViewModel>(filtered);
                 GroupedCredentials = CreateGroupedView(DisplayedCredentials, sort);
@@ -690,6 +694,53 @@ namespace SinglePass.WPF.ViewModels
             if (TotpService.TryGetCode(configuration, DateTime.UtcNow, out var code, out _))
                 CopyToClipboard(code);
         }
+
+        #region Hosts
+        /// <summary>An SSH key entry a host can sign in with; the first option is "no key".</summary>
+        public sealed record SshKeyOption(Guid? Id, string Name, string KeyType, bool IsMissing = false);
+
+        /// <summary>The SSH key entries, for the key picker of the host editor and the host view.</summary>
+        public IReadOnlyList<SshKeyOption> SshKeyOptions { get; private set; } = [];
+
+        private void RefreshSshKeyOptions()
+        {
+            var options = new List<SshKeyOption> { new(null, LocalizationManager.Instance["NoSshKey"], null) };
+            options.AddRange(_credentialVMs
+                .Where(item => item.SshKey != null)
+                .OrderBy(item => item.NameFieldVM.Value, StringComparer.CurrentCultureIgnoreCase)
+                .Select(item => new SshKeyOption(item.Model.Id, item.NameFieldVM.Value, item.SshKey.KeyInfo?.KeyType)));
+
+            // A new list only when something changed: the picker of an open editor would lose its selection.
+            if (options.SequenceEqual(SshKeyOptions))
+                return;
+
+            SshKeyOptions = options;
+            OnPropertyChanged(nameof(SshKeyOptions));
+        }
+
+        [RelayCommand]
+        private void CopySshCommand(HostViewModel host)
+        {
+            if (host is not { HasHostname: true })
+                return;
+
+            string identityFile = null;
+            if (_sshAgent?.IsRunning == true && host.SshKeyId is { } keyId &&
+                _credentialVMs.Find(item => item.Model.Id == keyId)?.SshKey is { HasPublicKey: true } key)
+            {
+                try
+                {
+                    identityFile = SshPublicKeyFiles.Write(keyId, key.PublicKey);
+                }
+                catch (Exception ex) when (ex is System.IO.IOException or UnauthorizedAccessException)
+                {
+                    _logger.LogError(ex, "Failed to write the public key file");
+                }
+            }
+
+            CopyToClipboard(SshPublicKeyFiles.BuildCommand(host, identityFile, identityFile == null ? null : _sshAgent.IdentityAgentPath));
+        }
+        #endregion
 
         private static bool CanOpenInBrowser(Uri address) =>
             address?.IsAbsoluteUri == true &&

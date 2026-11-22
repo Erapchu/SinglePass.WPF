@@ -928,4 +928,70 @@
   <data name="TrashSynchronized" xml:space="preserve">
     <value>Удалённые записи синхронизированы</value>
   </data>
+  <data name="Host" xml:space="preserve">
+    <value>Хост</value>
+  </data>
+  <data name="CategoryHosts" xml:space="preserve">
+    <value>Хосты</value>
+  </data>
+  <data name="Hostname" xml:space="preserve">
+    <value>Имя хоста</value>
+  </data>
+  <data name="Port" xml:space="preserve">
+    <value>Порт</value>
+  </data>
+  <data name="Username" xml:space="preserve">
+    <value>Пользователь</value>
+  </data>
+  <data name="CopyHostname" xml:space="preserve">
+    <value>Копировать имя хоста</value>
+  </data>
+  <data name="CopyUsername" xml:space="preserve">
+    <value>Копировать имя пользователя</value>
+  </data>
+  <data name="NoSshKey" xml:space="preserve">
+    <value>Без ключа</value>
+  </data>
+  <data name="SshKeyNotFound" xml:space="preserve">
+    <value>Ключ не найден: запись удалена</value>
+  </data>
+  <data name="PortInvalid" xml:space="preserve">
+    <value>Порт должен быть числом от 1 до 65535.</value>
+  </data>
+  <data name="HostSshKeyHint" xml:space="preserve">
+    <value>Вход выполняется этим ключом через SSH-агент SinglePass; приватный ключ не покидает хранилище.</value>
+  </data>
+  <data name="CopySshCommand" xml:space="preserve">
+    <value>Копировать команду SSH</value>
+  </data>
+  <data name="CopySshCommandHint" xml:space="preserve">
+    <value>Копирует команду ssh, которая входит привязанным ключом через агент SinglePass.</value>
+  </data>
+  <data name="SshAgent" xml:space="preserve">
+    <value>SSH-агент</value>
+  </data>
+  <data name="SshAgentDescription" xml:space="preserve">
+    <value>ssh, git и другие программы могут входить с SSH-ключами из хранилища. Каждое использование требует подтверждения, а пока хранилище заблокировано, ключи недоступны. Чтобы агент работал везде, задайте переменную среды пользователя SSH_AUTH_SOCK с адресом ниже. Команда SSH, скопированная у хоста, уже его содержит.</value>
+  </data>
+  <data name="CopySshAgentPipe" xml:space="preserve">
+    <value>Копировать адрес</value>
+  </data>
+  <data name="SshAgentConfirmHeader" xml:space="preserve">
+    <value>Разрешить использование SSH-ключа?</value>
+  </data>
+  <data name="SshAgentConfirmKey" xml:space="preserve">
+    <value>Ключ</value>
+  </data>
+  <data name="SshAgentConfirmProgram" xml:space="preserve">
+    <value>Запрашивает</value>
+  </data>
+  <data name="SshAgentRemember" xml:space="preserve">
+    <value>Разрешать этой программе до блокировки хранилища</value>
+  </data>
+  <data name="SshAgentAllow" xml:space="preserve">
+    <value>Разрешить</value>
+  </data>
+  <data name="SshAgentDeny" xml:space="preserve">
+    <value>Запретить</value>
+  </data>
 </root>

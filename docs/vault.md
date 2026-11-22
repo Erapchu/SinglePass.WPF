@@ -43,7 +43,7 @@ Every write goes to a temporary file `singlePass.dat.<guid>.tmp`, is flushed to 
 
 ```jsonc
 {
-  "Version": 5,
+  "Version": 6,
   "Credentials": [ /* Credential */ ],
   "Groups":             { "<group id>":      { "Group": {...} | null, "ModifiedAt": "...", "IsDeleted": false } },
   "Assignments":        { "<credential id>": { "GroupId": "<group id>" | null, "ModifiedAt": "..." } },
@@ -61,8 +61,9 @@ Every write goes to a temporary file `singlePass.dat.<guid>.tmp`, is flushed to 
 | 3 | Adds entry types: `Credential.Type`, one data block per type (`Login`, `SshKey`). The login fields move from the credential into `Login`. |
 | 4 | Adds payment cards: `Credential.Card`. |
 | 5 | Adds the trash: `Trash`. |
+| 6 | Adds SSH hosts: `Credential.Host`. |
 
-- A vault with a newer `Version` than the application supports is rejected, both locally and on sync. Builds that only know version 1 cannot open a version 2 vault. This is intentional: an old build would drop `DeletedCredentials` on its next write and deleted credentials would return. For the same reason builds that only know version 2 cannot open a version 3 vault: they would not find the login fields, which moved into `Login`, and would drop the SSH key data. Builds that only know version 3 cannot open a version 4 vault: they would drop card data. Builds that only know version 4 cannot open a version 5 vault: they would show entries in the trash as regular ones and drop the trash state.
+- A vault with a newer `Version` than the application supports is rejected, both locally and on sync. Builds that only know version 1 cannot open a version 2 vault. This is intentional: an old build would drop `DeletedCredentials` on its next write and deleted credentials would return. For the same reason builds that only know version 2 cannot open a version 3 vault: they would not find the login fields, which moved into `Login`, and would drop the SSH key data. Builds that only know version 3 cannot open a version 4 vault: they would drop card data. Builds that only know version 4 cannot open a version 5 vault: they would show entries in the trash as regular ones and drop the trash state. Builds that only know version 5 cannot open a version 6 vault: they would drop host data.
 - Older vaults are upgraded in memory and written as the current version on the next change. For versions before 3, `LoginField`, `PasswordField`, `SiteField`, `Totp` and `PasswordHistory` of every credential are moved into a `Login` object before the JSON is read. This happens in `ReadVault`, so the local vault, backups and the cloud copy are all converted.
 - A missing collection is read as empty; an explicit `null` makes the file invalid.
 
@@ -73,12 +74,13 @@ A credential holds the fields every entry has, its type and one data block for t
 ```jsonc
 {
   "Id": "<guid>",
-  "Type": 0,                         // 0 login (also when missing), 1 SSH key, 2 card
+  "Type": 0,                         // 0 login (also when missing), 1 SSH key, 2 card, 3 host
   "NameField": {...}, "OtherField": {...}, "AdditionalFields": [...],
   "CreationTime": "...", "LastModifiedTime": "...",
   "Login":  { "LoginField": {...}, "PasswordField": {...}, "SiteField": {...}, "Totp": {...} | null, "PasswordHistory": [...] } | null,
   "SshKey": { "PrivateKey": "...", "PublicKey": "...", "Passphrase": "..." } | null,
-  "Card":   { "Number": "...", "Holder": "...", "Expiry": "MM/YY", "Cvv": "...", "Pin": "...", "Brand": 2 | null } | null
+  "Card":   { "Number": "...", "Holder": "...", "Expiry": "MM/YY", "Cvv": "...", "Pin": "...", "Brand": 2 | null } | null,
+  "Host":   { "Hostname": "...", "Port": 2222 | null, "Username": "...", "SshKeyId": "<guid>" | null } | null
 }
 ```
 
@@ -88,6 +90,7 @@ A credential holds the fields every entry has, its type and one data block for t
 - `Login.PasswordHistory` — up to 10 previous passwords, newest first. When a save changes a non-empty password, the old one is added with the current UTC time.
 - `SshKey.PrivateKey` is the key file text (OpenSSH or PEM, possibly encrypted with `Passphrase`); `PublicKey` is an `authorized_keys` line.
 - `Card.Brand` is the payment network the user chose (`CardBrand`, a number); null means it is detected from the number when shown. The editor accepts only digits in the number, `MM/YY` in the expiry and digits in CVV and PIN (`CardNumbers`, `CardInput`); values saved before these rules stay as they are until edited. A number that fails the Luhn check is still saved, with a warning in the editor.
+- `Host.Port` null means 22. `Host.SshKeyId` is the `Id` of an SSH key entry to sign in with. It is a plain reference: deleting or trashing the key does not change the host, which then shows the key as missing. The private key is used through the SSH agent, see [ssh-agent.md](ssh-agent.md).
 - `LastModifiedTime`, `CreationTime` — UTC, set by the UI on save. Older vaults stored local time with an offset; the model converts any value to UTC when it is assigned, and the UI shows local time.
 
 Merge, tombstones, groups and backups do not depend on the type: an entry wins or loses as a whole. Password histories are combined only for logins.

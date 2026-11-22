@@ -122,6 +122,12 @@ namespace SinglePass.WPF
             services.AddScoped<CredentialViewModelFactory>();
             services.AddSingleton<AddressBarExtractor>();
             services.AddSingleton<UpdateService>();
+
+            // SSH agent: lives as long as the application and finds the vault of the current unlock itself.
+            services.AddSingleton<SshAgentKeyStore>();
+            services.AddSingleton<ISshAgentKeyStore>(sp => sp.GetRequiredService<SshAgentKeyStore>());
+            services.AddSingleton<SshAgent>();
+            services.AddSingleton<SshAgentServer>();
             services.AddSingleton(new AsyncKeyedLocker<string>(o =>
             {
                 o.PoolSize = 20;
@@ -200,6 +206,9 @@ namespace SinglePass.WPF
             updates.UpdateReady += (_, _) => PromptUpdate();
             updates.Start();
 
+            if (settings.SshAgentEnabled)
+                StartSshAgent(_rootServices);
+
             OpenVault();
         }
 
@@ -228,6 +237,25 @@ namespace SinglePass.WPF
                 MessageDialogButtons.YesNo);
             if (choice == DialogChoice.Yes)
                 updates.Restart();
+        }
+
+        /// <summary>The vault service of the current unlock, or null while the vault is locked.</summary>
+        internal CredentialsCryptoService UnlockedVault =>
+            _vaultWindow != null && !_locking ? Services?.GetService<CredentialsCryptoService>() : null;
+
+        /// <summary>Shows the unlock window, or brings the vault forward, without waiting for it.</summary>
+        internal void RequestUnlock() => Dispatcher.BeginInvoke(ShowVault, DispatcherPriority.Normal);
+
+        private static void StartSshAgent(IServiceProvider services)
+        {
+            try
+            {
+                services.GetRequiredService<SshAgentServer>().Start();
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                services.GetRequiredService<ILogger<App>>().LogError(ex, "The SSH agent could not start");
+            }
         }
 
         internal bool ShowUnlockIfLocked()
@@ -339,6 +367,7 @@ namespace SinglePass.WPF
         private void Application_Exit(object sender, ExitEventArgs e)
         {
             WindowsClipboard.ClearIfOwned();
+            _rootServices?.GetService<SshAgentServer>()?.Stop();
             var logger = _rootServices?.GetService<ILogger<App>>();
             logger?.LogInformation("The application is shutting down...{0}", Environment.NewLine);
         }

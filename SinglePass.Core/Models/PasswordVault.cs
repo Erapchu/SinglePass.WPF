@@ -12,7 +12,8 @@ namespace SinglePass.Core.Models
         // Version 4 adds payment cards (Credential.Card), for the same reason.
         // Version 5 adds the trash (Trash). An older client would show trashed entries as regular ones
         // and drop the trash state on its next write.
-        internal const int CurrentVersion = 5;
+        // Version 6 adds hosts (Credential.Host). An older client would drop the host data on its next write.
+        internal const int CurrentVersion = 6;
 
         /// <summary>How long an entry stays in the trash before it is deleted for good.</summary>
         internal static readonly TimeSpan TrashRetention = TimeSpan.FromDays(30);

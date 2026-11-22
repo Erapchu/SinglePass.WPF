@@ -27,6 +27,9 @@ namespace SinglePass.WPF.Settings
         public double DetailsPaneRatio { get; set; } = 0.5;
         public bool CheckForUpdates { get; set; } = true;
 
+        /// <summary>Serve the SSH keys of the vault to ssh, git and other programs (see SshAgentServer).</summary>
+        public bool SshAgentEnabled { get; set; } = true;
+
         /// <summary>Time of the last successful sync on this device, per cloud.</summary>
         public Dictionary<CloudType, DateTimeOffset> LastSyncTimes { get; set => field = value ?? new(); } = new();
 

@@ -468,6 +468,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hosts.
+        /// </summary>
+        public static string CategoryHosts {
+            get {
+                return ResourceManager.GetString("CategoryHosts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Passwords.
         /// </summary>
         public static string CategoryLogins {
@@ -621,6 +630,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Copy hostname.
+        /// </summary>
+        public static string CopyHostname {
+            get {
+                return ResourceManager.GetString("CopyHostname", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Copy login.
         /// </summary>
         public static string CopyLogin {
@@ -675,11 +693,47 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Copy address.
+        /// </summary>
+        public static string CopySshAgentPipe {
+            get {
+                return ResourceManager.GetString("CopySshAgentPipe", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy SSH command.
+        /// </summary>
+        public static string CopySshCommand {
+            get {
+                return ResourceManager.GetString("CopySshCommand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copies an ssh command that signs in with the linked key through the SinglePass agent..
+        /// </summary>
+        public static string CopySshCommandHint {
+            get {
+                return ResourceManager.GetString("CopySshCommandHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Copy verification code.
         /// </summary>
         public static string CopyTotp {
             get {
                 return ResourceManager.GetString("CopyTotp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy username.
+        /// </summary>
+        public static string CopyUsername {
+            get {
+                return ResourceManager.GetString("CopyUsername", resourceCulture);
             }
         }
         
@@ -1125,6 +1179,33 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Host.
+        /// </summary>
+        public static string Host {
+            get {
+                return ResourceManager.GetString("Host", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hostname.
+        /// </summary>
+        public static string Hostname {
+            get {
+                return ResourceManager.GetString("Hostname", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The SinglePass SSH agent signs in with this key; the private key does not leave the vault..
+        /// </summary>
+        public static string HostSshKeyHint {
+            get {
+                return ResourceManager.GetString("HostSshKeyHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Hotkeys.
         /// </summary>
         public static string Hotkeys {
@@ -1512,6 +1593,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No key.
+        /// </summary>
+        public static string NoSshKey {
+            get {
+                return ResourceManager.GetString("NoSshKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Copy a screenshot of the QR code to the clipboard first..
         /// </summary>
         public static string NoTotpQrImage {
@@ -1724,6 +1814,24 @@ namespace SinglePass.Language.Properties {
         public static string Popup {
             get {
                 return ResourceManager.GetString("Popup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Port.
+        /// </summary>
+        public static string Port {
+            get {
+                return ResourceManager.GetString("Port", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The port must be a number from 1 to 65535..
+        /// </summary>
+        public static string PortInvalid {
+            get {
+                return ResourceManager.GetString("PortInvalid", resourceCulture);
             }
         }
         
@@ -2000,6 +2108,78 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to SSH agent.
+        /// </summary>
+        public static string SshAgent {
+            get {
+                return ResourceManager.GetString("SshAgent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Allow.
+        /// </summary>
+        public static string SshAgentAllow {
+            get {
+                return ResourceManager.GetString("SshAgentAllow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Allow use of an SSH key?.
+        /// </summary>
+        public static string SshAgentConfirmHeader {
+            get {
+                return ResourceManager.GetString("SshAgentConfirmHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Key.
+        /// </summary>
+        public static string SshAgentConfirmKey {
+            get {
+                return ResourceManager.GetString("SshAgentConfirmKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Requested by.
+        /// </summary>
+        public static string SshAgentConfirmProgram {
+            get {
+                return ResourceManager.GetString("SshAgentConfirmProgram", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Deny.
+        /// </summary>
+        public static string SshAgentDeny {
+            get {
+                return ResourceManager.GetString("SshAgentDeny", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ssh, git and other programs can sign in with the SSH keys of the vault. Every use asks for your confirmation, and the keys are unavailable while the vault is locked. To use the agent everywhere, set the SSH_AUTH_SOCK user environment variable to the address below. Copy SSH command of a host already includes it..
+        /// </summary>
+        public static string SshAgentDescription {
+            get {
+                return ResourceManager.GetString("SshAgentDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Allow this program until the vault is locked.
+        /// </summary>
+        public static string SshAgentRemember {
+            get {
+                return ResourceManager.GetString("SshAgentRemember", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to SSH key.
         /// </summary>
         public static string SshKey {
@@ -2032,6 +2212,15 @@ namespace SinglePass.Language.Properties {
         public static string SshKeyFileTooLarge {
             get {
                 return ResourceManager.GetString("SshKeyFileTooLarge", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Key not found: the entry was deleted.
+        /// </summary>
+        public static string SshKeyNotFound {
+            get {
+                return ResourceManager.GetString("SshKeyNotFound", resourceCulture);
             }
         }
         
@@ -2437,6 +2626,15 @@ namespace SinglePass.Language.Properties {
         public static string Uploading {
             get {
                 return ResourceManager.GetString("Uploading", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Username.
+        /// </summary>
+        public static string Username {
+            get {
+                return ResourceManager.GetString("Username", resourceCulture);
             }
         }
         

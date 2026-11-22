@@ -209,6 +209,7 @@ namespace SinglePass.WPF.ViewModels
                 {
                     CredentialType.SshKey => loc["SshKey"],
                     CredentialType.Card => loc["Card"],
+                    CredentialType.Host => loc["Host"],
                     _ => loc["Password"]
                 };
                 return $"{type} · {TrashViewModel.Plural(DaysLeft, "TrashDaysLeft")}";

@@ -6,5 +6,6 @@ namespace SinglePass.Core.Models
         Login = 0,
         SshKey = 1,
         Card = 2,
+        Host = 3,
     }
 }

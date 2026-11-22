@@ -399,6 +399,33 @@ namespace SinglePass.Core.Tests
         }
 
         [Fact]
+        public void HostEntry_SurvivesFile()
+        {
+            var keyId = Guid.NewGuid();
+            var credential = Credential.CreateNew(CredentialType.Host);
+            credential.Host.Hostname = "server.example.com";
+            credential.Host.Port = 2222;
+            credential.Host.Username = "root";
+            credential.Host.SshKeyId = keyId;
+
+            var stored = Assert.Single(RoundTrip(new PasswordVault { Credentials = [credential] }).Credentials);
+
+            Assert.Equal(CredentialType.Host, stored.Type);
+            Assert.Null(stored.Login);
+            Assert.Null(stored.SshKey);
+            Assert.Null(stored.Card);
+            Assert.Equal("server.example.com", stored.Host.Hostname);
+            Assert.Equal(2222, stored.Host.Port);
+            Assert.Equal("root", stored.Host.Username);
+            Assert.Equal(keyId, stored.Host.SshKeyId);
+
+            var clone = stored.Clone();
+            clone.Host.Port = null;
+            Assert.Equal(2222, stored.Host.Port);
+            Assert.Null(Credential.CreateNew().Host);
+        }
+
+        [Fact]
         public void SshKeyEntry_SurvivesFile()
         {
             var credential = Credential.CreateNew(CredentialType.SshKey);

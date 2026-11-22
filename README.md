@@ -8,6 +8,7 @@ SinglePass is a Windows password manager with a local encrypted vault, a quick-a
 - Organize credentials into custom groups. Select a group in the sidebar to filter the list, or drag one or more selected entries onto a group to move them.
 - Copy credentials to the clipboard, show or hide passwords, and open saved websites in a browser.
 - Generate and copy time-based one-time passwords (TOTP) from a saved entry.
+- Keep SSH keys and SSH hosts. The built-in SSH agent lets `ssh`, `git` and other OpenSSH clients sign in with the keys of the vault, asking for confirmation before each use; a host copies a ready `ssh` command. See [docs/ssh-agent.md](docs/ssh-agent.md).
 - Search by name, login, website or notes, including transliterated text.
 - Open a quick-access popup with a configurable global hotkey. The popup can suggest entries based on the current browser address and paste a login and password or individual fields.
 - Synchronize credentials with Google Drive or Yandex Disk after signing in.
@@ -55,6 +56,7 @@ Application data is stored under `%LOCALAPPDATA%\SinglePass`:
 - `googleDrive.token` — Google Drive authorization data protected by Windows for the current user. SinglePass migrates the former `googleDrive.json` and removes it after saving the protected token.
 - `yandexDisk.token` — Yandex Disk authorization data protected by Windows for the current user.
 - `Backups` — automatic copies of the vault, restorable from **Settings → Security → Backups**.
+- `ssh` — public keys of SSH key entries, written for the commands copied from hosts. Private keys stay in the vault.
 - `Cache` — cached data; logs are stored in `Logs`.
 
 The vault uses AES-256-GCM encryption with a key derived from the master password using Argon2id. SinglePass upgrades older local vaults after you unlock them successfully. Vaults written by this version cannot be opened by older versions, so update SinglePass on every device that syncs the same vault. The file format and merge rules are described in [docs/vault.md](docs/vault.md), synchronization in [docs/cloud-sync.md](docs/cloud-sync.md).

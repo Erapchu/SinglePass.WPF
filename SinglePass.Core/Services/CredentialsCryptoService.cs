@@ -34,6 +34,13 @@ namespace SinglePass.Core.Services
         public bool AnyChanges => Restored.Count > 0 || Reverted.Count > 0 || GroupsChanged;
     }
 
+    /// <summary>An entry in the trash and when it was moved there.</summary>
+    internal sealed record TrashedCredential(Credential Credential, DateTimeOffset DeletedAt)
+    {
+        /// <summary>When the entry is deleted for good.</summary>
+        public DateTimeOffset PurgeAt => DeletedAt + PasswordVault.TrashRetention;
+    }
+
     public class CredentialsCryptoService
     {
         private readonly ILogger<CredentialsCryptoService> _logger;
@@ -45,7 +52,32 @@ namespace SinglePass.Core.Services
         private volatile bool _locked;
         internal bool IsLocked => _locked;
 
-        public List<Credential> Credentials => _vault.Credentials.ToList();
+        /// <summary>Entries of the vault, without the ones in the trash.</summary>
+        public List<Credential> Credentials
+        {
+            get
+            {
+                var vault = _vault;
+                return vault.Credentials.Where(credential => !IsTrashed(vault, credential.Id)).ToList();
+            }
+        }
+
+        /// <summary>Entries in the trash, most recently deleted first.</summary>
+        internal IReadOnlyList<TrashedCredential> TrashedCredentials
+        {
+            get
+            {
+                var vault = _vault;
+                return vault.Credentials
+                    .Where(credential => IsTrashed(vault, credential.Id))
+                    .Select(credential => new TrashedCredential(credential, vault.Trash[credential.Id].DeletedAt.Value))
+                    .OrderByDescending(item => item.DeletedAt)
+                    .ToList();
+            }
+        }
+
+        private static bool IsTrashed(PasswordVault vault, Guid credentialId) =>
+            vault.Trash.TryGetValue(credentialId, out var state) && state.IsTrashed;
 
         /// <summary>Backups of the vault file, newest first.</summary>
         internal IReadOnlyList<VaultBackupInfo> Backups => _backups.List();
@@ -143,7 +175,7 @@ namespace SinglePass.Core.Services
             var vault = node.Deserialize<PasswordVault>();
 
             if (vault.Credentials == null || vault.Groups == null || vault.Assignments == null ||
-                vault.DeletedCredentials == null)
+                vault.DeletedCredentials == null || vault.Trash == null)
                 throw new JsonException("Incomplete password vault.");
 
             foreach (var credential in vault.Credentials)
@@ -198,6 +230,14 @@ namespace SinglePass.Core.Services
                 catch (FileNotFoundException) when (allowCreate)
                 {
                     vault = new PasswordVault();
+                    needsRewrite = true;
+                }
+
+                var purged = PurgeExpiredTrash(vault, DateTimeOffset.UtcNow);
+                if (!ReferenceEquals(purged, vault))
+                {
+                    CreateDailyBackupIfDue();
+                    vault = purged;
                     needsRewrite = true;
                 }
 
@@ -274,33 +314,84 @@ namespace SinglePass.Core.Services
             return saved;
         }
 
+        /// <summary>Deletes the credential for good, bypassing the trash.</summary>
         public Task DeleteCredential(Credential credential)
         {
             ArgumentNullException.ThrowIfNull(credential);
-            return UpdateVault(vault =>
+            return DeleteCredentials([credential.Id]);
+        }
+
+        /// <summary>Deletes credentials for good, whether they are in the trash or not.</summary>
+        internal Task DeleteCredentials(IReadOnlyCollection<Guid> credentialIds) =>
+            UpdateVault(vault => RemoveCredentials(vault, credentialIds, DateTimeOffset.UtcNow));
+
+        /// <summary>Moves the credential to the trash. It keeps its data and group and can be restored.</summary>
+        public Task MoveToTrash(Credential credential)
+        {
+            ArgumentNullException.ThrowIfNull(credential);
+            return UpdateVault(vault => MoveToTrash(vault, credential.Id, DateTimeOffset.UtcNow));
+        }
+
+        internal static PasswordVault MoveToTrash(PasswordVault vault, Guid credentialId, DateTimeOffset now) =>
+            vault.Credentials.Any(credential => credential.Id == credentialId) && !IsTrashed(vault, credentialId)
+                ? SetTrashState(vault, [credentialId], new TrashState(now, now))
+                : vault;
+
+        /// <summary>Brings credentials back from the trash.</summary>
+        internal Task RestoreFromTrash(IReadOnlyCollection<Guid> credentialIds) =>
+            UpdateVault(vault => RestoreFromTrash(vault, credentialIds, DateTimeOffset.UtcNow));
+
+        internal static PasswordVault RestoreFromTrash(PasswordVault vault, IEnumerable<Guid> credentialIds, DateTimeOffset now)
+        {
+            var trashed = credentialIds.Where(id => IsTrashed(vault, id)).ToList();
+            return trashed.Count == 0 ? vault : SetTrashState(vault, trashed, new TrashState(null, now));
+        }
+
+        /// <summary>Deletes for good the credentials that have been in the trash longer than <see cref="PasswordVault.TrashRetention"/>.</summary>
+        internal Task PurgeExpiredTrash() => UpdateVault(vault => PurgeExpiredTrash(vault, DateTimeOffset.UtcNow));
+
+        internal static PasswordVault PurgeExpiredTrash(PasswordVault vault, DateTimeOffset now)
+        {
+            var expired = vault.Trash
+                .Where(pair => pair.Value.DeletedAt is { } deletedAt && deletedAt + PasswordVault.TrashRetention <= now)
+                .Select(pair => pair.Key)
+                .ToList();
+            return expired.Count == 0 ? vault : RemoveCredentials(vault, expired, now);
+        }
+
+        private static PasswordVault SetTrashState(PasswordVault vault, IEnumerable<Guid> credentialIds, TrashState state)
+        {
+            var trash = new Dictionary<Guid, TrashState>(vault.Trash);
+            foreach (var id in credentialIds)
+                trash[id] = state;
+            return vault with { Trash = trash };
+        }
+
+        internal static PasswordVault RemoveCredentials(PasswordVault vault, IReadOnlyCollection<Guid> credentialIds, DateTimeOffset now)
+        {
+            var existing = vault.Credentials.Select(credential => credential.Id).ToHashSet();
+            var ids = credentialIds.Where(existing.Contains).ToHashSet();
+            if (ids.Count == 0)
+                return vault;
+
+            // The tombstone keeps other devices and the cloud copy from bringing the credential back on sync.
+            var deleted = new Dictionary<Guid, DateTimeOffset>(vault.DeletedCredentials);
+            var assignments = new Dictionary<Guid, GroupAssignment>(vault.Assignments);
+            var trash = new Dictionary<Guid, TrashState>(vault.Trash);
+            foreach (var id in ids)
             {
-                if (!vault.Credentials.Contains(credential))
-                    return vault;
+                deleted[id] = now;
+                assignments.Remove(id);
+                trash.Remove(id);
+            }
 
-                // The tombstone keeps other devices and the cloud copy from bringing the credential back on sync.
-                var deleted = new Dictionary<Guid, DateTimeOffset>(vault.DeletedCredentials)
-                {
-                    [credential.Id] = DateTimeOffset.UtcNow
-                };
-                var assignments = vault.Assignments;
-                if (assignments.ContainsKey(credential.Id))
-                {
-                    assignments = new Dictionary<Guid, GroupAssignment>(assignments);
-                    assignments.Remove(credential.Id);
-                }
-
-                return vault with
-                {
-                    Credentials = vault.Credentials.Where(item => !item.Equals(credential)).ToList(),
-                    DeletedCredentials = deleted,
-                    Assignments = assignments
-                };
-            });
+            return vault with
+            {
+                Credentials = vault.Credentials.Where(item => !ids.Contains(item.Id)).ToList(),
+                DeletedCredentials = deleted,
+                Assignments = assignments,
+                Trash = trash
+            };
         }
 
         internal Task SaveGroup(PasswordGroup group, bool isNew) => UpdateVault(vault =>
@@ -519,6 +610,46 @@ namespace SinglePass.Core.Services
                 }
             }
 
+            // Trash state: the later of moving to the trash and restoring wins, for credentials that survived.
+            var localIds = local.Credentials.Select(credential => credential.Id).ToHashSet();
+            var trash = new Dictionary<Guid, TrashState>(local.Trash);
+            foreach (var id in local.Trash.Keys)
+            {
+                if (!credentialIds.Contains(id))
+                {
+                    trash.Remove(id);
+                    changed = true;
+                }
+            }
+
+            foreach (var (id, state) in incoming.Trash)
+            {
+                if (!credentialIds.Contains(id))
+                    continue;
+
+                if (trash.TryGetValue(id, out var current) && state.ModifiedAt <= current.ModifiedAt)
+                    continue;
+
+                trash[id] = state;
+                if (localIds.Contains(id) && (current?.IsTrashed ?? false) != state.IsTrashed)
+                    result.TrashChanges = true;
+                else
+                    changed = true;
+            }
+
+            // Entries in the trash are not reported as new or changed: they are not shown in the vault.
+            foreach (var list in new[] { result.NewCredentials, result.ChangedCredentials })
+            {
+                for (var i = list.Count - 1; i >= 0; i--)
+                {
+                    if (trash.TryGetValue(list[i].Id, out var state) && state.IsTrashed)
+                    {
+                        list.RemoveAt(i);
+                        changed = true;
+                    }
+                }
+            }
+
             var passwordChangedAt = local.MasterPasswordChangedAt;
             if (incoming.MasterPasswordChangedAt > (passwordChangedAt ?? DateTimeOffset.MinValue))
             {
@@ -535,6 +666,7 @@ namespace SinglePass.Core.Services
                 Groups = groups,
                 Assignments = assignments,
                 DeletedCredentials = deleted,
+                Trash = trash,
                 MasterPasswordChangedAt = passwordChangedAt
             };
         }
@@ -635,11 +767,22 @@ namespace SinglePass.Core.Services
             var reverted = new List<Credential>();
             var credentials = current.Credentials.ToList();
             var deleted = new Dictionary<Guid, DateTimeOffset>(current.DeletedCredentials);
-            foreach (var saved in backup.Credentials)
+            var trash = new Dictionary<Guid, TrashState>(current.Trash);
+            // Entries that were in the trash at the time of the backup were not part of the vault then.
+            var backupCredentials = backup.Credentials.Where(credential => !IsTrashed(backup, credential.Id)).ToList();
+            foreach (var saved in backupCredentials)
             {
                 var index = credentials.IndexOf(saved);
+                var inTrash = IsTrashed(current, saved.Id);
+                if (inTrash)
+                    trash[saved.Id] = new TrashState(null, now);
+
                 if (index >= 0 && HasSameContent(credentials[index], saved))
+                {
+                    if (inTrash)
+                        restored.Add(credentials[index]);
                     continue;
+                }
 
                 var copy = saved.Clone();
                 copy.LastModifiedTime = now.UtcDateTime;
@@ -648,7 +791,7 @@ namespace SinglePass.Core.Services
                     if (copy.Login != null && credentials[index].Login is { } currentLogin)
                         copy.Login.PasswordHistory = CombineHistory(copy.Login, currentLogin, now);
                     credentials[index] = copy;
-                    reverted.Add(copy);
+                    (inTrash ? restored : reverted).Add(copy);
                 }
                 else
                 {
@@ -685,7 +828,7 @@ namespace SinglePass.Core.Services
             }
 
             var assignments = new Dictionary<Guid, GroupAssignment>(current.Assignments);
-            foreach (var saved in backup.Credentials)
+            foreach (var saved in backupCredentials)
             {
                 Guid? target = backup.Assignments.TryGetValue(saved.Id, out var assignment) &&
                     assignment.GroupId is { } savedGroupId && groupIds.TryGetValue(savedGroupId, out var mapped)
@@ -711,7 +854,8 @@ namespace SinglePass.Core.Services
                 Credentials = credentials,
                 Groups = groups,
                 Assignments = assignments,
-                DeletedCredentials = deleted
+                DeletedCredentials = deleted,
+                Trash = trash
             };
         }
 

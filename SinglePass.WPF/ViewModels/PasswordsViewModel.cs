@@ -620,7 +620,8 @@ namespace SinglePass.WPF.ViewModels
 
             var result = await MessageDialog.ShowAsync(
                 SinglePass.Language.Properties.Resources.DeleteItem,
-                string.Format(SinglePass.Language.Properties.Resources.Name0, credential.NameFieldVM.Value),
+                string.Format(SinglePass.Language.Properties.Resources.Name0, credential.NameFieldVM.Value) +
+                    Environment.NewLine + Environment.NewLine + MoveToTrashHint,
                 MessageDialogButtons.YesNo,
                 "\uE74D");
 
@@ -628,10 +629,17 @@ namespace SinglePass.WPF.ViewModels
                 await DeleteCredentialAsync(credential);
         }
 
+        /// <summary>What happens to a deleted entry, shown when deletion is confirmed.</summary>
+        public static string MoveToTrashHint =>
+            string.Format(LocalizationManager.Instance["MoveToTrashHint"], TrashViewModel.RetentionDays);
+
+        /// <summary>Moves the entry to the trash ("Deleted"), where it can be restored for a while.</summary>
         internal async Task<bool> DeleteCredentialAsync(CredentialViewModel credential)
         {
-            if (!await SaveCredentialAsync(() => _credentialsCryptoService.DeleteCredential(credential.Model)))
+            if (!await SaveCredentialAsync(() => _credentialsCryptoService.MoveToTrash(credential.Model)))
                 return false;
+
+            StatusMessageRequested?.Invoke(string.Format(LocalizationManager.Instance["MovedToTrash"], credential.NameFieldVM.Value));
 
             _credentialVMs.Remove(credential);
             var index = Math.Min(DisplayedCredentials.IndexOf(credential), DisplayedCredentials.Count - 2);

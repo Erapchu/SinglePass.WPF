@@ -836,4 +836,76 @@ Sync to update the cloud copy and other devices.</value>
   <data name="CategoryCards" xml:space="preserve">
     <value>Bank cards</value>
   </data>
+  <data name="Trash" xml:space="preserve">
+    <value>Deleted</value>
+  </data>
+  <data name="RecentlyDeleted" xml:space="preserve">
+    <value>Recently deleted</value>
+  </data>
+  <data name="TrashDescription" xml:space="preserve">
+    <value>Deleted items are removed permanently after {0} days.</value>
+  </data>
+  <data name="TrashEmpty" xml:space="preserve">
+    <value>No deleted items</value>
+  </data>
+  <data name="TrashItemsCountOne" xml:space="preserve">
+    <value>{0} item</value>
+  </data>
+  <data name="TrashItemsCountFew" xml:space="preserve">
+    <value>{0} items</value>
+  </data>
+  <data name="TrashItemsCountMany" xml:space="preserve">
+    <value>{0} items</value>
+  </data>
+  <data name="TrashDaysLeftOne" xml:space="preserve">
+    <value>{0} day left</value>
+  </data>
+  <data name="TrashDaysLeftFew" xml:space="preserve">
+    <value>{0} days left</value>
+  </data>
+  <data name="TrashDaysLeftMany" xml:space="preserve">
+    <value>{0} days left</value>
+  </data>
+  <data name="TrashItemRestored" xml:space="preserve">
+    <value>“{0}” restored</value>
+  </data>
+  <data name="TrashItemsRestoredOne" xml:space="preserve">
+    <value>{0} item restored</value>
+  </data>
+  <data name="TrashItemsRestoredFew" xml:space="preserve">
+    <value>{0} items restored</value>
+  </data>
+  <data name="TrashItemsRestoredMany" xml:space="preserve">
+    <value>{0} items restored</value>
+  </data>
+  <data name="RestoreAll" xml:space="preserve">
+    <value>Restore all</value>
+  </data>
+  <data name="DeleteForever" xml:space="preserve">
+    <value>Delete permanently</value>
+  </data>
+  <data name="DeleteForeverTitle" xml:space="preserve">
+    <value>Delete permanently?</value>
+  </data>
+  <data name="DeleteForeverConfirmation" xml:space="preserve">
+    <value>“{0}” will be deleted permanently. This cannot be undone.</value>
+  </data>
+  <data name="EmptyTrash" xml:space="preserve">
+    <value>Empty trash</value>
+  </data>
+  <data name="EmptyTrashTitle" xml:space="preserve">
+    <value>Empty trash?</value>
+  </data>
+  <data name="EmptyTrashConfirmation" xml:space="preserve">
+    <value>All items in the trash ({0}) will be deleted permanently. This cannot be undone.</value>
+  </data>
+  <data name="MoveToTrashHint" xml:space="preserve">
+    <value>The item moves to Deleted, where it can be restored within {0} days.</value>
+  </data>
+  <data name="MovedToTrash" xml:space="preserve">
+    <value>“{0}” moved to Deleted</value>
+  </data>
+  <data name="TrashSynchronized" xml:space="preserve">
+    <value>Deleted items synchronized</value>
+  </data>
 </root>

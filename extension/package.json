@@ -5,8 +5,13 @@
   "description": "SinglePass browser extension for Chrome and Edge (docs/browser-extension.md)",
   "type": "module",
   "scripts": {
+    "start": "node run.mjs",
+    "start:edge": "node run.mjs edge",
+    "start:chrome": "node run.mjs chrome",
+    "start:release": "node run.mjs --release",
     "build": "node build.mjs",
     "build:dev": "node build.mjs --dev",
+    "watch": "node build.mjs --dev --watch",
     "typecheck": "tsc --noEmit",
     "test:pipe": "node build.mjs --test && node dist-test/pipe-client.js"
   },

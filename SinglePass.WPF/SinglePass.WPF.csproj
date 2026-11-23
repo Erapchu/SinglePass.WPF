@@ -56,7 +56,31 @@
     <ProjectReference Include="..\SinglePass.Language\SinglePass.Language.csproj" />
     <ProjectReference Include="..\SinglePass.FavIcons.Application\SinglePass.FavIcons.Application.csproj" />
     <ProjectReference Include="..\SinglePass.FavIcons.Repository\SinglePass.FavIcons.Repository.csproj" />
+    <!-- Built (and restored) with the application, but not referenced: the browser starts it, see docs/browser-extension.md. -->
+    <ProjectReference Include="..\SinglePass.NativeHost\SinglePass.NativeHost.csproj" ReferenceOutputAssembly="false" Private="false" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <NativeHostProject>$(MSBuildThisFileDirectory)..\SinglePass.NativeHost\SinglePass.NativeHost.csproj</NativeHostProject>
+    <NativeHostOutput>$(MSBuildThisFileDirectory)..\SinglePass.NativeHost\bin\$(Configuration)\win-x64\</NativeHostOutput>
+    <!-- The native host is a framework-dependent executable next to a self-contained one; neither loads the other. -->
+    <ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
+  </PropertyGroup>
+
+  <!-- BrowserPipeServer accepts only the native host from the application folder: put it there in every build. -->
+  <Target Name="CopyNativeHost" AfterTargets="Build">
+    <ItemGroup>
+      <NativeHostFiles Include="$(NativeHostOutput)SinglePass.NativeHost.exe;$(NativeHostOutput)SinglePass.NativeHost.dll;$(NativeHostOutput)SinglePass.NativeHost.runtimeconfig.json;$(NativeHostOutput)SinglePass.NativeHost.deps.json" />
+    </ItemGroup>
+    <Copy SourceFiles="@(NativeHostFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+  <!-- A release gets the Native AOT build: one exe that needs no runtime. -->
+  <Target Name="PublishNativeHost" AfterTargets="Publish">
+    <MSBuild Projects="$(NativeHostProject)" Targets="Publish"
+             Properties="Configuration=$(Configuration);RuntimeIdentifier=win-x64;PublishDir=$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(PublishDir)'))" />
+    <Delete Files="$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(PublishDir)'))SinglePass.NativeHost.pdb" />
+  </Target>
 
   <ItemGroup>
     <Resource Include="Resources\CardShadow.png" />

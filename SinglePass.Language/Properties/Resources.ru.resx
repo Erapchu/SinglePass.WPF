@@ -1039,4 +1039,52 @@
   <data name="CloudVaultNewerVersion" xml:space="preserve">
     <value>Облачная копия сохранена более новой версией SinglePass на другом устройстве. Обновите SinglePass на этом устройстве, чтобы синхронизироваться.</value>
   </data>
+  <data name="Hotkey" xml:space="preserve">
+    <value>Горячая клавиша</value>
+  </data>
+  <data name="PopupHotkey" xml:space="preserve">
+    <value>Окно быстрого доступа</value>
+  </data>
+  <data name="PopupHotkeyDescription" xml:space="preserve">
+    <value>Горячая клавиша открывает список логинов и вводит выбранный в активное окно, например в настольное приложение. Какой сайт открыт в браузере, окно не проверяет.</value>
+  </data>
+  <data name="SaveHotkeySettingsFailed" xml:space="preserve">
+    <value>Не удалось сохранить настройки горячих клавиш.</value>
+  </data>
+  <data name="HotkeyInUse" xml:space="preserve">
+    <value>Сочетание {0} уже занято другой программой. Выберите другое.</value>
+  </data>
+  <data name="BrowserExtension" xml:space="preserve">
+    <value>Расширение для браузера</value>
+  </data>
+  <data name="BrowserExtensionDescription" xml:space="preserve">
+    <value>Расширение SinglePass для Chrome и Edge заполняет логины на сайтах, к которым они относятся. Пароль оно получает, только когда вы выбираете логин, и только для сайта этой записи. Браузер подключается один раз, после сверки кода здесь и в расширении.</value>
+  </data>
+  <data name="PairedBrowsers" xml:space="preserve">
+    <value>Подключённые браузеры</value>
+  </data>
+  <data name="NoPairedBrowsers" xml:space="preserve">
+    <value>Браузеров пока нет. Откройте расширение SinglePass в браузере, чтобы подключить его.</value>
+  </data>
+  <data name="RemovePairing" xml:space="preserve">
+    <value>Отключить</value>
+  </data>
+  <data name="BrowserLastUsed" xml:space="preserve">
+    <value>Последнее использование: {0}</value>
+  </data>
+  <data name="BrowserPairingHeader" xml:space="preserve">
+    <value>Подключить браузер?</value>
+  </data>
+  <data name="BrowserPairingBrowser" xml:space="preserve">
+    <value>Браузер</value>
+  </data>
+  <data name="BrowserPairingCode" xml:space="preserve">
+    <value>Код</value>
+  </data>
+  <data name="BrowserPairingHint" xml:space="preserve">
+    <value>Подключайте, только если расширение SinglePass показывает такой же код. Браузер сможет запрашивать логины открытых сайтов.</value>
+  </data>
+  <data name="BrowserPairingAllow" xml:space="preserve">
+    <value>Подключить</value>
+  </data>
 </root>

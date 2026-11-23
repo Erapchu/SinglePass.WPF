@@ -18,7 +18,7 @@ namespace SinglePass.WPF.Views.Windows
         public bool Allowed { get; private set; }
         public bool Remember => Allowed && RememberCheckBox.IsChecked == true;
 
-        public SshAgentConfirmWindow(string keyName, SshAgentClient client)
+        public SshAgentConfirmWindow(string keyName, PipeClient client)
         {
             InitializeComponent();
             KeyName.Text = keyName;

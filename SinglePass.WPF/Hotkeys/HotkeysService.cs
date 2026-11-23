@@ -19,29 +19,32 @@ namespace SinglePass.WPF.Hotkeys
             _logger = logger;
 
             HotkeyManager.Current.IsEnabled = true;
-            UpdateKey(_appSettingsService.ShowPopupHotkey, nameof(_appSettingsService.ShowPopupHotkey), HotkeyDelegates.PopupHotkeyHandler);
+            ApplyPopupHotkey(_appSettingsService.PopupHotkeyEnabled, _appSettingsService.ShowPopupHotkey);
         }
 
-        public void UpdateKey(Hotkey hotkey, string hotkeyName, Action action)
+        /// <summary>
+        /// Registers the popup hotkey, or removes it when the popup is turned off or has no hotkey.
+        /// Returns false when another program already uses the key combination; the popup then has no hotkey.
+        /// </summary>
+        public bool ApplyPopupHotkey(bool enabled, Hotkey hotkey)
         {
-            if (string.IsNullOrWhiteSpace(hotkeyName))
-                throw new ArgumentException($"'{nameof(hotkeyName)}' cannot be null or whitespace.", nameof(hotkeyName));
+            const string name = nameof(AppSettingsService.ShowPopupHotkey);
+            HotkeyManager.Current.Remove(name);
 
-            if (action is null)
-                throw new ArgumentNullException(nameof(action));
+            if (!enabled || hotkey is null || hotkey.IsEmpty)
+                return true;
 
-            HotkeyManager.Current.Remove(hotkeyName);
-
-            if (hotkey is null || hotkey.Key == Key.None)
-                return;
-
-            var handler = new EventHandler<HotkeyEventArgs>((s, args) => HotkeysEventHandler(s, args, action));
-
-            HotkeyManager.Current.AddOrReplace(
-                hotkeyName,
-                hotkey.Key,
-                hotkey.Modifiers,
-                handler);
+            try
+            {
+                HotkeyManager.Current.AddOrReplace(name, hotkey.Key, hotkey.Modifiers,
+                    (s, args) => HotkeysEventHandler(s, args, HotkeyDelegates.PopupHotkeyHandler));
+                return true;
+            }
+            catch (HotkeyAlreadyRegisteredException ex)
+            {
+                _logger.LogWarning(ex, "The popup hotkey {Hotkey} is used by another program", hotkey);
+                return false;
+            }
         }
 
         private void HotkeysEventHandler(object sender, HotkeyEventArgs args, Action action)

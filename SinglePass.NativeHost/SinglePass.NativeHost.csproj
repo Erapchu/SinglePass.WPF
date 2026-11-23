@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Started by Chrome and Edge for the SinglePass extension (Native Messaging); relays messages to SinglePass.exe
+    over a named pipe. No vault access and no logic: see docs/browser-extension.md.
+    Published with Native AOT, so it starts quickly and needs no runtime; Debug builds run on the installed runtime.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
+    <PublishAot>true</PublishAot>
+  </PropertyGroup>
+
+</Project>

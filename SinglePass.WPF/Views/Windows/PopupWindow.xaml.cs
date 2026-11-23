@@ -14,12 +14,6 @@ namespace SinglePass.WPF.Views.Windows
 
         private PopupViewModel ViewModel { get; }
 
-        public IntPtr ForegroundHWND
-        {
-            get => ViewModel.ForegroundHWND;
-            set => ViewModel.ForegroundHWND = value;
-        }
-
         public IntPtr TargetWindow
         {
             get => ViewModel.TargetWindow;

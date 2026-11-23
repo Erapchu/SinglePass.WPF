@@ -1019,4 +1019,52 @@ Sync to update the cloud copy and other devices.</value>
   <data name="CloudVaultNewerVersion" xml:space="preserve">
     <value>The cloud copy was saved by a newer version of SinglePass on another device. Update SinglePass on this device to sync.</value>
   </data>
+  <data name="Hotkey" xml:space="preserve">
+    <value>Hotkey</value>
+  </data>
+  <data name="PopupHotkey" xml:space="preserve">
+    <value>Quick-access popup</value>
+  </data>
+  <data name="PopupHotkeyDescription" xml:space="preserve">
+    <value>A hotkey opens a list of logins and types the chosen one into the active window, for example into a desktop application. The popup does not check which site is open in a browser.</value>
+  </data>
+  <data name="SaveHotkeySettingsFailed" xml:space="preserve">
+    <value>Could not save the hotkey settings.</value>
+  </data>
+  <data name="HotkeyInUse" xml:space="preserve">
+    <value>{0} is already used by another program. Choose another key combination.</value>
+  </data>
+  <data name="BrowserExtension" xml:space="preserve">
+    <value>Browser extension</value>
+  </data>
+  <data name="BrowserExtensionDescription" xml:space="preserve">
+    <value>The SinglePass extension for Chrome and Edge fills logins on the sites they belong to. It gets a password only when you choose a login, and only for the site of that entry. A browser connects once, after you compare the code shown here and in the extension.</value>
+  </data>
+  <data name="PairedBrowsers" xml:space="preserve">
+    <value>Connected browsers</value>
+  </data>
+  <data name="NoPairedBrowsers" xml:space="preserve">
+    <value>No browsers yet. Open the SinglePass extension in your browser to connect it.</value>
+  </data>
+  <data name="RemovePairing" xml:space="preserve">
+    <value>Disconnect</value>
+  </data>
+  <data name="BrowserLastUsed" xml:space="preserve">
+    <value>Last used {0}</value>
+  </data>
+  <data name="BrowserPairingHeader" xml:space="preserve">
+    <value>Connect a browser?</value>
+  </data>
+  <data name="BrowserPairingBrowser" xml:space="preserve">
+    <value>Browser</value>
+  </data>
+  <data name="BrowserPairingCode" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="BrowserPairingHint" xml:space="preserve">
+    <value>Connect only if the SinglePass extension shows the same code. The browser will be able to ask for the logins of the sites you open.</value>
+  </data>
+  <data name="BrowserPairingAllow" xml:space="preserve">
+    <value>Connect</value>
+  </data>
 </root>

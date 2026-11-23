@@ -11,26 +11,25 @@ namespace SinglePass.WPF.Helpers
         public static void ShowMainWindow()
         {
             var currentProcessId = System.Environment.ProcessId;
+            // A Debug and a Release instance can run side by side; the window name tells them apart.
             var processes = Process
                 .GetProcessesByName(Constants.ProcessName)
-                .Where(p => !p.Id.Equals(currentProcessId))
-                .ToList();
-            if (processes.Count == 0)
-                return;
-
-            var spProcess = processes[0];
-            var processWindowHandles = WinApiProvider.EnumerateProcessWindowHandles(spProcess.Id);
-            foreach (var processWindowHandle in processWindowHandles)
+                .Where(p => !p.Id.Equals(currentProcessId));
+            foreach (var spProcess in processes)
             {
-                var windowCaption = WinApiProvider.GetWindowText(processWindowHandle);
-                if (windowCaption.Equals(Constants.InterprocessWindowName))
+                var processWindowHandles = WinApiProvider.EnumerateProcessWindowHandles(spProcess.Id);
+                foreach (var processWindowHandle in processWindowHandles)
                 {
-                    WinApiProvider.PostMessage(
-                        processWindowHandle,
-                        (uint)CustomWindowsMessages.WM_SHOW_MAIN_WINDOW,
-                        IntPtr.Zero,
-                        IntPtr.Zero);
-                    break;
+                    var windowCaption = WinApiProvider.GetWindowText(processWindowHandle);
+                    if (windowCaption.Equals(Constants.InterprocessWindowName))
+                    {
+                        WinApiProvider.PostMessage(
+                            processWindowHandle,
+                            (uint)CustomWindowsMessages.WM_SHOW_MAIN_WINDOW,
+                            IntPtr.Zero,
+                            IntPtr.Zero);
+                        return;
+                    }
                 }
             }
         }

@@ -28,7 +28,6 @@ namespace SinglePass.WPF.ViewModels
 
         private readonly ILogger<PopupViewModel> _logger;
         private readonly CredentialViewModelFactory _credentialViewModelFactory;
-        private readonly AddressBarExtractor _addressBarExtractor;
         private readonly List<CredentialViewModel> _credentialVMs = new();
 
         public event Action Accept;
@@ -46,8 +45,6 @@ namespace SinglePass.WPF.ViewModels
         public partial string SearchText { get; set; }
 
         partial void OnSearchTextChanged(string value) => _ = DisplayCredentialsAsync();
-
-        public IntPtr ForegroundHWND { get; set; }
 
         /// <summary>
         /// The top-level window that was active when the popup opened. Credentials are pasted only into it.
@@ -70,12 +67,10 @@ namespace SinglePass.WPF.ViewModels
 
         public PopupViewModel(
             ILogger<PopupViewModel> logger,
-            CredentialViewModelFactory credentialViewModelFactory,
-            AddressBarExtractor addressBarExtractor)
+            CredentialViewModelFactory credentialViewModelFactory)
         {
             _logger = logger;
             _credentialViewModelFactory = credentialViewModelFactory;
-            _addressBarExtractor = addressBarExtractor;
         }
 
         [RelayCommand]
@@ -194,33 +189,9 @@ namespace SinglePass.WPF.ViewModels
                     // The popup types a login and password into the active window; other entry types have neither.
                     tempCredentialsVM.AddRange(_credentialViewModelFactory.ProvideAllNew().Where(c => c.IsLogin));
 
-                    var addressBarString = _addressBarExtractor.ExtractAddressBar(ForegroundHWND);
-                    if (!string.IsNullOrWhiteSpace(addressBarString))
-                    {
-                        if (!addressBarString.StartsWith("http"))
-                            addressBarString = "http://" + addressBarString;
-
-                        if (Uri.TryCreate(addressBarString, UriKind.Absolute, out Uri addressBarUri))
-                        {
-                            var host = addressBarUri.Host;
-                            var domains = host.Split('.', StringSplitOptions.RemoveEmptyEntries);
-                            // Take last 2 levels of domains
-                            var domainsString = string.Join('.', domains.TakeLast(2));
-
-                            tempCredentialsVM = tempCredentialsVM
-                                .OrderByDescending(c => c.Login.SiteFieldVM.Value is null ? -1 : c.Login.SiteFieldVM.Value.Contains(domainsString) ? 1 : -1)
-                                .ThenByDescending(c => c.LastModifiedTime)
-                                .ToList();
-                        }
-                    }
-                    else
-                    {
-                        tempCredentialsVM = tempCredentialsVM
-                            .OrderByDescending(c => c.LastModifiedTime)
-                            .ToList();
-                    }
-
-                    _credentialVMs.AddRange(tempCredentialsVM);
+                    // The popup does not guess the site of the target window: in browsers the extension matches
+                    // logins by the tab address (docs/browser-extension.md). Recently changed entries come first.
+                    _credentialVMs.AddRange(tempCredentialsVM.OrderByDescending(c => c.LastModifiedTime));
                     await DisplayCredentialsAsync();
                 }
                 catch (Exception ex)

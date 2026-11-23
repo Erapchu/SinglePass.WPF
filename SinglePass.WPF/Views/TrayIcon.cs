@@ -65,7 +65,7 @@ namespace SinglePass.WPF.Views
                 Flags = MessageFlag | IconFlag | TipFlag | ShowTipFlag,
                 CallbackMessage = NotifyCallback,
                 Icon = _icon.Handle,
-                Tip = Constants.AppName,
+                Tip = Constants.DisplayName,
                 Version = Version4
             };
 

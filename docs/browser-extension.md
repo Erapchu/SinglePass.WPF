@@ -1,11 +1,13 @@
 # Browser extension (specification)
 
-Status: **design, not implemented.** This document describes how a SinglePass browser extension talks to the desktop application, what it may ask for and how the parts are installed. Implementation notes for the existing named pipe code are in [ssh-agent.md](ssh-agent.md).
+Status: **first version for Chrome and Edge** (steps 1–5 and the popup of step 6 of the [implementation order](#implementation-order)). This document describes how the SinglePass browser extension talks to the desktop application, what it may ask for and how the parts are installed. The pipe code shared with the SSH agent is described in [ssh-agent.md](ssh-agent.md).
+
+Code: `SinglePass.Core/Services/Browser/` (protocol, pairing, session crypto), `SinglePass.Core/Services/WebsiteMatcher.cs` and `PublicSuffixList.cs`, `SinglePass.NativeHost/`, `SinglePass.WPF/Services/BrowserBackend.cs` and `NativeMessagingRegistration.cs`, `extension/`. Tests: `SinglePass.Core.Tests/BrowserPipeServerTests.cs`, `WebsiteMatcherTests.cs`, and `BrowserExtensionInteropTests.cs`, which runs the extension's TypeScript protocol code in Node against the C# server.
 
 ## Goals
 
 - Suggest and fill logins in Chrome, Edge and Firefox (and other Chromium-based browsers) from the vault of the running SinglePass.
-- Match entries by the address the browser reports for the tab, so a look-alike site gets no suggestions. This replaces the address bar reading and clipboard pasting of the quick-access popup for browsers; the popup stays for other applications.
+- Match entries by the address the browser reports for the tab, so a look-alike site gets no suggestions. The quick-access popup no longer reads the browser address bar (UI Automation could not tell the scheme, the right edit field or text being typed from the page address); it is off by default and stays for other applications.
 - The vault never leaves the desktop application. The extension gets one entry at a time, after a user action, and keeps no secrets in browser storage.
 
 Not in the first version: saving new logins from the browser, passkeys, cards and identities, filling without SinglePass running.
@@ -31,7 +33,7 @@ A localhost HTTP or WebSocket server is **not** used: every web page can send re
 
 | Component | Location | Role |
 |---|---|---|
-| Extension | `extension/` (new) | Detects login forms, shows suggestions, fills fields, holds the pairing key. |
+| Extension | `extension/` (new) | Detects login forms, shows suggestions, fills fields, holds the pairing key. TypeScript, bundled with esbuild. |
 | Native host | `SinglePass.NativeHost/` (new project) | Relays messages between the browser and the pipe. Has no vault access and no logic. |
 | Browser server | `SinglePass.WPF` + `SinglePass.Core` | Pipe server, pairing, session crypto, URL matching, answers. |
 
@@ -67,8 +69,8 @@ Firefox uses `"allowed_extensions": ["singlepass@<domain>"]` instead of `allowed
 
 - The installed build registers in the Velopack install and update hooks (`Program.Main` → `VelopackApp`) and unregisters on uninstall. `current\` is the stable Velopack folder, so updates do not change the path.
 - The portable build checks the registration on every start and rewrites it when the path changed.
-- **Settings → Browser** turns the integration off: unregisters the host and stops the pipe server.
-- Development builds add the unpacked extension ID to `allowed_origins`.
+- **Settings → Security → Browser extension** turns the integration off: unregisters the host and stops the pipe server.
+- Debug builds register their own host name; see [Development](#development).
 
 ## Transport
 
@@ -80,14 +82,21 @@ Native Messaging framing: a 32-bit length in native byte order (little-endian on
 
 `\\.\pipe\singlepass-browser-<user SID>`, the same pipe security as the SSH agent: ACL for the current user only, network logons denied, `FirstPipeInstance`. Framing: 32-bit big-endian length, then UTF-8 JSON, at most 1 MB.
 
-The host forwards every message unchanged in both directions. If the pipe does not exist (SinglePass is not running or the integration is off), the host answers the next request with error `app_not_running` and keeps reading, so the extension can tell the user to start SinglePass.
+The host connects to the pipe once, when the browser starts it, and forwards every message unchanged in both directions. It cannot add an `id` to its own answers (after `hello` the messages are encrypted), so it reports problems with events:
+
+- The pipe does not exist (SinglePass is not running or the integration is off): the host writes `{ "event": "app_not_running" }` and exits.
+- SinglePass closes the pipe (exit, integration turned off): the host exits; the browser reports the port as disconnected.
+
+The extension does not reconnect in a loop: it connects again (a new host process and a new `hello`) on the next user action, such as opening the toolbar popup or focusing a login field.
 
 ### Client check
 
 For every pipe connection the server takes the client process chain (as the SSH agent does, see [ssh-agent.md](ssh-agent.md#confirmation)):
 
 - the client must be `SinglePass.NativeHost.exe` from the application folder, otherwise the connection is closed and logged;
-- its parent is shown in the pairing window (`chrome.exe`, `msedge.exe`, `firefox.exe`, …) and stored with the pairing, but not enforced: there are many Chromium-based browsers.
+- the browser is the first process above it that is not `cmd.exe` (Chrome and Edge start native hosts through `cmd /d /s /c`). It is shown in the pairing window (`chrome.exe`, `msedge.exe`, …) and stored with the pairing, but not enforced: there are many Chromium-based browsers.
+
+This check only keeps other programs from casually talking to the pipe: any program of the user can start `SinglePass.NativeHost.exe` itself. The pairing key below is what protects the answers.
 
 ## Pairing
 
@@ -95,7 +104,7 @@ The pipe ACL lets any process of the user connect, so the server also requires a
 
 Keys are ECDH on P-256: WebCrypto in all supported browsers and `ECDiffieHellman` in .NET both support it.
 
-1. On install the extension generates a static key pair and keeps it in `chrome.storage.local` (non-extractable `CryptoKey` where the browser allows it).
+1. On install the extension generates a static key pair and keeps it in IndexedDB as a non-extractable `CryptoKey`. `chrome.storage` cannot hold it: it stores JSON only, so the private key would have to be exported.
 2. `associate` sends the extension's static public key and a name (`Chrome`, `Edge`, …). SinglePass generates its own static key pair for this pairing.
 3. Both sides show a six-digit code: the first 4 bytes of `SHA-256("singlepass-pair" || appPublic || extensionPublic)` as a big-endian number, modulo 1 000 000, padded with zeros. SinglePass shows a window: *Connect browser "Chrome" (chrome.exe)? Code 482 917*; the extension popup shows the same code.
 4. The user confirms in SinglePass. The pairing is stored and the extension receives the pairing ID and the app's static public key.
@@ -108,7 +117,7 @@ Pairings are per device and are not synced. They are stored in `%LOCALAPPDATA%\S
   "CreatedAt": "<UTC>", "LastUsedAt": "<UTC>" }
 ```
 
-**Settings → Browser** lists pairings with their last use and removes them. A removed pairing makes the extension ask for pairing again.
+**Settings → Security → Browser extension** lists pairings with their last use and removes them. A removed pairing makes the extension ask for pairing again.
 
 Pairing works while the vault is locked: it reveals nothing about the vault.
 
@@ -147,9 +156,9 @@ Inside the session, requests and responses are JSON objects with an `id` chosen 
 | `getTotp { entryId, url }` | `{ code, validFor }` | Same check as above. |
 | `openEntry { entryId }` | `{}` | Brings SinglePass to the front with the entry selected. |
 
-Events pushed by SinglePass without a request: `{ "event": "locked" }`, `{ "event": "unlocked" }`, `{ "event": "vaultChanged" }`. On `locked` the extension drops everything it showed.
+Events pushed by SinglePass without a request: `{ "event": "locked" }`, `{ "event": "unlocked" }`, `{ "event": "vaultChanged" }` (defined, not sent yet: the popup asks again each time it opens). On `locked` the extension drops everything it showed. The native host sends `{ "event": "app_not_running" }` in plain JSON (see [Transport](#native-host--singlepass)).
 
-Errors: `locked`, `not_paired`, `not_found`, `bad_request`, `unsupported_version`, `app_not_running` (from the native host), `internal`.
+Errors: `locked`, `not_paired`, `not_found`, `bad_request`, `unsupported_version`, `internal`.
 
 Rules:
 
@@ -164,20 +173,18 @@ Rules:
 
 1. Normalize both hosts: lowercase, IDN to punycode, no trailing dot.
 2. **Exact**: same host (and same port, if the entry has one).
-3. **Domain**: same registrable domain by the [Public Suffix List](https://publicsuffix.org/) (eTLD+1): `login.example.com` matches an entry for `example.com`, but `example.co.uk` does not match `other.co.uk`. The list is embedded and updated with releases.
+3. **Domain**: same registrable domain by the [Public Suffix List](https://publicsuffix.org/) (eTLD+1): `login.example.com` matches an entry for `example.com`, but `example.co.uk` does not match `other.co.uk`, and `alice.github.io` does not match `bob.github.io`. The list is `SinglePass.Core/Resources/public_suffix_list.dat`, an embedded resource read by `PublicSuffixList` (normal, wildcard `*.` and exception `!` rules, ICANN and private sections alike); a host that no rule covers uses the implicit `*` rule (its last label is the suffix). The file is updated with releases.
 4. IP addresses and single-label hosts (`localhost`, `router`) match only exactly.
 5. An entry saved with `https` is not offered on an `http` page (downgrade). An `http` entry is offered on `https`.
 6. Only `http` and `https` pages; never `file:`, `chrome:`, `about:` or extension pages.
 
-The popup now matches by the last two labels of the host and a substring check (`PopupViewModel`), so `example.com.evil.net` contains `example.com`. The popup should switch to `WebsiteMatcher` as well.
-
 ## Extension
 
-Manifest V3, one code base for Chromium and Firefox.
+Manifest V3, TypeScript bundled with esbuild (`extension/`, `npm run build` → `extension/dist/`). The first version targets Chrome and Edge, which share one manifest. Firefox comes later with its own manifest: it runs MV3 background code as `background.scripts` (an event page), not as a service worker, and needs `browser_specific_settings.gecko.id`.
 
-- **Background service worker**: the native port, pairing, session crypto, request queue. An open native messaging port keeps the service worker alive in current browsers; it still reconnects (new `hello`) when the worker restarts.
-- **Toolbar popup**: status (not running / locked / unlocked), unlock button, logins for the current tab, pairing code during pairing.
-- **Content script**: finds login forms (password fields, username fields before them, also in same-origin iframes), shows an inline SinglePass icon in the field, fills on the user's choice.
+- **Background service worker**: the native port, pairing, session crypto, request queue. An open native messaging port keeps the service worker alive in current browsers; when the worker or the port goes away, it connects again (new `hello`) on the next user action.
+- **Toolbar popup**: status (not running / locked / unlocked), unlock button, logins for the current tab, pairing code during pairing. Choosing a login fills it into the tab (`chrome.scripting.executeScript` with `activeTab`, `src/fill.ts`); the buttons beside it copy the login or the password. The fill checks that the tab is still on the origin of the address the login was matched with.
+- **Content script** (not yet): finds login forms (password fields, username fields before them, also in same-origin iframes), shows an inline SinglePass icon in the field, fills on the user's choice.
 
 Filling rules:
 
@@ -188,16 +195,33 @@ Filling rules:
 
 ## Settings in SinglePass
 
-**Settings → Browser**:
+**Settings → Security → Browser extension**:
 
 - *Browser integration* on/off — registers or unregisters the native host and starts or stops the pipe server. Off by default until the extension is published.
 - Paired browsers: name, browser, last use, **Remove**.
 
+## Development
+
+Debug builds of SinglePass are a separate instance, so testing the extension never touches the working vault and can run next to the installed application:
+
+| | Release | Debug |
+|---|---|---|
+| Data folder (vault, settings, logs, pairings) | `%LOCALAPPDATA%\SinglePass` | `%LOCALAPPDATA%\SinglePass.Dev` |
+| Pipes | `singlepass-ssh-agent-<SID>`, `singlepass-browser-<SID>` | the same with `-dev` |
+| Single-instance mutex, interprocess window | as now | with `-dev` |
+| Native host name | `com.singlepass.host` | `com.singlepass.host.dev` |
+
+`Constants.IsDevBuild` (the `DEBUG` symbol of `SinglePass.Core`) switches all of them. The Debug build registers `com.singlepass.host.dev` for the `SinglePass.NativeHost.exe` next to it in `bin\Debug`, with the ID of the unpacked extension in `allowed_origins`. The development extension (`npm run build:dev`) connects to `com.singlepass.host.dev`; its manifest has a fixed `key`, so Chrome and Edge give the unpacked extension the same ID on every machine.
+
+To try it: build the solution in Debug, start SinglePass (it creates a new empty vault in `SinglePass.Dev`), turn on **Settings → Security → Browser extension**, run `npm install` and `npm run build:dev` in `extension/`, open `chrome://extensions` (or `edge://extensions`), turn on developer mode and load `extension/dist/`.
+
 ## Implementation order
 
-1. `SinglePass.Core`: `WebsiteMatcher` with tests; switch the popup to it.
-2. `NamedPipeServer` base extracted from `SshAgentServer`; `BrowserPipeServer` with the protocol, pairing and session crypto, with tests (a test client plays the extension).
-3. `SinglePass.NativeHost` (Native AOT), registration in Velopack hooks and for the portable build, packaging.
-4. Pairing window and **Settings → Browser** in `SinglePass.WPF`.
-5. The extension: background worker and popup first (list and copy), then the content script and inline fill.
-6. Store listings (Chrome Web Store, Edge Add-ons, Firefox AMO); their extension IDs go into the manifests.
+1. Debug instance separation (above).
+2. `SinglePass.Core`: `PublicSuffixList` and `WebsiteMatcher` with tests.
+3. `NamedPipeServer` base extracted from `SshAgentServer`; `BrowserPipeServer` with the protocol, pairing and session crypto, with tests (a test client plays the extension).
+4. `SinglePass.NativeHost` (Native AOT), registration in Velopack hooks, for the portable build and for Debug, packaging.
+5. Pairing window and **Settings → Security → Browser extension** in `SinglePass.WPF`.
+6. The extension for Chrome and Edge: background worker and popup first (list and copy), then the content script and inline fill.
+7. Firefox: its manifest and registration.
+8. Store listings (Chrome Web Store, Edge Add-ons, Firefox AMO); their extension IDs go into the manifests.

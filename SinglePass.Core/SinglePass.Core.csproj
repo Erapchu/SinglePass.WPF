@@ -16,6 +16,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- https://publicsuffix.org/list/public_suffix_list.dat (MPL 2.0); update before releases. -->
+    <EmbeddedResource Include="Resources\public_suffix_list.dat" LogicalName="SinglePass.Core.public_suffix_list.dat" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AsyncKeyedLock" Version="8.1.2" />
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.7.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.15" />

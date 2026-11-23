@@ -20,6 +20,8 @@ using System.Windows;
 using System.Windows.Interop;
 using SinglePass.Core.Helpers;
 using SinglePass.Core.Services;
+using SinglePass.Core.Services.Browser;
+using System.Linq;
 
 namespace SinglePass.WPF.ViewModels
 {
@@ -43,7 +45,16 @@ namespace SinglePass.WPF.ViewModels
         private readonly SshAgentServer _sshAgent;
         private readonly WindowsHelloUnlock _windowsHello;
         private bool _revertingWindowsHello;
+        private readonly BrowserPipeServer _browserServer;
+        private readonly BrowserPairingStore _browserPairings;
+        private readonly NativeMessagingRegistration _nativeMessaging;
         private readonly ILogger<SettingsViewModel> _logger;
+
+        [ObservableProperty]
+        public partial bool BrowserIntegrationEnabled { get; set; }
+
+        /// <summary>Browsers allowed to ask for logins, most recently used first.</summary>
+        public ObservableCollection<BrowserPairingItem> BrowserPairings { get; } = new();
 
         /// <summary>Raised after a backup restore changed the vault, so the lists can reload it.</summary>
         public event Action VaultRestored;
@@ -57,6 +68,10 @@ namespace SinglePass.WPF.ViewModels
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(ChangeHelperPopupHotkeyCommand))]
         public partial Hotkey ShowPopupHotkey { get; set; }
+
+        /// <summary>The popup hotkey is registered. Off by default.</summary>
+        [ObservableProperty]
+        public partial bool PopupHotkeyEnabled { get; set; }
 
         [ObservableProperty]
         public partial AppTheme ThemeMode { get; set; }
@@ -98,6 +113,9 @@ namespace SinglePass.WPF.ViewModels
             HotkeysService hotkeysService,
             SshAgentServer sshAgent,
             WindowsHelloUnlock windowsHello,
+            BrowserPipeServer browserServer,
+            BrowserPairingStore browserPairings,
+            NativeMessagingRegistration nativeMessaging,
             ILogger<SettingsViewModel> logger)
         {
             // Before _windowsHello is set: loading the state must not turn Windows Hello unlock on or off.
@@ -107,10 +125,17 @@ namespace SinglePass.WPF.ViewModels
             // Before _sshAgent is set: loading the setting must not start or stop the agent.
             SshAgentEnabled = appSettingsService.Settings.SshAgentEnabled;
             _sshAgent = sshAgent;
+            // The same for the browser server.
+            BrowserIntegrationEnabled = appSettingsService.Settings.BrowserIntegrationEnabled;
+            _browserServer = browserServer;
+            _browserPairings = browserPairings;
+            _nativeMessaging = nativeMessaging;
             ThemeMode = appSettingsService.ThemeMode;
             AnimationsEnabled = appSettingsService.Settings.AnimationsEnabled;
             Language = LocalizationManager.Normalize(appSettingsService.Language);
             ShowPopupHotkey = appSettingsService.ShowPopupHotkey;
+            // Before _hotkeysService is set: loading the setting must not register or save anything.
+            PopupHotkeyEnabled = appSettingsService.PopupHotkeyEnabled;
             IdleLockTimeout = appSettingsService.Settings.IdleLockTimeout;
             LockOnWindowsLock = appSettingsService.Settings.LockOnWindowsLock;
 
@@ -225,17 +250,58 @@ namespace SinglePass.WPF.ViewModels
         [RelayCommand]
         private void ChangeHelperPopupHotkey(System.Windows.Input.KeyEventArgs args)
         {
-            if (_hotkeysService.GetHotkeyForKeyPress(args, out Hotkey hotkey))
+            if (!_hotkeysService.GetHotkeyForKeyPress(args, out Hotkey hotkey))
+                return;
+
+            if (_hotkeysService.ApplyPopupHotkey(PopupHotkeyEnabled, hotkey))
             {
-                _hotkeysService.UpdateKey(hotkey, nameof(_appSettingsService.ShowPopupHotkey), HotkeyDelegates.PopupHotkeyHandler);
                 ShowPopupHotkey = hotkey;
+                return;
             }
+
+            // Keep the previous hotkey: the new one belongs to another program.
+            _hotkeysService.ApplyPopupHotkey(PopupHotkeyEnabled, ShowPopupHotkey);
+            ShowHotkeyInUse(hotkey);
         }
 
         [RelayCommand]
         private void ClearShowPopupHotkey()
         {
+            _hotkeysService?.ApplyPopupHotkey(PopupHotkeyEnabled, Hotkey.Empty);
             ShowPopupHotkey = Hotkey.Empty;
+        }
+
+        partial void OnPopupHotkeyEnabledChanged(bool value)
+        {
+            if (_hotkeysService is null)
+                return;
+
+            if (!_hotkeysService.ApplyPopupHotkey(value, ShowPopupHotkey))
+                ShowHotkeyInUse(ShowPopupHotkey);
+
+            SavePopupHotkeySettings();
+        }
+
+        private static void ShowHotkeyInUse(Hotkey hotkey)
+        {
+            _ = MessageDialog.ShowAsync(Resources.Error,
+                string.Format(LocalizationManager.Instance["HotkeyInUse"], hotkey),
+                MessageDialogButtons.OK, "\uEA39");
+        }
+
+        private async void SavePopupHotkeySettings()
+        {
+            _appSettingsService.PopupHotkeyEnabled = PopupHotkeyEnabled;
+            _appSettingsService.ShowPopupHotkey = ShowPopupHotkey;
+            try
+            {
+                await _appSettingsService.Save();
+            }
+            catch (Exception)
+            {
+                await MessageDialog.ShowAsync(Resources.Error, LocalizationManager.Instance["SaveHotkeySettingsFailed"],
+                    MessageDialogButtons.OK, "\uEA39");
+            }
         }
 
         partial void OnLanguageChanged(string value) => LocalizationManager.Instance.Apply(value);
@@ -333,6 +399,58 @@ namespace SinglePass.WPF.ViewModels
             SaveSecuritySettings();
         }
 
+        partial void OnBrowserIntegrationEnabledChanged(bool value)
+        {
+            if (_browserServer is null)
+                return;
+
+            if (value)
+            {
+                if (_nativeMessaging.Register())
+                {
+                    try
+                    {
+                        _browserServer.Start();
+                    }
+                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                    {
+                        _logger.LogError(ex, "The browser server could not start");
+                        _ = MessageDialog.ShowAsync(Resources.Error, ex.Message, MessageDialogButtons.OK, "\uEA39");
+                    }
+                }
+                LoadBrowserPairings();
+            }
+            else
+            {
+                _browserServer.Stop();
+                NativeMessagingRegistration.Unregister(_logger);
+            }
+
+            SaveSecuritySettings();
+        }
+
+        [RelayCommand]
+        private void LoadBrowserPairings()
+        {
+            if (_browserPairings is null)
+                return;
+
+            BrowserPairings.Clear();
+            foreach (var pairing in _browserPairings.GetAll().OrderByDescending(pairing => pairing.LastUsedAt))
+                BrowserPairings.Add(new BrowserPairingItem(pairing));
+        }
+
+        [RelayCommand]
+        private void RemoveBrowserPairing(BrowserPairingItem item)
+        {
+            if (item is null || _browserPairings is null)
+                return;
+
+            _browserPairings.Remove(item.Id);
+            _browserServer.Disconnect(item.Id);
+            BrowserPairings.Remove(item);
+        }
+
         [RelayCommand]
         private void CopySshAgentPipePath()
         {
@@ -354,6 +472,7 @@ namespace SinglePass.WPF.ViewModels
             _appSettingsService.Settings.IdleLockTimeout = IdleLockTimeout;
             _appSettingsService.Settings.LockOnWindowsLock = LockOnWindowsLock;
             _appSettingsService.Settings.SshAgentEnabled = SshAgentEnabled;
+            _appSettingsService.Settings.BrowserIntegrationEnabled = BrowserIntegrationEnabled;
             try
             {
                 await _appSettingsService.Save();
@@ -364,6 +483,17 @@ namespace SinglePass.WPF.ViewModels
                     MessageDialogButtons.OK, "\uEA39");
             }
         }
+    }
+
+    /// <summary>A paired browser in the Security settings list.</summary>
+    public sealed class BrowserPairingItem(BrowserPairing pairing)
+    {
+        public Guid Id { get; } = pairing.Id;
+
+        public string Title { get; } = pairing.Browser is null or "?" ? pairing.Name : $"{pairing.Name} ({pairing.Browser})";
+
+        public string LastUsed { get; } = string.Format(LocalizationManager.Instance["BrowserLastUsed"],
+            pairing.LastUsedAt.LocalDateTime.ToString("dd-MM-yyyy, HH:mm"));
     }
 
     /// <summary>A vault backup in the Security settings list.</summary>

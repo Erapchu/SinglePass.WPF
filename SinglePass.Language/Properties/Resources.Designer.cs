@@ -279,6 +279,78 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Browser extension.
+        /// </summary>
+        public static string BrowserExtension {
+            get {
+                return ResourceManager.GetString("BrowserExtension", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The SinglePass extension for Chrome and Edge fills logins on the sites they belong to. It gets a password only when you choose a login, and only for the site of that entry. A browser connects once, after you compare the code shown here and in the extension..
+        /// </summary>
+        public static string BrowserExtensionDescription {
+            get {
+                return ResourceManager.GetString("BrowserExtensionDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Last used {0}.
+        /// </summary>
+        public static string BrowserLastUsed {
+            get {
+                return ResourceManager.GetString("BrowserLastUsed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connect.
+        /// </summary>
+        public static string BrowserPairingAllow {
+            get {
+                return ResourceManager.GetString("BrowserPairingAllow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Browser.
+        /// </summary>
+        public static string BrowserPairingBrowser {
+            get {
+                return ResourceManager.GetString("BrowserPairingBrowser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Code.
+        /// </summary>
+        public static string BrowserPairingCode {
+            get {
+                return ResourceManager.GetString("BrowserPairingCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connect a browser?.
+        /// </summary>
+        public static string BrowserPairingHeader {
+            get {
+                return ResourceManager.GetString("BrowserPairingHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connect only if the SinglePass extension shows the same code. The browser will be able to ask for the logins of the sites you open..
+        /// </summary>
+        public static string BrowserPairingHint {
+            get {
+                return ResourceManager.GetString("BrowserPairingHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cancel.
         /// </summary>
         public static string Cancel {
@@ -1233,6 +1305,24 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hotkey.
+        /// </summary>
+        public static string Hotkey {
+            get {
+                return ResourceManager.GetString("Hotkey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} is already used by another program. Choose another key combination..
+        /// </summary>
+        public static string HotkeyInUse {
+            get {
+                return ResourceManager.GetString("HotkeyInUse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Hotkeys.
         /// </summary>
         public static string Hotkeys {
@@ -1611,6 +1701,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No browsers yet. Open the SinglePass extension in your browser to connect it..
+        /// </summary>
+        public static string NoPairedBrowsers {
+            get {
+                return ResourceManager.GetString("NoPairedBrowsers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No group.
         /// </summary>
         public static string NoPasswordGroup {
@@ -1688,6 +1787,15 @@ namespace SinglePass.Language.Properties {
         public static string Other {
             get {
                 return ResourceManager.GetString("Other", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connected browsers.
+        /// </summary>
+        public static string PairedBrowsers {
+            get {
+                return ResourceManager.GetString("PairedBrowsers", resourceCulture);
             }
         }
         
@@ -1845,6 +1953,24 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Quick-access popup.
+        /// </summary>
+        public static string PopupHotkey {
+            get {
+                return ResourceManager.GetString("PopupHotkey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A hotkey opens a list of logins and types the chosen one into the active window, for example into a desktop application. The popup does not check which site is open in a browser..
+        /// </summary>
+        public static string PopupHotkeyDescription {
+            get {
+                return ResourceManager.GetString("PopupHotkeyDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Port.
         /// </summary>
         public static string Port {
@@ -1895,6 +2021,15 @@ namespace SinglePass.Language.Properties {
         public static string RecentlyDeleted {
             get {
                 return ResourceManager.GetString("RecentlyDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disconnect.
+        /// </summary>
+        public static string RemovePairing {
+            get {
+                return ResourceManager.GetString("RemovePairing", resourceCulture);
             }
         }
         
@@ -1978,6 +2113,15 @@ namespace SinglePass.Language.Properties {
         public static string SaveAppearanceSettingsFailed {
             get {
                 return ResourceManager.GetString("SaveAppearanceSettingsFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not save the hotkey settings..
+        /// </summary>
+        public static string SaveHotkeySettingsFailed {
+            get {
+                return ResourceManager.GetString("SaveHotkeySettingsFailed", resourceCulture);
             }
         }
         

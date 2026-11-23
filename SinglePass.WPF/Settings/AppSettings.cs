@@ -21,6 +21,13 @@ namespace SinglePass.WPF.Settings
         public bool AnimationsEnabled { get; set; } = true;
         public string Language { get; set; } = "system";
         public Hotkey ShowPopupHotkey { get; set; }
+
+        /// <summary>
+        /// Whether <see cref="ShowPopupHotkey"/> is registered. Off by default: logins are mostly filled in browsers,
+        /// where the extension does it. Null in settings saved before the switch existed; see
+        /// <see cref="AppSettingsService.PopupHotkeyEnabled"/>.
+        /// </summary>
+        public bool? PopupHotkeyEnabled { get; set; }
         public WindowSettings MainWindowSettings { get; set; }
         public SortType Sort { get; set; }
         public OrderType Order { get; set; }
@@ -32,6 +39,11 @@ namespace SinglePass.WPF.Settings
 
         /// <summary>Reopen a locked vault with Windows Hello (see WindowsHelloUnlock).</summary>
         public bool WindowsHelloEnabled { get; set; }
+
+        /// <summary>
+        /// Answer the SinglePass browser extension (see BrowserPipeServer). Off by default until the extension is published.
+        /// </summary>
+        public bool BrowserIntegrationEnabled { get; set; }
 
         /// <summary>Time of the last successful sync on this device, per cloud.</summary>
         public Dictionary<CloudType, DateTimeOffset> LastSyncTimes { get; set => field = value ?? new(); } = new();

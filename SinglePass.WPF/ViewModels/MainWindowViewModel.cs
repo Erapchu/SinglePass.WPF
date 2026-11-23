@@ -140,7 +140,6 @@ namespace SinglePass.WPF.ViewModels
             GroupNavigation.Remove(navigation);
         }
 
-        [RelayCommand]
         /// <summary>Selects the entry if the current list shows it (the browser extension's "open in SinglePass").</summary>
         internal void SelectCredential(Guid id)
         {
@@ -152,6 +151,7 @@ namespace SinglePass.WPF.ViewModels
             ScrollIntoViewRequired?.Invoke(item);
         }
 
+        [RelayCommand]
         private void Navigate(NavigationItemViewModel item)
         {
             if (item != null)

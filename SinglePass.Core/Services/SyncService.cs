@@ -1,5 +1,4 @@
-﻿using AsyncKeyedLock;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using SinglePass.Core.Clouds.Enums;
 using SinglePass.Core.Clouds.Services;
 using SinglePass.Core.Helpers;
@@ -23,7 +22,6 @@ namespace SinglePass.Core.Services
         private readonly ILogger<SyncService> _logger;
         private readonly CredentialsCryptoService _credentialsCryptoService;
         private readonly CryptoService _cryptoService;
-        private readonly AsyncKeyedLocker<string> _asyncKeyedLocker;
         private readonly HashSet<CloudType> _syncClouds = new();
         private readonly CancellationTokenSource _syncCTS = new();
         internal bool IsLocked => _credentialsCryptoService.IsLocked;
@@ -35,14 +33,12 @@ namespace SinglePass.Core.Services
             CloudServiceProvider cloudServiceProvider,
             CredentialsCryptoService credentialsCryptoService,
             CryptoService cryptoService,
-            AsyncKeyedLocker<string> asyncKeyedLocker,
             ILogger<SyncService> logger)
         {
             _cloudServiceProvider = cloudServiceProvider;
             _logger = logger;
             _credentialsCryptoService = credentialsCryptoService;
             _cryptoService = cryptoService;
-            _asyncKeyedLocker = asyncKeyedLocker;
         }
 
         /// <summary>
@@ -81,22 +77,25 @@ namespace SinglePass.Core.Services
                     if (cloudBytes is not null)
                     {
                         expectedRevision = Convert.ToHexStringLower(MD5.HashData(cloudBytes));
-                        var (incoming, password, isLegacy) = await DecryptCloudVault(
+                        var (incoming, cloudKey, password) = await DecryptCloudVault(
                             cloudType, cloudBytes, cloudPassword, userPasswordRequired, token);
                         if (incoming is null)
                             return CredentialsMergeResult.FailureMergeResult; // Cancelled by the user
 
-                        cloudPassword = password;
-                        SyncStateChanged?.Invoke(cloudType, LocalizationManager.Instance["Merging"]);
-                        await _credentialsCryptoService.MergeFromCloud(incoming, password, result);
-                        needsUpload = result.CloudNeedsUpdate || isLegacy;
+                        using (cloudKey)
+                        {
+                            cloudPassword = password ?? cloudPassword;
+                            SyncStateChanged?.Invoke(cloudType, LocalizationManager.Instance["Merging"]);
+                            await _credentialsCryptoService.MergeFromCloud(incoming, cloudKey, password, result);
+                        }
+                        needsUpload = result.CloudNeedsUpdate;
                     }
 
                     if (!needsUpload)
                         return result;
 
                     SyncStateChanged?.Invoke(cloudType, SinglePass.Language.Properties.Resources.Uploading);
-                    var localBytes = await ReadLocalVault();
+                    var localBytes = await _credentialsCryptoService.ReadVaultFileAsync();
 
                     // Neither provider offers an atomic conditional write, so check right before uploading.
                     var currentRevision = await cloudService.GetRevision(Constants.PasswordsFileName, token);
@@ -123,6 +122,16 @@ namespace SinglePass.Core.Services
                 _logger.LogWarning("Synchronize for '{CloudType}' has been cancelled", cloudType);
                 return CredentialsMergeResult.FailureMergeResult;
             }
+            catch (UnsupportedVaultVersionException ex)
+            {
+                // No password can open it: the cloud copy was written by a newer SinglePass on another device.
+                _logger.LogError(ex, "The '{CloudType}' vault was written by a newer version", cloudType);
+                return new CredentialsMergeResult
+                {
+                    Success = false,
+                    FailureReason = LocalizationManager.Instance["CloudVaultNewerVersion"]
+                };
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Synchronize for '{CloudType}' failed", cloudType);
@@ -140,46 +149,52 @@ namespace SinglePass.Core.Services
         }
 
         /// <summary>
-        /// Decrypts the cloud vault with the local master password, then with the password entered during
-        /// a previous attempt, then asks the user. Returns a null vault when the user cancels.
+        /// Opens the cloud vault: with this device's vault key when the cloud copy uses it (no password, no Argon2),
+        /// otherwise with a password entered in a previous attempt or kept for the first sync of a new or converted vault,
+        /// then by asking the user until a password works or the user cancels. Returns a null vault when the user cancels.
+        /// The key is that of the cloud file (null for SinglePass 1.x files); the password is null when the key opened it.
+        /// Throws <see cref="UnsupportedVaultVersionException"/> for a copy of a newer SinglePass, without asking.
         /// </summary>
-        private async Task<(PasswordVault Vault, string Password, bool IsLegacy)> DecryptCloudVault(
+        private async Task<(PasswordVault Vault, VaultKey Key, string Password)> DecryptCloudVault(
             CloudType cloudType, byte[] cloudBytes, string knownPassword, Func<Task<string>> userPasswordRequired, CancellationToken token)
         {
-            var candidates = new List<string> { _credentialsCryptoService.GetPassword() };
-            if (knownPassword is not null && knownPassword != candidates[0])
-                candidates.Add(knownPassword);
+            SyncStateChanged?.Invoke(cloudType, SinglePass.Language.Properties.Resources.Decrypting);
+            var byKey = await Task.Run(() => (
+                Opened: _credentialsCryptoService.TryReadWithCurrentKey(cloudBytes, out var vault, out var key), vault, key), token);
+            if (byKey.Opened)
+                return (byKey.vault, byKey.key, null);
+
+            var candidates = new List<string>();
+            foreach (var candidate in new[] { knownPassword, _credentialsCryptoService.FirstSyncPassword })
+            {
+                if (candidate is not null && !candidates.Contains(candidate))
+                    candidates.Add(candidate);
+            }
 
             for (var i = 0; ; i++)
             {
                 var password = i < candidates.Count ? candidates[i] : await userPasswordRequired();
                 if (password is null)
-                    return (null, null, false);
+                    return (null, null, null);
 
                 SyncStateChanged?.Invoke(cloudType, SinglePass.Language.Properties.Resources.Decrypting);
                 try
                 {
-                    var vault = await Task.Run(() =>
+                    var read = await Task.Run(() =>
                     {
                         using var stream = new MemoryStream(cloudBytes, writable: false);
-                        var read = CredentialsCryptoService.ReadVault(_cryptoService, stream, password, out var isLegacy);
-                        return (read, isLegacy);
+                        var vault = CredentialsCryptoService.ReadVault(_cryptoService, stream, password, out var key);
+                        return (vault, key);
                     }, token);
-                    return (vault.read, password, vault.isLegacy);
+                    return (read.vault, read.key, password);
                 }
-                catch (Exception ex) when (ex is not OperationCanceledException)
+                catch (Exception ex) when (ex is not OperationCanceledException and not UnsupportedVaultVersionException)
                 {
                     _logger.LogWarning(ex, "Could not decrypt the cloud vault");
                 }
 
                 token.ThrowIfCancellationRequested();
             }
-        }
-
-        private async Task<byte[]> ReadLocalVault()
-        {
-            using var locker = await _asyncKeyedLocker.LockAsync(Constants.PasswordsFilePath).ConfigureAwait(false);
-            return await File.ReadAllBytesAsync(Constants.PasswordsFilePath).ConfigureAwait(false);
         }
 
         internal void CancelTransfers() => _syncCTS.Cancel();

@@ -16,6 +16,7 @@ using SinglePass.WPF.Hotkeys;
 using SinglePass.Core.Localization;
 using SinglePass.Core.Options;
 using SinglePass.WPF.Services;
+using SinglePass.WPF.Services.WindowsHello;
 using SinglePass.WPF.Settings;
 using SinglePass.WPF.ViewModels;
 using SinglePass.WPF.ViewModels.Dialogs;
@@ -122,6 +123,8 @@ namespace SinglePass.WPF
             services.AddScoped<CredentialViewModelFactory>();
             services.AddSingleton<AddressBarExtractor>();
             services.AddSingleton<UpdateService>();
+            services.AddSingleton<WindowsHelloUnlock>();
+            services.AddSingleton<IVaultKeyObserver>(sp => sp.GetRequiredService<WindowsHelloUnlock>());
 
             // SSH agent: lives as long as the application and finds the vault of the current unlock itself.
             services.AddSingleton<SshAgentKeyStore>();
@@ -286,7 +289,8 @@ namespace SinglePass.WPF
 
             _vaultScope = _rootServices.CreateScope();
             Services = _vaultScope.ServiceProvider;
-            var login = new LoginWindow(new LoginWindowViewModel(() => Task.FromResult(Services), true));
+            var login = new LoginWindow(new LoginWindowViewModel(() => Task.FromResult(Services), true,
+                _rootServices.GetRequiredService<WindowsHelloUnlock>().IsOffered));
             _loginWindow = login;
             var accepted = login.ShowDialog() == true;
             _loginWindow = null;

@@ -13,6 +13,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Vault files written by released versions; see VaultKeyServiceTests. -->
+    <None Update="TestData\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SinglePass.Core\SinglePass.Core.csproj" />
   </ItemGroup>
 

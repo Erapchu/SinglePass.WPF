@@ -2540,6 +2540,15 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unlock with Windows Hello.
+        /// </summary>
+        public static string UnlockWithWindowsHello {
+            get {
+                return ResourceManager.GetString("UnlockWithWindowsHello", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Update available.
         /// </summary>
         public static string UpdateAvailableHeader {
@@ -2680,6 +2689,69 @@ namespace SinglePass.Language.Properties {
         public static string Website {
             get {
                 return ResourceManager.GetString("Website", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reopen the locked vault with your Windows PIN, fingerprint or face. The master password is still required after SinglePass or Windows restarts and every 14 days..
+        /// </summary>
+        public static string WindowsHelloDescription {
+            get {
+                return ResourceManager.GetString("WindowsHelloDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Windows Hello unlock could not be turned on..
+        /// </summary>
+        public static string WindowsHelloEnableFailed {
+            get {
+                return ResourceManager.GetString("WindowsHelloEnableFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Windows Hello could not unlock the vault. Enter the master password..
+        /// </summary>
+        public static string WindowsHelloFailed {
+            get {
+                return ResourceManager.GetString("WindowsHelloFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Windows Hello unlock was turned off because its key is no longer available, for example after the Windows PIN was reset. Enter the master password and turn it on again in Settings..
+        /// </summary>
+        public static string WindowsHelloKeyLost {
+            get {
+                return ResourceManager.GetString("WindowsHelloKeyLost", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The master password kept for Windows Hello no longer opens the vault. Enter the master password; Windows Hello will use it next time..
+        /// </summary>
+        public static string WindowsHelloPasswordOutdated {
+            get {
+                return ResourceManager.GetString("WindowsHelloPasswordOutdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unlock SinglePass.
+        /// </summary>
+        public static string WindowsHelloPrompt {
+            get {
+                return ResourceManager.GetString("WindowsHelloPrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Set up Windows Hello (at least a PIN) in Windows Settings → Accounts → Sign-in options to use it here..
+        /// </summary>
+        public static string WindowsHelloUnavailable {
+            get {
+                return ResourceManager.GetString("WindowsHelloUnavailable", resourceCulture);
             }
         }
         

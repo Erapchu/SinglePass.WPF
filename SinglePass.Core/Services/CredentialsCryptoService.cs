@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
@@ -16,7 +15,9 @@ namespace SinglePass.Core.Services
     internal enum CredentialLoadResult
     {
         Loaded,
-        Failed
+        Failed,
+        /// <summary>The vault was written by a newer SinglePass.</summary>
+        NewerVersion
     }
 
     internal enum PasswordChangeResult
@@ -46,8 +47,15 @@ namespace SinglePass.Core.Services
         private readonly ILogger<CredentialsCryptoService> _logger;
         private readonly CryptoService _cryptoService;
         private readonly AsyncKeyedLocker<string> _asyncKeyedLocker;
-        private readonly object _passwordLock = new();
-        private readonly VaultBackups _backups = new(Constants.PasswordsFilePath, Constants.BackupsDirectoryPath);
+        private readonly IVaultKeyObserver _keyObserver;
+        private readonly object _keyLock = new();
+        private readonly string _path;
+        private readonly VaultBackups _backups;
+        private VaultKey _key;
+        private string _firstSyncPassword;
+
+        /// <summary>The file on disk is still in format 1: converting it on unlock failed. The next write converts it.</summary>
+        private volatile bool _fileNeedsRewrite;
         private volatile PasswordVault _vault = new();
         private volatile bool _locked;
         internal bool IsLocked => _locked;
@@ -107,35 +115,88 @@ namespace SinglePass.Core.Services
                 : null;
         }
 
-        private SecureString PasswordSecure { get; set; }
-
         public CredentialsCryptoService(
             ILogger<CredentialsCryptoService> logger,
             CryptoService cryptoService,
-            AsyncKeyedLocker<string> asyncKeyedLocker)
+            AsyncKeyedLocker<string> asyncKeyedLocker,
+            IVaultKeyObserver keyObserver = null)
+            : this(logger, cryptoService, asyncKeyedLocker, keyObserver, Constants.PasswordsFilePath, Constants.BackupsDirectoryPath)
+        {
+        }
+
+        /// <summary>For tests: a vault file and backups folder other than the user's.</summary>
+        internal CredentialsCryptoService(
+            ILogger<CredentialsCryptoService> logger,
+            CryptoService cryptoService,
+            AsyncKeyedLocker<string> asyncKeyedLocker,
+            IVaultKeyObserver keyObserver,
+            string vaultPath,
+            string backupsDirectory)
         {
             _logger = logger;
             _cryptoService = cryptoService;
             _asyncKeyedLocker = asyncKeyedLocker;
+            _keyObserver = keyObserver;
+            _path = vaultPath;
+            _backups = new VaultBackups(vaultPath, backupsDirectory);
         }
 
-        public void SetPassword(string password)
+        /// <summary>A copy of the vault key, for Windows Hello unlock. The caller zeroes it. Null while locked.</summary>
+        internal byte[] CopyVaultKey()
         {
-            ReplacePassword(SecureStringHelper.MakeSecureString(password));
+            lock (_keyLock)
+                return _key?.Key.ToArray();
         }
 
-        public string GetPassword()
+        /// <summary>
+        /// The master password, kept only when this unlock created the vault or converted a vault file of SinglePass 1.x,
+        /// and only until the vault locks. The cloud copy then uses another key or the old format, and its first sync needs
+        /// the password; without it the user would be asked again right after typing it. Null otherwise.
+        /// </summary>
+        internal string FirstSyncPassword
         {
-            lock (_passwordLock)
-                return SecureStringHelper.GetString(PasswordSecure);
-        }
-
-        private void ReplacePassword(SecureString password)
-        {
-            lock (_passwordLock)
+            get
             {
-                PasswordSecure?.Dispose();
-                PasswordSecure = password;
+                lock (_keyLock)
+                    return _firstSyncPassword;
+            }
+        }
+
+        private void ForgetFirstSyncPassword()
+        {
+            lock (_keyLock)
+                _firstSyncPassword = null;
+        }
+
+        private VaultKey CurrentKey()
+        {
+            lock (_keyLock)
+                return _key ?? throw new InvalidOperationException("The password vault is locked.");
+        }
+
+        private void ReplaceKey(VaultKey key)
+        {
+            lock (_keyLock)
+            {
+                if (!ReferenceEquals(_key, key))
+                    _key?.Dispose();
+                _key = key;
+                if (key is null)
+                    _firstSyncPassword = null;
+            }
+        }
+
+        /// <summary>The user typed the master password and <paramref name="key"/> opens the vault from now on.</summary>
+        private void NotifyPasswordEntered(VaultKey key)
+        {
+            try
+            {
+                _keyObserver?.OnMasterPasswordEntered(key.Key);
+            }
+            catch (Exception ex)
+            {
+                // The vault is already open with this key; an observer must not undo that.
+                _logger.LogError(ex, "Failed to pass the vault key on.");
             }
         }
 
@@ -147,14 +208,56 @@ namespace SinglePass.Core.Services
 
         internal async Task ClearAsync()
         {
-            using var locker = await _asyncKeyedLocker.LockAsync(Constants.PasswordsFilePath).ConfigureAwait(false);
+            using var locker = await _asyncKeyedLocker.LockAsync(_path).ConfigureAwait(false);
             _vault = new();
-            ReplacePassword(null);
+            ReplaceKey(null);
         }
 
-        internal static PasswordVault ReadVault(CryptoService cryptoService, Stream stream, string password, out bool isLegacy)
+        /// <summary>
+        /// Reads a vault file of any format with the master password. <paramref name="key"/> is null for files in
+        /// format 1 or the legacy format, which have no vault key yet.
+        /// </summary>
+        internal static PasswordVault ReadVault(CryptoService cryptoService, Stream stream, string password, out VaultKey key)
         {
-            var json = cryptoService.DecryptFromStream<JsonElement>(stream, password, out isLegacy);
+            var json = cryptoService.DecryptFromStream<JsonElement>(stream, password, out key);
+            try
+            {
+                return ParseVault(json);
+            }
+            catch
+            {
+                key?.Dispose();
+                key = null;
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Reads a format 2 file encrypted with the vault key <paramref name="key"/>. Returns false when the file uses
+        /// another key or an older format. <paramref name="fileKey"/> is the key together with the header of the file.
+        /// </summary>
+        internal static bool TryReadVault(CryptoService cryptoService, Stream stream, ReadOnlySpan<byte> key,
+            out PasswordVault vault, out VaultKey fileKey)
+        {
+            vault = null;
+            if (!cryptoService.TryDecryptWithKey<JsonElement>(stream, key, out var json, out fileKey))
+                return false;
+
+            try
+            {
+                vault = ParseVault(json);
+                return true;
+            }
+            catch
+            {
+                fileKey.Dispose();
+                fileKey = null;
+                throw;
+            }
+        }
+
+        private static PasswordVault ParseVault(JsonElement json)
+        {
             if (json.ValueKind == JsonValueKind.Array)
             {
                 var array = JsonNode.Parse(json.GetRawText());
@@ -166,8 +269,11 @@ namespace SinglePass.Core.Services
 
             if (json.ValueKind != JsonValueKind.Object ||
                 !json.TryGetProperty(nameof(PasswordVault.Version), out var version) ||
-                !version.TryGetInt32(out var number) || number < 1 || number > PasswordVault.CurrentVersion)
+                !version.TryGetInt32(out var number) || number < 1)
                 throw new JsonException("Unsupported password vault format.");
+
+            if (number > PasswordVault.CurrentVersion)
+                throw new UnsupportedVaultVersionException($"The vault has version {number}, which this version does not know.");
 
             // Not limited to versions before 3: early version 3 builds wrote the login fields at the top level too.
             var node = JsonNode.Parse(json.GetRawText());
@@ -214,38 +320,62 @@ namespace SinglePass.Core.Services
             }
         }
 
+        /// <summary>
+        /// Opens the vault with the master password, or creates it when <paramref name="allowCreate"/> and there is no
+        /// vault file yet. A file in format 1 or the legacy format gets a vault key and is rewritten in format 2;
+        /// the old file is kept as an <see cref="VaultBackupReason.Upgrade"/> backup.
+        /// </summary>
         internal Task<CredentialLoadResult> LoadCredentialsAsync(string password, bool allowCreate = false) => Task.Run(async () =>
         {
-            var path = Constants.PasswordsFilePath;
             try
             {
-                using var locker = await _asyncKeyedLocker.LockAsync(path).ConfigureAwait(false);
+                using var locker = await _asyncKeyedLocker.LockAsync(_path).ConfigureAwait(false);
                 PasswordVault vault;
-                var needsRewrite = false;
+                VaultKey key = null;
+                var fileExists = true;
                 try
                 {
-                    using var stream = File.OpenRead(path);
-                    vault = ReadVault(_cryptoService, stream, password, out needsRewrite);
+                    using var stream = File.OpenRead(_path);
+                    vault = ReadVault(_cryptoService, stream, password, out key);
                 }
                 catch (FileNotFoundException) when (allowCreate)
                 {
                     vault = new PasswordVault();
-                    needsRewrite = true;
+                    fileExists = false;
                 }
 
-                var purged = PurgeExpiredTrash(vault, DateTimeOffset.UtcNow);
-                if (!ReferenceEquals(purged, vault))
+                // A new vault, or a file of SinglePass 1.x: give it a vault key.
+                var newKey = key is null;
+                if (newKey)
                 {
-                    CreateDailyBackupIfDue();
-                    vault = purged;
-                    needsRewrite = true;
+                    if (fileExists)
+                        CreateUpgradeBackup();
+                    key = CreateVerifiedKey(password);
                 }
 
-                if (needsRewrite)
-                    WriteVault(vault, password);
+                try
+                {
+                    CompleteLoad(vault, key, forceWrite: newKey, conversion: newKey && fileExists);
+                }
+                catch
+                {
+                    key.Dispose();
+                    throw;
+                }
 
-                _vault = vault;
+                if (newKey)
+                {
+                    lock (_keyLock)
+                        _firstSyncPassword = password;
+                }
+
+                NotifyPasswordEntered(key);
                 return CredentialLoadResult.Loaded;
+            }
+            catch (UnsupportedVaultVersionException ex)
+            {
+                _logger.LogError(ex, "The password vault was written by a newer version.");
+                return CredentialLoadResult.NewerVersion;
             }
             catch (Exception ex)
             {
@@ -253,6 +383,93 @@ namespace SinglePass.Core.Services
                 return CredentialLoadResult.Failed;
             }
         });
+
+        /// <summary>
+        /// Opens the vault with its vault key, which Windows Hello unlock keeps. Fails when the vault file uses
+        /// another key.
+        /// </summary>
+        internal Task<CredentialLoadResult> LoadCredentialsAsync(byte[] vaultKey) => Task.Run(async () =>
+        {
+            try
+            {
+                using var locker = await _asyncKeyedLocker.LockAsync(_path).ConfigureAwait(false);
+                PasswordVault vault;
+                VaultKey key;
+                using (var stream = File.OpenRead(_path))
+                {
+                    if (!TryReadVault(_cryptoService, stream, vaultKey, out vault, out key))
+                        return CredentialLoadResult.Failed;
+                }
+
+                try
+                {
+                    CompleteLoad(vault, key, forceWrite: false, conversion: false);
+                }
+                catch
+                {
+                    key.Dispose();
+                    throw;
+                }
+                return CredentialLoadResult.Loaded;
+            }
+            catch (UnsupportedVaultVersionException ex)
+            {
+                _logger.LogError(ex, "The password vault was written by a newer version.");
+                return CredentialLoadResult.NewerVersion;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to load the password vault with its vault key.");
+                return CredentialLoadResult.Failed;
+            }
+        });
+
+        /// <param name="conversion">
+        /// The file is in format 1 or the legacy format. If it cannot be rewritten (read-only, locked by another program,
+        /// disk full), the vault opens anyway, as it did before conversion existed: the old file stays as it is and
+        /// still opens with the password, and the next successful write converts it.
+        /// </param>
+        private void CompleteLoad(PasswordVault vault, VaultKey key, bool forceWrite, bool conversion)
+        {
+            var purged = PurgeExpiredTrash(vault, DateTimeOffset.UtcNow);
+            if (!ReferenceEquals(purged, vault))
+            {
+                CreateDailyBackupIfDue();
+                vault = purged;
+                forceWrite = true;
+            }
+
+            if (forceWrite)
+            {
+                try
+                {
+                    WriteVault(vault, key);
+                }
+                catch (Exception ex) when (conversion && ex is IOException or UnauthorizedAccessException)
+                {
+                    _logger.LogWarning(ex, "Could not convert the password vault file; it opens in its old format for now.");
+                    _fileNeedsRewrite = true;
+                }
+            }
+
+            _vault = vault;
+            ReplaceKey(key);
+        }
+
+        /// <summary>
+        /// A new vault key for <paramref name="password"/>, its slot checked by opening it with the password.
+        /// Files are written with this exact header (<see cref="WriteVault"/> compares it byte by byte), so every file
+        /// with this key opens with the password. Runs Argon2 twice.
+        /// </summary>
+        private VaultKey CreateVerifiedKey(string password)
+        {
+            var key = _cryptoService.CreateKey(password);
+            if (_cryptoService.OpensWithPassword(key, password))
+                return key;
+
+            key.Dispose();
+            throw new System.Security.Cryptography.CryptographicException("The new vault key does not open with its password.");
+        }
 
         public Task AddCredential(Credential credential) => AddCredential(credential, null);
 
@@ -457,55 +674,91 @@ namespace SinglePass.Core.Services
         }
 
         /// <summary>
-        /// Merges a vault downloaded from the cloud that was decrypted with <paramref name="cloudPassword"/>.
-        /// When the cloud vault uses another master password, the more recently changed password is kept:
-        /// either this device switches to the cloud password, or the cloud copy has to be re-encrypted.
+        /// Merges a vault downloaded from the cloud. <paramref name="cloudKey"/> is the vault key of the cloud file, or null
+        /// for a file in format 1 or the legacy format. <paramref name="cloudPassword"/> is the password the user entered
+        /// to open it, or null when it opened with this device's key.
+        /// <para>
+        /// When the cloud file uses another vault key, the side whose master password changed later wins. On a tie the key
+        /// with the lower id wins. The rule is the same on every device and for every cloud, so devices that got their keys
+        /// independently (each converted its own 1.x file, or two clouds got different keys) all settle on one key instead
+        /// of switching back and forth. The losing side is re-encrypted with the winning key: this device's file here, the
+        /// cloud copy on upload. A 1.x cloud file switches this device to its password only when that password was changed
+        /// later, as before; otherwise the cloud copy is converted with this device's key on upload.
+        /// </para>
         /// Adds the changes to <paramref name="result"/>, which may already hold changes of a previous attempt.
         /// </summary>
-        internal Task MergeFromCloud(PasswordVault incoming, string cloudPassword, CredentialsMergeResult result) => Task.Run(async () =>
+        internal Task MergeFromCloud(PasswordVault incoming, VaultKey cloudKey, string cloudPassword, CredentialsMergeResult result) => Task.Run(async () =>
         {
-            using var locker = await _asyncKeyedLocker.LockAsync(Constants.PasswordsFilePath).ConfigureAwait(false);
+            using var locker = await _asyncKeyedLocker.LockAsync(_path).ConfigureAwait(false);
             if (_locked)
                 throw new InvalidOperationException("The password vault is locked.");
 
-            var localPassword = GetPassword();
-            var samePassword = string.Equals(cloudPassword, localPassword, StringComparison.Ordinal);
-            var adoptCloudPassword = !samePassword &&
-                (incoming.MasterPasswordChangedAt ?? DateTimeOffset.MinValue) > (_vault.MasterPasswordChangedAt ?? DateTimeOffset.MinValue);
+            var localKey = CurrentKey();
+            var sameKey = cloudKey is not null && localKey.IsSameKey(cloudKey.Id);
+            var cloudChangedAt = incoming.MasterPasswordChangedAt ?? DateTimeOffset.MinValue;
+            var localChangedAt = _vault.MasterPasswordChangedAt ?? DateTimeOffset.MinValue;
 
-            var merged = MergeVaults(_vault, incoming, result);
-            if (adoptCloudPassword || !ReferenceEquals(merged, _vault))
-            {
-                // Sync writes changes that came from elsewhere: keep the vault as it was before them.
-                _backups.Create(adoptCloudPassword ? VaultBackupReason.Password : VaultBackupReason.Sync, DateTimeOffset.UtcNow);
-            }
+            // Whether the cloud password differs from the local one; known only when the user entered it. Runs Argon2,
+            // so it is evaluated before anything is written.
+            var otherPassword = !sameKey && cloudPassword is not null && !_cryptoService.OpensWithPassword(localKey, cloudPassword);
 
-            if (adoptCloudPassword)
+            VaultKey adoptedKey = null;
+            var adopted = false;
+            try
             {
-                var cloudPasswordSecure = SecureStringHelper.MakeSecureString(cloudPassword);
-                try
+                if (!sameKey && cloudPassword is not null)
                 {
-                    WriteVault(merged, cloudPassword);
+                    if (cloudKey is not null)
+                    {
+                        var cloudWins = cloudChangedAt > localChangedAt ||
+                            cloudChangedAt == localChangedAt && cloudKey.Id.AsSpan().SequenceCompareTo(localKey.Id) < 0;
+                        if (cloudWins)
+                            adoptedKey = cloudKey.Clone();
+                    }
+                    else if (cloudChangedAt > localChangedAt && otherPassword)
+                    {
+                        adoptedKey = CreateVerifiedKey(cloudPassword);
+                    }
                 }
-                catch
+
+                var merged = MergeVaults(_vault, incoming, result);
+                if (adoptedKey is not null || !ReferenceEquals(merged, _vault) || _fileNeedsRewrite)
                 {
-                    cloudPasswordSecure.Dispose();
-                    throw;
+                    // Sync writes changes that came from elsewhere: keep the vault as it was before them.
+                    var reason = adoptedKey is not null && otherPassword ? VaultBackupReason.Password : VaultBackupReason.Sync;
+                    _backups.Create(reason, DateTimeOffset.UtcNow);
                 }
 
-                _vault = merged;
-                ReplacePassword(cloudPasswordSecure);
-                result.MasterPasswordAdopted = true;
-            }
-            else if (!ReferenceEquals(merged, _vault))
-            {
-                WriteVault(merged, localPassword);
-                _vault = merged;
-            }
+                if (adoptedKey is not null)
+                {
+                    // The cloud slot opened with cloudPassword, or the new key was checked with it: the file opens with it.
+                    WriteVault(merged, adoptedKey);
+                    result.MasterPasswordAdopted = otherPassword;
+                    _vault = merged;
+                    ReplaceKey(adoptedKey);
+                    if (otherPassword)
+                        ForgetFirstSyncPassword(); // it is the old password now
+                    NotifyPasswordEntered(adoptedKey);
+                    adoptedKey = null;
+                    adopted = true;
+                }
+                else if (!ReferenceEquals(merged, _vault) || _fileNeedsRewrite)
+                {
+                    WriteVault(merged, localKey);
+                    _vault = merged;
+                }
 
-            result.CloudPasswordReplaced = !samePassword && !adoptCloudPassword;
-            result.CloudNeedsUpdate = result.CloudPasswordReplaced ||
-                !ReferenceEquals(MergeVaults(incoming, merged, new CredentialsMergeResult()), incoming);
+                // Upload sends the local file, so the cloud copy gets this device's key (and password) whenever they differ.
+                // A 1.x cloud file is always rewritten in format 2.
+                var cloudHasOtherKey = cloudKey is null || !CurrentKey().IsSameKey(cloudKey.Id);
+                result.CloudReencrypted = !adopted && otherPassword;
+                result.CloudNeedsUpdate = cloudHasOtherKey ||
+                    !ReferenceEquals(MergeVaults(incoming, merged, new CredentialsMergeResult()), incoming);
+            }
+            finally
+            {
+                adoptedKey?.Dispose();
+            }
         });
 
         /// <summary>
@@ -694,7 +947,7 @@ namespace SinglePass.Core.Services
 
         private Task UpdateVault(Func<PasswordVault, PasswordVault> update) => Task.Run(async () =>
         {
-            using var locker = await _asyncKeyedLocker.LockAsync(Constants.PasswordsFilePath).ConfigureAwait(false);
+            using var locker = await _asyncKeyedLocker.LockAsync(_path).ConfigureAwait(false);
             if (_locked)
                 throw new InvalidOperationException("The password vault is locked.");
 
@@ -703,27 +956,78 @@ namespace SinglePass.Core.Services
                 return;
 
             CreateDailyBackupIfDue();
-            WriteVault(updated, GetPassword());
+            WriteVault(updated, CurrentKey());
             _vault = updated;
         });
 
         /// <summary>
-        /// Reads a backup file. Returns null when <paramref name="password"/> does not open it;
-        /// other failures (missing file, no access) throw.
+        /// Reads a backup file with the master password it was saved with. Returns null when <paramref name="password"/>
+        /// does not open it; other failures (missing file, no access, a newer version) throw.
         /// </summary>
         internal Task<PasswordVault> ReadBackup(string path, string password) => Task.Run(() =>
         {
             using var stream = File.OpenRead(path);
             try
             {
-                return ReadVault(_cryptoService, stream, password, out _);
+                var vault = ReadVault(_cryptoService, stream, password, out var key);
+                key?.Dispose();
+                return vault;
             }
-            catch (Exception ex) when (ex is System.Security.Cryptography.CryptographicException or JsonException
-                or InvalidDataException or EndOfStreamException or ArgumentException)
+            catch (Exception ex) when (ex is not UnsupportedVaultVersionException &&
+                ex is System.Security.Cryptography.CryptographicException or JsonException
+                    or InvalidDataException or EndOfStreamException or ArgumentException)
             {
                 return null;
             }
         });
+
+        /// <summary>
+        /// Reads a backup file that uses the current vault key, without a password. Returns null for a backup with
+        /// another key (made before a password change) or in an older format.
+        /// </summary>
+        internal Task<PasswordVault> ReadBackup(string path) => Task.Run(() =>
+        {
+            using var stream = File.OpenRead(path);
+            return TryReadWithCurrentKey(stream, out var vault) ? vault : null;
+        });
+
+        /// <summary>
+        /// Reads a vault file downloaded from the cloud if it uses the current vault key. Returns false for another key
+        /// or an older format, which need a password.
+        /// </summary>
+        internal bool TryReadWithCurrentKey(byte[] file, out PasswordVault vault, out VaultKey fileKey)
+        {
+            using var stream = new MemoryStream(file, writable: false);
+            return TryReadWithCurrentKey(stream, out vault, out fileKey);
+        }
+
+        private bool TryReadWithCurrentKey(Stream stream, out PasswordVault vault)
+        {
+            if (!TryReadWithCurrentKey(stream, out vault, out var fileKey))
+                return false;
+            fileKey.Dispose();
+            return true;
+        }
+
+        private bool TryReadWithCurrentKey(Stream stream, out PasswordVault vault, out VaultKey fileKey)
+        {
+            var key = CopyVaultKey() ?? throw new InvalidOperationException("The password vault is locked.");
+            try
+            {
+                return TryReadVault(_cryptoService, stream, key, out vault, out fileKey);
+            }
+            finally
+            {
+                System.Security.Cryptography.CryptographicOperations.ZeroMemory(key);
+            }
+        }
+
+        /// <summary>The vault file as it is on disk, for upload.</summary>
+        internal async Task<byte[]> ReadVaultFileAsync()
+        {
+            using var locker = await _asyncKeyedLocker.LockAsync(_path).ConfigureAwait(false);
+            return await File.ReadAllBytesAsync(_path).ConfigureAwait(false);
+        }
 
         /// <summary>
         /// Brings back credentials and earlier versions from <paramref name="backup"/> as a new change of this
@@ -735,7 +1039,7 @@ namespace SinglePass.Core.Services
             var result = BackupRestoreResult.Empty;
             await Task.Run(async () =>
             {
-                using var locker = await _asyncKeyedLocker.LockAsync(Constants.PasswordsFilePath).ConfigureAwait(false);
+                using var locker = await _asyncKeyedLocker.LockAsync(_path).ConfigureAwait(false);
                 if (_locked)
                     throw new InvalidOperationException("The password vault is locked.");
 
@@ -745,7 +1049,7 @@ namespace SinglePass.Core.Services
                     return;
 
                 _backups.Create(VaultBackupReason.Restore, now);
-                WriteVault(updated, GetPassword());
+                WriteVault(updated, CurrentKey());
                 _vault = updated;
             }).ConfigureAwait(false);
             return result;
@@ -903,24 +1207,54 @@ namespace SinglePass.Core.Services
             }
         }
 
-        private void WriteVault(PasswordVault vault, string password)
+        /// <summary>
+        /// Keeps the 1.x file before it is converted. Once per file: when the newest <c>upgrade</c> backup already holds
+        /// the same bytes (an earlier conversion attempt failed), no copy is made, so retries do not push out older backups.
+        /// </summary>
+        private void CreateUpgradeBackup()
         {
-            var path = Constants.PasswordsFilePath;
-            var tempPath = $"{path}.{Guid.NewGuid():N}.tmp";
+            try
+            {
+                var latest = _backups.List().FirstOrDefault(backup => backup.Reason == VaultBackupReason.Upgrade);
+                if (latest is not null && File.ReadAllBytes(latest.Path).AsSpan().SequenceEqual(File.ReadAllBytes(_path)))
+                    return;
+
+                _backups.Create(VaultBackupReason.Upgrade, DateTimeOffset.UtcNow);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                // The vault is written only after reading it back, so a missed copy must not block unlocking.
+                _logger.LogError(ex, "Failed to back up the password vault.");
+            }
+        }
+
+        /// <summary>
+        /// Writes the vault with <paramref name="key"/> and replaces the file only after reading the written file back:
+        /// it must start with exactly this key's header and its contents must decrypt with this key. The header holds
+        /// the password slot, which was checked against the password when the key was made (<see cref="CreateVerifiedKey"/>)
+        /// or opened with it (a key from another file), so the written file opens with the password too.
+        /// </summary>
+        private void WriteVault(PasswordVault vault, VaultKey key)
+        {
+            var tempPath = $"{_path}.{Guid.NewGuid():N}.tmp";
             var tempFileCreated = false;
             try
             {
-                using (var stream = new FileStream(tempPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+                using (var stream = new FileStream(tempPath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None))
                 {
                     tempFileCreated = true;
-                    _cryptoService.EncryptToStream(vault, stream, password);
+                    _cryptoService.EncryptToStream(vault, stream, key);
                     stream.Flush(flushToDisk: true);
+
+                    if (!_cryptoService.IsWrittenWith(stream, key))
+                        throw new InvalidDataException("The written vault file does not match its vault key.");
                 }
 
-                if (File.Exists(path))
-                    File.Replace(tempPath, path, destinationBackupFileName: null, ignoreMetadataErrors: false);
+                if (File.Exists(_path))
+                    File.Replace(tempPath, _path, destinationBackupFileName: null, ignoreMetadataErrors: false);
                 else
-                    File.Move(tempPath, path);
+                    File.Move(tempPath, _path);
+                _fileNeedsRewrite = false;
             }
             catch
             {
@@ -932,35 +1266,40 @@ namespace SinglePass.Core.Services
             }
         }
 
+        /// <summary>
+        /// Changes the master password. The vault also gets a new vault key, so the old password together with an old
+        /// copy of the file does not open the files written from now on.
+        /// </summary>
         internal Task<PasswordChangeResult> ChangePasswordAsync(string currentPassword, string newPassword)
         {
             return Task.Run(async () =>
             {
                 try
                 {
-                    var path = Constants.PasswordsFilePath;
-                    using var locker = await _asyncKeyedLocker.LockAsync(path).ConfigureAwait(false);
+                    using var locker = await _asyncKeyedLocker.LockAsync(_path).ConfigureAwait(false);
                     if (_locked)
                         return PasswordChangeResult.Failed;
 
-                    if (!string.Equals(currentPassword, GetPassword(), StringComparison.Ordinal))
+                    if (!_cryptoService.OpensWithPassword(CurrentKey(), currentPassword))
                         return PasswordChangeResult.IncorrectCurrentPassword;
 
                     _backups.Create(VaultBackupReason.Password, DateTimeOffset.UtcNow);
-                    var newPasswordSecure = SecureStringHelper.MakeSecureString(newPassword);
+                    var newKey = CreateVerifiedKey(newPassword);
                     var updated = _vault with { MasterPasswordChangedAt = DateTimeOffset.UtcNow };
                     try
                     {
-                        WriteVault(updated, newPassword);
+                        WriteVault(updated, newKey);
                     }
                     catch
                     {
-                        newPasswordSecure.Dispose();
+                        newKey.Dispose();
                         throw;
                     }
 
                     _vault = updated;
-                    ReplacePassword(newPasswordSecure);
+                    ReplaceKey(newKey);
+                    ForgetFirstSyncPassword(); // it is the old password now
+                    NotifyPasswordEntered(newKey);
                     return PasswordChangeResult.Changed;
                 }
                 catch (Exception ex)

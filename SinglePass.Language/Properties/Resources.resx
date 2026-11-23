@@ -986,4 +986,37 @@ Sync to update the cloud copy and other devices.</value>
   <data name="ConnectSshFailed" xml:space="preserve">
     <value>Could not start the terminal: {0}</value>
   </data>
+  <data name="WindowsHelloPrompt" xml:space="preserve">
+    <value>Unlock SinglePass</value>
+  </data>
+  <data name="UnlockWithWindowsHello" xml:space="preserve">
+    <value>Unlock with Windows Hello</value>
+  </data>
+  <data name="WindowsHelloDescription" xml:space="preserve">
+    <value>Reopen the locked vault with your Windows PIN, fingerprint or face. The master password is still required after SinglePass or Windows restarts and every 14 days.</value>
+  </data>
+  <data name="WindowsHelloUnavailable" xml:space="preserve">
+    <value>Set up Windows Hello (at least a PIN) in Windows Settings → Accounts → Sign-in options to use it here.</value>
+  </data>
+  <data name="WindowsHelloPasswordOutdated" xml:space="preserve">
+    <value>Windows Hello no longer opens the vault: its key changed. Enter the master password; Windows Hello will work again next time.</value>
+  </data>
+  <data name="WindowsHelloKeyLost" xml:space="preserve">
+    <value>Windows Hello unlock was turned off because its key is no longer available, for example after the Windows PIN was reset. Enter the master password and turn it on again in Settings.</value>
+  </data>
+  <data name="WindowsHelloFailed" xml:space="preserve">
+    <value>Windows Hello could not unlock the vault. Enter the master password.</value>
+  </data>
+  <data name="WindowsHelloEnableFailed" xml:space="preserve">
+    <value>Windows Hello unlock could not be turned on.</value>
+  </data>
+  <data name="BackupReasonUpgrade" xml:space="preserve">
+    <value>Before conversion to the new format</value>
+  </data>
+  <data name="VaultNewerVersion" xml:space="preserve">
+    <value>This vault was saved by a newer version of SinglePass. Update SinglePass to open it.</value>
+  </data>
+  <data name="CloudVaultNewerVersion" xml:space="preserve">
+    <value>The cloud copy was saved by a newer version of SinglePass on another device. Update SinglePass on this device to sync.</value>
+  </data>
 </root>

@@ -5,7 +5,7 @@ SinglePass serves the SSH key entries of the vault to `ssh`, `git`, `scp` and ot
 Code:
 
 - `SinglePass.Core/Services/SshAgent.cs` — the agent protocol (draft-miller-ssh-agent): list keys, sign.
-- `SinglePass.Core/Services/SshAgentServer.cs` — the named pipe and the program that connects to it.
+- `SinglePass.Core/Services/SshAgentServer.cs` — the agent's pipe; the pipe itself (ACL, first instance, the program that connects) is `NamedPipeServer.cs`, shared with the browser extension's pipe.
 - `SinglePass.Core/Services/SshSigningKey.cs` — reads private keys and signs: Ed25519, RSA (`ssh-rsa`, `rsa-sha2-256`, `rsa-sha2-512`), ECDSA on NIST P-256/384/521.
 - `SinglePass.Core/Services/BcryptPbkdf.cs` — the key derivation of OpenSSH keys with a passphrase.
 - `SinglePass.WPF/Services/SshAgentKeyStore.cs` — keys of the unlocked vault, confirmation, unlock on request.

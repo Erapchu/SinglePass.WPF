@@ -47,6 +47,22 @@ jobs:
       env:
         Configuration: ${{ matrix.configuration }}
 
+    # The browser extension: type check, build, and the Node client that BrowserExtensionInteropTests runs.
+    - name: Install Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+        cache: npm
+        cache-dependency-path: extension/package-lock.json
+
+    - name: Build extension
+      working-directory: extension
+      run: |
+       npm ci
+       npm run typecheck
+       npm run build
+       node build.mjs --test
+
     - name: Test
       run: |
        dotnet test .\SinglePass.Core.Tests\SinglePass.Core.Tests.csproj --configuration $env:CONFIGURATION

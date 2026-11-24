@@ -10,10 +10,12 @@ SinglePass is a Windows password manager with a local encrypted vault, a quick-a
 - Generate and copy time-based one-time passwords (TOTP) from a saved entry.
 - Keep SSH keys and SSH hosts. The built-in SSH agent lets `ssh`, `git` and other OpenSSH clients sign in with the keys of the vault, asking for confirmation before each use; a host copies a ready `ssh` command. See [docs/ssh-agent.md](docs/ssh-agent.md).
 - Search by name, login, website or notes, including transliterated text.
-- Open a quick-access popup with a configurable global hotkey. The popup can suggest entries based on the current browser address and paste a login and password or individual fields.
+- Optionally open a quick-access popup with a global hotkey and paste a login and password or individual fields into the active window.
+- Fill logins in Chrome and Edge with the SinglePass browser extension, which matches entries by the site of the tab, so a look-alike site gets nothing. In development; see [docs/browser-extension.md](docs/browser-extension.md).
 - Synchronize credentials with Google Drive or Yandex Disk after signing in.
 - Change the master password, choose a theme and select English, Russian or the system language.
 - Automatically lock the vault when the Windows session locks or after five minutes without keyboard or mouse input. Enter the master password to reopen it.
+- Unlock the vault with Windows Hello (PIN, fingerprint or face) instead of the master password. See [Windows Hello unlock](#windows-hello-unlock).
 - Access the application from the Windows notification area.
 
 ## Getting started
@@ -30,12 +32,25 @@ On first launch, enter a master password of at least eight characters. Use that 
 
 ### Quick-access popup
 
-1. Add a credential and fill in its website address.
-2. Set a popup hotkey in **Settings**.
-3. Open the website in a Chromium-based browser, focus the login field and press the configured hotkey.
-4. Select an entry in the popup to paste the credentials. You can also search or paste individual fields.
+The popup is off by default.
 
-The popup uses the clipboard and simulates keyboard input. Filling both fields assumes that pressing Tab moves focus from the login field to the password field; behavior depends on the target application and page.
+1. In **Settings**, turn on **Quick-access popup** and set a hotkey.
+2. In any application, focus the login field and press the hotkey.
+3. Select an entry in the popup to paste the credentials. You can also search or paste individual fields. Recently changed entries come first.
+
+The popup does not know which site is open in a browser and offers every login, so make sure you pick the entry for the page you are on. The popup uses the clipboard and simulates keyboard input. Filling both fields assumes that pressing Tab moves focus from the login field to the password field; behavior depends on the target application and page.
+
+### Windows Hello unlock
+
+Turn on **Settings → Security → Unlock with Windows Hello**. Windows asks for your PIN, fingerprint or face once to create a key for SinglePass. From then on, the unlock window shows the Windows Hello prompt right away, when SinglePass starts and when the vault locks; cancel it to type the master password instead. This requires Windows Hello to be set up (at least a PIN) under **Windows Settings → Accounts → Sign-in options**.
+
+The master password is still required 14 days after it was last typed, so that you keep remembering it.
+
+The master password is not stored. After you type it, SinglePass writes the vault key (see below) to `windowsHello.dat`, encrypted with an RSA key that Windows Hello keeps for the current user on this computer, in the TPM where there is one. Decrypting it requires the Windows Hello gesture, so the file is useless on another computer or Windows account. The time the password was typed is encrypted together with the key, so editing the file does not postpone the 14 days. When the vault key changes because the master password changed on this device or sync adopted the key of another device, SinglePass updates the file without a prompt.
+
+If the Windows Hello key is lost, for example after the Windows PIN is reset, SinglePass turns Windows Hello unlock off and asks for the master password; turn it on again in Settings. Turning it off deletes the file and the key.
+
+Windows Hello unlock does not protect against malware running in your Windows session: such a program can wait until the vault is unlocked and read it from memory.
 
 ### Cloud synchronization
 
@@ -55,11 +70,12 @@ Application data is stored under `%LOCALAPPDATA%\SinglePass`:
 - `commonSettings.json` — application settings.
 - `googleDrive.token` — Google Drive authorization data protected by Windows for the current user. SinglePass migrates the former `googleDrive.json` and removes it after saving the protected token.
 - `yandexDisk.token` — Yandex Disk authorization data protected by Windows for the current user.
+- `windowsHello.dat` — the vault key protected by Windows Hello, present while Windows Hello unlock is on.
 - `Backups` — automatic copies of the vault, restorable from **Settings → Security → Backups**.
 - `ssh` — public keys of SSH key entries, written for the commands copied from hosts. Private keys stay in the vault.
 - `Cache` — cached data; logs are stored in `Logs`.
 
-The vault uses AES-256-GCM encryption with a key derived from the master password using Argon2id. SinglePass upgrades older local vaults after you unlock them successfully. Vaults written by this version cannot be opened by older versions, so update SinglePass on every device that syncs the same vault. The file format and merge rules are described in [docs/vault.md](docs/vault.md), synchronization in [docs/cloud-sync.md](docs/cloud-sync.md).
+The vault is encrypted with AES-256-GCM using a random vault key. The file keeps that key encrypted with a key derived from the master password using Argon2id, so unlocking takes a moment, while saving and syncing need no key derivation. Changing the master password also replaces the vault key. SinglePass converts vaults of version 1.x after you unlock them successfully and keeps the old file as a backup. Vaults written by this version cannot be opened by older versions, so update SinglePass on every device that syncs the same vault. After the update each device may ask for the master password once during its first sync, while the devices agree on one vault key. The file format and merge rules are described in [docs/vault.md](docs/vault.md), synchronization in [docs/cloud-sync.md](docs/cloud-sync.md).
 
 ## Build from source
 

@@ -38,7 +38,7 @@ namespace SinglePass.WPF.Services
 
         private Dispatcher Dispatcher => _app.Dispatcher;
 
-        public async Task<IReadOnlyList<SshAgentIdentity>> GetIdentitiesAsync(SshAgentClient client, CancellationToken cancellationToken)
+        public async Task<IReadOnlyList<SshAgentIdentity>> GetIdentitiesAsync(PipeClient client, CancellationToken cancellationToken)
         {
             var vault = await GetVaultAsync(waitForUnlock: true, cancellationToken);
             if (vault == null)
@@ -52,7 +52,7 @@ namespace SinglePass.WPF.Services
                 .ToList();
         }
 
-        public async Task<SshKeyData> AuthorizeAsync(SshAgentIdentity identity, SshAgentClient client, CancellationToken cancellationToken)
+        public async Task<SshKeyData> AuthorizeAsync(SshAgentIdentity identity, PipeClient client, CancellationToken cancellationToken)
         {
             var vault = await GetVaultAsync(waitForUnlock: false, cancellationToken);
             if (vault?.Credentials.Find(item => item.Id == identity.CredentialId && item.Type == CredentialType.SshKey) is not { } credential)
@@ -104,7 +104,7 @@ namespace SinglePass.WPF.Services
             }
         }
 
-        private static Task<(bool Allowed, bool Remember)> AskAsync(string keyName, SshAgentClient client)
+        private static Task<(bool Allowed, bool Remember)> AskAsync(string keyName, PipeClient client)
         {
             var result = new TaskCompletionSource<(bool, bool)>();
             var window = new SshAgentConfirmWindow(keyName, client);

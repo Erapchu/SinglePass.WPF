@@ -324,6 +324,8 @@ namespace SinglePass.WPF.Views.Windows
 
         private bool _closingForVaultLock;
 
+        internal void SelectCredential(Guid id) => ViewModel?.SelectCredential(id);
+
         internal void CloseForVaultLock()
         {
             _closingForVaultLock = true;

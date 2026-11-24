@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using SinglePass.WPF.Settings;
+using System;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
@@ -9,11 +11,11 @@ namespace SinglePass.WPF.Hotkeys
     {
         #region Static properties
 
-        private static readonly Lazy<Hotkey> _lazyEmpty = new(() => new Hotkey() { Key = Key.None, Modifiers = ModifierKeys.None });
         /// <summary>
-        /// Default empty hotkey shared class instance
+        /// A new empty hotkey. Not a shared instance: <see cref="Hotkey"/> is mutable, and Newtonsoft fills an existing
+        /// <see cref="AppSettings.ShowPopupHotkey"/> object instead of replacing it, so a shared one would take the saved keys.
         /// </summary>
-        public static Hotkey Empty => _lazyEmpty.Value;
+        public static Hotkey Empty => new() { Key = Key.None, Modifiers = ModifierKeys.None };
 
         #endregion
 
@@ -21,6 +23,9 @@ namespace SinglePass.WPF.Hotkeys
 
         public ModifierKeys Modifiers { get; set; }
         public Key Key { get; set; }
+
+        [JsonIgnore]
+        public bool IsEmpty => Key == Key.None;
 
         #endregion
 

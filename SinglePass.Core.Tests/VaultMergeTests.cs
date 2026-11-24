@@ -460,7 +460,7 @@ namespace SinglePass.Core.Tests
         [Fact]
         public void NewerVaultVersion_IsRejected()
         {
-            Assert.Throws<JsonException>(() => RoundTrip(new PasswordVault { Version = PasswordVault.CurrentVersion + 1 }));
+            Assert.Throws<UnsupportedVaultVersionException>(() => RoundTrip(new PasswordVault { Version = PasswordVault.CurrentVersion + 1 }));
         }
     }
 }

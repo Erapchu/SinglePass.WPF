@@ -140,6 +140,17 @@ namespace SinglePass.WPF.ViewModels
             GroupNavigation.Remove(navigation);
         }
 
+        /// <summary>Selects the entry if the current list shows it (the browser extension's "open in SinglePass").</summary>
+        internal void SelectCredential(Guid id)
+        {
+            var item = PasswordsVM.DisplayedCredentials.FirstOrDefault(credential => credential.Model.Id == id);
+            if (item == null)
+                return;
+
+            PasswordsVM.SelectedCredentialVM = item;
+            ScrollIntoViewRequired?.Invoke(item);
+        }
+
         [RelayCommand]
         private void Navigate(NavigationItemViewModel item)
         {

@@ -13,30 +13,17 @@ namespace SinglePass.Core.Services
     /// <summary>A key the agent offers: an SSH key entry of the vault.</summary>
     public sealed record SshAgentIdentity(Guid CredentialId, string Name, byte[] PublicKeyBlob);
 
-    /// <summary>
-    /// The program connected to the agent. <see cref="Chain"/> starts with the program itself and goes up
-    /// through the programs that started it, for example <c>ssh.exe</c>, <c>git.exe</c>, <c>Code.exe</c>.
-    /// </summary>
-    public sealed record SshAgentClient(int ProcessId, IReadOnlyList<SshAgentClientProcess> Chain)
-    {
-        public static SshAgentClient Unknown { get; } = new(0, []);
-
-        public string DisplayName => Chain.Count == 0 ? "?" : string.Join(" ← ", Chain.Select(p => p.Name));
-    }
-
-    public sealed record SshAgentClientProcess(int Id, string Name, string Path);
-
     /// <summary>Where the agent takes keys from and who allows their use. Implemented by the application.</summary>
     public interface ISshAgentKeyStore
     {
         /// <summary>Keys to offer; empty while the vault is locked. May wait for the user to unlock it.</summary>
-        Task<IReadOnlyList<SshAgentIdentity>> GetIdentitiesAsync(SshAgentClient client, CancellationToken cancellationToken);
+        Task<IReadOnlyList<SshAgentIdentity>> GetIdentitiesAsync(PipeClient client, CancellationToken cancellationToken);
 
         /// <summary>
         /// Asks the user whether <paramref name="client"/> may sign with the key. Returns the key data
         /// when allowed, null when denied or when the entry is gone.
         /// </summary>
-        Task<SshKeyData> AuthorizeAsync(SshAgentIdentity identity, SshAgentClient client, CancellationToken cancellationToken);
+        Task<SshKeyData> AuthorizeAsync(SshAgentIdentity identity, PipeClient client, CancellationToken cancellationToken);
     }
 
     /// <summary>
@@ -64,7 +51,7 @@ namespace SinglePass.Core.Services
         }
 
         /// <summary>Answers requests on <paramref name="stream"/> until the client disconnects.</summary>
-        public async Task ServeAsync(Stream stream, SshAgentClient client, CancellationToken cancellationToken)
+        public async Task ServeAsync(Stream stream, PipeClient client, CancellationToken cancellationToken)
         {
             var header = new byte[4];
             while (!cancellationToken.IsCancellationRequested)
@@ -90,7 +77,7 @@ namespace SinglePass.Core.Services
         }
 
         /// <summary>Answers one request (without the length prefix).</summary>
-        internal async Task<byte[]> HandleAsync(byte[] request, SshAgentClient client, CancellationToken cancellationToken)
+        internal async Task<byte[]> HandleAsync(byte[] request, PipeClient client, CancellationToken cancellationToken)
         {
             try
             {
@@ -110,7 +97,7 @@ namespace SinglePass.Core.Services
             }
         }
 
-        private async Task<byte[]> ListIdentitiesAsync(SshAgentClient client, CancellationToken cancellationToken)
+        private async Task<byte[]> ListIdentitiesAsync(PipeClient client, CancellationToken cancellationToken)
         {
             var identities = await _keyStore.GetIdentitiesAsync(client, cancellationToken).ConfigureAwait(false);
             var writer = new SshWriter();
@@ -124,7 +111,7 @@ namespace SinglePass.Core.Services
             return writer.ToArray();
         }
 
-        private async Task<byte[]> SignAsync(SshReader reader, SshAgentClient client, CancellationToken cancellationToken)
+        private async Task<byte[]> SignAsync(SshReader reader, PipeClient client, CancellationToken cancellationToken)
         {
             var publicKey = reader.ReadBytes();
             var data = reader.ReadBytes();

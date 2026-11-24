@@ -16,7 +16,9 @@ namespace SinglePass.Core.Services
         /// <summary>Before the master password is changed or replaced by the cloud one.</summary>
         Password,
         /// <summary>Before a backup is restored.</summary>
-        Restore
+        Restore,
+        /// <summary>Before a vault file of SinglePass 1.x is rewritten in the current format.</summary>
+        Upgrade
     }
 
     public sealed record VaultBackupInfo(string Path, DateTimeOffset CreatedAt, VaultBackupReason Reason);

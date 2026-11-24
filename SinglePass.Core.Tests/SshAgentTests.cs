@@ -92,7 +92,7 @@ namespace SinglePass.Core.Tests
             var store = new FakeKeyStore(SshTestKeys.Ed25519Ctr, SshTestKeys.RsaPem);
             var agent = new SshAgent(store, null);
 
-            var response = new Reader(await agent.HandleAsync([SshAgent.RequestIdentities], SshAgentClient.Unknown, default));
+            var response = new Reader(await agent.HandleAsync([SshAgent.RequestIdentities], PipeClient.Unknown, default));
 
             Assert.Equal(SshAgent.IdentitiesAnswer, response.Byte());
             Assert.Equal(2u, response.UInt32());
@@ -110,7 +110,7 @@ namespace SinglePass.Core.Tests
             var blob = PublicBlob(SshTestKeys.EcdsaP256Ctr.PublicKey);
             var data = Encoding.UTF8.GetBytes("data");
 
-            var response = new Reader(await agent.HandleAsync(SignRequest(blob, data, 0), SshAgentClient.Unknown, default));
+            var response = new Reader(await agent.HandleAsync(SignRequest(blob, data, 0), PipeClient.Unknown, default));
 
             Assert.Equal(SshAgent.SignResponse, response.Byte());
             Assert.True(Verify(blob, data, response.Bytes(), 0));
@@ -124,7 +124,7 @@ namespace SinglePass.Core.Tests
             var agent = new SshAgent(store, null);
             var blob = PublicBlob(SshTestKeys.EcdsaP256Ctr.PublicKey);
 
-            var response = await agent.HandleAsync(SignRequest(blob, [1, 2, 3], 0), SshAgentClient.Unknown, default);
+            var response = await agent.HandleAsync(SignRequest(blob, [1, 2, 3], 0), PipeClient.Unknown, default);
 
             Assert.Equal([SshAgent.Failure], response);
         }
@@ -136,7 +136,7 @@ namespace SinglePass.Core.Tests
             var agent = new SshAgent(store, null);
 
             var response = await agent.HandleAsync(SignRequest(PublicBlob(SshTestKeys.RsaPem.PublicKey), [1], 0),
-                SshAgentClient.Unknown, default);
+                PipeClient.Unknown, default);
 
             Assert.Equal([SshAgent.Failure], response);
             Assert.Equal(0, store.AuthorizeCalls);
@@ -150,7 +150,7 @@ namespace SinglePass.Core.Tests
         {
             var agent = new SshAgent(new FakeKeyStore(SshTestKeys.RsaPem), null);
 
-            var response = await agent.HandleAsync(request, SshAgentClient.Unknown, default);
+            var response = await agent.HandleAsync(request, PipeClient.Unknown, default);
 
             Assert.Equal([SshAgent.Failure], response);
         }
@@ -310,9 +310,9 @@ namespace SinglePass.Core.Tests
 
             public bool Allow { get; init; } = true;
             public int AuthorizeCalls { get; private set; }
-            public SshAgentClient LastClient { get; private set; }
+            public PipeClient LastClient { get; private set; }
 
-            public Task<IReadOnlyList<SshAgentIdentity>> GetIdentitiesAsync(SshAgentClient client, CancellationToken cancellationToken)
+            public Task<IReadOnlyList<SshAgentIdentity>> GetIdentitiesAsync(PipeClient client, CancellationToken cancellationToken)
             {
                 LastClient = client;
                 IReadOnlyList<SshAgentIdentity> identities = _keys
@@ -321,7 +321,7 @@ namespace SinglePass.Core.Tests
                 return Task.FromResult(identities);
             }
 
-            public Task<SshKeyData> AuthorizeAsync(SshAgentIdentity identity, SshAgentClient client, CancellationToken cancellationToken)
+            public Task<SshKeyData> AuthorizeAsync(SshAgentIdentity identity, PipeClient client, CancellationToken cancellationToken)
             {
                 AuthorizeCalls++;
                 var key = _keys[identity.CredentialId];

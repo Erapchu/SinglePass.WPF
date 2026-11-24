@@ -1,0 +1,24 @@
+{
+  "name": "singlepass-extension",
+  "private": true,
+  "version": "0.1.0",
+  "description": "SinglePass browser extension for Chrome and Edge (docs/browser-extension.md)",
+  "type": "module",
+  "scripts": {
+    "start": "node run.mjs",
+    "start:edge": "node run.mjs edge",
+    "start:chrome": "node run.mjs chrome",
+    "start:release": "node run.mjs --release",
+    "build": "node build.mjs",
+    "build:dev": "node build.mjs --dev",
+    "watch": "node build.mjs --dev --watch",
+    "typecheck": "tsc --noEmit",
+    "test:pipe": "node build.mjs --test && node dist-test/pipe-client.js"
+  },
+  "devDependencies": {
+    "@types/chrome": "0.0.287",
+    "@types/node": "22.10.7",
+    "esbuild": "0.24.2",
+    "typescript": "5.7.3"
+  }
+}

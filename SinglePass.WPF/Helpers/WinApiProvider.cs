@@ -13,6 +13,14 @@ namespace SinglePass.WPF.Helpers
         public static extern bool SetForegroundWindow(IntPtr hWnd);
 
         [DllImport("user32.dll")]
+        public static extern IntPtr GetForegroundWindow();
+
+        public const uint GA_ROOT = 2;
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetAncestor(IntPtr hWnd, uint gaFlags);
+
+        [DllImport("user32.dll")]
         public static extern bool GetGUIThreadInfo(uint idThread, ref GUITHREADINFO lpgui);
 
         [DllImport("oleacc.dll")]

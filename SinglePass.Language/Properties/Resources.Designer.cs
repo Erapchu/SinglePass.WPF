@@ -2837,7 +2837,7 @@ namespace SinglePass.Language.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Reopen the locked vault with your Windows PIN, fingerprint or face. The master password is still required after SinglePass or Windows restarts and every 14 days..
+        ///   Looks up a localized string similar to Open the vault with your Windows PIN, fingerprint or face instead of the master password, also when SinglePass starts. The master password is still required every 14 days, so keep remembering it..
         /// </summary>
         public static string WindowsHelloDescription {
             get {

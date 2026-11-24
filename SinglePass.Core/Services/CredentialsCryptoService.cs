@@ -17,7 +17,9 @@ namespace SinglePass.Core.Services
         Loaded,
         Failed,
         /// <summary>The vault was written by a newer SinglePass.</summary>
-        NewerVersion
+        NewerVersion,
+        /// <summary>The vault key does not open the vault file: it uses another key (unlock with a vault key only).</summary>
+        WrongKey
     }
 
     internal enum PasswordChangeResult
@@ -398,7 +400,7 @@ namespace SinglePass.Core.Services
                 using (var stream = File.OpenRead(_path))
                 {
                     if (!TryReadVault(_cryptoService, stream, vaultKey, out vault, out key))
-                        return CredentialLoadResult.Failed;
+                        return CredentialLoadResult.WrongKey;
                 }
 
                 try

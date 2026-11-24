@@ -1013,7 +1013,7 @@
     <value>Разблокировка через Windows Hello</value>
   </data>
   <data name="WindowsHelloDescription" xml:space="preserve">
-    <value>Открывать заблокированное хранилище PIN-кодом Windows, отпечатком пальца или лицом. Мастер-пароль всё равно нужен после перезапуска SinglePass или Windows и раз в 14 дней.</value>
+    <value>Открывать хранилище PIN-кодом Windows, отпечатком пальца или лицом вместо мастер-пароля, в том числе при запуске SinglePass. Мастер-пароль всё равно потребуется раз в 14 дней, чтобы вы его не забыли.</value>
   </data>
   <data name="WindowsHelloUnavailable" xml:space="preserve">
     <value>Чтобы пользоваться этим, настройте Windows Hello (хотя бы PIN-код) в Параметрах Windows → Учётные записи → Варианты входа.</value>

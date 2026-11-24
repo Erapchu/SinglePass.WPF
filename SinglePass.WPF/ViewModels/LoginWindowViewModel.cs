@@ -55,7 +55,8 @@ namespace SinglePass.WPF.ViewModels
         internal IntPtr OwnerHandle { get; set; }
 
         /// <param name="windowsHelloOffered">
-        /// Offer Windows Hello: it is turned on and holds the vault key from a master password typed earlier in this run (<see cref="WindowsHelloUnlock.IsOffered"/>).
+        /// Offer Windows Hello: it is turned on and windowsHello.dat holds the vault key from a master password typed less than
+        /// 14 days ago (<see cref="WindowsHelloUnlock.IsOffered"/>).
         /// </param>
         internal LoginWindowViewModel(Func<Task<IServiceProvider>> prepareServices, bool credentialsFileExists, bool windowsHelloOffered = false)
         {
@@ -168,10 +169,16 @@ namespace SinglePass.WPF.ViewModels
                     case CredentialLoadResult.NewerVersion:
                         HelperText = LocalizationManager.Instance["VaultNewerVersion"];
                         break;
+                    case CredentialLoadResult.WrongKey:
+                        // The stored vault key no longer opens the vault: offer only the master password from now on.
+                        services.GetRequiredService<WindowsHelloUnlock>().ForgetStoredKey();
+                        WindowsHelloOffered = false;
+                        HelperText = LocalizationManager.Instance["WindowsHelloPasswordOutdated"];
+                        break;
                     default:
                         HelperText = typed
                             ? SinglePass.Language.Properties.Resources.PasswordIsIncorrect
-                            : LocalizationManager.Instance["WindowsHelloPasswordOutdated"];
+                            : LocalizationManager.Instance["WindowsHelloFailed"];
                         break;
                 }
             }

@@ -42,16 +42,13 @@ The popup does not know which site is open in a browser and offers every login, 
 
 ### Windows Hello unlock
 
-Turn on **Settings → Security → Unlock with Windows Hello**. Windows asks for your PIN, fingerprint or face once to create a key for SinglePass. From then on, when the vault locks, the unlock window shows the Windows Hello prompt right away; cancel it to type the master password instead. This requires Windows Hello to be set up (at least a PIN) under **Windows Settings → Accounts → Sign-in options**.
+Turn on **Settings → Security → Unlock with Windows Hello**. Windows asks for your PIN, fingerprint or face once to create a key for SinglePass. From then on, the unlock window shows the Windows Hello prompt right away, when SinglePass starts and when the vault locks; cancel it to type the master password instead. This requires Windows Hello to be set up (at least a PIN) under **Windows Settings → Accounts → Sign-in options**.
 
-The master password is still required:
+The master password is still required 14 days after it was last typed, so that you keep remembering it.
 
-- the first time after SinglePass or Windows starts;
-- 14 days after it was last typed, so that you keep remembering it.
+The master password is not stored. After you type it, SinglePass writes the vault key (see below) to `windowsHello.dat`, encrypted with an RSA key that Windows Hello keeps for the current user on this computer, in the TPM where there is one. Decrypting it requires the Windows Hello gesture, so the file is useless on another computer or Windows account. The time the password was typed is encrypted together with the key, so editing the file does not postpone the 14 days. When the vault key changes because the master password changed on this device or sync adopted the key of another device, SinglePass updates the file without a prompt.
 
-SinglePass writes nothing for this to disk and does not keep the master password. After you type it, SinglePass keeps the vault key (see below) in memory only encrypted with an RSA key that Windows Hello keeps for the current user on this computer, in the TPM where there is one. Decrypting it requires the Windows Hello gesture. When the vault key changes because the master password changed on this device or sync adopted the key of another device, SinglePass updates that copy without a prompt.
-
-If the Windows Hello key is lost, for example after the Windows PIN is reset, SinglePass turns Windows Hello unlock off and asks for the master password; turn it on again in Settings. Turning it off deletes the key.
+If the Windows Hello key is lost, for example after the Windows PIN is reset, SinglePass turns Windows Hello unlock off and asks for the master password; turn it on again in Settings. Turning it off deletes the file and the key.
 
 Windows Hello unlock does not protect against malware running in your Windows session: such a program can wait until the vault is unlocked and read it from memory.
 
@@ -73,6 +70,7 @@ Application data is stored under `%LOCALAPPDATA%\SinglePass`:
 - `commonSettings.json` — application settings.
 - `googleDrive.token` — Google Drive authorization data protected by Windows for the current user. SinglePass migrates the former `googleDrive.json` and removes it after saving the protected token.
 - `yandexDisk.token` — Yandex Disk authorization data protected by Windows for the current user.
+- `windowsHello.dat` — the vault key protected by Windows Hello, present while Windows Hello unlock is on.
 - `Backups` — automatic copies of the vault, restorable from **Settings → Security → Backups**.
 - `ssh` — public keys of SSH key entries, written for the commands copied from hosts. Private keys stay in the vault.
 - `Cache` — cached data; logs are stored in `Logs`.

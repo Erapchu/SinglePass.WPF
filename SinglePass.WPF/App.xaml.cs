@@ -181,7 +181,7 @@ namespace SinglePass.WPF
 
             var preparation = new Lazy<Task<IServiceProvider>>(() => PrepareLoginAsync(settings, settingsReadError));
             var loginViewModel = new LoginWindowViewModel(
-                () => preparation.Value, File.Exists(Constants.PasswordsFilePath));
+                () => preparation.Value, File.Exists(Constants.PasswordsFilePath), WindowsHelloUnlock.IsOfferedFor(settings));
             var loginWindow = new LoginWindow(loginViewModel);
             _loginWindow = loginWindow;
 

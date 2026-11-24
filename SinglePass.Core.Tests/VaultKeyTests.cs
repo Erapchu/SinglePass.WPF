@@ -431,7 +431,7 @@ namespace SinglePass.Core.Tests
             Assert.Equal("mail", Assert.Single(restarted.Service.Credentials).NameField.Value);
             Assert.Empty(restarted.Observer.Keys); // Windows Hello does not count as typing the password
 
-            Assert.Equal(CredentialLoadResult.Failed, await Restart(device).Service.LoadCredentialsAsync(RandomNumberGenerator.GetBytes(32)));
+            Assert.Equal(CredentialLoadResult.WrongKey, await Restart(device).Service.LoadCredentialsAsync(RandomNumberGenerator.GetBytes(32)));
         }
 
         [Fact]
@@ -449,7 +449,7 @@ namespace SinglePass.Core.Tests
             Assert.Equal(device.Service.CopyVaultKey(), device.Observer.Keys.Last());
             Assert.Equal("mail", Assert.Single(ReadWithPassword(device.VaultPath, "new password 2").Credentials).NameField.Value);
             Assert.ThrowsAny<CryptographicException>(() => ReadWithPassword(device.VaultPath, Password));
-            Assert.Equal(CredentialLoadResult.Failed, await Restart(device).Service.LoadCredentialsAsync(oldKey));
+            Assert.Equal(CredentialLoadResult.WrongKey, await Restart(device).Service.LoadCredentialsAsync(oldKey));
 
             // The backup made before the change keeps the old key and password.
             var backup = device.Service.Backups.Single(b => b.Reason == VaultBackupReason.Password);

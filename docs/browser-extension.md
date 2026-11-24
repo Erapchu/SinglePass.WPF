@@ -213,7 +213,24 @@ Debug builds of SinglePass are a separate instance, so testing the extension nev
 
 `Constants.IsDevBuild` (the `DEBUG` symbol of `SinglePass.Core`) switches all of them. The Debug build registers `com.singlepass.host.dev` for the `SinglePass.NativeHost.exe` next to it in `bin\Debug`, with the ID of the unpacked extension in `allowed_origins`. The development extension (`npm run build:dev`) connects to `com.singlepass.host.dev`; its manifest has a fixed `key`, so Chrome and Edge give the unpacked extension the same ID on every machine.
 
-To try it: build the solution in Debug, start SinglePass (it creates a new empty vault in `SinglePass.Dev`), turn on **Settings → Security → Browser extension**, run `npm install` and `npm run build:dev` in `extension/`, open `chrome://extensions` (or `edge://extensions`), turn on developer mode and load `extension/dist/`.
+To try it: build the solution in Debug, start SinglePass (it creates a new empty vault in `SinglePass.Dev`), turn on **Settings → Security → Browser extension**, then in `extension/` run `npm install` once and `npm start`.
+
+Scripts in `extension/` (Node 22):
+
+| Script | What it does |
+|---|---|
+| `npm start` | Builds the development extension, starts Chrome (or Edge when Chrome is not installed) with it loaded and rebuilds and reloads it on every change under `src/`. Pass a browser or pages: `npm start -- edge https://github.com/login`. |
+| `npm run start:edge`, `npm run start:chrome` | The same in that browser. |
+| `npm run start:release` | The same against the installed (Release) SinglePass: `com.singlepass.host` and its vault. |
+| `npm run watch` | Development build that rebuilds on changes, for an extension loaded by hand. |
+| `npm run build:dev` | Development build into `dist/` (`com.singlepass.host.dev`, fixed key). |
+| `npm run build` | Release build into `dist/` (`com.singlepass.host`, no key: the store assigns the ID). |
+| `npm run typecheck` | TypeScript check. |
+| `npm run test:pipe` | The Node pipe client of `BrowserExtensionInteropTests`. |
+
+`npm start` uses its own browser profile in `extension/.profile/<browser>-<dev|release>`, so the pairing stays between runs and the everyday profile is untouched; close that window before starting it again. Branded Chrome ignores `--load-extension` since version 137, so `run.mjs` loads the folder through the DevTools protocol (`Extensions.loadUnpacked` over `--remote-debugging-pipe` with `--enable-unsafe-extension-debugging`); Edge also gets `--edge-skip-compat-layer-relaunch`, without which it restarts itself in a process that has no DevTools pipe. A reload after a rebuild restarts the service worker, so reopen the popup to see the change.
+
+To load it by hand instead: `npm run build:dev`, open `chrome://extensions` (or `edge://extensions`), turn on developer mode and load `extension/dist/`.
 
 ## Implementation order
 

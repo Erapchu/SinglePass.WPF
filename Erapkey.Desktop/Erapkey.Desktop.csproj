@@ -77,6 +77,16 @@
     <Copy SourceFiles="@(NativeHostFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
   </Target>
 
+  <!-- WPF's mixed-mode assemblies must load from disk on .NET 11 (dotnet/wpf#11842). -->
+  <Target Name="KeepWpfMixedModeAssembliesOutsideBundle" AfterTargets="ComputeResolvedFilesToPublishList"
+          Condition="'$(PublishSingleFile)' == 'true'">
+    <ItemGroup>
+      <ResolvedFileToPublish Update="@(ResolvedFileToPublish)"
+                             Condition="'%(Filename)%(Extension)' == 'DirectWriteForwarder.dll' or '%(Filename)%(Extension)' == 'System.Printing.dll'"
+                             ExcludeFromSingleFile="true" />
+    </ItemGroup>
+  </Target>
+
   <!-- A release gets the Native AOT build: one exe that needs no runtime. -->
   <Target Name="PublishNativeHost" AfterTargets="Publish">
     <MSBuild Projects="$(NativeHostProject)" Targets="Publish"

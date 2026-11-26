@@ -92,7 +92,8 @@ namespace Erapkey.Core.Tests
             var store = new FakeKeyStore(SshTestKeys.Ed25519Ctr, SshTestKeys.RsaPem);
             var agent = new SshAgent(store, null);
 
-            var response = new Reader(await agent.HandleAsync([SshAgent.RequestIdentities], PipeClient.Unknown, default));
+            var response = new Reader(await agent.HandleAsync([SshAgent.RequestIdentities],
+                PipeClient.Unknown, TestContext.Current.CancellationToken));
 
             Assert.Equal(SshAgent.IdentitiesAnswer, response.Byte());
             Assert.Equal(2u, response.UInt32());
@@ -110,7 +111,8 @@ namespace Erapkey.Core.Tests
             var blob = PublicBlob(SshTestKeys.EcdsaP256Ctr.PublicKey);
             var data = Encoding.UTF8.GetBytes("data");
 
-            var response = new Reader(await agent.HandleAsync(SignRequest(blob, data, 0), PipeClient.Unknown, default));
+            var response = new Reader(await agent.HandleAsync(SignRequest(blob, data, 0),
+                PipeClient.Unknown, TestContext.Current.CancellationToken));
 
             Assert.Equal(SshAgent.SignResponse, response.Byte());
             Assert.True(Verify(blob, data, response.Bytes(), 0));
@@ -124,7 +126,8 @@ namespace Erapkey.Core.Tests
             var agent = new SshAgent(store, null);
             var blob = PublicBlob(SshTestKeys.EcdsaP256Ctr.PublicKey);
 
-            var response = await agent.HandleAsync(SignRequest(blob, [1, 2, 3], 0), PipeClient.Unknown, default);
+            var response = await agent.HandleAsync(SignRequest(blob, [1, 2, 3], 0),
+                PipeClient.Unknown, TestContext.Current.CancellationToken);
 
             Assert.Equal([SshAgent.Failure], response);
         }
@@ -136,7 +139,7 @@ namespace Erapkey.Core.Tests
             var agent = new SshAgent(store, null);
 
             var response = await agent.HandleAsync(SignRequest(PublicBlob(SshTestKeys.RsaPem.PublicKey), [1], 0),
-                PipeClient.Unknown, default);
+                PipeClient.Unknown, TestContext.Current.CancellationToken);
 
             Assert.Equal([SshAgent.Failure], response);
             Assert.Equal(0, store.AuthorizeCalls);
@@ -150,7 +153,7 @@ namespace Erapkey.Core.Tests
         {
             var agent = new SshAgent(new FakeKeyStore(SshTestKeys.RsaPem), null);
 
-            var response = await agent.HandleAsync(request, PipeClient.Unknown, default);
+            var response = await agent.HandleAsync(request, PipeClient.Unknown, TestContext.Current.CancellationToken);
 
             Assert.Equal([SshAgent.Failure], response);
         }
@@ -163,7 +166,7 @@ namespace Erapkey.Core.Tests
             server.Start();
 
             using var client = new NamedPipeClientStream(".", server.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
-            await client.ConnectAsync(5000);
+            await client.ConnectAsync(5000, TestContext.Current.CancellationToken);
             var blob = PublicBlob(SshTestKeys.Ed25519Ctr.PublicKey);
             var data = Encoding.UTF8.GetBytes("over the pipe");
 

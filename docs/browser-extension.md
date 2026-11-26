@@ -153,7 +153,6 @@ Inside the session, requests and responses are JSON objects with an `id` chosen 
 | `unlock` | `{ locked }` | Shows the unlock window (as an SSH agent request does) and answers when the vault is unlocked, or with `locked: true` after a minute. |
 | `getLogins { url }` | `logins: [{ entryId, name, login, match }]` | Logins whose site matches `url` (see below), best match first. `match` is `exact` or `domain`. **No passwords.** |
 | `getCredentials { entryId, url }` | `{ login, password, totp? }` | Only if the entry still matches `url`; otherwise `not_found`. `totp` is the current code when the entry has TOTP. |
-| `getTotp { entryId, url }` | `{ code, validFor }` | Same check as above. |
 | `openEntry { entryId }` | `{}` | Brings Erapkey to the front with the entry selected. |
 
 Events pushed by Erapkey without a request: `{ "event": "locked" }`, `{ "event": "unlocked" }`, `{ "event": "vaultChanged" }` (defined, not sent yet: the popup asks again each time it opens). On `locked` the extension drops everything it showed. The native host sends `{ "event": "app_not_running" }` in plain JSON (see [Transport](#native-host--erapkey)).
@@ -183,7 +182,7 @@ Rules:
 Manifest V3, TypeScript bundled with esbuild (`extension/`, `npm run build` → `extension/dist/`). The first version targets Chrome and Edge, which share one manifest. Firefox comes later with its own manifest: it runs MV3 background code as `background.scripts` (an event page), not as a service worker, and needs `browser_specific_settings.gecko.id`.
 
 - **Background service worker**: the native port, pairing, session crypto, request queue. An open native messaging port keeps the service worker alive in current browsers; when the worker or the port goes away, it connects again (new `hello`) on the next user action.
-- **Toolbar popup**: status (not running / locked / unlocked), unlock button, logins for the current tab, pairing code during pairing. Choosing a login fills it into the tab (`chrome.scripting.executeScript` with `activeTab`, `src/fill.ts`); the buttons beside it copy the login or the password. The fill checks that the tab is still on the origin of the address the login was matched with.
+- **Toolbar popup**: status (not running / locked / unlocked), unlock button, logins for the current tab, pairing code during pairing. Choosing a login fills it into the tab (`chrome.scripting.executeScript` with `activeTab`, `src/fill.ts`). There is no copy to the clipboard: it would put the password into the Win+V history and, with clipboard sync on, into the Microsoft cloud. The fill checks that the tab is still on the origin of the address the login was matched with.
 - **Content script** (not yet): finds login forms (password fields, username fields before them, also in same-origin iframes), shows an inline Erapkey icon in the field, fills on the user's choice.
 
 Filling rules:
@@ -191,6 +190,7 @@ Filling rules:
 - Fill only after a user action: choosing a login in the inline menu or the popup, or the keyboard shortcut. Never on page load, so hidden forms cannot collect passwords.
 - Fill only visible, enabled fields of the top-level page or same-origin frames. A cross-origin frame is matched by its own URL, not by the page's.
 - Fire `input` and `change` events so that page scripts notice the values.
+- A field for a one-time code never gets the login. It is recognised by `autocomplete="one-time-code"`; by words in its name, id, placeholder or label (`otp`, `2fa`, `mfa`, `passcode`, `one time`, `verification code` and the like, but not postal, promo or card codes); by a short digits-only field (`inputmode="numeric"`, 4–8 characters); or as four or more boxes of one character. It gets the current TOTP code of the entry (`totp` of `getCredentials`), one digit per box when the code is split. When the page asks only for a code and the entry has no TOTP, the popup says so (`no_totp`).
 - Passwords stay in memory only for the fill; nothing from the vault goes to `chrome.storage`.
 
 ## Settings in Erapkey

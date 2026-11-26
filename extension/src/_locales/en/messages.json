@@ -13,9 +13,6 @@
   "noSite": { "message": "There is no website in this tab." },
   "noLogins": { "message": "No logins for $HOST$.", "placeholders": { "host": { "content": "$1" } } },
   "fill": { "message": "Fill in" },
-  "copyLogin": { "message": "Copy login" },
-  "copyPassword": { "message": "Copy password" },
-  "copied": { "message": "Copied." },
   "retry": { "message": "Try again" },
   "errorNotRunning": { "message": "Erapkey is not running, or the browser extension is turned off in Settings → Security." },
   "errorDenied": { "message": "Erapkey did not connect this browser." },
@@ -23,6 +20,7 @@
   "errorVersion": { "message": "This extension and Erapkey do not match. Update both." },
   "errorNotFound": { "message": "The login is no longer there for this page." },
   "errorNoFields": { "message": "No login fields on this page." },
+  "errorNoTotp": { "message": "The page asks for a one-time code, and this login has no TOTP in Erapkey." },
   "errorPageChanged": { "message": "The page changed. Open the extension again." },
   "errorGeneric": { "message": "Something went wrong ($ERROR$).", "placeholders": { "error": { "content": "$1" } } }
 }

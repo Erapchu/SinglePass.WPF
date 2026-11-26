@@ -6,7 +6,6 @@ export type PopupRequest =
   | { cmd: 'pair' }
   | { cmd: 'unlock' }
   | { cmd: 'fill'; tabId: number; entryId: string }
-  | { cmd: 'copy'; tabId: number; entryId: string; field: 'login' | 'password' | 'totp' }
   | { cmd: 'open'; entryId: string };
 
 /** What the popup shows. */
@@ -16,6 +15,4 @@ export type State =
   | { state: 'pairing'; code?: string }
   | { state: 'error'; error: ErrorCode };
 
-export type FillResult = { ok: true; filled: boolean } | { ok: false; error: ErrorCode | 'no_fields' | 'page_changed' };
-
-export type CopyResult = { ok: true; text: string } | { ok: false; error: ErrorCode };
+export type FillResult = { ok: true; filled: boolean } | { ok: false; error: ErrorCode | 'no_fields' | 'no_totp' | 'page_changed' };

@@ -335,16 +335,6 @@ namespace Erapkey.Core.Services.Browser
                         answer["totp"] = code;
                     return Success(answer);
                 }
-                case "getTotp":
-                {
-                    var (credential, error) = await FindMatchingEntryAsync(request, cancellationToken).ConfigureAwait(false);
-                    if (credential == null)
-                        return Failure(error);
-
-                    if (!TotpService.TryGetCode(credential.Login.Totp, DateTime.UtcNow, out var code, out var seconds))
-                        return Failure("not_found");
-                    return Success(new JsonObject { ["code"] = code, ["validFor"] = seconds });
-                }
                 case "openEntry":
                 {
                     if (!Guid.TryParse(Str(request["entryId"]), out var entryId))

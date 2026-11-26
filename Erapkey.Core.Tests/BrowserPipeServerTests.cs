@@ -120,24 +120,6 @@ namespace Erapkey.Core.Tests
         }
 
         [Fact]
-        public async Task TotpCode()
-        {
-            Assert.True(TotpService.TryParse("JBSWY3DPEHPK3PXP", out var totp));
-            var entry = Login("Example", "example.com", totp: totp);
-            _backend.Credentials = [entry];
-            await using var extension = await TestExtension.ConnectAsync(_server.PipeName);
-            await extension.HelloAsync(await extension.PairAsync("Chrome", _backend));
-
-            var answer = await extension.RequestAsync(new JsonObject
-            {
-                ["type"] = "getTotp", ["entryId"] = entry.Id.ToString(), ["url"] = "https://example.com/",
-            });
-            Assert.True((bool)answer["ok"]);
-            Assert.Equal(6, ((string)answer["code"])!.Length);
-            Assert.InRange((int)answer["validFor"], 1, 30);
-        }
-
-        [Fact]
         public async Task DeniedPairingIsNotStored()
         {
             _backend.AllowPairing = false;

@@ -183,10 +183,6 @@ export class Client {
     return this.request({ type: 'getCredentials', entryId, url });
   }
 
-  async getTotp(entryId: string, url: string): Promise<{ code: string; validFor: number }> {
-    return this.request({ type: 'getTotp', entryId, url });
-  }
-
   async openEntry(entryId: string): Promise<void> {
     await this.request({ type: 'openEntry', entryId });
   }

@@ -1,8 +1,9 @@
 // The background service worker: the native messaging port to Erapkey, the pairing and the session.
-// The popup asks it for everything; passwords pass through only for a fill or a copy and are not stored.
+// The popup asks it for everything; passwords pass through only for a fill and are not stored. There is no copy: the clipboard
+// would put them in the Win+V history and the cloud clipboard.
 import { Client, HostError, type ErrorCode, type Pairing } from './client';
 import { fillPage } from './fill';
-import type { CopyResult, FillResult, PopupRequest, State } from './messages';
+import type { FillResult, PopupRequest, State } from './messages';
 import { forgetPairing, loadPairing, savePairing } from './pairingStore';
 
 declare const __HOST_NAME__: string;
@@ -100,24 +101,11 @@ async function fill(tabId: number, entryId: string): Promise<FillResult> {
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
       func: fillPage,
-      args: [page.origin, credentials.login, credentials.password],
+      args: [page.origin, credentials.login, credentials.password, credentials.totp ?? null],
     });
     const outcome = result?.result;
     if (outcome === 'filled') return { ok: true, filled: true };
-    return { ok: false, error: outcome === 'page_changed' ? 'page_changed' : 'no_fields' };
-  } catch (error) {
-    return { ok: false, error: errorCode(error) };
-  }
-}
-
-async function copy(tabId: number, entryId: string, field: 'login' | 'password' | 'totp'): Promise<CopyResult> {
-  try {
-    const page = await pageOf(tabId);
-    if (!page) return { ok: false, error: 'not_found' };
-    const connection = await session();
-    if (field === 'totp') return { ok: true, text: (await connection.getTotp(entryId, page.href)).code };
-    const credentials = await connection.getCredentials(entryId, page.href);
-    return { ok: true, text: field === 'login' ? credentials.login : credentials.password };
+    return { ok: false, error: outcome === 'page_changed' || outcome === 'no_totp' ? outcome : 'no_fields' };
   } catch (error) {
     return { ok: false, error: errorCode(error) };
   }
@@ -163,8 +151,6 @@ chrome.runtime.onMessage.addListener((request: PopupRequest, sender, sendRespons
         }
       case 'fill':
         return fill(request.tabId, request.entryId);
-      case 'copy':
-        return copy(request.tabId, request.entryId, request.field);
       case 'open':
         try {
           await (await session()).openEntry(request.entryId);

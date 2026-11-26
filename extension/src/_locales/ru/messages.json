@@ -13,9 +13,6 @@
   "noSite": { "message": "В этой вкладке нет сайта." },
   "noLogins": { "message": "Нет логинов для $HOST$.", "placeholders": { "host": { "content": "$1" } } },
   "fill": { "message": "Заполнить" },
-  "copyLogin": { "message": "Копировать логин" },
-  "copyPassword": { "message": "Копировать пароль" },
-  "copied": { "message": "Скопировано." },
   "retry": { "message": "Повторить" },
   "errorNotRunning": { "message": "Erapkey не запущен или расширение для браузера выключено в «Настройки → Безопасность»." },
   "errorDenied": { "message": "Erapkey не подключил этот браузер." },
@@ -23,6 +20,7 @@
   "errorVersion": { "message": "Версии расширения и Erapkey не совпадают. Обновите оба." },
   "errorNotFound": { "message": "Этого логина для страницы больше нет." },
   "errorNoFields": { "message": "На странице нет полей входа." },
+  "errorNoTotp": { "message": "Страница просит одноразовый код, а у этого логина в Erapkey нет TOTP." },
   "errorPageChanged": { "message": "Страница изменилась. Откройте расширение ещё раз." },
   "errorGeneric": { "message": "Что-то пошло не так ($ERROR$).", "placeholders": { "error": { "content": "$1" } } }
 }

@@ -1,0 +1,99 @@
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Erapkey.Core.Localization;
+using Erapkey.Core.Models;
+using System;
+using System.ComponentModel;
+using System.Windows.Controls;
+
+namespace Erapkey.ViewModels
+{
+    public class NavigationItemViewModel : ObservableRecipient
+    {
+        private readonly Lazy<Control> _lazyContent;
+        private readonly string _nameKey;
+
+        /// <summary>
+        /// Name of settings item.
+        /// </summary>
+        public string Name => Group?.Name ?? LocalizationManager.Instance[_nameKey];
+
+        /// <summary>
+        /// Navigation icon.
+        /// </summary>
+        public string Glyph => Group?.Icon ?? _glyph;
+
+        private readonly string _glyph;
+        public PasswordGroup Group { get; private set; }
+
+        /// <summary>Entry type this item shows (a category), or null. An item is a category or a group, not both.</summary>
+        public CredentialType? Category { get; }
+
+        private bool _isSelected;
+        public bool IsSelected
+        {
+            get => _isSelected;
+            internal set => SetProperty(ref _isSelected, value);
+        }
+
+        private bool _hasBadge;
+        /// <summary>
+        /// Shows an attention dot next to the item, e.g. when an update is ready.
+        /// </summary>
+        public bool HasBadge
+        {
+            get => _hasBadge;
+            internal set => SetProperty(ref _hasBadge, value);
+        }
+
+        /// <summary>
+        /// Visible content.
+        /// </summary>
+        public Control Content
+        {
+            get
+            {
+                try
+                {
+                    return _lazyContent.Value;
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+        }
+
+        public NavigationItemViewModel(string nameKey, string glyph, Func<Control> createContent)
+        {
+            _nameKey = nameKey;
+            _glyph = glyph;
+            _lazyContent = new Lazy<Control>(createContent);
+            PropertyChangedEventManager.AddHandler(LocalizationManager.Instance, OnLanguageChanged, "Item[]");
+        }
+
+        /// <summary>A category: the entries of one type, shown in the same list as all entries.</summary>
+        public NavigationItemViewModel(string nameKey, string glyph, CredentialType category, NavigationItemViewModel passwords)
+        {
+            _nameKey = nameKey;
+            _glyph = glyph;
+            Category = category;
+            _lazyContent = passwords._lazyContent;
+            PropertyChangedEventManager.AddHandler(LocalizationManager.Instance, OnLanguageChanged, "Item[]");
+        }
+
+        public NavigationItemViewModel(PasswordGroup group, NavigationItemViewModel passwords)
+        {
+            Group = group;
+            _lazyContent = passwords._lazyContent;
+        }
+
+        internal void UpdateGroup(PasswordGroup group)
+        {
+            Group = group;
+            OnPropertyChanged(nameof(Name));
+            OnPropertyChanged(nameof(Glyph));
+        }
+
+        private void OnLanguageChanged(object sender, PropertyChangedEventArgs e) => OnPropertyChanged(nameof(Name));
+    }
+}

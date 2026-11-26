@@ -4,10 +4,10 @@ How **Sync** keeps the local vault and the cloud copy in step. File format and m
 
 Code:
 
-- `SinglePass.Core/Services/SyncService.cs` — the sync cycle (`Synchronize`).
-- `SinglePass.Core/Services/CredentialsCryptoService.cs` — `MergeFromCloud` (merge + vault key and master password choice) and `MergeVaults` (pure merge).
-- `SinglePass.Core/Clouds/Services/` — providers: `Download`, `GetRevision`, `Upload`.
-- `SinglePass.WPF/ViewModels/CloudSyncViewModel.cs` — the button, password prompt and result dialog.
+- `Erapkey.Core/Services/SyncService.cs` — the sync cycle (`Synchronize`).
+- `Erapkey.Core/Services/CredentialsCryptoService.cs` — `MergeFromCloud` (merge + vault key and master password choice) and `MergeVaults` (pure merge).
+- `Erapkey.Core/Clouds/Services/` — providers: `Download`, `GetRevision`, `Upload`.
+- `Erapkey/ViewModels/CloudSyncViewModel.cs` — the button, password prompt and result dialog.
 
 ## In short
 
@@ -17,8 +17,8 @@ Sync = **download → merge → upload if needed**, with a revision check before
 
 Each attempt:
 
-1. **Download** `singlePass.dat`. Remember its MD5 as the *expected revision*. No file in the cloud → go to step 4.
-2. **Decrypt.** If the cloud file uses this device's vault key (same key id), it is decrypted with that key: no password, no Argon2. This is the usual case. Otherwise it is tried with a password entered in a previous attempt, then with the password kept for the first sync after the vault was created or converted on this unlock (see below), then the user is asked until a password works or the user cancels (cancel = sync fails, nothing uploaded). A cloud file written by a newer SinglePass fails sync at once with "update SinglePass".
+1. **Download** `erapkey.dat`. Remember its MD5 as the *expected revision*. No file in the cloud → go to step 4.
+2. **Decrypt.** If the cloud file uses this device's vault key (same key id), it is decrypted with that key: no password, no Argon2. This is the usual case. Otherwise it is tried with a password entered in a previous attempt, then with the password kept for the first sync after the vault was created or converted on this unlock (see below), then the user is asked until a password works or the user cancels (cancel = sync fails, nothing uploaded). A cloud file written by a newer Erapkey fails sync at once with "update Erapkey".
 3. **Merge** into the local vault and write the local file. If the merge changes anything, a `sync` backup of the local vault is made first (see [vault.md](vault.md#backups)). Deletions (tombstones) are applied here, so deleted credentials do not come back. If the cloud file uses another vault key, see [Vault key and master password](#vault-key-and-master-password).
 4. **Decide whether to upload.** Upload is needed when:
    - the cloud has no file;
@@ -47,7 +47,7 @@ download ─► decrypt ─► merge (local file written)
 All devices of a vault should use one vault key (see [vault.md](vault.md#keys)); then sync needs neither the password nor Argon2. The key travels inside the cloud file, in its password slot. A cloud file with another key appears when:
 
 - the master password was changed on another device (a change creates a new key);
-- devices converted their SinglePass 1.x files independently, each getting its own random key;
+- devices converted their Erapkey 1.x files independently, each getting its own random key;
 - a new vault was created on this device while the cloud already had one.
 
 The vault stores `MasterPasswordChangedAt` (set when the password is changed; unknown = oldest). Opening such a cloud file needs its password, and then:
@@ -68,7 +68,7 @@ The password is asked only while a cloud uses another key: at most once per devi
 | | Google Drive | Yandex Disk |
 |---|---|---|
 | Scope | `drive.file` (only files this app created) | `cloud_api:disk.app_folder` |
-| File | Oldest non-trashed file named `singlePass.dat` | `app:/singlePass.dat` |
+| File | Oldest non-trashed file named `erapkey.dat` | `app:/erapkey.dat` |
 | Revision | `md5Checksum` | `md5` of the resource |
 | Create | One multipart request (metadata + content) | Upload link with `overwrite=true` |
 
@@ -94,8 +94,8 @@ New, changed and deleted credentials; "groups updated"; "master password changed
 - **Revision check is not atomic.** Neither Google Drive v3 nor Yandex Disk has a conditional write, so steps 5–6 are check-then-write. An upload from another device in the short window between them is overwritten. That device still has the data locally and puts it back on its next sync, so it is lost only if that local vault is lost first.
 - **Timestamps come from device clocks.** Credential conflicts, edit-vs-delete and master password changes use them; clock skew can pick the wrong winner.
 - **No forced overwrite.** If the cloud vault cannot be decrypted (forgotten password, damaged file), sync cannot proceed; delete the cloud file manually.
-- **SinglePass 1.x cannot read format 2.** Once one device uploads, devices still on 1.x keep asking for the password of the cloud copy; they do not change it. Update every device.
+- **Erapkey 1.x cannot read format 2.** Once one device uploads, devices still on 1.x keep asking for the password of the cloud copy; they do not change it. Update every device.
 
 ## Tests
 
-`SinglePass.Core.Tests`: `VaultMergeTests` (merge, tombstones, format), `SyncMergeTests` (upload decision, password timestamp, UTC times) and `VaultKeyServiceTests` (`MergeFromCloud` with the same key, independently converted devices, password changed here or elsewhere, 1.x cloud files; on temporary files). Provider calls and the `SyncService` cycle use the network and are not covered.
+`Erapkey.Core.Tests`: `VaultMergeTests` (merge, tombstones, format), `SyncMergeTests` (upload decision, password timestamp, UTC times) and `VaultKeyServiceTests` (`MergeFromCloud` with the same key, independently converted devices, password changed here or elsewhere, 1.x cloud files; on temporary files). Provider calls and the `SyncService` cycle use the network and are not covered.

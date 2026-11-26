@@ -1,8 +1,8 @@
 // Builds the extension into dist/ (load it unpacked from there).
-//   node build.mjs          release: talks to com.singlepass.host, no key (the store assigns the ID)
-//   node build.mjs --unpacked  installed SinglePass: talks to com.singlepass.host and has a fixed key
-//   node build.mjs --dev    development: talks to com.singlepass.host.dev (Debug SinglePass) and has a fixed key,
-//                           so the unpacked extension always gets the ID that SinglePass allows
+//   node build.mjs          release: talks to com.erapkey.host, no key (the store assigns the ID)
+//   node build.mjs --unpacked  installed Erapkey: talks to com.erapkey.host and has a fixed key
+//   node build.mjs --dev    development: talks to com.erapkey.host.dev (Debug Erapkey) and has a fixed key,
+//                           so the unpacked extension always gets the ID that Erapkey allows
 //   node build.mjs --watch  with --dev: rebuild on every change under src/
 //   node build.mjs --test   the pipe test client for Node (dist-test/)
 // run.mjs builds through build() below and starts a browser with the extension.
@@ -19,14 +19,14 @@ export const distPath = root + 'dist';
 const DEV_KEY =
   'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwsuTK2CVXmODK4NAhO2nihaYMw6AWa6qRkN2GMuOcNvSWgjcpEi4EV3OLyNdB8GaP/v2eNCck3RsrcVr/9+m7gZjqkTlORH1vOY9flYDfQgzgCo7xgwOPN2Tx7dZtwB4CwcZ7oazM/3smXxWXxKixrjdU5nPoW0BRt8f9+3oOjVyonvsPbtEfSHdOGPii4o6gjzYzr0hzxoUCzcN++U/MRIXlFxbgMQlTWPmYHbIsat2/6LQ9EJZ1UeM9GkHrIPGDdevbZQpFEDgwul/I1wMm+MUI3c93RDo3hiopIFzZkuhMoNaAsRdJYakKZgw9LQdrjDf8DekyyxC3d1Hsm09NQIDAQAB';
 
-/** The ID that DEV_KEY gives; SinglePass allows only it until the stores assign theirs. */
+/** The ID that DEV_KEY gives; Erapkey allows only it until the stores assign theirs. */
 export const DEV_EXTENSION_ID = 'mhnlllocpadmflggkijecmklkooflbbe';
 
-export const HOST_NAMES = { dev: 'com.singlepass.host.dev', release: 'com.singlepass.host' };
+export const HOST_NAMES = { dev: 'com.erapkey.host.dev', release: 'com.erapkey.host' };
 
 /**
  * Builds dist/.
- * host: 'dev' for Debug SinglePass, 'release' for the installed one.
+ * host: 'dev' for Debug Erapkey, 'release' for the installed one.
  * key: put DEV_KEY into the manifest (every unpacked build; never a store build).
  * clean: delete dist/ first (not while a browser has it loaded).
  */

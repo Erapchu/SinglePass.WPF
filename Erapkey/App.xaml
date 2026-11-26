@@ -1,0 +1,64 @@
+﻿<Application
+    x:Class="Erapkey.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    Exit="Application_Exit"
+    ShutdownMode="OnExplicitShutdown"
+    Startup="Application_Startup">
+    <Application.Resources>
+        <DrawingImage x:Key="DefaultFavIcon">
+            <DrawingImage.Drawing>
+                <GeometryDrawing>
+                    <GeometryDrawing.Pen>
+                        <Pen Brush="#7C7C7C" Thickness="1.6" />
+                    </GeometryDrawing.Pen>
+                    <GeometryDrawing.Geometry>
+                        <GeometryGroup>
+                            <EllipseGeometry Center="16,16" RadiusX="9.5" RadiusY="9.5" />
+                            <EllipseGeometry Center="16,16" RadiusX="4.4" RadiusY="9.5" />
+                            <PathGeometry Figures="M 8,11 Q 16,14 24,11 M 6.5,16 L 25.5,16 M 8,21 Q 16,18 24,21" />
+                        </GeometryGroup>
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <FontFamily x:Key="PasswordFontFamily">Consolas</FontFamily>
+        <sys:Double x:Key="PasswordFontSize">14</sys:Double>
+        <Style x:Key="SymbolText" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="Card" TargetType="Border">
+            <Setter Property="Padding" Value="16" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
+        </Style>
+        <!-- Dialog cards shown by ModalHost -->
+        <Style x:Key="ModalHeader" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style x:Key="ModalFooter" TargetType="ContentControl">
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ContentControl">
+                        <Grid>
+                            <Border Background="{DynamicResource SolidBackgroundFillColorBaseBrush}" CornerRadius="0,0,7,7"
+                                    IsHitTestVisible="False" />
+                            <Border BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}" BorderThickness="0,1,0,0"
+                                    Padding="11,14">
+                                <ContentPresenter />
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Application.Resources>
+</Application>

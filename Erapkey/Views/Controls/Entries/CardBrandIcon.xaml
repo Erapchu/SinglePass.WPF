@@ -1,0 +1,89 @@
+<UserControl
+    x:Class="Erapkey.Views.Controls.Entries.CardBrandIcon"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    IsTabStop="False" Focusable="False">
+    <!-- Simple badges in the colours of the payment networks, drawn in a 38x24 box and scaled to the
+         control's size. They mark the network; they are not the networks' logos. One child is visible
+         at a time, see Brand. -->
+    <UserControl.Style>
+        <!-- The default size is a style value, not a local one, so that a size set in a DataTemplate wins. -->
+        <Style TargetType="UserControl">
+            <Setter Property="Width" Value="38" />
+            <Setter Property="Height" Value="24" />
+        </Style>
+    </UserControl.Style>
+    <Viewbox Stretch="Uniform">
+        <Grid Width="38" Height="24">
+            <Border x:Name="Visa" Background="White" BorderBrush="#D0D0D0" BorderThickness="1" CornerRadius="3">
+                <TextBlock Text="VISA" FontSize="11" FontWeight="Black" FontStyle="Italic" Foreground="#1A1F71"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <Canvas x:Name="Mastercard">
+                <Ellipse Canvas.Left="6" Canvas.Top="3" Width="18" Height="18" Fill="#EB001B" />
+                <Ellipse Canvas.Left="14" Canvas.Top="3" Width="18" Height="18" Fill="#F79E1B" />
+                <Path Fill="#FF5F00">
+                    <Path.Data>
+                        <CombinedGeometry GeometryCombineMode="Intersect">
+                            <CombinedGeometry.Geometry1>
+                                <EllipseGeometry Center="15,12" RadiusX="9" RadiusY="9" />
+                            </CombinedGeometry.Geometry1>
+                            <CombinedGeometry.Geometry2>
+                                <EllipseGeometry Center="23,12" RadiusX="9" RadiusY="9" />
+                            </CombinedGeometry.Geometry2>
+                        </CombinedGeometry>
+                    </Path.Data>
+                </Path>
+            </Canvas>
+            <Canvas x:Name="Maestro">
+                <Ellipse Canvas.Left="6" Canvas.Top="3" Width="18" Height="18" Fill="#EB001B" />
+                <Ellipse Canvas.Left="14" Canvas.Top="3" Width="18" Height="18" Fill="#00A2E5" />
+                <Path Fill="#7375CF">
+                    <Path.Data>
+                        <CombinedGeometry GeometryCombineMode="Intersect">
+                            <CombinedGeometry.Geometry1>
+                                <EllipseGeometry Center="15,12" RadiusX="9" RadiusY="9" />
+                            </CombinedGeometry.Geometry1>
+                            <CombinedGeometry.Geometry2>
+                                <EllipseGeometry Center="23,12" RadiusX="9" RadiusY="9" />
+                            </CombinedGeometry.Geometry2>
+                        </CombinedGeometry>
+                    </Path.Data>
+                </Path>
+            </Canvas>
+            <Border x:Name="Mir" Background="White" BorderBrush="#D0D0D0" BorderThickness="1" CornerRadius="3">
+                <TextBlock Text="МИР" FontSize="11" FontWeight="Black" Foreground="#0F754E"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <Border x:Name="AmericanExpress" Background="#2E77BC" CornerRadius="3">
+                <TextBlock Text="AMEX" FontSize="9.5" FontWeight="Black" Foreground="White"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <Canvas x:Name="UnionPay">
+                <Path Fill="#E21836" Data="M 6,2 L 16,2 L 13,22 L 3,22 Z" />
+                <Path Fill="#00447C" Data="M 15,2 L 25,2 L 22,22 L 12,22 Z" />
+                <Path Fill="#007B84" Data="M 24,2 L 35,2 L 32,22 L 21,22 Z" />
+            </Canvas>
+            <StackPanel x:Name="Jcb" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Border Width="10" Height="20" Margin="1,0" Background="#0E4C96" CornerRadius="3">
+                    <TextBlock Text="J" FontSize="9" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <Border Width="10" Height="20" Margin="1,0" Background="#E0261A" CornerRadius="3">
+                    <TextBlock Text="C" FontSize="9" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <Border Width="10" Height="20" Margin="1,0" Background="#007940" CornerRadius="3">
+                    <TextBlock Text="B" FontSize="9" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+            </StackPanel>
+            <Border x:Name="Discover" Background="White" BorderBrush="#D0D0D0" BorderThickness="1" CornerRadius="3">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Text="DISC" FontSize="7" FontWeight="Bold" Foreground="#231F20" VerticalAlignment="Center" />
+                    <Ellipse Width="6" Height="6" Margin="0.5,0" Fill="#F58220" VerticalAlignment="Center" />
+                    <TextBlock Text="VER" FontSize="7" FontWeight="Bold" Foreground="#231F20" VerticalAlignment="Center" />
+                </StackPanel>
+            </Border>
+            <TextBlock x:Name="Generic" Text="&#xE8C7;" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Grid>
+    </Viewbox>
+</UserControl>

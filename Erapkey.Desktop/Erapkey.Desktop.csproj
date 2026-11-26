@@ -89,8 +89,10 @@
 
   <!-- A release gets the Native AOT build: one exe that needs no runtime. -->
   <Target Name="PublishNativeHost" AfterTargets="Publish">
+    <!-- Keep the desktop bundle settings from publishing an apphost over the Native AOT executable. -->
     <MSBuild Projects="$(NativeHostProject)" Targets="Publish"
-             Properties="Configuration=$(Configuration);RuntimeIdentifier=win-x64;PublishDir=$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(PublishDir)'))" />
+             RemoveProperties="PublishSingleFile;PublishReadyToRun"
+             Properties="Configuration=$(Configuration);RuntimeIdentifier=win-x64;_IsPublishing=true;SelfContained=true;PublishDir=$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(PublishDir)'))" />
     <Delete Files="$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(PublishDir)'))Erapkey.NativeHost.pdb" />
   </Target>
 

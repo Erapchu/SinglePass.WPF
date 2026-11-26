@@ -8,7 +8,7 @@ Code:
 - `Erapkey.Core/Services/SshAgentServer.cs` — the agent's pipe; the pipe itself (ACL, first instance, the program that connects) is `NamedPipeServer.cs`, shared with the browser extension's pipe.
 - `Erapkey.Core/Services/SshSigningKey.cs` — reads private keys and signs: Ed25519, RSA (`ssh-rsa`, `rsa-sha2-256`, `rsa-sha2-512`), ECDSA on NIST P-256/384/521.
 - `Erapkey.Core/Services/BcryptPbkdf.cs` — the key derivation of OpenSSH keys with a passphrase.
-- `Erapkey/Services/SshAgentKeyStore.cs` — keys of the unlocked vault, confirmation, unlock on request.
+- `Erapkey.Desktop/Services/SshAgentKeyStore.cs` — keys of the unlocked vault, confirmation, unlock on request.
 
 Tests are in `Erapkey.Core.Tests/SshAgentTests.cs`, with keys made by `ssh-keygen`.
 
@@ -55,7 +55,7 @@ Every signature is confirmed in a window on top of the others. It shows the key 
 
 ## Hosts
 
-A host entry (`HostData`) keeps the address, port, user and a link to an SSH key entry. The ssh arguments are built by `Erapkey/Helpers/SshCommands.cs`:
+A host entry (`HostData`) keeps the address, port, user and a link to an SSH key entry. The ssh arguments are built by `Erapkey.Desktop/Helpers/SshCommands.cs`:
 
 ```
 -o IdentityAgent=//./pipe/erapkey-ssh-agent-<SID> -o IdentitiesOnly=yes -i "%LOCALAPPDATA%\Erapkey\ssh\<key id>.pub" -p <port> -- user@host

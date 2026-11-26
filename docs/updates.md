@@ -4,10 +4,10 @@ Erapkey updates itself from [GitHub Releases](https://github.com/Erapchu/Erapkey
 
 The code:
 
-- `Erapkey/Program.cs` — entry point; runs Velopack hooks before WPF starts.
-- `Erapkey/Services/UpdateService.cs` — checks, downloads and applies updates.
-- `Erapkey/App.xaml.cs` — starts the update service after unlock and offers a restart.
-- `Erapkey/Views/Controls/AboutControl.xaml` — **Settings → About → Updates** card.
+- `Erapkey.Desktop/Program.cs` — entry point; runs Velopack hooks before WPF starts.
+- `Erapkey.Desktop/Services/UpdateService.cs` — checks, downloads and applies updates.
+- `Erapkey.Desktop/App.xaml.cs` — starts the update service after unlock and offers a restart.
+- `Erapkey.Desktop/Views/Controls/AboutControl.xaml` — **Settings → About → Updates** card.
 - `.github/workflows/dotnet-desktop.yml` — builds, packs and publishes a release.
 
 ## Release contents
@@ -83,7 +83,7 @@ The **Build and create release** workflow is started manually on `master`. After
 
 The release is visible to the application only after step 5.
 
-When updating Velopack, change the `Velopack` package version in `Erapkey.csproj` and the `vpk` version in the workflow together.
+When updating Velopack, change the `Velopack` package version in `Erapkey.Desktop.csproj` and the `vpk` version in the workflow together.
 
 ## Delta size
 

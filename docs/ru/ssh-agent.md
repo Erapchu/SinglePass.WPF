@@ -10,7 +10,7 @@ Erapkey отдаёт записи с SSH-ключами из хранилища 
 - `Erapkey.Core/Services/SshAgentServer.cs` — канал (pipe) агента; сам канал (ACL, первый экземпляр, программа, которая подключается) реализован в `NamedPipeServer.cs`, общем с каналом расширения браузера.
 - `Erapkey.Core/Services/SshSigningKey.cs` — читает закрытые ключи и подписывает: Ed25519, RSA (`ssh-rsa`, `rsa-sha2-256`, `rsa-sha2-512`), ECDSA на NIST P-256/384/521.
 - `Erapkey.Core/Services/BcryptPbkdf.cs` — функция выработки ключа для ключей OpenSSH с парольной фразой.
-- `Erapkey/Services/SshAgentKeyStore.cs` — ключи разблокированного хранилища, подтверждение, разблокировка по запросу.
+- `Erapkey.Desktop/Services/SshAgentKeyStore.cs` — ключи разблокированного хранилища, подтверждение, разблокировка по запросу.
 
 Тесты находятся в `Erapkey.Core.Tests/SshAgentTests.cs`, с ключами, созданными `ssh-keygen`.
 
@@ -58,7 +58,7 @@ Erapkey отдаёт записи с SSH-ключами из хранилища 
 
 ## Хосты
 
-Запись хоста (`HostData`) хранит адрес, порт, пользователя и ссылку на запись SSH-ключа. Аргументы ssh строит `Erapkey/Helpers/SshCommands.cs`:
+Запись хоста (`HostData`) хранит адрес, порт, пользователя и ссылку на запись SSH-ключа. Аргументы ssh строит `Erapkey.Desktop/Helpers/SshCommands.cs`:
 
 ```
 -o IdentityAgent=//./pipe/erapkey-ssh-agent-<SID> -o IdentitiesOnly=yes -i "%LOCALAPPDATA%\Erapkey\ssh\<key id>.pub" -p <port> -- user@host

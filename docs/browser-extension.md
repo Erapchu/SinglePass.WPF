@@ -2,7 +2,7 @@
 
 Status: **first version for Chrome and Edge** (steps 1–5 and the popup of step 6 of the [implementation order](#implementation-order)). This document describes how the Erapkey browser extension talks to the desktop application, what it may ask for and how the parts are installed. The pipe code shared with the SSH agent is described in [ssh-agent.md](ssh-agent.md).
 
-Code: `Erapkey.Core/Services/Browser/` (protocol, pairing, session crypto), `Erapkey.Core/Services/WebsiteMatcher.cs` and `PublicSuffixList.cs`, `Erapkey.NativeHost/`, `Erapkey/Services/BrowserBackend.cs` and `NativeMessagingRegistration.cs`, `extension/`. Tests: `Erapkey.Core.Tests/BrowserPipeServerTests.cs`, `WebsiteMatcherTests.cs`, and `BrowserExtensionInteropTests.cs`, which runs the extension's TypeScript protocol code in Node against the C# server.
+Code: `Erapkey.Core/Services/Browser/` (protocol, pairing, session crypto), `Erapkey.Core/Services/WebsiteMatcher.cs` and `PublicSuffixList.cs`, `Erapkey.NativeHost/`, `Erapkey.Desktop/Services/BrowserBackend.cs` and `NativeMessagingRegistration.cs`, `extension/`. Tests: `Erapkey.Core.Tests/BrowserPipeServerTests.cs`, `WebsiteMatcherTests.cs`, and `BrowserExtensionInteropTests.cs`, which runs the extension's TypeScript protocol code in Node against the C# server.
 
 ## Goals
 
@@ -35,7 +35,7 @@ A localhost HTTP or WebSocket server is **not** used: every web page can send re
 |---|---|---|
 | Extension | `extension/` (new) | Detects login forms, shows suggestions, fills fields, holds the pairing key. TypeScript, bundled with esbuild. |
 | Native host | `Erapkey.NativeHost/` (new project) | Relays messages between the browser and the pipe. Has no vault access and no logic. |
-| Browser server | `Erapkey` + `Erapkey.Core` | Pipe server, pairing, session crypto, URL matching, answers. |
+| Browser server | `Erapkey.Desktop` + `Erapkey.Core` | Pipe server, pairing, session crypto, URL matching, answers. |
 
 The native host is a separate executable, not `Erapkey.exe` with a flag: the browser starts the path from the manifest **without arguments of our choice** (Chrome passes the extension origin, Firefox the manifest path and extension ID), and the host must not run Velopack hooks, take the single-instance mutex or load WPF. It is a small console application published with Native AOT, so it starts quickly and needs no runtime.
 
@@ -241,7 +241,7 @@ To load it by hand for the installed Erapkey, run `npm run build:unpacked` and l
 2. `Erapkey.Core`: `PublicSuffixList` and `WebsiteMatcher` with tests.
 3. `NamedPipeServer` base extracted from `SshAgentServer`; `BrowserPipeServer` with the protocol, pairing and session crypto, with tests (a test client plays the extension).
 4. `Erapkey.NativeHost` (Native AOT), registration in Velopack hooks, for the portable build and for Debug, packaging.
-5. Pairing window and **Settings → Security → Browser extension** in `Erapkey`.
+5. Pairing window and **Settings → Security → Browser extension** in `Erapkey.Desktop`.
 6. The extension for Chrome and Edge: background worker and popup first (list and copy), then the content script and inline fill.
 7. Firefox: its manifest and registration.
 8. Store listings (Chrome Web Store, Edge Add-ons, Firefox AMO); their extension IDs go into the manifests.

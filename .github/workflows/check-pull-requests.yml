@@ -15,7 +15,7 @@ jobs:
     
     env:
       SOLUTION_NAME: Erapkey.sln
-      PROJECT_PATH: .\Erapkey\Erapkey.csproj
+      PROJECT_PATH: .\Erapkey.Desktop\Erapkey.Desktop.csproj
       
     steps:
     - name: Checkout

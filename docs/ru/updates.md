@@ -6,10 +6,10 @@ Erapkey обновляется сам из [GitHub Releases](https://github.com/
 
 Код:
 
-- `Erapkey/Program.cs` — точка входа; запускает хуки Velopack до старта WPF.
-- `Erapkey/Services/UpdateService.cs` — проверяет, скачивает и применяет обновления.
-- `Erapkey/App.xaml.cs` — запускает службу обновлений после разблокировки и предлагает перезапуск.
-- `Erapkey/Views/Controls/AboutControl.xaml` — карточка **Settings → About → Updates**.
+- `Erapkey.Desktop/Program.cs` — точка входа; запускает хуки Velopack до старта WPF.
+- `Erapkey.Desktop/Services/UpdateService.cs` — проверяет, скачивает и применяет обновления.
+- `Erapkey.Desktop/App.xaml.cs` — запускает службу обновлений после разблокировки и предлагает перезапуск.
+- `Erapkey.Desktop/Views/Controls/AboutControl.xaml` — карточка **Settings → About → Updates**.
 - `.github/workflows/dotnet-desktop.yml` — собирает, упаковывает и публикует релиз.
 
 ## Содержимое релиза
@@ -85,7 +85,7 @@ Setup.exe устанавливает приложение для текущег�
 
 Релиз становится виден приложению только после шага 5.
 
-При обновлении Velopack меняйте версию пакета `Velopack` в `Erapkey.csproj` и версию `vpk` в рабочем процессе одновременно.
+При обновлении Velopack меняйте версию пакета `Velopack` в `Erapkey.Desktop.csproj` и версию `vpk` в рабочем процессе одновременно.
 
 ## Размер дельты
 

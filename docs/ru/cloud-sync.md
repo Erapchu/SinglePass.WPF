@@ -9,7 +9,7 @@
 - `Erapkey.Core/Services/SyncService.cs` — цикл синхронизации (`Synchronize`).
 - `Erapkey.Core/Services/CredentialsCryptoService.cs` — `MergeFromCloud` (слияние и выбор ключа хранилища и мастер-пароля) и `MergeVaults` (чистое слияние).
 - `Erapkey.Core/Clouds/Services/` — провайдеры: `Download`, `GetRevision`, `Upload`.
-- `Erapkey/ViewModels/CloudSyncViewModel.cs` — кнопка, запрос пароля и диалог с результатом.
+- `Erapkey.Desktop/ViewModels/CloudSyncViewModel.cs` — кнопка, запрос пароля и диалог с результатом.
 
 ## Кратко
 

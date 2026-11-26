@@ -136,7 +136,7 @@
 1. Значение в `CredentialType` и класс данных (например, `CardData`) с методом `Clone`.
 2. Свойство в `Credential`, строка в `EnsureTypeData` и в `Clone`.
 3. Новая `Version` хранилища, чтобы старые сборки отказывались от хранилища, а не теряли новый блок.
-4. UI, в `Erapkey`:
+4. UI, в `Erapkey.Desktop`:
    - модель представления в `ViewModels/Entries`, производная от `CredentialDataViewModel` (подзаголовок списка, глиф, тексты для поиска) и вариант в `CredentialViewModel.CreateData`;
    - представление и редактор в `Views/Controls/Entries`, зарегистрированные как `DataTemplate` для модели представления в `CredentialsDetailsControl.xaml`;
    - пункт в меню **New item** (`PasswordsControl.xaml`), категория в боковой панели (`MainWindowViewModel.CategoryNavigation`) и строки.

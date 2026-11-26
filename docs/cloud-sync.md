@@ -7,7 +7,7 @@ Code:
 - `Erapkey.Core/Services/SyncService.cs` — the sync cycle (`Synchronize`).
 - `Erapkey.Core/Services/CredentialsCryptoService.cs` — `MergeFromCloud` (merge + vault key and master password choice) and `MergeVaults` (pure merge).
 - `Erapkey.Core/Clouds/Services/` — providers: `Download`, `GetRevision`, `Upload`.
-- `Erapkey/ViewModels/CloudSyncViewModel.cs` — the button, password prompt and result dialog.
+- `Erapkey.Desktop/ViewModels/CloudSyncViewModel.cs` — the button, password prompt and result dialog.
 
 ## In short
 

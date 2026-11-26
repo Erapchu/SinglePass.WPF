@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32421.90
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Erapkey", "Erapkey\Erapkey.csproj", "{0A18A596-DFB1-4959-8204-3FBB81BEE945}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Erapkey.Desktop", "Erapkey.Desktop\Erapkey.Desktop.csproj", "{0A18A596-DFB1-4959-8204-3FBB81BEE945}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Erapkey.Language", "Erapkey.Language\Erapkey.Language.csproj", "{44C8C637-E0B7-4B67-AB88-C038CB8FFBA1}"
 EndProject

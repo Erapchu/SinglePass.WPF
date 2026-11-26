@@ -91,10 +91,10 @@ msbuild .\Erapkey.sln /t:Build /p:Configuration=Release
 To publish a self-contained Windows x64 build, as in the release workflow:
 
 ```powershell
-msbuild .\Erapkey\Erapkey.csproj /t:Publish /p:Configuration=Release /p:RuntimeIdentifier=win-x64 /p:SelfContained=true /p:PublishReadyToRun=true /p:PublishSingleFile=true
+msbuild .\Erapkey.Desktop\Erapkey.Desktop.csproj /t:Publish /p:Configuration=Release /p:RuntimeIdentifier=win-x64 /p:SelfContained=true /p:PublishReadyToRun=true /p:PublishSingleFile=true
 ```
 
-The output is in `Erapkey\bin\Release\win-x64\publish`.
+The output is in `Erapkey.Desktop\bin\Release\win-x64\publish`.
 
 ## Screenshots
 

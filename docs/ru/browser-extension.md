@@ -4,7 +4,7 @@
 
 Статус: **первая версия для Chrome и Edge** (шаги 1–5 и всплывающее окно из шага 6 [порядка реализации](#implementation-order)). Документ описывает, как расширение Erapkey для браузера общается с настольным приложением, что оно может запрашивать и как устанавливаются части системы. Код каналов (pipe), общий с SSH-агентом, описан в [ssh-agent.md](ssh-agent.md).
 
-Код: `Erapkey.Core/Services/Browser/` (протокол, сопряжение, криптография сеанса), `Erapkey.Core/Services/WebsiteMatcher.cs` и `PublicSuffixList.cs`, `Erapkey.NativeHost/`, `Erapkey/Services/BrowserBackend.cs` и `NativeMessagingRegistration.cs`, `extension/`. Тесты: `Erapkey.Core.Tests/BrowserPipeServerTests.cs`, `WebsiteMatcherTests.cs` и `BrowserExtensionInteropTests.cs`, который запускает TypeScript-код протокола расширения в Node против C#-сервера.
+Код: `Erapkey.Core/Services/Browser/` (протокол, сопряжение, криптография сеанса), `Erapkey.Core/Services/WebsiteMatcher.cs` и `PublicSuffixList.cs`, `Erapkey.NativeHost/`, `Erapkey.Desktop/Services/BrowserBackend.cs` и `NativeMessagingRegistration.cs`, `extension/`. Тесты: `Erapkey.Core.Tests/BrowserPipeServerTests.cs`, `WebsiteMatcherTests.cs` и `BrowserExtensionInteropTests.cs`, который запускает TypeScript-код протокола расширения в Node против C#-сервера.
 
 ## Цели
 
@@ -37,7 +37,7 @@ Erapkey.exe                   BrowserPipeServer → unlocked vault, pairing and 
 |---|---|---|
 | Расширение | `extension/` (новое) | Обнаруживает формы входа, показывает подсказки, заполняет поля, хранит ключ сопряжения. TypeScript, сборка esbuild. |
 | Native host | `Erapkey.NativeHost/` (новый проект) | Передаёт сообщения между браузером и каналом. Не имеет доступа к хранилищу и не содержит логики. |
-| Сервер для браузера | `Erapkey` + `Erapkey.Core` | Сервер канала, сопряжение, криптография сеанса, сопоставление URL, ответы. |
+| Сервер для браузера | `Erapkey.Desktop` + `Erapkey.Core` | Сервер канала, сопряжение, криптография сеанса, сопоставление URL, ответы. |
 
 Native host — отдельный исполняемый файл, а не `Erapkey.exe` с флагом: браузер запускает путь из манифеста **без выбранных нами аргументов** (Chrome передаёт origin расширения, Firefox — путь к манифесту и ID расширения), а host не должен выполнять хуки Velopack, занимать мьютекс единственного экземпляра или загружать WPF. Это небольшое консольное приложение, опубликованное с Native AOT, поэтому оно быстро запускается и не требует среды выполнения.
 
@@ -228,7 +228,7 @@ Manifest V3, TypeScript, сборка esbuild (`extension/`, `npm run build` →
 2. `Erapkey.Core`: `PublicSuffixList` и `WebsiteMatcher` с тестами.
 3. Базовый `NamedPipeServer`, выделенный из `SshAgentServer`; `BrowserPipeServer` с протоколом, сопряжением и криптографией сеанса, с тестами (тестовый клиент изображает расширение).
 4. `Erapkey.NativeHost` (Native AOT), регистрация в хуках Velopack, для портативной сборки и для Debug, упаковка.
-5. Окно сопряжения и **Настройки → Безопасность → Расширение для браузера** в `Erapkey`.
+5. Окно сопряжения и **Настройки → Безопасность → Расширение для браузера** в `Erapkey.Desktop`.
 6. Расширение для Chrome и Edge: сначала фоновый worker и всплывающее окно (список и копирование), затем content script и встроенная подстановка.
 7. Firefox: его манифест и регистрация.
 8. Страницы в магазинах (Chrome Web Store, Edge Add-ons, Firefox AMO); их ID расширений попадают в манифесты.

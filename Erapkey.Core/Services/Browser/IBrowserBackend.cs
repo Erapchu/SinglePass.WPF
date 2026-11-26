@@ -12,7 +12,7 @@ namespace Erapkey.Core.Services.Browser
     /// <param name="Code">The six digits the extension shows too.</param>
     public sealed record BrowserPairingRequest(string Name, string Browser, string Code);
 
-    /// <summary>What the browser server needs from the application. Implemented by Erapkey.</summary>
+    /// <summary>What the browser server needs from the application. Implemented by Erapkey.Desktop.</summary>
     public interface IBrowserBackend
     {
         /// <summary>Entries of the unlocked vault (not in the trash), or null while it is locked.</summary>

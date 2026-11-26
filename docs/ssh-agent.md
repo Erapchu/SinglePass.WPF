@@ -1,31 +1,31 @@
 # SSH agent
 
-SinglePass serves the SSH key entries of the vault to `ssh`, `git`, `scp` and other OpenSSH clients, the way `ssh-agent`, 1Password or Bitwarden do. Programs get signatures, never the keys.
+Erapkey serves the SSH key entries of the vault to `ssh`, `git`, `scp` and other OpenSSH clients, the way `ssh-agent`, 1Password or Bitwarden do. Programs get signatures, never the keys.
 
 Code:
 
-- `SinglePass.Core/Services/SshAgent.cs` — the agent protocol (draft-miller-ssh-agent): list keys, sign.
-- `SinglePass.Core/Services/SshAgentServer.cs` — the agent's pipe; the pipe itself (ACL, first instance, the program that connects) is `NamedPipeServer.cs`, shared with the browser extension's pipe.
-- `SinglePass.Core/Services/SshSigningKey.cs` — reads private keys and signs: Ed25519, RSA (`ssh-rsa`, `rsa-sha2-256`, `rsa-sha2-512`), ECDSA on NIST P-256/384/521.
-- `SinglePass.Core/Services/BcryptPbkdf.cs` — the key derivation of OpenSSH keys with a passphrase.
-- `SinglePass.WPF/Services/SshAgentKeyStore.cs` — keys of the unlocked vault, confirmation, unlock on request.
+- `Erapkey.Core/Services/SshAgent.cs` — the agent protocol (draft-miller-ssh-agent): list keys, sign.
+- `Erapkey.Core/Services/SshAgentServer.cs` — the agent's pipe; the pipe itself (ACL, first instance, the program that connects) is `NamedPipeServer.cs`, shared with the browser extension's pipe.
+- `Erapkey.Core/Services/SshSigningKey.cs` — reads private keys and signs: Ed25519, RSA (`ssh-rsa`, `rsa-sha2-256`, `rsa-sha2-512`), ECDSA on NIST P-256/384/521.
+- `Erapkey.Core/Services/BcryptPbkdf.cs` — the key derivation of OpenSSH keys with a passphrase.
+- `Erapkey.Desktop/Services/SshAgentKeyStore.cs` — keys of the unlocked vault, confirmation, unlock on request.
 
-Tests are in `SinglePass.Core.Tests/SshAgentTests.cs`, with keys made by `ssh-keygen`.
+Tests are in `Erapkey.Core.Tests/SshAgentTests.cs`, with keys made by `ssh-keygen`.
 
 ## Pipe
 
-`\\.\pipe\singlepass-ssh-agent-<user SID>`. It has its own name, so it does not conflict with the Windows `ssh-agent` service (`\\.\pipe\openssh-ssh-agent`), and the SID keeps users of one machine apart: pipe names are shared by all sessions.
+`\\.\pipe\erapkey-ssh-agent-<user SID>`. It has its own name, so it does not conflict with the Windows `ssh-agent` service (`\\.\pipe\openssh-ssh-agent`), and the SID keeps users of one machine apart: pipe names are shared by all sessions.
 
 - The pipe ACL allows the current user and denies network logons. Only processes of this user on this machine can connect.
 - The first instance is created with `FirstPipeInstance`. If another program already holds the name, the agent does not start (and logs it) instead of sharing the name with it.
-- The agent starts after the first unlock and runs until SinglePass exits. **Settings → Security → SSH agent** turns it off and shows the address.
+- The agent starts after the first unlock and runs until Erapkey exits. **Settings → Security → SSH agent** turns it off and shows the address.
 
 Clients find it in one of two ways:
 
 | Where | Value |
 |---|---|
-| `SSH_AUTH_SOCK` environment variable (all programs) | `\\.\pipe\singlepass-ssh-agent-<SID>` |
-| `IdentityAgent` option of `ssh` / `ssh_config` | `//./pipe/singlepass-ssh-agent-<SID>` |
+| `SSH_AUTH_SOCK` environment variable (all programs) | `\\.\pipe\erapkey-ssh-agent-<SID>` |
+| `IdentityAgent` option of `ssh` / `ssh_config` | `//./pipe/erapkey-ssh-agent-<SID>` |
 
 `IdentityAgent` needs forward slashes: the ssh option parser treats backslashes as escapes. Windows accepts both forms.
 
@@ -55,19 +55,19 @@ Every signature is confirmed in a window on top of the others. It shows the key 
 
 ## Hosts
 
-A host entry (`HostData`) keeps the address, port, user and a link to an SSH key entry. The ssh arguments are built by `SinglePass.WPF/Helpers/SshCommands.cs`:
+A host entry (`HostData`) keeps the address, port, user and a link to an SSH key entry. The ssh arguments are built by `Erapkey.Desktop/Helpers/SshCommands.cs`:
 
 ```
--o IdentityAgent=//./pipe/singlepass-ssh-agent-<SID> -o IdentitiesOnly=yes -i "%LOCALAPPDATA%\SinglePass\ssh\<key id>.pub" -p <port> -- user@host
+-o IdentityAgent=//./pipe/erapkey-ssh-agent-<SID> -o IdentitiesOnly=yes -i "%LOCALAPPDATA%\Erapkey\ssh\<key id>.pub" -p <port> -- user@host
 ```
 
-The public key is written to `%LOCALAPPDATA%\SinglePass\ssh\<key id>.pub` (public keys are not secret). With `-i` pointing to it and `IdentitiesOnly=yes`, ssh offers only that key and has the agent sign with it. Without a linked key, or with the agent turned off, only `-p <port> -- user@host` remains. `-p` is left out for port 22. `--` keeps a host or user that starts with `-` (for example `-oProxyCommand=…` from a synced vault) from being read as an option.
+The public key is written to `%LOCALAPPDATA%\Erapkey\ssh\<key id>.pub` (public keys are not secret). With `-i` pointing to it and `IdentitiesOnly=yes`, ssh offers only that key and has the agent sign with it. Without a linked key, or with the agent turned off, only `-p <port> -- user@host` remains. `-p` is left out for port 22. `--` keeps a host or user that starts with `-` (for example `-oProxyCommand=…` from a synced vault) from being read as an option.
 
-- **Connect** starts `C:\Windows\System32\OpenSSH\ssh.exe` with these arguments in a new tab of the Windows Terminal window named `SinglePass` (`wt -w SinglePass new-tab --title <entry name> …`), so all connections share one window. `;` in arguments is escaped as `\;`, because `wt` splits commands at it. Without Windows Terminal, ssh opens in its own console window. The full path is used because the ssh of Git for Windows, which may come first in `PATH`, cannot talk to the agent.
+- **Connect** starts `C:\Windows\System32\OpenSSH\ssh.exe` with these arguments in a new tab of the Windows Terminal window named `Erapkey` (`wt -w Erapkey new-tab --title <entry name> …`), so all connections share one window. `;` in arguments is escaped as `\;`, because `wt` splits commands at it. Without Windows Terminal, ssh opens in its own console window. The full path is used because the ssh of Git for Windows, which may come first in `PATH`, cannot talk to the agent.
 - **Copy SSH command** copies `ssh` with the same arguments, to paste into any terminal.
 
 ## Limits
 
-- While the vault is unlocked, a program running as the same user could read the memory of SinglePass. The confirmation protects against silent use through the agent, not against that.
+- While the vault is unlocked, a program running as the same user could read the memory of Erapkey. The confirmation protects against silent use through the agent, not against that.
 - `ForwardAgent` lets the remote server use the agent while the session lasts. Its requests come through the local `ssh.exe`, so a remembered approval for that ssh covers them too. Do not forward the agent to servers you do not trust.
 - Hardware-backed keys (`sk-ssh-ed25519`, `sk-ecdsa`) and DSA keys are not supported.

@@ -1,6 +1,6 @@
 // Runs inside the page (chrome.scripting.executeScript), so it must not use anything from outside its own body.
 // Fills only visible, enabled fields of the top-level page, and only if the page is still on the origin whose
-// login SinglePass returned (docs/browser-extension.md#extension).
+// login Erapkey returned (docs/browser-extension.md#extension).
 
 export function fillPage(expectedOrigin: string, login: string, password: string): 'filled' | 'no_fields' | 'page_changed' {
   if (location.origin !== expectedOrigin) return 'page_changed';

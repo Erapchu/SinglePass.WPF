@@ -1,6 +1,6 @@
-# SinglePass.WPF
+# Erapkey
 
-SinglePass is a Windows password manager with a local encrypted vault, a quick-access popup for filling credentials in other applications, and optional cloud synchronization.
+Erapkey is a Windows password manager with a local encrypted vault, a quick-access popup for filling credentials in other applications, and optional cloud synchronization.
 
 ## Features
 
@@ -11,7 +11,7 @@ SinglePass is a Windows password manager with a local encrypted vault, a quick-a
 - Keep SSH keys and SSH hosts. The built-in SSH agent lets `ssh`, `git` and other OpenSSH clients sign in with the keys of the vault, asking for confirmation before each use; a host copies a ready `ssh` command. See [docs/ssh-agent.md](docs/ssh-agent.md).
 - Search by name, login, website or notes, including transliterated text.
 - Optionally open a quick-access popup with a global hotkey and paste a login and password or individual fields into the active window.
-- Fill logins in Chrome and Edge with the SinglePass browser extension, which matches entries by the site of the tab, so a look-alike site gets nothing. In development; see [docs/browser-extension.md](docs/browser-extension.md).
+- Fill logins in Chrome and Edge with the Erapkey browser extension, which matches entries by the site of the tab, so a look-alike site gets nothing. In development; see [docs/browser-extension.md](docs/browser-extension.md).
 - Synchronize credentials with Google Drive or Yandex Disk after signing in.
 - Change the master password, choose a theme and select English, Russian or the system language.
 - Automatically lock the vault when the Windows session locks or after five minutes without keyboard or mouse input. Enter the master password to reopen it.
@@ -20,14 +20,14 @@ SinglePass is a Windows password manager with a local encrypted vault, a quick-a
 
 ## Getting started
 
-Download `SinglePass.WPF-win-Setup.exe` from [Releases](https://github.com/Erapchu/SinglePass.WPF/releases) and run it. SinglePass installs for the current user without administrator rights into `%LocalAppData%\SinglePass.WPF`, adds Start menu and desktop shortcuts and updates itself from new releases (**Settings → About → Updates**; see [docs/updates.md](docs/updates.md)). For a portable copy, download `SinglePass.WPF-win-Portable.zip`, extract it anywhere and run `SinglePass.exe`; it updates itself in place. Both are self-contained Windows x64 builds. The vault and settings are stored separately (see below), so updating or uninstalling the application keeps them.
+Download `Erapkey.App-win-Setup.exe` from [Releases](https://github.com/Erapchu/Erapkey/releases) and run it. Erapkey installs for the current user without administrator rights into `%LocalAppData%\Erapkey.App`, adds Start menu and desktop shortcuts and updates itself from new releases (**Settings → About → Updates**; see [docs/updates.md](docs/updates.md)). For a portable copy, download `Erapkey.App-win-Portable.zip`, extract it anywhere and run `Erapkey.exe`; it updates itself in place. Both are self-contained Windows x64 builds. The vault and settings are stored separately (see below), so updating or uninstalling the application keeps them.
 
 On first launch, enter a master password of at least eight characters. Use that password to unlock the vault. Keep a secure backup of the vault file and its master password so you can decrypt the backup.
 
 ### Two-factor authentication codes
 
 1. In the account's security settings, start setting up an authenticator app.
-2. Create or edit the entry in SinglePass. Paste the Base32 setup key or an `otpauth://totp/` link into **2FA setup key or otpauth link**. For a QR code, copy a screenshot of it to the clipboard and select **Paste QR code**.
+2. Create or edit the entry in Erapkey. Paste the Base32 setup key or an `otpauth://totp/` link into **2FA setup key or otpauth link**. For a QR code, copy a screenshot of it to the clipboard and select **Paste QR code**.
 3. Save the entry. **One-Time Password** in the entry details shows the current code and its countdown. Use **Copy verification code** to copy it and finish setup on the website.
 
 ### Quick-access popup
@@ -42,13 +42,13 @@ The popup does not know which site is open in a browser and offers every login, 
 
 ### Windows Hello unlock
 
-Turn on **Settings → Security → Unlock with Windows Hello**. Windows asks for your PIN, fingerprint or face once to create a key for SinglePass. From then on, the unlock window shows the Windows Hello prompt right away, when SinglePass starts and when the vault locks; cancel it to type the master password instead. This requires Windows Hello to be set up (at least a PIN) under **Windows Settings → Accounts → Sign-in options**.
+Turn on **Settings → Security → Unlock with Windows Hello**. Windows asks for your PIN, fingerprint or face once to create a key for Erapkey. From then on, the unlock window shows the Windows Hello prompt right away, when Erapkey starts and when the vault locks; cancel it to type the master password instead. This requires Windows Hello to be set up (at least a PIN) under **Windows Settings → Accounts → Sign-in options**.
 
 The master password is still required 14 days after it was last typed, so that you keep remembering it.
 
-The master password is not stored. After you type it, SinglePass writes the vault key (see below) to `windowsHello.dat`, encrypted with an RSA key that Windows Hello keeps for the current user on this computer, in the TPM where there is one. Decrypting it requires the Windows Hello gesture, so the file is useless on another computer or Windows account. The time the password was typed is encrypted together with the key, so editing the file does not postpone the 14 days. When the vault key changes because the master password changed on this device or sync adopted the key of another device, SinglePass updates the file without a prompt.
+The master password is not stored. After you type it, Erapkey writes the vault key (see below) to `windowsHello.dat`, encrypted with an RSA key that Windows Hello keeps for the current user on this computer, in the TPM where there is one. Decrypting it requires the Windows Hello gesture, so the file is useless on another computer or Windows account. The time the password was typed is encrypted together with the key, so editing the file does not postpone the 14 days. When the vault key changes because the master password changed on this device or sync adopted the key of another device, Erapkey updates the file without a prompt.
 
-If the Windows Hello key is lost, for example after the Windows PIN is reset, SinglePass turns Windows Hello unlock off and asks for the master password; turn it on again in Settings. Turning it off deletes the file and the key.
+If the Windows Hello key is lost, for example after the Windows PIN is reset, Erapkey turns Windows Hello unlock off and asks for the master password; turn it on again in Settings. Turning it off deletes the file and the key.
 
 Windows Hello unlock does not protect against malware running in your Windows session: such a program can wait until the vault is unlocked and read it from memory.
 
@@ -59,23 +59,23 @@ Open **Settings → Cloud Sync** and sign in to Google Drive or Yandex Disk. **S
 #### Configure Yandex Disk
 
 1. Register a [Yandex OAuth application](https://oauth.yandex.ru/client/new/id/) with the redirect URI `http://localhost:17682/`. Grant application folder access (`cloud_api:disk.app_folder`), profile access (`login:info`) and avatar access (`login:avatar`).
-2. Set the `Settings__YandexDiskConfig__ClientId` environment variable for the SinglePass process, then restart SinglePass. The client secret is optional because sign-in uses PKCE; set `Settings__YandexDiskConfig__ClientSecret` only if your OAuth application requires it. To use another loopback port, register its exact URI and set `Settings__YandexDiskConfig__RedirectUri` to match.
+2. Set the `Settings__YandexDiskConfig__ClientId` environment variable for the Erapkey process, then restart Erapkey. The client secret is optional because sign-in uses PKCE; set `Settings__YandexDiskConfig__ClientSecret` only if your OAuth application requires it. To use another loopback port, register its exact URI and set `Settings__YandexDiskConfig__RedirectUri` to match.
 3. Sign in under **Settings → Cloud Sync → Yandex Disk**. Use the same OAuth application on each computer to access the same app folder.
 
 ## Data and configuration
 
-Application data is stored under `%LOCALAPPDATA%\SinglePass`:
+Application data is stored under `%LOCALAPPDATA%\Erapkey`:
 
-- `singlePass.dat` — encrypted vault containing credentials, groups and saved TOTP setup data.
+- `erapkey.dat` — encrypted vault containing credentials, groups and saved TOTP setup data.
 - `commonSettings.json` — application settings.
-- `googleDrive.token` — Google Drive authorization data protected by Windows for the current user. SinglePass migrates the former `googleDrive.json` and removes it after saving the protected token.
+- `googleDrive.token` — Google Drive authorization data protected by Windows for the current user. Erapkey migrates the former `googleDrive.json` and removes it after saving the protected token.
 - `yandexDisk.token` — Yandex Disk authorization data protected by Windows for the current user.
 - `windowsHello.dat` — the vault key protected by Windows Hello, present while Windows Hello unlock is on.
 - `Backups` — automatic copies of the vault, restorable from **Settings → Security → Backups**.
 - `ssh` — public keys of SSH key entries, written for the commands copied from hosts. Private keys stay in the vault.
 - `Cache` — cached data; logs are stored in `Logs`.
 
-The vault is encrypted with AES-256-GCM using a random vault key. The file keeps that key encrypted with a key derived from the master password using Argon2id, so unlocking takes a moment, while saving and syncing need no key derivation. Changing the master password also replaces the vault key. SinglePass converts vaults of version 1.x after you unlock them successfully and keeps the old file as a backup. Vaults written by this version cannot be opened by older versions, so update SinglePass on every device that syncs the same vault. After the update each device may ask for the master password once during its first sync, while the devices agree on one vault key. The file format and merge rules are described in [docs/vault.md](docs/vault.md), synchronization in [docs/cloud-sync.md](docs/cloud-sync.md).
+The vault is encrypted with AES-256-GCM using a random vault key. The file keeps that key encrypted with a key derived from the master password using Argon2id, so unlocking takes a moment, while saving and syncing need no key derivation. Changing the master password also replaces the vault key. Erapkey converts vaults of version 1.x after you unlock them successfully and keeps the old file as a backup. Vaults written by this version cannot be opened by older versions, so update Erapkey on every device that syncs the same vault. After the update each device may ask for the master password once during its first sync, while the devices agree on one vault key. The file format and merge rules are described in [docs/vault.md](docs/vault.md), synchronization in [docs/cloud-sync.md](docs/cloud-sync.md).
 
 ## Build from source
 
@@ -84,23 +84,23 @@ The project targets .NET 10 and Windows x64. Building requires Windows, the .NET
 From a Visual Studio Developer PowerShell at the repository root:
 
 ```powershell
-msbuild .\SinglePass.WPF.sln /t:Restore /p:Configuration=Release
-msbuild .\SinglePass.WPF.sln /t:Build /p:Configuration=Release
+msbuild .\Erapkey.sln /t:Restore /p:Configuration=Release
+msbuild .\Erapkey.sln /t:Build /p:Configuration=Release
 ```
 
 To publish a self-contained Windows x64 build, as in the release workflow:
 
 ```powershell
-msbuild .\SinglePass.WPF\SinglePass.WPF.csproj /t:Publish /p:Configuration=Release /p:RuntimeIdentifier=win-x64 /p:SelfContained=true /p:PublishReadyToRun=true /p:PublishSingleFile=true
+msbuild .\Erapkey.Desktop\Erapkey.Desktop.csproj /t:Publish /p:Configuration=Release /p:RuntimeIdentifier=win-x64 /p:SelfContained=true /p:PublishReadyToRun=true /p:PublishSingleFile=true
 ```
 
-The output is in `SinglePass.WPF\bin\Release\win-x64\publish`.
+The output is in `Erapkey.Desktop\bin\Release\win-x64\publish`.
 
 ## Screenshots
 
-![SinglePass main window](web/images/main.png)
+![Erapkey main window](web/images/main.png)
 
-![SinglePass settings](web/images/settings.png)
+![Erapkey settings](web/images/settings.png)
 
 ## License
 

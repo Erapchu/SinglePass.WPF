@@ -14,8 +14,8 @@ jobs:
                              # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
     
     env:
-      SOLUTION_NAME: SinglePass.WPF.sln
-      PROJECT_PATH: .\SinglePass.WPF\SinglePass.WPF.csproj
+      SOLUTION_NAME: Erapkey.sln
+      PROJECT_PATH: .\Erapkey.Desktop\Erapkey.Desktop.csproj
       
     steps:
     - name: Checkout
@@ -65,6 +65,6 @@ jobs:
 
     - name: Test
       run: |
-       dotnet test .\SinglePass.Core.Tests\SinglePass.Core.Tests.csproj --configuration $env:CONFIGURATION
+       dotnet test .\Erapkey.Core.Tests\Erapkey.Core.Tests.csproj --configuration $env:CONFIGURATION
       env:
         Configuration: ${{ matrix.configuration }}

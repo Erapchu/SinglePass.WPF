@@ -7,14 +7,14 @@ permissions:
   contents: write
 
 concurrency:
-  group: singlepass-release-master
+  group: erapkey-release-master
 
 jobs:
   build:
     if: github.ref == 'refs/heads/master'
     runs-on: windows-latest
     env:
-      PROJECT_PATH: .\SinglePass.WPF\SinglePass.WPF.csproj
+      PROJECT_PATH: .\Erapkey.Desktop\Erapkey.Desktop.csproj
       CONFIGURATION: Release
     steps:
     - name: Checkout
@@ -47,7 +47,7 @@ jobs:
         }
         $settings = @{ GoogleDriveConfig = @{ ClientId = $env:GOOGLE_CLIENT_ID; ClientSecret = $env:GOOGLE_CLIENT_SECRET } }
         if ($env:YANDEX_CLIENT_ID) { $settings.YandexDiskConfig = @{ ClientId = $env:YANDEX_CLIENT_ID } }
-        @{ Settings = $settings } | ConvertTo-Json -Depth 5 | Set-Content -Path .\SinglePass.WPF\settings.secrets.json -Encoding utf8
+        @{ Settings = $settings } | ConvertTo-Json -Depth 5 | Set-Content -Path .\Erapkey.Desktop\settings.secrets.json -Encoding utf8
     - name: Publish application
       if: steps.version.outputs.published == 'false'
       run: msbuild $env:PROJECT_PATH /t:Publish /p:Configuration=$env:CONFIGURATION /p:RuntimeIdentifier=win-x64 /p:SelfContained=true /p:PublishReadyToRun=true /p:PublishSingleFile=true
@@ -67,17 +67,17 @@ jobs:
       if: steps.version.outputs.published == 'false'
       env:
         VERSION: ${{ steps.version.outputs.version }}
-      # packId must differ from "SinglePass": %LocalAppData%\SinglePass holds the user's vault,
+      # packId must differ from "Erapkey": %LocalAppData%\Erapkey holds the user's vault,
       # and Velopack deletes its install folder (%LocalAppData%\<packId>) on uninstall.
       run: >
         vpk pack
-        --packId SinglePass.WPF
+        --packId Erapkey.App
         --packVersion $env:VERSION
-        --packDir .\SinglePass.WPF\bin\Release\win-x64\publish
-        --mainExe SinglePass.WPF.exe
-        --packTitle SinglePass
+        --packDir .\Erapkey.Desktop\bin\Release\win-x64\publish
+        --mainExe Erapkey.exe
+        --packTitle Erapkey
         --packAuthors "Andrey Nasonov"
-        --icon .\SinglePass.WPF\Resources\pass-man.ico
+        --icon .\Erapkey.Desktop\Resources\pass-man.ico
         --outputDir .\Releases
     - name: Upload GitHub Release
       if: steps.version.outputs.published == 'false'

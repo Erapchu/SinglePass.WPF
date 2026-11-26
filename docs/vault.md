@@ -1,17 +1,17 @@
 # Password vault
 
-This document describes how the password vault is stored, changed and synchronized. The code lives in `SinglePass.Core`:
+This document describes how the password vault is stored, changed and synchronized. The code lives in `Erapkey.Core`:
 
 - `Services/CryptoService.cs` — file encryption format.
 - `Services/CredentialsCryptoService.cs` — vault in memory, local changes, merge.
 - `Services/SyncService.cs` — cloud synchronization, described in [cloud-sync.md](cloud-sync.md).
 - `Models/PasswordVault.cs` — vault contents.
 
-Tests for the merge rules and the vault format are in `SinglePass.Core.Tests`.
+Tests for the merge rules and the vault format are in `Erapkey.Core.Tests`.
 
 ## File
 
-The vault is a single file, `%LOCALAPPDATA%\SinglePass\singlePass.dat`. The cloud copy has the same name and the same bytes: upload sends the local file as is.
+The vault is a single file, `%LOCALAPPDATA%\Erapkey\erapkey.dat`. The cloud copy has the same name and the same bytes: upload sends the local file as is.
 
 ### Keys
 
@@ -41,15 +41,16 @@ The contents are encrypted with the **vault key**: 32 random bytes, created once
 | 122 | 16 | Contents: AES-GCM tag |
 | 138 | rest | Contents: UTF-8 JSON of `PasswordVault`, encrypted with the vault key |
 
-- Password key: Argon2id v1.3 with the parameters of the header (64 MiB, 3 iterations, parallelism 4 for new slots), 32 bytes, from the UTF-8 master password. When reading, they are checked before Argon2 runs: values below 8 MiB, 1 iteration or parallelism 1 make the file invalid; values above 1 GiB, 32 iterations or parallelism 16 are reported as written by a newer SinglePass. They can be raised later without a new format version, up to these limits; a newer version that goes beyond them makes older versions ask to update.
+- Password key: Argon2id v1.3 with the parameters of the header (64 MiB, 3 iterations, parallelism 4 for new slots), 32 bytes, from the UTF-8 master password. When reading, they are checked before Argon2 runs: values below 8 MiB, 1 iteration or parallelism 1 make the file invalid; values above 1 GiB, 32 iterations or parallelism 16 are reported as written by a newer Erapkey. They can be raised later without a new format version, up to these limits; a newer version that goes beyond them makes older versions ask to update.
+- The magic and the key id label keep the project's former name (SinglePass): both are part of the format, and changing them would make existing vaults unreadable or their key unrecognized.
 - Slot: AES-256-GCM with the password key; bytes 0–49 are the associated data.
 - Contents: AES-256-GCM with the vault key; the whole header (bytes 0–109, slot included) is the associated data. Any change to the header or the contents fails decryption.
 - The key id lets a device see whether a file uses its vault key without the password (sync, backups, Windows Hello). It reveals nothing about the key. After the slot is opened, the key must match its id.
 - Key and plaintext buffers are zeroed after use.
 
-The format version byte describes encryption only. The structure of the JSON inside has its own `Version` (see below). A file with a format version above 2 is reported as written by a newer SinglePass (`UnsupportedVaultVersionException`), not as a wrong password.
+The format version byte describes encryption only. The structure of the JSON inside has its own `Version` (see below). A file with a format version above 2 is reported as written by a newer Erapkey (`UnsupportedVaultVersionException`), not as a wrong password.
 
-### Format version 1 (SinglePass 1.x)
+### Format version 1 (Erapkey 1.x)
 
 | Offset | Size | Content |
 |---|---|---|
@@ -68,7 +69,7 @@ A file that does not start with the magic is read as the old format: a 16-byte I
 
 ### Writing
 
-Every write goes to a temporary file `singlePass.dat.<guid>.tmp` and is flushed to disk. The temporary file is then read back: it must start with exactly the header of the vault key in memory (byte for byte, so it holds the same password slot), the key must match the key id, and the contents must decrypt with that key. The password slot itself is checked when the key is made: a new key (new vault, conversion, password change) must open with its password before it is used, which runs Argon2 once more; a key taken from the cloud comes from a slot that just opened with the password. Only then does the temporary file replace `singlePass.dat` with `File.Replace` (or `File.Move` for the first write). A crash or a failed check leaves the old file intact. Backups are described [below](#backups).
+Every write goes to a temporary file `erapkey.dat.<guid>.tmp` and is flushed to disk. The temporary file is then read back: it must start with exactly the header of the vault key in memory (byte for byte, so it holds the same password slot), the key must match the key id, and the contents must decrypt with that key. The password slot itself is checked when the key is made: a new key (new vault, conversion, password change) must open with its password before it is used, which runs Argon2 once more; a key taken from the cloud comes from a slot that just opened with the password. Only then does the temporary file replace `erapkey.dat` with `File.Replace` (or `File.Move` for the first write). A crash or a failed check leaves the old file intact. Backups are described [below](#backups).
 
 ## Contents
 
@@ -95,7 +96,7 @@ Every write goes to a temporary file `singlePass.dat.<guid>.tmp` and is flushed 
 | 6 | Adds SSH hosts: `Credential.Host`. |
 
 - A vault with a newer `Version` than the application supports is rejected, both locally and on sync. Builds that only know version 1 cannot open a version 2 vault. This is intentional: an old build would drop `DeletedCredentials` on its next write and deleted credentials would return. For the same reason builds that only know version 2 cannot open a version 3 vault: they would not find the login fields, which moved into `Login`, and would drop the SSH key data. Builds that only know version 3 cannot open a version 4 vault: they would drop card data. Builds that only know version 4 cannot open a version 5 vault: they would show entries in the trash as regular ones and drop the trash state. Builds that only know version 5 cannot open a version 6 vault: they would drop host data.
-- Such a vault is reported as written by a newer SinglePass (`UnsupportedVaultVersionException`): the unlock window and sync ask to update SinglePass instead of asking for another password. SinglePass 1.x cannot tell the two apart and keeps asking for the password of a newer cloud copy; it does not change the copy.
+- Such a vault is reported as written by a newer Erapkey (`UnsupportedVaultVersionException`): the unlock window and sync ask to update Erapkey instead of asking for another password. Erapkey 1.x cannot tell the two apart and keeps asking for the password of a newer cloud copy; it does not change the copy.
 - Older vaults are upgraded in memory and written as the current version on the next change. For versions before 3, `LoginField`, `PasswordField`, `SiteField`, `Totp` and `PasswordHistory` of every credential are moved into a `Login` object before the JSON is read. This happens in `ReadVault`, so the local vault, backups and the cloud copy are all converted.
 - A missing collection is read as empty; an explicit `null` makes the file invalid.
 
@@ -132,7 +133,7 @@ Merge, tombstones, groups and backups do not depend on the type: an entry wins o
 1. A value in `CredentialType` and a data class (for example `CardData`) with a `Clone` method.
 2. A property on `Credential`, a line in `EnsureTypeData` and in `Clone`.
 3. A new vault `Version`, so that older builds refuse the vault instead of dropping the new block.
-4. UI, in `SinglePass.WPF`:
+4. UI, in `Erapkey.Desktop`:
    - a view model in `ViewModels/Entries` derived from `CredentialDataViewModel` (list subtitle, glyph, searchable texts) and a case in `CredentialViewModel.CreateData`;
    - a view and an editor in `Views/Controls/Entries`, registered as `DataTemplate`s for the view model in `CredentialsDetailsControl.xaml`;
    - an item in the **New item** menu (`PasswordsControl.xaml`), a category in the sidebar (`MainWindowViewModel.CategoryNavigation`) and strings.
@@ -186,7 +187,7 @@ Tombstones of credentials and groups are never removed.
 
 ## Backups
 
-`Services/VaultBackups.cs` copies the encrypted vault file to `%LOCALAPPDATA%\SinglePass\Backups\singlePass-<UTC yyyyMMdd-HHmmss-fff>-<reason>.dat`. A backup is the file exactly as it was, so it opens with the master password of that moment, and without a password while it uses the current vault key. The newest 20 are kept; older ones are deleted when a new one is made.
+`Services/VaultBackups.cs` copies the encrypted vault file to `%LOCALAPPDATA%\Erapkey\Backups\erapkey-<UTC yyyyMMdd-HHmmss-fff>-<reason>.dat`. A backup is the file exactly as it was, so it opens with the master password of that moment, and without a password while it uses the current vault key. The newest 20 are kept; older ones are deleted when a new one is made.
 
 | Reason | When |
 |---|---|
@@ -194,7 +195,7 @@ Tombstones of credentials and groups are never removed.
 | `sync` | Before a sync writes changes that came from the cloud. |
 | `password` | Before the master password is changed, or replaced by the cloud one during sync. |
 | `restore` | Before a backup is restored. |
-| `upgrade` | Before a vault file of SinglePass 1.x is rewritten in format 2. Once per file: if the newest `upgrade` backup holds the same bytes (an earlier conversion could not write), no new one is made. A failure is logged and the conversion goes on. |
+| `upgrade` | Before a vault file of Erapkey 1.x is rewritten in format 2. Once per file: if the newest `upgrade` backup holds the same bytes (an earlier conversion could not write), no new one is made. A failure is logged and the conversion goes on. |
 
 Except for `daily` and `upgrade`, a failed backup cancels the operation.
 
@@ -208,7 +209,7 @@ Except for `daily` and `upgrade`, a failed backup cancels the operation.
 - entries in the trash now that were not in the trash in the backup are restored from it; entries that were in the trash in the backup are not restored;
 - every restored item gets the current time, so the next sync spreads the restore to the cloud copy and other devices instead of undoing it (a restored credential is newer than the tombstone that deleted it).
 
-A backup that uses the current vault key opens without a password; one made before a password change (another key) or by SinglePass 1.x asks for the password of that backup. Restoring a backup by copying the file over `singlePass.dat` also works, but then the next sync merges the newer cloud changes and deletions back in.
+A backup that uses the current vault key opens without a password; one made before a password change (another key) or by Erapkey 1.x asks for the password of that backup. Restoring a backup by copying the file over `erapkey.dat` also works, but then the next sync merges the newer cloud changes and deletions back in.
 
 ## Cloud synchronization
 

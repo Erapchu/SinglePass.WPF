@@ -3,7 +3,7 @@
 import { generateKeyPair } from './crypto';
 import type { Pairing } from './client';
 
-const DATABASE = 'singlepass';
+const DATABASE = 'erapkey';
 const STORE = 'pairing';
 const KEY = 'current';
 
@@ -42,7 +42,7 @@ export async function savePairing(pairing: Pairing): Promise<void> {
   await transaction('readwrite', (store) => store.put(pairing, KEY));
 }
 
-/** SinglePass no longer knows the pairing: keep the key pair, forget the rest. */
+/** Erapkey no longer knows the pairing: keep the key pair, forget the rest. */
 export async function forgetPairing(pairing: Pairing): Promise<void> {
   await savePairing({ keys: pairing.keys });
 }

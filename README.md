@@ -79,7 +79,7 @@ The vault is encrypted with AES-256-GCM using a random vault key. The file keeps
 
 ## Build from source
 
-The project targets .NET 10 and Windows x64. Building requires Windows, the .NET 10 SDK and Visual Studio/MSBuild with the .NET desktop development workload; the project uses a Windows UI Automation COM reference.
+The project targets .NET 11 and Windows x64. To build it, use the .NET 11 SDK and MSBuild from Visual Studio 2026 (18.12 or later) with the .NET desktop development workload. The project uses a Windows UI Automation COM reference.
 
 From a Visual Studio Developer PowerShell at the repository root:
 
@@ -88,7 +88,7 @@ msbuild .\Erapkey.sln /t:Restore /p:Configuration=Release
 msbuild .\Erapkey.sln /t:Build /p:Configuration=Release
 ```
 
-To publish a self-contained Windows x64 build, as in the release workflow:
+Publishing also requires the Desktop development with C++ workload to compile the browser's Native Messaging host. To publish a self-contained Windows x64 build, run the command used by the release workflow:
 
 ```powershell
 msbuild .\Erapkey.Desktop\Erapkey.Desktop.csproj /t:Publish /p:Configuration=Release /p:RuntimeIdentifier=win-x64 /p:SelfContained=true /p:PublishReadyToRun=true /p:PublishSingleFile=true

@@ -87,7 +87,7 @@ When updating Velopack, change the `Velopack` package version in `Erapkey.Deskto
 
 ## Delta size
 
-A delta contains only the binary difference from the previous version. With an ordinary code change it is a few hundred kilobytes, both for the single-file build and for a build with separate files (measured locally: about 0.1 MB against an 80 MB full package). Expect a larger delta when the .NET runtime patch version changes, because the workflow installs the latest `10.0.x` SDK.
+A delta contains only the binary difference from the previous version. With an ordinary code change it is a few hundred kilobytes, both for the single-file build and for a build with separate files (measured locally: about 0.1 MB against an 80 MB full package). Expect a larger delta when the .NET runtime patch version changes, because the workflow installs the latest `11.0.x` SDK.
 
 ## Testing a release
 

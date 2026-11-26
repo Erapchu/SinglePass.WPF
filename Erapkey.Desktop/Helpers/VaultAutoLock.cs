@@ -47,7 +47,8 @@ namespace Erapkey.Desktop.Helpers
                 return;
 
             var timeout = TimeSpan.FromMinutes((int)idleLockTimeout);
-            var idle = unchecked((uint)Environment.TickCount - input.Tick) >= timeout.TotalMilliseconds;
+            // LASTINPUTINFO uses the Win32 tick count. On .NET 11, Environment.TickCount excludes time spent asleep.
+            var idle = unchecked(GetTickCount() - input.Tick) >= timeout.TotalMilliseconds;
             var expired = idle && !_idle;
             _idle = idle;
             if (expired)
@@ -81,6 +82,9 @@ namespace Erapkey.Desktop.Helpers
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool GetLastInputInfo(ref LastInputInfo input);
+
+        [DllImport("kernel32.dll")]
+        private static extern uint GetTickCount();
 
         [DllImport("wtsapi32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]

@@ -135,20 +135,6 @@ ul {
   color: var(--muted);
 }
 
-button.icon {
-  width: 28px;
-  height: 28px;
-  border: 0;
-  border-radius: 4px;
-  background: none;
-  cursor: pointer;
-  filter: grayscale(1);
-}
-
-button.icon:hover {
-  background: var(--line);
-}
-
 .toast {
   margin-top: 10px;
   color: var(--muted);

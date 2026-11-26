@@ -1,4 +1,4 @@
-// The protocol with SinglePass over any message transport: the native messaging port in the browser,
+// The protocol with Erapkey over any message transport: the native messaging port in the browser,
 // the named pipe in the Node test (docs/browser-extension.md#pairing, #session, #requests).
 import {
   NONCE_SIZE, deriveSessionKeys, exportPublicKey, fromBase64, generateKeyPair, importPublicKey, open,
@@ -27,7 +27,7 @@ export interface Transport {
 export interface Pairing {
   keys: CryptoKeyPair;
   pairingId?: string;
-  /** The static public key SinglePass made for this pairing (SPKI, base64). */
+  /** The static public key Erapkey made for this pairing (SPKI, base64). */
   appPublicKey?: string;
 }
 
@@ -65,7 +65,7 @@ export class Client {
   private deriving = false;
   private readonly early: any[] = [];
 
-  /** Events pushed by SinglePass: locked, unlocked, vaultChanged. */
+  /** Events pushed by Erapkey: locked, unlocked, vaultChanged. */
   onEvent?: (name: string) => void;
   /** Called once when the connection ends. */
   onClose?: (code: ErrorCode) => void;
@@ -88,7 +88,7 @@ export class Client {
         this.close('app_not_running');
         return;
       }
-      // SinglePass may send an event right after its hello answer, while the keys are still being derived here.
+      // Erapkey may send an event right after its hello answer, while the keys are still being derived here.
       if (this.deriving && typeof message?.c === 'string') {
         this.early.push(message);
         return;
@@ -120,8 +120,8 @@ export class Client {
   }
 
   /**
-   * Asks SinglePass to allow this extension. `onCode` gets the six digits to show while the user compares them
-   * with the SinglePass window. Returns the pairing to keep.
+   * Asks Erapkey to allow this extension. `onCode` gets the six digits to show while the user compares them
+   * with the Erapkey window. Returns the pairing to keep.
    */
   async associate(name: string, keys: CryptoKeyPair, onCode: (code: string) => void): Promise<Pairing> {
     const extensionPublic = await exportPublicKey(keys.publicKey);
@@ -131,13 +131,13 @@ export class Client {
     if (pairing.type !== 'pairing') throw new HostError(pairing.error ?? 'bad_request');
     onCode(await pairingCode(fromBase64(pairing.appPublicKey), extensionPublic));
 
-    // SinglePass waits up to two minutes for the user.
+    // Erapkey waits up to two minutes for the user.
     const associated = await this.nextPlain(150_000);
     if (associated.type !== 'associated' || !associated.ok) throw new HostError(associated.error ?? 'bad_request');
     return { keys, pairingId: associated.pairingId, appPublicKey: pairing.appPublicKey };
   }
 
-  /** Opens the encrypted session of a pairing. Throws HostError('not_paired') when SinglePass forgot it. */
+  /** Opens the encrypted session of a pairing. Throws HostError('not_paired') when Erapkey forgot it. */
   async hello(pairing: Pairing): Promise<void> {
     if (!pairing.pairingId || !pairing.appPublicKey) throw new HostError('not_paired');
     const ephemeral = await generateKeyPair();
@@ -169,7 +169,7 @@ export class Client {
     return this.request({ type: 'status' });
   }
 
-  /** Waits for the user to unlock SinglePass (up to a minute). */
+  /** Waits for the user to unlock Erapkey (up to a minute). */
   async unlock(): Promise<boolean> {
     const answer = await this.request({ type: 'unlock' });
     return !answer.locked;
@@ -181,10 +181,6 @@ export class Client {
 
   async getCredentials(entryId: string, url: string): Promise<Credentials> {
     return this.request({ type: 'getCredentials', entryId, url });
-  }
-
-  async getTotp(entryId: string, url: string): Promise<{ code: string; validFor: number }> {
-    return this.request({ type: 'getTotp', entryId, url });
   }
 
   async openEntry(entryId: string): Promise<void> {

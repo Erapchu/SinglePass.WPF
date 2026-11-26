@@ -2,7 +2,7 @@
 // Rebuilds and reloads the extension on every change under src/. Closing the browser or Ctrl+C stops it.
 //   node run.mjs [chrome|edge] [--release] [url...]
 //     chrome|edge  the browser (default: Chrome if installed, otherwise Edge)
-//     --release    talk to the installed (Release) SinglePass instead of Debug
+//     --release    talk to the installed (Release) Erapkey instead of Debug
 //     url          pages to open (default: the browser's extensions page)
 //
 // Branded Chrome ignores --load-extension since version 137, so the extension is loaded through the DevTools
@@ -53,7 +53,7 @@ if (!executable) {
 
 checkHostRegistered();
 
-// Release SinglePass allows the development ID too until the stores assign theirs, so both builds carry the key.
+// Release Erapkey allows the development ID too until the stores assign theirs, so both builds carry the key.
 await build({ host, key: true });
 
 const profile = fileURLToPath(new URL(`.profile/${browserName}-${host}`, import.meta.url));
@@ -91,7 +91,7 @@ try {
   loaded = true;
   console.log(`${browser.title} started with the extension ${id} (profile ${profile}).`);
   if (id !== DEV_EXTENSION_ID)
-    console.warn(`Warning: SinglePass allows only ${DEV_EXTENSION_ID}; this ID will be refused.`);
+    console.warn(`Warning: Erapkey allows only ${DEV_EXTENSION_ID}; this ID will be refused.`);
 } catch (error) {
   if (child.exitCode !== null)
     await new Promise(() => {}); // The exit handler reports it.
@@ -127,14 +127,14 @@ function findExecutable({ appPath, paths }) {
   return paths.find(path => path && existsSync(path));
 }
 
-/** SinglePass registers the native messaging host when the browser extension setting is on. */
+/** Erapkey registers the native messaging host when the browser extension setting is on. */
 function checkHostRegistered() {
   try {
     execFileSync('reg', ['query', `${browser.registry}\\${HOST_NAMES[host]}`], { stdio: 'ignore' });
   } catch {
-    const app = host === 'dev' ? 'Debug SinglePass' : 'SinglePass';
+    const app = host === 'dev' ? 'Debug Erapkey' : 'Erapkey';
     console.warn(`Note: ${HOST_NAMES[host]} is not registered for ${browser.title}. ` +
-      `Start ${app} and turn on Settings → Security → Browser extension, or the extension will say SinglePass is not running.`);
+      `Start ${app} and turn on Settings → Security → Browser extension, or the extension will say Erapkey is not running.`);
   }
 }
 

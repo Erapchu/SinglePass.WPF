@@ -1,5 +1,5 @@
 // Runs the extension's protocol code (client.ts, crypto.ts with WebCrypto) against a real BrowserPipeServer.
-// Started by SinglePass.Core.Tests/BrowserExtensionInteropTests with the pipe name and the expected answers:
+// Started by Erapkey.Core.Tests/BrowserExtensionInteropTests with the pipe name and the expected answers:
 //   node dist-test/pipe-client.js <pipe name> <entry id> <login> <password>
 // Prints "OK" and exits with 0 when every step answers as expected.
 import { connect } from 'node:net';

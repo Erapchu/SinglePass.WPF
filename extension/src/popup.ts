@@ -1,7 +1,7 @@
 // The toolbar popup: status, pairing, unlock, and the logins of the current tab. Everything goes through the
 // background worker; the popup keeps nothing after it closes.
 import type { ErrorCode, Login } from './client';
-import type { CopyResult, FillResult, PopupRequest, State } from './messages';
+import type { FillResult, PopupRequest, State } from './messages';
 
 const content = document.getElementById('content')!;
 const hostLabel = document.getElementById('host')!;
@@ -42,6 +42,7 @@ function errorText(error: ErrorCode | string): string {
     case 'not_found': return t('errorNotFound');
     case 'no_fields': return t('errorNoFields');
     case 'page_changed': return t('errorPageChanged');
+    case 'no_totp': return t('errorNoTotp');
     case 'locked': return t('locked');
     default: return t('errorGeneric', error);
   }
@@ -112,23 +113,6 @@ function loginList(logins: Login[]): HTMLElement {
       else toast(errorText(result.error));
     });
 
-    for (const [selector, field, title] of [
-      ['.copy-login', 'login', t('copyLogin')],
-      ['.copy-password', 'password', t('copyPassword')],
-    ] as const) {
-      const copyButton = row.querySelector<HTMLButtonElement>(selector)!;
-      copyButton.title = title;
-      copyButton.setAttribute('aria-label', title);
-      copyButton.addEventListener('click', async () => {
-        const result = await send<CopyResult>({ cmd: 'copy', tabId, entryId: login.entryId, field });
-        if (!result.ok) {
-          toast(errorText(result.error));
-          return;
-        }
-        await navigator.clipboard.writeText(result.text);
-        toast(t('copied'));
-      });
-    }
     list.append(row);
   }
   return list;

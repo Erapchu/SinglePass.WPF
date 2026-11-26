@@ -1,11 +1,11 @@
-// Key agreement and message encryption with SinglePass (docs/browser-extension.md#session).
-// Mirrors SinglePass.Core/Services/Browser/BrowserCrypto.cs: ECDH P-256 with SPKI public keys,
+// Key agreement and message encryption with Erapkey (docs/browser-extension.md#session).
+// Mirrors Erapkey.Core/Services/Browser/BrowserCrypto.cs: ECDH P-256 with SPKI public keys,
 // HKDF-SHA256 and AES-256-GCM with a 12-byte nonce of 4 zero bytes and a 64-bit big-endian counter.
 
 const subtle = globalThis.crypto.subtle;
 const encoder = new TextEncoder();
-const PAIRING_LABEL = encoder.encode('singlepass-pair');
-const SESSION_INFO = encoder.encode('singlepass-browser-v1');
+const PAIRING_LABEL = encoder.encode('erapkey-pair');
+const SESSION_INFO = encoder.encode('erapkey-browser-v1');
 const ECDH_P256 = { name: 'ECDH', namedCurve: 'P-256' } as const;
 
 export const NONCE_SIZE = 16;
@@ -27,16 +27,16 @@ export function randomBytes(length: number): Uint8Array {
   return globalThis.crypto.getRandomValues(new Uint8Array(length));
 }
 
-/** The six digits SinglePass shows too: SHA-256("singlepass-pair" || appPublic || extensionPublic), first 4 bytes mod 1 000 000. */
+/** The six digits Erapkey shows too: SHA-256("erapkey-pair" || appPublic || extensionPublic), first 4 bytes mod 1 000 000. */
 export async function pairingCode(appPublicKey: Uint8Array, extensionPublicKey: Uint8Array): Promise<string> {
   const hash = new DataView(await subtle.digest('SHA-256', concat(PAIRING_LABEL, appPublicKey, extensionPublicKey)));
   return String(hash.getUint32(0) % 1_000_000).padStart(6, '0');
 }
 
 export interface SessionKeys {
-  /** Extension → SinglePass. */
+  /** Extension → Erapkey. */
   sendKey: CryptoKey;
-  /** SinglePass → extension. */
+  /** Erapkey → extension. */
   receiveKey: CryptoKey;
 }
 

@@ -1,8 +1,9 @@
-// The background service worker: the native messaging port to SinglePass, the pairing and the session.
-// The popup asks it for everything; passwords pass through only for a fill or a copy and are not stored.
+// The background service worker: the native messaging port to Erapkey, the pairing and the session.
+// The popup asks it for everything; passwords pass through only for a fill and are not stored. There is no copy: the clipboard
+// would put them in the Win+V history and the cloud clipboard.
 import { Client, HostError, type ErrorCode, type Pairing } from './client';
 import { fillPage } from './fill';
-import type { CopyResult, FillResult, PopupRequest, State } from './messages';
+import type { FillResult, PopupRequest, State } from './messages';
 import { forgetPairing, loadPairing, savePairing } from './pairingStore';
 
 declare const __HOST_NAME__: string;
@@ -10,7 +11,7 @@ declare const __HOST_NAME__: string;
 let client: Client | undefined;
 let pairingProgress: { code?: string; result?: ErrorCode } | undefined;
 
-/** A connection to SinglePass through a new native host process, unless one is open. */
+/** A connection to Erapkey through a new native host process, unless one is open. */
 function connect(): Client {
   if (client?.isOpen) return client;
   const port = chrome.runtime.connectNative(__HOST_NAME__);
@@ -20,8 +21,8 @@ function connect(): Client {
   });
   port.onMessage.addListener((message) => connection.receive(message));
   port.onDisconnect.addListener(() => {
-    // chrome.runtime.lastError tells why: the host is not registered (SinglePass never turned the integration on)
-    // or it exited. Either way, SinglePass cannot answer now.
+    // chrome.runtime.lastError tells why: the host is not registered (Erapkey never turned the integration on)
+    // or it exited. Either way, Erapkey cannot answer now.
     const reason = chrome.runtime.lastError?.message;
     connection.close(reason && /not found|forbidden/i.test(reason) ? 'app_not_running' : 'disconnected');
   });
@@ -42,7 +43,7 @@ async function session(): Promise<Client> {
     await connection.hello(pairing);
   } catch (error) {
     if (error instanceof HostError && error.code === 'not_paired') {
-      // Removed in SinglePass, or never paired: pair again.
+      // Removed in Erapkey, or never paired: pair again.
       if (pairing.pairingId) await forgetPairing(pairing);
     } else {
       connection.close();
@@ -100,24 +101,11 @@ async function fill(tabId: number, entryId: string): Promise<FillResult> {
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
       func: fillPage,
-      args: [page.origin, credentials.login, credentials.password],
+      args: [page.origin, credentials.login, credentials.password, credentials.totp ?? null],
     });
     const outcome = result?.result;
     if (outcome === 'filled') return { ok: true, filled: true };
-    return { ok: false, error: outcome === 'page_changed' ? 'page_changed' : 'no_fields' };
-  } catch (error) {
-    return { ok: false, error: errorCode(error) };
-  }
-}
-
-async function copy(tabId: number, entryId: string, field: 'login' | 'password' | 'totp'): Promise<CopyResult> {
-  try {
-    const page = await pageOf(tabId);
-    if (!page) return { ok: false, error: 'not_found' };
-    const connection = await session();
-    if (field === 'totp') return { ok: true, text: (await connection.getTotp(entryId, page.href)).code };
-    const credentials = await connection.getCredentials(entryId, page.href);
-    return { ok: true, text: field === 'login' ? credentials.login : credentials.password };
+    return { ok: false, error: outcome === 'page_changed' || outcome === 'no_totp' ? outcome : 'no_fields' };
   } catch (error) {
     return { ok: false, error: errorCode(error) };
   }
@@ -163,8 +151,6 @@ chrome.runtime.onMessage.addListener((request: PopupRequest, sender, sendRespons
         }
       case 'fill':
         return fill(request.tabId, request.entryId);
-      case 'copy':
-        return copy(request.tabId, request.entryId, request.field);
       case 'open':
         try {
           await (await session()).openEntry(request.entryId);

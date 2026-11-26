@@ -1,0 +1,285 @@
+<Window
+    x:Class="Erapkey.Desktop.Views.Windows.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:Erapkey.Desktop.Views.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:helpers="clr-namespace:Erapkey.Desktop.Helpers"
+    xmlns:coreHelpers="clr-namespace:Erapkey.Core.Helpers;assembly=Erapkey.Core"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:loc="clr-namespace:Erapkey.Core.Localization;assembly=Erapkey.Core"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:Erapkey.Desktop.ViewModels"
+    Title="{x:Static coreHelpers:Constants.AppName}"
+    Icon="/Erapkey;component/Resources/pass-man.ico"
+    Width="800"
+    Height="550"
+    MinWidth="620"
+    MinHeight="300"
+    helpers:UiAnimations.IsEnabled="{Binding SettingsVM.AnimationsEnabled, FallbackValue=True}"
+    d:DataContext="{x:Static vm:MainWindowViewModel.DesignTimeInstance}"
+    Closed="Window_Closed"
+    Closing="Window_Closing"
+    IsVisibleChanged="Window_IsVisibleChanged"
+    Loaded="Window_Loaded"
+    UseLayoutRounding="True"
+    WindowStartupLocation="Manual"
+    mc:Ignorable="d">
+    <Window.Resources>
+        <Style x:Key="NavigationRow" TargetType="Border">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="CornerRadius" Value="5" />
+            <Setter Property="Margin" Value="0,0,0,2" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+                </Trigger>
+                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="NavigationButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+            <Setter Property="Padding" Value="12,7" />
+            <Setter Property="MinHeight" Value="38" />
+            <Setter Property="AutomationProperties.Name" Value="{Binding Name}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid Background="{TemplateBinding Background}">
+                            <Border x:Name="SelectionIndicator"
+                                    Width="3" Height="16"
+                                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                                    Background="{DynamicResource ListViewItemPillFillBrush}"
+                                    CornerRadius="2" IsHitTestVisible="False" Visibility="Collapsed" />
+                            <ContentPresenter Margin="{TemplateBinding Padding}" VerticalAlignment="Center"
+                                              TextElement.Foreground="{TemplateBinding Foreground}" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                <Setter TargetName="SelectionIndicator" Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <DataTemplate x:Key="NavigationItemTemplate" DataType="{x:Type vm:NavigationItemViewModel}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource SymbolText}" Text="{Binding Glyph}" />
+                <TextBlock Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center" Text="{Binding Name}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Name}" />
+                <Ellipse x:Name="Badge" Grid.Column="2" Width="8" Height="8" Margin="8,0,0,0" VerticalAlignment="Center"
+                         Fill="{DynamicResource AccentFillColorDefaultBrush}" Visibility="Collapsed" />
+            </Grid>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding HasBadge}" Value="True">
+                    <Setter TargetName="Badge" Property="Visibility" Value="Visible" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+    </Window.Resources>
+    <Window.CommandBindings>
+        <CommandBinding Command="{x:Static controls:SettingsControl.OpenCloudSyncCommand}" Executed="OpenCloudSync_Executed" />
+        <CommandBinding Command="{x:Static controls:SettingsControl.OpenSecurityCommand}" Executed="OpenSecurity_Executed" />
+        <CommandBinding Command="{x:Static controls:SettingsControl.OpenAppearanceCommand}" Executed="OpenAppearance_Executed" />
+        <CommandBinding Command="{x:Static controls:SettingsControl.OpenAboutCommand}" Executed="OpenAbout_Executed" />
+    </Window.CommandBindings>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding LoadingCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <Grid>
+        <!-- Not disabled while ModalHost is open: its backdrop blocks the mouse and it keeps keyboard focus. -->
+        <Grid x:Name="Workspace" Margin="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <DockPanel Margin="0,0,8,0">
+                <Border DockPanel.Dock="Top" DataContext="{Binding AllPasswordsNavigation}" Style="{StaticResource NavigationRow}"
+                        AllowDrop="True" DragOver="Group_DragOver" DragLeave="Group_DragLeave" Drop="Group_Drop">
+                    <Button Style="{StaticResource NavigationButton}" Content="{Binding}" ContentTemplate="{StaticResource NavigationItemTemplate}"
+                            Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" />
+                </Border>
+                <StackPanel DockPanel.Dock="Bottom">
+                    <Separator Margin="4,4,4,2" />
+                    <Border DataContext="{Binding TrashNavigation}" Style="{StaticResource NavigationRow}">
+                        <Button Style="{StaticResource NavigationButton}" Content="{Binding}" ContentTemplate="{StaticResource NavigationItemTemplate}"
+                                Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" />
+                    </Border>
+                    <Border DataContext="{Binding SettingsNavigation}" Style="{StaticResource NavigationRow}">
+                        <Button Style="{StaticResource NavigationButton}" Content="{Binding}" ContentTemplate="{StaticResource NavigationItemTemplate}"
+                                Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" />
+                    </Border>
+                </StackPanel>
+                <!-- Categories and groups scroll together, so a short window still reaches every item.
+                     One item is selected in the whole sidebar: a category, a group, all entries or settings. -->
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" Focusable="False">
+                    <StackPanel>
+                        <TextBlock Margin="12,10,4,6" FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding [Categories], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
+                        <ItemsControl ItemsSource="{Binding CategoryNavigation}" Focusable="False">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource NavigationRow}">
+                                        <Button Style="{StaticResource NavigationButton}" Content="{Binding}" ContentTemplate="{StaticResource NavigationItemTemplate}"
+                                                Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" />
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <DockPanel Margin="12,6,4,4">
+                            <Button DockPanel.Dock="Right" Width="28" Height="28" Padding="0" Background="Transparent" BorderThickness="0" Click="AddGroup_Click"
+                                    AutomationProperties.Name="{Binding [AddPasswordGroup], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                                    ToolTip="{Binding [AddPasswordGroup], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}">
+                                <TextBlock Style="{StaticResource SymbolText}" FontSize="12" Text="&#xE710;" />
+                            </Button>
+                            <TextBlock VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                       Text="{Binding [PasswordGroups], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}" />
+                        </DockPanel>
+                        <ItemsControl ItemsSource="{Binding GroupNavigation}" Focusable="False">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border x:Name="GroupRow" Style="{StaticResource NavigationRow}"
+                                            AllowDrop="True" DragOver="Group_DragOver" DragLeave="Group_DragLeave" Drop="Group_Drop">
+                                        <Grid>
+                                            <Button Style="{StaticResource NavigationButton}" Padding="12,7,36,7"
+                                                    Content="{Binding}" ContentTemplate="{StaticResource NavigationItemTemplate}"
+                                                    Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" />
+                                            <Button Width="28" Height="28" Margin="0,0,4,0" Padding="0"
+                                                    HorizontalAlignment="Right" Background="Transparent" BorderThickness="0" Click="GroupMenu_Click"
+                                                    AutomationProperties.Name="{Binding [PasswordGroupActions], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                                                    ToolTip="{Binding [PasswordGroupActions], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}">
+                                                <TextBlock Style="{StaticResource SymbolText}" FontSize="13" Text="&#xE712;" />
+                                                <Button.ContextMenu>
+                                                    <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                                        <MenuItem Header="{Binding [Edit], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                                                                  Click="EditGroup_Click" />
+                                                        <MenuItem Header="{Binding [Delete], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                                                                  Click="DeleteGroup_Click" />
+                                                    </ContextMenu>
+                                                </Button.ContextMenu>
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                                        <Setter Property="Opacity" Value="0" />
+                                                        <Setter Property="IsHitTestVisible" Value="False" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsMouseOver, ElementName=GroupRow}" Value="True">
+                                                                <Setter Property="Opacity" Value="1" />
+                                                                <Setter Property="IsHitTestVisible" Value="True" />
+                                                            </DataTrigger>
+                                                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                                                <Setter Property="Opacity" Value="1" />
+                                                                <Setter Property="IsHitTestVisible" Value="True" />
+                                                            </Trigger>
+                                                            <DataTrigger Binding="{Binding ContextMenu.IsOpen, RelativeSource={RelativeSource Self}}" Value="True">
+                                                                <Setter Property="Opacity" Value="1" />
+                                                                <Setter Property="IsHitTestVisible" Value="True" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+            </DockPanel>
+            <DockPanel Grid.Column="1" ClipToBounds="True">
+                <TextBlock x:Name="PasswordsHeading" DockPanel.Dock="Top" Margin="2,4,8,8" Height="39"
+                           Padding="0,3,0,0" FontSize="24" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
+                           AutomationProperties.HeadingLevel="Level1" Text="{Binding SelectedNavigationItem.Name}"
+                           ToolTip="{Binding SelectedNavigationItem.Name}" />
+                <Grid x:Name="SettingsHeader" DockPanel.Dock="Top" Margin="8,4,8,8" Visibility="Collapsed">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button
+                        x:Name="SettingsBreadcrumbButton"
+                        Height="39"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Top"
+                        AutomationProperties.Name="{Binding [Settings], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}"
+                        Background="Transparent"
+                        BorderBrush="Transparent"
+                        Click="SettingsBreadcrumbButton_Click"
+                        Visibility="{Binding Visibility, ElementName=SettingsPageBreadcrumb}" />
+                    <TextBlock
+                        x:Name="SettingsHeading"
+                        Height="39"
+                        Padding="2,3,4,0"
+                        VerticalAlignment="Top"
+                        FontSize="24"
+                        FontWeight="SemiBold"
+                        IsHitTestVisible="False"
+                        Text="{Binding [Settings], Source={x:Static loc:LocalizationManager.Instance}, Mode=OneWay}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="AutomationProperties.HeadingLevel" Value="Level1" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Visibility, ElementName=SettingsPageBreadcrumb}" Value="Visible">
+                                        <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+                                        <Setter Property="AutomationProperties.HeadingLevel" Value="None" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <DockPanel x:Name="SettingsPageBreadcrumb" Grid.Column="1" Visibility="Collapsed">
+                        <Grid DockPanel.Dock="Left" Height="39" Margin="8,0,12,0" VerticalAlignment="Top">
+                            <TextBlock Style="{StaticResource SymbolText}" Text="&#xE76C;" />
+                        </Grid>
+                        <TextBlock
+                            x:Name="SettingsPageTitle"
+                            Padding="0,3,0,0"
+                            AutomationProperties.HeadingLevel="Level1"
+                            FontSize="24"
+                            FontWeight="SemiBold"
+                            TextWrapping="Wrap" />
+                    </DockPanel>
+                </Grid>
+                <ContentControl
+                    x:Name="NavigationContent"
+                    HorizontalContentAlignment="Stretch"
+                    VerticalContentAlignment="Stretch">
+                    <ContentControl.Style>
+                        <Style TargetType="ContentControl">
+                            <Setter Property="Content" Value="{Binding SelectedNavigationItem.Content}" />
+                        </Style>
+                    </ContentControl.Style>
+                    <ContentControl.RenderTransform>
+                        <TranslateTransform x:Name="NavigationOffset" />
+                    </ContentControl.RenderTransform>
+                </ContentControl>
+            </DockPanel>
+        </Grid>
+        <controls:ModalHost x:Name="ModalHost" />
+        <Border
+            x:Name="StatusBanner"
+            Margin="208,8,8,8"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Bottom"
+            Padding="14,8"
+            AutomationProperties.LiveSetting="Polite"
+            Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
+            IsHitTestVisible="False"
+            Style="{StaticResource Card}"
+            Visibility="Collapsed">
+            <TextBlock x:Name="StatusText" />
+        </Border>
+    </Grid>
+</Window>

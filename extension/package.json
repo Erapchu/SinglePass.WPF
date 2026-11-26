@@ -1,8 +1,8 @@
 {
-  "name": "singlepass-extension",
+  "name": "erapkey-extension",
   "private": true,
   "version": "0.1.0",
-  "description": "SinglePass browser extension for Chrome and Edge (docs/browser-extension.md)",
+  "description": "Erapkey browser extension for Chrome and Edge (docs/browser-extension.md)",
   "type": "module",
   "scripts": {
     "start": "node run.mjs",

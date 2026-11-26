@@ -241,6 +241,15 @@ namespace Erapkey.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Before conversion to the new format.
+        /// </summary>
+        public static string BackupReasonUpgrade {
+            get {
+                return ResourceManager.GetString("BackupReasonUpgrade", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Restored credentials: {0}. Returned to the backup version: {1}.
         ///
         ///Sync to update the cloud copy and other devices..
@@ -644,6 +653,15 @@ namespace Erapkey.Language.Properties {
         public static string CloudVaultKeptChanging {
             get {
                 return ResourceManager.GetString("CloudVaultKeptChanging", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The cloud copy was saved by a newer version of Erapkey on another device. Update Erapkey on this device to sync..
+        /// </summary>
+        public static string CloudVaultNewerVersion {
+            get {
+                return ResourceManager.GetString("CloudVaultNewerVersion", resourceCulture);
             }
         }
         
@@ -2828,6 +2846,15 @@ namespace Erapkey.Language.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to This vault was saved by a newer version of Erapkey. Update Erapkey to open it..
+        /// </summary>
+        public static string VaultNewerVersion {
+            get {
+                return ResourceManager.GetString("VaultNewerVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Website.
         /// </summary>
         public static string Website {
@@ -2873,7 +2900,7 @@ namespace Erapkey.Language.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The master password kept for Windows Hello no longer opens the vault. Enter the master password; Windows Hello will use it next time..
+        ///   Looks up a localized string similar to Windows Hello no longer opens the vault: its key changed. Enter the master password; Windows Hello will work again next time..
         /// </summary>
         public static string WindowsHelloPasswordOutdated {
             get {

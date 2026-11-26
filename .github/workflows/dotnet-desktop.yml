@@ -79,6 +79,15 @@ jobs:
         --packAuthors "Andrey Nasonov"
         --icon .\Erapkey.Desktop\Resources\pass-man.ico
         --outputDir .\Releases
+    - name: Add version to Setup.exe and Portable.zip names
+      if: steps.version.outputs.published == 'false'
+      env:
+        VERSION: ${{ steps.version.outputs.version }}
+      # Only the installer and the portable archive are renamed; nupkg packages and the update feed keep their names.
+      run: |
+        Get-ChildItem .\Releases -Filter '*-Setup.exe' | ForEach-Object { Rename-Item $_.FullName ($_.Name -replace '-Setup\.exe$', "-$env:VERSION-Setup.exe") }
+        Get-ChildItem .\Releases -Filter '*-Portable.zip' | ForEach-Object { Rename-Item $_.FullName ($_.Name -replace '-Portable\.zip$', "-$env:VERSION-Portable.zip") }
+        Get-ChildItem .\Releases | Select-Object -ExpandProperty Name
     - name: Upload GitHub Release
       if: steps.version.outputs.published == 'false'
       env:

@@ -224,6 +224,7 @@ Scripts in `extension/` (Node 22):
 | `npm run start:release` | The same against the installed (Release) SinglePass: `com.singlepass.host` and its vault. |
 | `npm run watch` | Development build that rebuilds on changes, for an extension loaded by hand. |
 | `npm run build:dev` | Development build into `dist/` (`com.singlepass.host.dev`, fixed key). |
+| `npm run build:unpacked` | Build into `dist/` for the installed SinglePass (`com.singlepass.host`, fixed key). |
 | `npm run build` | Release build into `dist/` (`com.singlepass.host`, no key: the store assigns the ID). |
 | `npm run typecheck` | TypeScript check. |
 | `npm run test:pipe` | The Node pipe client of `BrowserExtensionInteropTests`. |
@@ -231,6 +232,8 @@ Scripts in `extension/` (Node 22):
 `npm start` uses its own browser profile in `extension/.profile/<browser>-<dev|release>`, so the pairing stays between runs and the everyday profile is untouched; close that window before starting it again. Branded Chrome ignores `--load-extension` since version 137, so `run.mjs` loads the folder through the DevTools protocol (`Extensions.loadUnpacked` over `--remote-debugging-pipe` with `--enable-unsafe-extension-debugging`); Edge also gets `--edge-skip-compat-layer-relaunch`, without which it restarts itself in a process that has no DevTools pipe. A reload after a rebuild restarts the service worker, so reopen the popup to see the change.
 
 To load it by hand instead: `npm run build:dev`, open `chrome://extensions` (or `edge://extensions`), turn on developer mode and load `extension/dist/`.
+
+To load it by hand for the installed SinglePass, run `npm run build:unpacked` and load the same folder. If the folder is already loaded with a different extension ID, remove that entry before loading it again. The expected ID is `mhnlllocpadmflggkijecmklkooflbbe`.
 
 ## Implementation order
 

@@ -219,6 +219,8 @@ Manifest V3, TypeScript, сборка esbuild (`extension/`, `npm run build` →
 
 Чтобы попробовать: соберите решение в Debug, запустите SinglePass (он создаст новое пустое хранилище в `SinglePass.Dev`), включите **Настройки → Безопасность → Расширение для браузера**, выполните `npm install` и `npm run build:dev` в `extension/`, откройте `chrome://extensions` (или `edge://extensions`), включите режим разработчика и загрузите `extension/dist/`.
 
+Для установленного SinglePass выполните `npm run build:unpacked` в `extension/` и загрузите ту же папку. Эта сборка подключается к `com.singlepass.host` и содержит ключ для ID `mhnlllocpadmflggkijecmklkooflbbe`. Если папка уже загружена с другим ID, удалите прежнюю запись расширения и загрузите папку заново.
+
 <a id="implementation-order"></a>
 ## Порядок реализации
 

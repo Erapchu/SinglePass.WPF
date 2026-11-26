@@ -1,5 +1,6 @@
 // Builds the extension into dist/ (load it unpacked from there).
 //   node build.mjs          release: talks to com.singlepass.host, no key (the store assigns the ID)
+//   node build.mjs --unpacked  installed SinglePass: talks to com.singlepass.host and has a fixed key
 //   node build.mjs --dev    development: talks to com.singlepass.host.dev (Debug SinglePass) and has a fixed key,
 //                           so the unpacked extension always gets the ID that SinglePass allows
 //   node build.mjs --watch  with --dev: rebuild on every change under src/
@@ -104,9 +105,10 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
     await buildTestClient();
   } else {
     const dev = args.includes('--dev');
-    const options = { host: dev ? 'dev' : 'release' };
+    const options = { host: dev ? 'dev' : 'release', key: dev || args.includes('--unpacked') };
     await build(options);
-    console.log(`Built ${dev ? 'development' : 'release'} extension into dist/`);
+    const buildName = dev ? 'development' : options.key ? 'unpacked release' : 'release';
+    console.log(`Built ${buildName} extension into dist/`);
     if (args.includes('--watch')) {
       watchSources(options, () => console.log(`${new Date().toLocaleTimeString()} rebuilt`));
       console.log('Watching src/ for changes; press Ctrl+C to stop.');

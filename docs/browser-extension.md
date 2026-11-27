@@ -10,7 +10,7 @@ Code: `Erapkey.Core/Services/Browser/` (protocol, pairing, session crypto), `Era
 - Match entries by the address the browser reports for the tab, so a look-alike site gets no suggestions. The quick-access popup no longer reads the browser address bar (UI Automation could not tell the scheme, the right edit field or text being typed from the page address); it is off by default and stays for other applications.
 - The vault never leaves the desktop application. The extension gets one entry at a time, after a user action, and keeps no secrets in browser storage.
 
-Not in the first version: saving new logins from the browser, passkeys, cards and identities, filling without Erapkey running.
+Not in the first version: saving new logins from the browser, passkeys (planned in [passkeys.md](passkeys.md)), cards and identities, filling without Erapkey running.
 
 ## Architecture
 

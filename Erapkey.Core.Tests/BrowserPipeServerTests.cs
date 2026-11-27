@@ -25,7 +25,7 @@ namespace Erapkey.Core.Tests
 
         public BrowserPipeServerTests()
         {
-            _pairings = new BrowserPairingStore(Path.Combine(_directory, "browserPairings.dat"), null);
+            _pairings = new BrowserPairingStore(Path.Combine(_directory, "browserPairings.dat"), new DpapiUserDataProtector(), null);
             _server = new BrowserPipeServer(_backend, _pairings, new WebsiteMatcher(PublicSuffixList.Default), null,
                 "erapkey-browser-test-" + Guid.NewGuid(), _ => true);
             _server.Start();

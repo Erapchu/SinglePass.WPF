@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,6 +13,7 @@ namespace Erapkey.Core.Services
     /// find it through <c>IdentityAgent</c> or <c>SSH_AUTH_SOCK</c>. Only the current user can connect,
     /// and not over the network.
     /// </summary>
+    [SupportedOSPlatform("windows")]
     public sealed class SshAgentServer : NamedPipeServer
     {
         private readonly SshAgent _agent;

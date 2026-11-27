@@ -3,6 +3,7 @@ using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,6 +14,7 @@ namespace Erapkey.Core.Services.Browser
     /// (docs/browser-extension.md). Connections come only from the native host of this application; requests are
     /// answered only inside a session of a paired extension.
     /// </summary>
+    [SupportedOSPlatform("windows")]
     public sealed class BrowserPipeServer : NamedPipeServer
     {
         public const int ProtocolVersion = 1;

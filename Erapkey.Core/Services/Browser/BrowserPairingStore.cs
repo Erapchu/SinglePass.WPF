@@ -21,7 +21,7 @@ namespace Erapkey.Core.Services.Browser
         DateTimeOffset LastUsedAt);
 
     /// <summary>
-    /// Paired extensions of this device, in a file protected with DPAPI for the current user. Not synced: a pairing
+    /// Paired extensions of this device, in a file protected for the current user (<see cref="IUserDataProtector"/>). Not synced: a pairing
     /// belongs to one browser profile on one machine.
     /// </summary>
     public sealed class BrowserPairingStore
@@ -30,6 +30,7 @@ namespace Erapkey.Core.Services.Browser
         private static readonly TimeSpan LastUsedPrecision = TimeSpan.FromHours(1);
 
         private readonly string _path;
+        private readonly IUserDataProtector _protector;
         private readonly ILogger _logger;
         private readonly object _sync = new();
         private List<BrowserPairing> _pairings;
@@ -37,9 +38,10 @@ namespace Erapkey.Core.Services.Browser
         /// <summary>Raised after a pairing is added or removed, on the thread that changed it.</summary>
         public event Action Changed;
 
-        public BrowserPairingStore(string path, ILogger logger)
+        public BrowserPairingStore(string path, IUserDataProtector protector, ILogger logger)
         {
             _path = path ?? throw new ArgumentNullException(nameof(path));
+            _protector = protector ?? throw new ArgumentNullException(nameof(protector));
             _logger = logger;
         }
 
@@ -106,7 +108,7 @@ namespace Erapkey.Core.Services.Browser
             try
             {
                 var encrypted = File.ReadAllBytes(_path);
-                var plaintext = ProtectedData.Unprotect(encrypted, null, DataProtectionScope.CurrentUser);
+                var plaintext = _protector.Unprotect(encrypted);
                 try
                 {
                     _pairings = JsonSerializer.Deserialize<List<BrowserPairing>>(plaintext) ?? [];
@@ -135,7 +137,7 @@ namespace Erapkey.Core.Services.Browser
             byte[] encrypted;
             try
             {
-                encrypted = ProtectedData.Protect(plaintext, null, DataProtectionScope.CurrentUser);
+                encrypted = _protector.Protect(plaintext);
             }
             finally
             {

@@ -4,6 +4,7 @@ using System;
 using System.Buffers.Binary;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -16,6 +17,7 @@ namespace Erapkey.Core.Services.Browser
     /// One native host connection: plain <c>associate</c> and <c>hello</c>, then encrypted requests and events
     /// (docs/browser-extension.md). Frames are a 32-bit big-endian length and UTF-8 JSON, at most 1 MB.
     /// </summary>
+    [SupportedOSPlatform("windows")] // bound to BrowserPipeServer; the protocol itself is portable
     internal sealed class BrowserConnection
     {
         internal const int MaxMessageSize = 1024 * 1024;

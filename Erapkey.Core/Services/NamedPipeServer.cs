@@ -7,6 +7,7 @@ using System.IO;
 using System.IO.Pipes;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Threading;
@@ -15,23 +16,11 @@ using System.Threading.Tasks;
 namespace Erapkey.Core.Services
 {
     /// <summary>
-    /// The program connected to a pipe. <see cref="Chain"/> starts with the program itself and goes up
-    /// through the programs that started it, for example <c>ssh.exe</c>, <c>git.exe</c>, <c>Code.exe</c>.
-    /// </summary>
-    public sealed record PipeClient(int ProcessId, IReadOnlyList<PipeClientProcess> Chain)
-    {
-        public static PipeClient Unknown { get; } = new(0, []);
-
-        public string DisplayName => Chain.Count == 0 ? "?" : string.Join(" ← ", Chain.Select(p => p.Name));
-    }
-
-    public sealed record PipeClientProcess(int Id, string Name, string Path);
-
-    /// <summary>
     /// A named pipe for programs of the current user on this machine: the ACL allows the current user and denies
     /// network logons, and the first instance is created with <c>FirstPipeInstance</c>, so a program that took
     /// the name first is not shared with. Each connection is served by <see cref="ServeAsync"/> on its own task.
     /// </summary>
+    [SupportedOSPlatform("windows")]
     public abstract class NamedPipeServer : IDisposable
     {
         private readonly object _sync = new();

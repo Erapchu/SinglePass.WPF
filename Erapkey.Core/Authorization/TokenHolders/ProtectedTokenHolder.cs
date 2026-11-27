@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Erapkey.Core.Authorization.Responses;
+using Erapkey.Core.Services;
 using System;
 using System.IO;
 using System.Security.Cryptography;
@@ -13,13 +14,15 @@ namespace Erapkey.Core.Authorization.TokenHolders
     {
         private readonly string _tokenPath;
         private readonly string _legacyPath;
+        private readonly IUserDataProtector _protector;
         private readonly ILogger _logger;
         private readonly object _gate = new();
         private OAuthInfo _token;
 
-        protected ProtectedTokenHolder(string tokenPath, ILogger logger, string legacyPath = null)
+        protected ProtectedTokenHolder(string tokenPath, IUserDataProtector protector, ILogger logger, string legacyPath = null)
         {
             _tokenPath = tokenPath;
+            _protector = protector ?? throw new ArgumentNullException(nameof(protector));
             _logger = logger;
             _legacyPath = legacyPath;
         }
@@ -38,7 +41,7 @@ namespace Erapkey.Core.Authorization.TokenHolders
             try
             {
                 var encrypted = File.ReadAllBytes(_tokenPath);
-                var plaintext = ProtectedData.Unprotect(encrypted, null, DataProtectionScope.CurrentUser);
+                var plaintext = _protector.Unprotect(encrypted);
                 OAuthInfo token;
                 try
                 {
@@ -136,7 +139,7 @@ namespace Erapkey.Core.Authorization.TokenHolders
             byte[] encrypted;
             try
             {
-                encrypted = ProtectedData.Protect(plaintext, null, DataProtectionScope.CurrentUser);
+                encrypted = _protector.Protect(plaintext);
             }
             finally
             {

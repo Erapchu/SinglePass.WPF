@@ -42,7 +42,7 @@ namespace Erapkey.Core.Authorization.Brokers
         {
             query["force_confirm"] = "yes";
             query["device_id"] = GetDeviceId();
-            query["device_name"] = "Erapkey for Windows";
+            query["device_name"] = GetDeviceName();
         }
 
         // Yandex requires an exact match with the redirect URI registered for the application.
@@ -60,9 +60,26 @@ namespace Erapkey.Core.Authorization.Brokers
 
         private static string GetDeviceId()
         {
-            using var identity = WindowsIdentity.GetCurrent();
-            var device = $"Erapkey:{Environment.MachineName}:{identity.User?.Value}";
+            var device = $"Erapkey:{Environment.MachineName}:{GetUserId()}";
             return OAuthHelper.Base64Url(SHA256.HashData(Encoding.UTF8.GetBytes(device)));
         }
+
+        /// <summary>The SID on Windows, as before: Yandex keeps one session per device id.</summary>
+        private static string GetUserId()
+        {
+            if (OperatingSystem.IsWindows())
+            {
+                using var identity = WindowsIdentity.GetCurrent();
+                return identity.User?.Value;
+            }
+
+            return Environment.UserName;
+        }
+
+        private static string GetDeviceName() =>
+            OperatingSystem.IsWindows() ? "Erapkey for Windows"
+            : OperatingSystem.IsIOS() ? "Erapkey for iOS"
+            : OperatingSystem.IsMacOS() ? "Erapkey for macOS"
+            : "Erapkey";
     }
 }

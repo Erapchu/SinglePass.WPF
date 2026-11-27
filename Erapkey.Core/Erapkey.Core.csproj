@@ -1,8 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!-- Windows-only (DPAPI, WindowsIdentity), but no WPF/WinForms references: UI code does not belong here. -->
-    <TargetFramework>net11.0-windows</TargetFramework>
+    <!-- Cross-platform (macOS/iOS later). Windows-only code is marked [SupportedOSPlatform("windows")]; CA1416 keeps it that way. -->
+    <TargetFramework>net11.0</TargetFramework>
+    <WarningsAsErrors>$(WarningsAsErrors);CA1416</WarningsAsErrors>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 

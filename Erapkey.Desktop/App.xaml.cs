@@ -85,6 +85,7 @@ namespace Erapkey.Desktop
             });
 
             services.AddHttpClient();
+            services.AddSingleton<IUserDataProtector, DpapiUserDataProtector>();
 
             // Clouds
             // Google
@@ -135,7 +136,8 @@ namespace Erapkey.Desktop
 
             // Browser extension: the pipe for Erapkey.NativeHost.exe, see docs/browser-extension.md.
             services.AddSingleton(sp => new BrowserPairingStore(
-                Path.Combine(Constants.LocalAppDataDirectoryPath, "browserPairings.dat"), sp.GetRequiredService<ILogger<BrowserPairingStore>>()));
+                Path.Combine(Constants.LocalAppDataDirectoryPath, "browserPairings.dat"), sp.GetRequiredService<IUserDataProtector>(),
+                sp.GetRequiredService<ILogger<BrowserPairingStore>>()));
             services.AddSingleton<IBrowserBackend, BrowserBackend>();
             services.AddSingleton<BrowserPipeServer>();
             services.AddSingleton<NativeMessagingRegistration>();

@@ -36,7 +36,7 @@ namespace Erapkey.Core.Tests
             entry.Login.PasswordField.Value = "p@ss \"quoted\" пароль";
             var backend = new Backend([entry, Credential.CreateNew()]);
 
-            using var server = new BrowserPipeServer(backend, new BrowserPairingStore(Path.Combine(directory, "pairings.dat"), null),
+            using var server = new BrowserPipeServer(backend, new BrowserPairingStore(Path.Combine(directory, "pairings.dat"), new DpapiUserDataProtector(), null),
                 new WebsiteMatcher(PublicSuffixList.Default), null, "erapkey-browser-test-" + Guid.NewGuid(), _ => true);
             server.Start();
             try
